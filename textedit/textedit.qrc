@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/">
-  <file>images/logo32.png</file>
+  <file>images/logo.png</file>
   <file>images/win/editcopy.png</file>
   <file>images/win/editcut.png</file>
   <file>images/win/editpaste.png</file>

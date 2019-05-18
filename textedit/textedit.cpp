@@ -41,6 +41,7 @@ const QString rsrcPath = ":/images/win";
 TextEdit::TextEdit(QWidget *parent) : QMainWindow(parent)
 {
 	setWindowTitle(QCoreApplication::applicationName());
+	setWindowIcon(QIcon(":/images/logo.png"));
 
 	textEdit = new QTextEdit(this);
 
