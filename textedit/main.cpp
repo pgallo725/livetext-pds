@@ -8,8 +8,6 @@
 
 int main(int argc, char *argv[])
 {
-	//PROVA PUSH
-
 	Q_INIT_RESOURCE(textedit); //Inizializza .qrc per il bind delle immagini
 
 	//Crea applicazione con vari parametri
