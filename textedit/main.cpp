@@ -5,7 +5,6 @@
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 
-// Scemo chi legge
 
 int main(int argc, char *argv[])
 {
