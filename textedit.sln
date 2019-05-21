@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textedit", "textedit\textedit.vcxproj", "{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textedit", "textedit\textedit.vcxproj", "{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TcpServer", "..\test\TcpServer\TcpServer\TcpServer.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,12 +15,18 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Debug|x64.ActiveCfg = Debug|x64
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Debug|x64.Build.0 = Debug|x64
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Debug|x86.ActiveCfg = Debug|x64
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Release|x64.ActiveCfg = Release|x64
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Release|x64.Build.0 = Release|x64
-		{13489E2F-8CBD-3CF3-B0F5-59C9FD2D5ED5}.Release|x86.ActiveCfg = Release|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x64.ActiveCfg = Debug|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x64.Build.0 = Debug|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x86.ActiveCfg = Debug|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x64.ActiveCfg = Release|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x64.Build.0 = Release|x64
+		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x86.ActiveCfg = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.ActiveCfg = Debug|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
