@@ -35,6 +35,7 @@
 #endif
 
 #include "textedit.h"
+#include <QKeyEvent>
 
 const QString rsrcPath = ":/images/win";
 
@@ -62,6 +63,7 @@ TextEdit::TextEdit(QWidget *parent) : QMainWindow(parent)
 	setupEditActions();
 	setupTextActions();
 	setupShareActions();
+	setupUserActions();
 
 	//Aggiunge un menu di Help alla barra dei menu con le conseguenti azioni (rimosso)
 	/*
@@ -170,19 +172,19 @@ void TextEdit::setupFileActions()
 	menu->addSeparator();
 
 #ifndef QT_NO_PRINTER
-	const QIcon printIcon = QIcon::fromTheme("document-print", QIcon(rsrcPath + "/fileprint.png"));
-	a = menu->addAction(printIcon, tr("&Print..."), this, &TextEdit::filePrint);
+	const QIcon exportPdfIcon = QIcon::fromTheme("exportpdf", QIcon(rsrcPath + "/exportpdf.png"));
+	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
 	a->setPriority(QAction::LowPriority);
-	a->setShortcut(QKeySequence::Print);
+	a->setShortcut(Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
 
 	const QIcon filePrintIcon = QIcon::fromTheme("fileprint", QIcon(rsrcPath + "/fileprint.png"));
 	menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
 
-	const QIcon exportPdfIcon = QIcon::fromTheme("exportpdf", QIcon(rsrcPath + "/exportpdf.png"));
-	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
+	const QIcon printIcon = QIcon::fromTheme("document-print", QIcon(rsrcPath + "/fileprint.png"));
+	a = menu->addAction(printIcon, tr("&Print..."), this, &TextEdit::filePrint);
 	a->setPriority(QAction::LowPriority);
-	a->setShortcut(Qt::CTRL + Qt::Key_D);
+	a->setShortcut(QKeySequence::Print);
 	tb->addAction(a);
 
 	menu->addSeparator();
@@ -194,12 +196,22 @@ void TextEdit::setupFileActions()
 
 void TextEdit::setupShareActions()
 {
-	QToolBar *tb = addToolBar(tr("Generate URI to share"));
+	QToolBar *tb = addToolBar(tr("Share"));
 	QMenu *menu = menuBar()->addMenu(tr("&Share"));
 
 	const QIcon shareIcon = QIcon::fromTheme("share", QIcon(rsrcPath + "/share.png"));
 	actionShare = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
 	tb->addAction(actionShare);
+}
+
+void TextEdit::setupUserActions()
+{
+	QToolBar* tb = addToolBar(tr("Account"));
+	QMenu* menu = menuBar()->addMenu(tr("&Account"));
+
+	const QIcon userIcon = QIcon::fromTheme("user", QIcon(rsrcPath + "/user.png"));
+	actionUser = menu->addAction(userIcon, tr("&Profile"), this, &TextEdit::editProfile);
+	tb->addAction(actionUser);
 }
 
 
@@ -427,6 +439,7 @@ bool TextEdit::load(const QString &f)
 //Pop-up in caso di chiusura
 bool TextEdit::maybeSave()
 {
+	
 	//Solo se modificato altrimenti chiude
 	if (!textEdit->document()->isModified())
 		return true;
@@ -626,6 +639,11 @@ void TextEdit::filePrintPdf()
 }
 
 void TextEdit::fileShare()
+{
+	//TODO
+}
+
+void TextEdit::editProfile()
 {
 	//TODO
 }

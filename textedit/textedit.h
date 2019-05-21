@@ -37,7 +37,9 @@ private slots:
 	void filePrintPreview();
 	void filePrintPdf();
 
+	//ADDED
 	void fileShare();
+	void editProfile();
 
 	void textBold();
 	void textUnderline();
@@ -55,11 +57,13 @@ private slots:
 	void about();
 	void printPreview(QPrinter *);
 
+	
 private:
 	void setupFileActions();
 	void setupEditActions();
 	void setupTextActions();
 	void setupShareActions();
+	void setupUserActions();
 	bool maybeSave();
 	void setCurrentFileName(const QString &fileName);
 
@@ -80,6 +84,7 @@ private:
 	QAction *actionUndo;
 	QAction *actionRedo;
 	QAction *actionShare;
+	QAction *actionUser;
 #ifndef QT_NO_CLIPBOARD
 	QAction *actionCut;
 	QAction *actionCopy;

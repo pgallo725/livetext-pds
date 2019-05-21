@@ -21,6 +21,7 @@
   <file>images/win/zoomin.png</file>
   <file>images/win/zoomout.png</file>
   <file>images/win/share.png</file>
+  <file>images/win/user.png</file>
   <file>example.html</file>
 </qresource>
 </RCC>
