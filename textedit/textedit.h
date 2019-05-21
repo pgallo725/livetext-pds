@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QPointer>
 
+
 //Serve per incapsulare tutti i metodi delle classi
 class QAction;
 class QComboBox;
