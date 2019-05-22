@@ -93,6 +93,8 @@ TextEdit::TextEdit(QWidget *parent) : QMainWindow(parent)
 	connect(textEdit->document(), &QTextDocument::undoAvailable, actionUndo, &QAction::setEnabled);
 	connect(textEdit->document(), &QTextDocument::redoAvailable, actionRedo, &QAction::setEnabled);
 
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 
 	//Stesso discorso delle connect ma inizializza
 	setWindowModified(textEdit->document()->isModified());
@@ -931,4 +933,27 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
 		actionAlignRight->setChecked(true);
 	else if (a & Qt::AlignJustify)
 		actionAlignJustify->setChecked(true);
+}
+
+//Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
+
+void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
+	QTextCursor cursor = textEdit->textCursor();
+	
+	for (int i = position; i < position + charsAdded; ++i) {
+		//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
+		//precedente al cursore.
+		cursor.setPosition(i+1);
+		
+		//Ricavo il carattere inserito
+		QChar ch = textEdit->document()->characterAt(i);
+		
+		//Ricavo formato carattere inserio
+		QTextCharFormat fmt =cursor.charFormat();
+
+		//Controllo generico sulla proprietà del formato
+		if (fmt.hasProperty(QTextFormat::FontItalic)) {
+			
+		}
+	}
 }

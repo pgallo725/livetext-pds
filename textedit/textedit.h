@@ -41,6 +41,7 @@ private slots:
 	//ADDED
 	void fileShare();
 	void editProfile();
+	void contentsChange(int position, int charsRemoved, int charsAdded);
 
 	void textBold();
 	void textUnderline();
@@ -53,6 +54,7 @@ private slots:
 
 	void currentCharFormatChanged(const QTextCharFormat &format);
 	void cursorPositionChanged();
+
 
 	void clipboardDataChanged();
 	void about();
