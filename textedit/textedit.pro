@@ -5,9 +5,14 @@ qtHaveModule(printsupport): QT += printsupport
 TEMPLATE        = app
 TARGET          = textedit
 
-HEADERS         = textedit.h
+HEADERS         = textedit.h \
+		  WelcomeWindow.h
+
 SOURCES         = textedit.cpp \
-                  main.cpp
+                  main.cpp \
+		  WelcomeWindow.cpp
+
+FORMS 		= welcomewindow.ui
 
 RESOURCES += textedit.qrc
 build_all:!build_pass {

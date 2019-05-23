@@ -39,7 +39,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-TextEdit::TextEdit(QWidget *parent) : QMainWindow(parent)
+TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 {
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -115,12 +115,12 @@ TextEdit::TextEdit(QWidget *parent) : QMainWindow(parent)
 
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
-
+	
 	//Stringa vuota
 	setCurrentFileName(QString());
 }
 
-void TextEdit::closeEvent(QCloseEvent *e)
+void TextEdit::closeEvent(QCloseEvent* e)
 {
 	if (maybeSave())
 		e->accept();
@@ -134,16 +134,16 @@ void TextEdit::closeEvent(QCloseEvent *e)
 void TextEdit::setupFileActions()
 {
 	//Creo una toolbar
-	QToolBar *tb = addToolBar(tr("File Actions"));
+	QToolBar* tb = addToolBar(tr("File Actions"));
 
 	//Creo il menu File
-	QMenu *menu = menuBar()->addMenu(tr("&File"));
+	QMenu* menu = menuBar()->addMenu(tr("&File"));
 
 	//Assegno icona per nuovo file
 	const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(rsrcPath + "/filenew.png"));
 
 	//Creo l'azione riferita alla creazione del nuovo file chiama il metodo fileNew
-	QAction *a = menu->addAction(newIcon, tr("&New"), this, &TextEdit::fileNew);
+	QAction * a = menu->addAction(newIcon, tr("&New"), this, &TextEdit::fileNew);
 
 	//Aggiungo action alla toolbar
 	tb->addAction(a);
@@ -198,8 +198,8 @@ void TextEdit::setupFileActions()
 
 void TextEdit::setupShareActions()
 {
-	QToolBar *tb = addToolBar(tr("Share"));
-	QMenu *menu = menuBar()->addMenu(tr("&Share"));
+	QToolBar* tb = addToolBar(tr("Share"));
+	QMenu* menu = menuBar()->addMenu(tr("&Share"));
 
 	const QIcon shareIcon = QIcon::fromTheme("share", QIcon(rsrcPath + "/share.png"));
 	actionShare = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
@@ -219,8 +219,8 @@ void TextEdit::setupUserActions()
 
 void TextEdit::setupEditActions()
 {
-	QToolBar *tb = addToolBar(tr("Edit Actions"));
-	QMenu *menu = menuBar()->addMenu(tr("&Edit"));
+	QToolBar* tb = addToolBar(tr("Edit Actions"));
+	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
 
 	const QIcon undoIcon = QIcon::fromTheme("edit-undo", QIcon(rsrcPath + "/editundo.png"));
 	actionUndo = menu->addAction(undoIcon, tr("&Undo"), textEdit, &QTextEdit::undo);
@@ -254,21 +254,21 @@ void TextEdit::setupEditActions()
 	tb->addAction(actionPaste);
 
 	//Controlla se ci sono appunti e abilita il paste solo se ha del testo copiato
-	if (const QMimeData *md = QApplication::clipboard()->mimeData())
+	if (const QMimeData * md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(md->hasText());
 #endif
 }
 
 void TextEdit::setupTextActions()
 {
-	QToolBar *tb = addToolBar(tr("Format Actions"));
-	QMenu *menu = menuBar()->addMenu(tr("F&ormat"));
+	QToolBar* tb = addToolBar(tr("Format Actions"));
+	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
 
 	const QIcon boldIcon = QIcon::fromTheme("format-text-bold", QIcon(rsrcPath + "/textbold.png"));
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
-	
+
 	QFont bold;
 	bold.setBold(true);
 	actionTextBold->setFont(bold); //Modifico il carattere del menu in Bold
@@ -302,19 +302,19 @@ void TextEdit::setupTextActions()
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 	actionAlignLeft->setPriority(QAction::LowPriority);
-	
+
 	const QIcon centerIcon = QIcon::fromTheme("format-justify-center", QIcon(rsrcPath + "/textcenter.png"));
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 	actionAlignCenter->setPriority(QAction::LowPriority);
-	
+
 	const QIcon rightIcon = QIcon::fromTheme("format-justify-right", QIcon(rsrcPath + "/textright.png"));
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 	actionAlignRight->setPriority(QAction::LowPriority);
-	
+
 	const QIcon fillIcon = QIcon::fromTheme("format-justify-fill", QIcon(rsrcPath + "/textjustify.png"));
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
@@ -322,7 +322,7 @@ void TextEdit::setupTextActions()
 	actionAlignJustify->setPriority(QAction::LowPriority);
 
 	// Make sure the alignLeft  is always left of the alignRight
-	QActionGroup *alignGroup = new QActionGroup(this);
+	QActionGroup * alignGroup = new QActionGroup(this);
 	connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
 
 	//Se sei un arabo che hai il testo al contrario l'ordine dei pulsanti di allineamento è al contrario
@@ -382,7 +382,7 @@ void TextEdit::setupTextActions()
 	//Formattazione carattere
 	comboFont = new QFontComboBox(tb);
 	tb->addWidget(comboFont);
-	connect(comboFont, QOverload<const QString &>::of(&QComboBox::activated), this, &TextEdit::textFamily);
+	connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
 
 	//Dimensione
 	comboSize = new QComboBox(tb);
@@ -397,7 +397,7 @@ void TextEdit::setupTextActions()
 	//Setta come dimensione di default la dimensione del testo appena viene caricata QApplication
 	comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
-	connect(comboSize, QOverload<const QString &>::of(&QComboBox::activated), this, &TextEdit::textSize);
+	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
 }
 
 
@@ -405,7 +405,7 @@ void TextEdit::setupTextActions()
 //Il file viene aperto in sola lettura e viene cambiato il nome del file corrente in quello appena aperto
 //copiandoci il contenuto all'interno
 
-bool TextEdit::load(const QString &f)
+bool TextEdit::load(const QString & f)
 {
 	//Se file non esiste torna false
 	if (!QFile::exists(f))
@@ -420,11 +420,11 @@ bool TextEdit::load(const QString &f)
 	QByteArray data = file.readAll();
 
 	//Cerca di interpretare codice html
-	QTextCodec *codec = Qt::codecForHtml(data);
+	QTextCodec* codec = Qt::codecForHtml(data);
 
 	//Converte i dati i letti in Unicode
 	QString str = codec->toUnicode(data);
-	
+
 	//Se è richText lo setta HTML altrimenti plain text
 	if (Qt::mightBeRichText(str)) {
 		textEdit->setHtml(str);
@@ -441,7 +441,7 @@ bool TextEdit::load(const QString &f)
 //Pop-up in caso di chiusura
 bool TextEdit::maybeSave()
 {
-	
+
 	//Solo se modificato altrimenti chiude
 	if (!textEdit->document()->isModified())
 		return true;
@@ -451,7 +451,7 @@ bool TextEdit::maybeSave()
 		QMessageBox::warning(this, QCoreApplication::applicationName(),
 			tr("The document has been modified.\nDo you want to save your changes?"),
 			QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-	
+
 	//Se premo salva salva il documento
 	if (ret == QMessageBox::Save)
 		return fileSave();
@@ -461,7 +461,7 @@ bool TextEdit::maybeSave()
 }
 
 
-void TextEdit::setCurrentFileName(const QString &fileName)
+void TextEdit::setCurrentFileName(const QString & fileName)
 {
 	this->fileName = fileName;
 	textEdit->document()->setModified(false);
@@ -493,20 +493,20 @@ void TextEdit::fileOpen()
 {
 	//Apre finestra di selezione file con titolo "Open File..."
 	QFileDialog fileDialog(this, tr("Open File..."));
-	
+
 	//Indica che se faccio ok apre
 	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
 	//Lista tutti i file e no permette di aprire tipo directory
 	fileDialog.setFileMode(QFileDialog::ExistingFile);
-	
+
 	//Permette nel filtro di scegliere tra txt, html... 
 	fileDialog.setMimeTypeFilters(QStringList() << "text/html" << "text/plain");
-	
+
 	// exec() permette di aprire la finestra di dialogo e non la chiude finchè l'utente non fa un'azione
 	// Se chiudo la finestra non fa nulla
 	if (fileDialog.exec() != QDialog::Accepted)
 		return;
-	
+
 	//Sceglie il file selezionato (il primo)
 	const QString fn = fileDialog.selectedFiles().first();
 
@@ -548,12 +548,12 @@ bool TextEdit::fileSaveAs()
 	//Apre finestra salva con nome
 	QFileDialog fileDialog(this, tr("Save as..."));
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	
+
 	//Mette una lista di tipi disponibili per il salvataggio .odt .html .txt
 	QStringList mimeTypes;
 	mimeTypes << "application/vnd.oasis.opendocument.text" << "text/html" << "text/plain";
 	fileDialog.setMimeTypeFilters(mimeTypes);
-	
+
 	//Default .odt
 	fileDialog.setDefaultSuffix("odt");
 	if (fileDialog.exec() != QDialog::Accepted)
@@ -573,12 +573,12 @@ void TextEdit::filePrint()
 	QPrinter printer(QPrinter::HighResolution);
 
 	//Apre dialogo di stampa
-	QPrintDialog *dlg = new QPrintDialog(&printer, this);
+	QPrintDialog* dlg = new QPrintDialog(&printer, this);
 
 	//Se il cursore ha una selezione permette di stampare solo la selezione (?)
 	if (textEdit->textCursor().hasSelection())
 		dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
-	
+
 	//Apre la finestra di stampa con "Print Document"
 	dlg->setWindowTitle(tr("Print Document"));
 	if (dlg->exec() == QDialog::Accepted)
@@ -601,7 +601,7 @@ void TextEdit::filePrintPreview()
 #endif
 }
 
-void TextEdit::printPreview(QPrinter *printer)
+void TextEdit::printPreview(QPrinter * printer)
 {
 #ifdef QT_NO_PRINTER
 	Q_UNUSED(printer);
@@ -617,16 +617,16 @@ void TextEdit::filePrintPdf()
 	//Apre finestra dialogo come Save As... ma con titolo Export PDF
 	QFileDialog fileDialog(this, tr("Export PDF"));
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-	
+
 	//Mostra solo file PDF
 	fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-	
+
 	fileDialog.setDefaultSuffix("pdf");
 	if (fileDialog.exec() != QDialog::Accepted)
 		return;
-	
+
 	QString fileName = fileDialog.selectedFiles().first();
-	
+
 	//Richiama classe di stampa, ma forza output come PdfFormat e con il nome fie scelto dalla finestra
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
@@ -673,14 +673,14 @@ void TextEdit::textItalic()
 }
 
 //Tipo di carattere (Arial...)
-void TextEdit::textFamily(const QString &f)
+void TextEdit::textFamily(const QString & f)
 {
 	QTextCharFormat fmt;
 	fmt.setFontFamily(f);
 	mergeFormatOnWordOrSelection(fmt);
 }
 
-void TextEdit::textSize(const QString &p)
+void TextEdit::textSize(const QString & p)
 {
 	//Casta a float (?) e imposta la dimensione del carattere
 	qreal pointSize = p.toFloat();
@@ -739,28 +739,28 @@ void TextEdit::textStyle(int styleIndex)
 	if (style == QTextListFormat::ListStyleUndefined) {
 
 		blockFmt.setObjectIndex(-1); //(?)
-		
+
 		//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
 		int headingLevel = styleIndex >= 9 ? styleIndex - 9 + 1 : 0; // H1 to H6, or Standard
 		blockFmt.setHeadingLevel(headingLevel);
 		cursor.setBlockFormat(blockFmt);
 
 		int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
-		
+
 		//Crea formattazione carattere
 		QTextCharFormat fmt;
 		//Se ho degli heading mette grassetto
 		fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
 		//Aggiorna il size da +3 a -2 a seconda dell'Heading
 		fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
-		
+
 		//Indica l'intera linea su cui sta il cursore
 		cursor.select(QTextCursor::LineUnderCursor);
 		cursor.mergeCharFormat(fmt);
 		textEdit->mergeCurrentCharFormat(fmt);
 	}
 	else {
-		
+
 		QTextListFormat listFmt;
 		//Indica se il cursore è gia in una lista, se sì ne prende il formato
 		if (cursor.currentList()) {
@@ -788,10 +788,10 @@ void TextEdit::textColor()
 {
 	//Creo finestra di dialogo per colori
 	QColor col = QColorDialog::getColor(textEdit->textColor(), this);
-	
+
 	if (!col.isValid()) //Se colore non valido torno
 		return;
-	
+
 	QTextCharFormat fmt;
 	fmt.setForeground(col);
 	mergeFormatOnWordOrSelection(fmt);
@@ -802,7 +802,7 @@ void TextEdit::textColor()
 
 //Funzione chiamata con il bind di triggered del gruppo di pulsanti di allineamento
 //Sono esclusivi
-void TextEdit::textAlign(QAction *a)
+void TextEdit::textAlign(QAction * a)
 {
 
 	//Applico gli allineamenti
@@ -817,7 +817,7 @@ void TextEdit::textAlign(QAction *a)
 }
 
 //Bind di QTextEdit quando cambia il formato
-void TextEdit::currentCharFormatChanged(const QTextCharFormat &format)
+void TextEdit::currentCharFormatChanged(const QTextCharFormat & format)
 {
 	//Applica cambiamenti chiamando gli slot opportuni
 	fontChanged(format.font());
@@ -829,10 +829,10 @@ void TextEdit::cursorPositionChanged()
 {
 	//Se cambia allineamento testo applico modifiche ai pulsanti markandoli come checked
 	alignmentChanged(textEdit->alignment());
-	
+
 	//Ricava l'elenco puntato in cui si trova il cursore
 	//Ne ricava lo stile della lista e lo setta nel combobox
-	QTextList *list = textEdit->textCursor().currentList();
+	QTextList* list = textEdit->textCursor().currentList();
 	if (list) {
 		switch (list->format().style()) {
 		case QTextListFormat::ListDisc:
@@ -875,7 +875,7 @@ void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
 	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
-	if (const QMimeData *md = QApplication::clipboard()->mimeData())
+	if (const QMimeData * md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(md->hasText());
 #endif
 }
@@ -888,33 +888,33 @@ void TextEdit::about()
 		"document for you to experiment with."));
 }
 
-void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
+void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat & format)
 {
 	//Chiamato quando devo cambiare il formato se ho una selezione
 	QTextCursor cursor = textEdit->textCursor();
 	if (!cursor.hasSelection())
 		//Se non ho una selezione cambio alla parola in cui sta il cursore
 		cursor.select(QTextCursor::WordUnderCursor);
-	
+
 	//Applico formattazione alla selezione
 	cursor.mergeCharFormat(format);
 	//Applico formattazione anche al documento
 	textEdit->mergeCurrentCharFormat(format);
 }
 
-void TextEdit::fontChanged(const QFont &f)
+void TextEdit::fontChanged(const QFont & f)
 {
 	//Se cambia il carattere aggiorno i ComboBox con dimensione e famiglia
 	comboFont->setCurrentIndex(comboFont->findText(QFontInfo(f).family()));
 	comboSize->setCurrentIndex(comboSize->findText(QString::number(f.pointSize())));
-	
+
 	//Setto i rispettivi pulsanti checkati
 	actionTextBold->setChecked(f.bold());
 	actionTextItalic->setChecked(f.italic());
 	actionTextUnderline->setChecked(f.underline());
 }
 
-void TextEdit::colorChanged(const QColor &c)
+void TextEdit::colorChanged(const QColor & c)
 {
 	//Camio icona colore se cambia il colore
 	QPixmap pix(16, 16);
@@ -938,22 +938,33 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
 //Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
-	QTextCursor cursor = textEdit->textCursor();
-	
-	for (int i = position; i < position + charsAdded; ++i) {
-		//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
-		//precedente al cursore.
-		cursor.setPosition(i+1);
-		
-		//Ricavo il carattere inserito
-		QChar ch = textEdit->document()->characterAt(i);
-		
-		//Ricavo formato carattere inserio
-		QTextCharFormat fmt =cursor.charFormat();
 
-		//Controllo generico sulla proprietà del formato
-		if (fmt.hasProperty(QTextFormat::FontItalic)) {
-			
+	//Gestione cancellazione carattere
+	if (charsRemoved > 0) {
+		for (int i = position; i < position + charsRemoved; ++i) {
+			//TODO: Remove characters
+		}
+	}
+
+	if (charsAdded > 0) {
+		//Gestione inserimento carattere
+		QTextCursor cursor = textEdit->textCursor();
+
+		for (int i = position; i < position + charsAdded; ++i) {
+			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
+			//precedente al cursore.
+			cursor.setPosition(i + 1);
+
+			//Ricavo il carattere inserito
+			QChar ch = textEdit->document()->characterAt(i);
+
+			//Ricavo formato carattere inserio
+			QTextCharFormat fmt = cursor.charFormat();
+
+			//Controllo generico sulla proprietà del formato
+			if (fmt.hasProperty(QTextFormat::FontItalic)) {
+				return;
+			}
 		}
 	}
 }

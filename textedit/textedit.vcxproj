@@ -109,23 +109,29 @@
     </ResourceCompile>
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
-      <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc;.;$(QTDIR)\include;$(QTDIR)\include/QtPrintSupport;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtCore;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_NO_DEBUG;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <InputFile>%(FullPath)</InputFile>
       <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc;.;$(QTDIR)\include;$(QTDIR)\include/QtPrintSupport;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtCore;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt</IncludePath>
     </QtMoc>
     <QtRcc>
-      <QTDIR>$(QTDIR)</QTDIR>
-      <InputFile>%(FullPath)</InputFile>
-      <OutputFile>$(Configuration)\qrc_%(Filename).cpp</OutputFile>
       <InitFuncName>textedit</InitFuncName>
+      <OutputFile>$(Configuration)\qrc_%(Filename).cpp</OutputFile>
+      <InputFile>%(FullPath)</InputFile>
+      <QTDIR>$(QTDIR)</QTDIR>
       <Compression>default</Compression>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
     </QtRcc>
+    <QtUic>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>ui_welcomewindow.h</OutputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -168,14 +174,14 @@
     </ResourceCompile>
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
-      <InputFile>%(FullPath)</InputFile>
       <OutputFile>$(Configuration)\moc_%(Filename).cpp</OutputFile>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc;.;$(QTDIR)\include;$(QTDIR)\include/QtPrintSupport;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtCore;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt</IncludePath>
       <Define>UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./$(Configuration)/moc_predefs.h</Include>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
+      <InputFile>%(FullPath)</InputFile>
       <DynamicSource>output</DynamicSource>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(QTDIR)\mkspecs/win32-msvc;.;$(QTDIR)\include;$(QTDIR)\include/QtPrintSupport;$(QTDIR)\include/QtWidgets;$(QTDIR)\include/QtGui;$(QTDIR)\include/QtANGLE;$(QTDIR)\include/QtCore;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.17763.0\cppwinrt</IncludePath>
     </QtMoc>
     <QtRcc>
       <QTDIR>$(QTDIR)</QTDIR>
@@ -185,12 +191,21 @@
       <Compression>default</Compression>
       <ExecutionDescription>Rcc'ing %(Identity)...</ExecutionDescription>
     </QtRcc>
+    <QtUic>
+      <QTDIR>$(QTDIR)</QTDIR>
+      <InputFile>%(FullPath)</InputFile>
+      <OutputFile>ui_welcomewindow.h</OutputFile>
+      <ExecutionDescription>Uic'ing %(Identity)...</ExecutionDescription>
+    </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="WelcomeWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="textedit.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="WelcomeWindow.h">
+    </QtMoc>
     <QtMoc Include="textedit.h">
     </QtMoc>
   </ItemGroup>
@@ -211,6 +226,11 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">release\moc_predefs.h;%(Outputs)</Outputs>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CustomBuild>
+    <ClInclude Include="ui_welcomewindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="welcomewindow.ui">
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="textedit.qrc">

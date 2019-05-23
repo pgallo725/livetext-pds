@@ -21,3 +21,4 @@ QMAKE_CXX.LIBDIRS = \
     "C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.17763.0\\um\\x64"
 QMAKE_LICHECK_TIMESTAMP = "Sat May 18"
 QMAKE_LICHECK_TIMESTAMP = "Tue May 21"
+QMAKE_LICHECK_TIMESTAMP = "Thu May 23"
