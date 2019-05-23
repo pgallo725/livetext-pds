@@ -22,6 +22,7 @@
   <file>images/win/zoomout.png</file>
   <file>images/win/share.png</file>
   <file>images/win/user.png</file>
+  <file>images/win/WelcomeWindow/new.png</file>	
   <file>example.html</file>
 </qresource>
 </RCC>

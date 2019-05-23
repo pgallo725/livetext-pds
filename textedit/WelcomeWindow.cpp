@@ -20,18 +20,28 @@ WelcomeWindow::WelcomeWindow(QWidget* parent): QMainWindow(parent), ui(new Ui::W
 	
 	ui->setupUi(this);
 	
-	QPixmap pix(":/images/logo.png");
-		int w = ui->label_logo->width();
-		int h = ui->label_logo->height();
-		ui->label_logo->setPixmap(pix.scaled(w,h,Qt::KeepAspectRatio));
+	int w = ui->pushButton_new->width();
+	int h = ui->pushButton_new->height();
+	ui->pushButton_new->setIconSize(QSize::QSize(w, h));
+	ui->pushButton_new->setIcon(QIcon::QIcon(rsrcPath + "/WelcomeWindow/new.png"));
+
+	QPixmap logoPix(":/images/logo.png");
+	w = ui->label_logo->width();
+	h = ui->label_logo->height();
+	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
+	
 
 	connect(ui->pushButton_login, SIGNAL(clicked()), this, SLOT(pushButtonLoginClicked()));
+	connect(ui->pushButton_new, SIGNAL(clicked()), this, SLOT(openEditor()));
+
+	ui->stackedWidget->setCurrentIndex(0);
 }
 
 WelcomeWindow::~WelcomeWindow()
 {
 	delete ui;
 }
+
 
 
 void WelcomeWindow::pushButtonLoginClicked()
@@ -42,10 +52,9 @@ void WelcomeWindow::pushButtonLoginClicked()
 	if (username == "test" && password == "test") {
 		//QMessageBox::information(this, "Login", "Username and password is correct");
 		//hide();
-		//ui->stackedWidget->setCurrentIndex(2);
-		//ui->stackedWidget->show();
-		this->close();
-		openEditor();
+		ui->stackedWidget->setCurrentIndex(2);
+		ui->stackedWidget->show();
+		
 	}
 	else {
 		QMessageBox::warning(this, "Login", "Username and password is not correct");
@@ -54,7 +63,10 @@ void WelcomeWindow::pushButtonLoginClicked()
 
 
 void WelcomeWindow::openEditor() {
-
+	
+	this->close();
+	
+	
 	/*QCommandLineParser parser;
 	parser.setApplicationDescription(QCoreApplication::applicationName());
 	parser.addHelpOption();

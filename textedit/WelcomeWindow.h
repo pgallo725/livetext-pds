@@ -17,11 +17,12 @@ public:
 
 private slots:
 	void pushButtonLoginClicked();
+	void openEditor();
 
 private:
 	Ui::WelcomeWindow* ui;
 
-	void openEditor();
+	
 };
 
 #endif // MAINWINDOW_H

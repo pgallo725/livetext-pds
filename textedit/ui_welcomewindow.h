@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QLabel>
@@ -28,6 +29,7 @@ class Ui_WelcomeWindow
 {
 public:
     QWidget *centralWidget;
+    QGridLayout *gridLayout;
     QStackedWidget *stackedWidget;
     QWidget *page_home;
     QGroupBox *groupBox;
@@ -56,17 +58,22 @@ public:
     {
         if (WelcomeWindow->objectName().isEmpty())
             WelcomeWindow->setObjectName(QString::fromUtf8("WelcomeWindow"));
-        WelcomeWindow->resize(523, 364);
+        WelcomeWindow->resize(650, 430);
+        WelcomeWindow->setMinimumSize(QSize(650, 430));
+        WelcomeWindow->setMaximumSize(QSize(650, 430));
         centralWidget = new QWidget(WelcomeWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
+        gridLayout = new QGridLayout(centralWidget);
+        gridLayout->setSpacing(6);
+        gridLayout->setContentsMargins(11, 11, 11, 11);
+        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         stackedWidget = new QStackedWidget(centralWidget);
         stackedWidget->setObjectName(QString::fromUtf8("stackedWidget"));
-        stackedWidget->setGeometry(QRect(-10, 0, 521, 351));
         page_home = new QWidget();
         page_home->setObjectName(QString::fromUtf8("page_home"));
         groupBox = new QGroupBox(page_home);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
-        groupBox->setGeometry(QRect(250, 60, 261, 141));
+        groupBox->setGeometry(QRect(330, 60, 261, 141));
         horizontalLayoutWidget = new QWidget(groupBox);
         horizontalLayoutWidget->setObjectName(QString::fromUtf8("horizontalLayoutWidget"));
         horizontalLayoutWidget->setGeometry(QRect(10, 20, 241, 51));
@@ -106,20 +113,20 @@ public:
 
         pushButton_login = new QPushButton(page_home);
         pushButton_login->setObjectName(QString::fromUtf8("pushButton_login"));
-        pushButton_login->setGeometry(QRect(260, 210, 241, 23));
+        pushButton_login->setGeometry(QRect(340, 250, 241, 23));
         pushButton_register = new QPushButton(page_home);
         pushButton_register->setObjectName(QString::fromUtf8("pushButton_register"));
-        pushButton_register->setGeometry(QRect(260, 270, 241, 23));
+        pushButton_register->setGeometry(QRect(340, 310, 241, 23));
         label_or = new QLabel(page_home);
         label_or->setObjectName(QString::fromUtf8("label_or"));
-        label_or->setGeometry(QRect(260, 240, 241, 21));
+        label_or->setGeometry(QRect(340, 280, 241, 21));
         label_or->setAlignment(Qt::AlignCenter);
         label_logo = new QLabel(page_home);
         label_logo->setObjectName(QString::fromUtf8("label_logo"));
-        label_logo->setGeometry(QRect(40, 60, 161, 151));
+        label_logo->setGeometry(QRect(60, 50, 171, 171));
         label = new QLabel(page_home);
         label->setObjectName(QString::fromUtf8("label"));
-        label->setGeometry(QRect(40, 230, 161, 61));
+        label->setGeometry(QRect(60, 260, 171, 61));
         label->setAlignment(Qt::AlignHCenter|Qt::AlignTop);
         stackedWidget->addWidget(page_home);
         page_register = new QWidget();
@@ -129,17 +136,20 @@ public:
         page_open->setObjectName(QString::fromUtf8("page_open"));
         pushButton_new = new QPushButton(page_open);
         pushButton_new->setObjectName(QString::fromUtf8("pushButton_new"));
-        pushButton_new->setGeometry(QRect(350, 100, 111, 111));
+        pushButton_new->setGeometry(QRect(360, 110, 251, 111));
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        groupBox_2->setGeometry(QRect(30, 20, 251, 261));
+        groupBox_2->setGeometry(QRect(50, 30, 251, 261));
         listWidget = new QListWidget(groupBox_2);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        listWidget->setGeometry(QRect(10, 30, 231, 221));
+        listWidget->setGeometry(QRect(10, 20, 231, 231));
         pushButton = new QPushButton(page_open);
         pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(30, 290, 251, 23));
+        pushButton->setGeometry(QRect(50, 300, 251, 23));
         stackedWidget->addWidget(page_open);
+
+        gridLayout->addWidget(stackedWidget, 0, 0, 1, 1);
+
         WelcomeWindow->setCentralWidget(centralWidget);
         statusBar = new QStatusBar(WelcomeWindow);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -155,7 +165,7 @@ public:
 
     void retranslateUi(QMainWindow *WelcomeWindow)
     {
-        WelcomeWindow->setWindowTitle(QApplication::translate("WelcomeWindow", "MainWindow", nullptr));
+        WelcomeWindow->setWindowTitle(QApplication::translate("WelcomeWindow", "LiveText", nullptr));
         groupBox->setTitle(QApplication::translate("WelcomeWindow", "Sign in", nullptr));
         label_usr->setText(QApplication::translate("WelcomeWindow", "Username", nullptr));
         label_2->setText(QApplication::translate("WelcomeWindow", "Password", nullptr));
