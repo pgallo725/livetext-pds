@@ -11,9 +11,8 @@ public:
 	TcpServer(QObject *parent = 0);
 	~TcpServer();
 
-signals:
-
 public slots:
-	void newConnection();
+	void newClientConnection();
+	void clientDisconnection();
 };
 

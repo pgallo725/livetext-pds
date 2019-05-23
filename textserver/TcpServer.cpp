@@ -5,8 +5,8 @@ TcpServer::TcpServer(QObject* parent) : QObject(parent) {
 	/* create a new object TCP server */
 	textServer = new QTcpServer(this);
 	
-	/*        sender             signal        receiver      method      */
-	connect(textServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
+	/* connect newConnection from QTcpServer to newClientConnection() */
+	connect(textServer, SIGNAL(newConnection()), this, SLOT(newClientConnection()));
 
 	/* server listen on 0.0.0.0:9999 - return true on success */
 	if (!textServer->listen(QHostAddress::Any, 9999))
@@ -15,35 +15,37 @@ TcpServer::TcpServer(QObject* parent) : QObject(parent) {
 	}
 	else
 	{
-		/* take ip and port */
-		QString ip = textServer->serverAddress().toString();
+		/* take ip address and port */
+		QString ip_address = textServer->serverAddress().toString();
 		quint16 port = textServer->serverPort();
-		qDebug() << "Server started at "<< ip <<":"<< port;
+		qDebug() << "Server started at "<< ip_address <<":"<< port;
 	}
 }
 
 TcpServer::~TcpServer()
 {
+	// TODO
 }
 
-/* it's a signal emitted every time a new connection is available */
-void TcpServer::newConnection()
+/* handle a new connection from a client */
+void TcpServer::newClientConnection()
 {
-	// need to grab the socket - socket is created as a child of server
+	/* need to grab the socket - socket is created as a child of server */
 	QTcpSocket* socket = textServer->nextPendingConnection();
 
+	/* check if there's a new connection or it was a windows signal */
 	if (socket == 0) {
 		qDebug() << "ERROR: no pending connections!\n";
 	}
 
+	qDebug() << " - new connection from a client";
+
 	/* write on socket */
 	socket->write("Hello client\r\n");
-	/* This function writes as much as possible from the internal write buffer to the underlying network socket, 
-	 * without blocking. If any data was written, this function returns true */
+	/* forse the socket to send all the data stored */
 	socket->flush();
 
-	/* This function blocks until at least one byte has been written on the socket 
-	 * return true if bytesWritten is written */
+	/* This function blocks until at least one byte has been written on the socket */
 	socket->waitForBytesWritten(3000);
 
 	/* This function blocks until new data is available for reading and the readyRead() signal has been emitted
@@ -53,5 +55,11 @@ void TcpServer::newConnection()
 		qDebug() << r;
 	}
 
+}
+
+void TcpServer::clientDisconnection()
+{
+	/* take the object (socket) where the signal was send */
+	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	socket->close();
 }
