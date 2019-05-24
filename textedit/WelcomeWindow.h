@@ -17,11 +17,18 @@ public:
 
 private slots:
 	void pushButtonLoginClicked();
-	void openEditor();
+	void pushButtonNewClicked();
+	void pushButtonRegisterClicked();
+	void pushButtonBrowseClicked();
+	void pushButtonConfirmRegistrationClicked();
+
+
+	void showUserIcon(QString path);
 
 private:
 	Ui::WelcomeWindow* ui;
-
+	void openEditor();
+	bool fileExist(QString path);
 	
 };
 

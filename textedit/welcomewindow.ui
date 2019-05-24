@@ -22,6 +22,12 @@
     <height>430</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+    <kerning>true</kerning>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>LiveText</string>
   </property>
@@ -29,17 +35,23 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+        <kerning>true</kerning>
+       </font>
+      </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_home">
        <widget class="QGroupBox" name="groupBox">
         <property name="geometry">
          <rect>
           <x>330</x>
-          <y>60</y>
+          <y>50</y>
           <width>261</width>
-          <height>141</height>
+          <height>171</height>
          </rect>
         </property>
         <property name="title">
@@ -63,7 +75,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_usr"/>
+           <widget class="QLineEdit" name="lineEdit_usr">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <kerning>true</kerning>
+             </font>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -71,21 +90,27 @@
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>80</y>
+           <y>70</y>
            <width>241</width>
            <height>51</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="label_psw">
             <property name="text">
-             <string>Password</string>
+             <string>Password </string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLineEdit" name="lineEdit_psw">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <kerning>true</kerning>
+             </font>
+            </property>
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -93,19 +118,19 @@
           </item>
          </layout>
         </widget>
-       </widget>
-       <widget class="QPushButton" name="pushButton_login">
-        <property name="geometry">
-         <rect>
-          <x>340</x>
-          <y>250</y>
-          <width>241</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Login</string>
-        </property>
+        <widget class="QPushButton" name="pushButton_login">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>130</y>
+           <width>241</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Login</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QPushButton" name="pushButton_register">
         <property name="geometry">
@@ -113,7 +138,7 @@
           <x>340</x>
           <y>310</y>
           <width>241</width>
-          <height>23</height>
+          <height>31</height>
          </rect>
         </property>
         <property name="text">
@@ -130,7 +155,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>OR</string>
+         <string>If you don't have an account</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -166,16 +191,231 @@ a.a 2018/2019</string>
          <set>Qt::AlignHCenter|Qt::AlignTop</set>
         </property>
        </widget>
+       <widget class="Line" name="line">
+        <property name="geometry">
+         <rect>
+          <x>270</x>
+          <y>0</y>
+          <width>16</width>
+          <height>401</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+          <kerning>true</kerning>
+         </font>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
       </widget>
-      <widget class="QWidget" name="page_register"/>
+      <widget class="QWidget" name="page_register">
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>611</width>
+          <height>381</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+          <kerning>true</kerning>
+         </font>
+        </property>
+        <property name="title">
+         <string>Registration form</string>
+        </property>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>591</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Please fill the form with required information to create your account</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignHCenter|Qt::AlignTop</set>
+         </property>
+        </widget>
+        <widget class="QWidget" name="formLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>80</y>
+           <width>291</width>
+           <height>301</height>
+          </rect>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="formAlignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+          <property name="verticalSpacing">
+           <number>35</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_regName">
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit_regName"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_regSurname">
+            <property name="text">
+             <string>Surname</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_regSurname"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_regUsr">
+            <property name="text">
+             <string>Username</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_regUsr"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_regPsw">
+            <property name="text">
+             <string>Password</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEdit_regPsw">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_regPswConf">
+            <property name="text">
+             <string>Confirm
+password</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="lineEdit_regPswConf">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QLabel" name="label_UsrIcon">
+         <property name="geometry">
+          <rect>
+           <x>400</x>
+           <y>80</y>
+           <width>140</width>
+           <height>140</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <strikeout>false</strikeout>
+          </font>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>1</number>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>240</y>
+           <width>231</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Choose your profile icon (optional)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QWidget" name="horizontalLayoutWidget_3">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>270</y>
+           <width>231</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLineEdit" name="lineEdit_UsrIconPath"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_browse">
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QPushButton" name="pushButton_regConf">
+         <property name="geometry">
+          <rect>
+           <x>360</x>
+           <y>320</y>
+           <width>231</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Register</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
       <widget class="QWidget" name="page_open">
        <widget class="QPushButton" name="pushButton_new">
         <property name="geometry">
          <rect>
-          <x>360</x>
-          <y>110</y>
-          <width>251</width>
-          <height>111</height>
+          <x>390</x>
+          <y>70</y>
+          <width>211</width>
+          <height>91</height>
          </rect>
         </property>
         <property name="text">
@@ -186,9 +426,9 @@ a.a 2018/2019</string>
         <property name="geometry">
          <rect>
           <x>50</x>
-          <y>30</y>
-          <width>251</width>
-          <height>261</height>
+          <y>20</y>
+          <width>301</width>
+          <height>271</height>
          </rect>
         </property>
         <property name="title">
@@ -199,7 +439,7 @@ a.a 2018/2019</string>
           <rect>
            <x>10</x>
            <y>20</y>
-           <width>231</width>
+           <width>291</width>
            <height>231</height>
           </rect>
          </property>
@@ -208,14 +448,27 @@ a.a 2018/2019</string>
        <widget class="QPushButton" name="pushButton">
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>60</x>
           <y>300</y>
-          <width>251</width>
-          <height>23</height>
+          <width>291</width>
+          <height>31</height>
          </rect>
         </property>
         <property name="text">
          <string>Open selected file</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pushButton_openuri">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>180</y>
+          <width>211</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </widget>
@@ -223,7 +476,11 @@ a.a 2018/2019</string>
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="sizeGripEnabled">
+    <bool>false</bool>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

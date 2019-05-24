@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	//Crea applicazione con vari parametri
 	QApplication a(argc, argv); 
 	QCoreApplication::setOrganizationName("DC");
-	QCoreApplication::setApplicationName("Editor di testo");
+	QCoreApplication::setApplicationName("LiveText");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 	
 	WelcomeWindow mw;

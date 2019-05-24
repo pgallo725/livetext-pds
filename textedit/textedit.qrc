@@ -23,6 +23,8 @@
   <file>images/win/share.png</file>
   <file>images/win/user.png</file>
   <file>images/win/WelcomeWindow/new.png</file>	
+  <file>images/win/WelcomeWindow/newuri.png</file>
+  <file>images/win/WelcomeWindow/defaultProfile.png</file>	
   <file>example.html</file>
 </qresource>
 </RCC>
