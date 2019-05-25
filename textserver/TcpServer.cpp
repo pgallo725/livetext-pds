@@ -63,3 +63,28 @@ void TcpServer::clientDisconnection()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	socket->close();
 }
+
+/*
+
+ ----------- MESSAGE -----------------
+
+ from client to server 
+ 
+ 0: nuova registrazione + username + pswd + ...
+ 2: login + username + pswd
+ 4: modify users + ...
+ 6: create new doc + newDocName
+ 8: ask a doc + docName
+ 10: insert a char + symbol
+ 12: delete a char + symbol
+
+ from server to client
+
+ 1: success on registration/login/modify + siteId
+ 3: success on create a newDoc / open a doc + URI
+ -1: error: cannot register/login/modify
+ -3: error: general
+
+
+
+*/

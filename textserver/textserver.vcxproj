@@ -99,9 +99,13 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TcpServer.cpp" />
+    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="TcpServer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="User.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
