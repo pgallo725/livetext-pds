@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QFontDatabase>
 #include <QMenu>
+#include <QBitmap>
 #include <QMenuBar>
 #include <QTextCodec>
 #include <QTextEdit>
@@ -346,8 +347,7 @@ void TextEdit::setupTextActions()
 
 	//Gestione colore del testo
 	//QPixMap crea l'icona colorata a seconda del colore che selezioniamo
-	QPixmap pix(16, 16);
-	pix.fill(Qt::black);
+	QPixmap pix(rsrcPath + "/textcolor.png");
 	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
 
@@ -916,9 +916,11 @@ void TextEdit::fontChanged(const QFont & f)
 
 void TextEdit::colorChanged(const QColor & c)
 {
-	//Camio icona colore se cambia il colore
-	QPixmap pix(16, 16);
+	//Cambio icona colore se cambia il colore
+	QPixmap pix(rsrcPath + "/textcolor.png");
+	QBitmap mask = pix.createMaskFromColor(Qt::transparent, Qt::MaskInColor);
 	pix.fill(c);
+	pix.setMask(mask);
 	actionTextColor->setIcon(pix);
 }
 

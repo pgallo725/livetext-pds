@@ -21,6 +21,7 @@ private slots:
 	void pushButtonRegisterClicked();
 	void pushButtonBrowseClicked();
 	void pushButtonConfirmRegistrationClicked();
+	void pushButtonBackLoginClicked();
 
 
 	void showUserIcon(QString path);

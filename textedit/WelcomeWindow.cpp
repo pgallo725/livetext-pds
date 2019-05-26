@@ -4,6 +4,8 @@
 
 #include <QMessageBox>
 #include <QPixmap>
+#include <QBitmap>
+#include <QPainter>
 #include <QWidget>
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -22,7 +24,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
-
+	
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
@@ -31,7 +33,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 	//Icona "Open from URI"
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
-	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/WelcomeWindow/newuri.png"));
+	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/WelcomeWindow/openuri.png"));
 
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
@@ -39,23 +41,32 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
 
-
 	//Connect dei segnali dei vari pushbutton
 	connect(ui->pushButton_login, &QPushButton::clicked, this, &WelcomeWindow::pushButtonLoginClicked);
 	connect(ui->pushButton_new, &QPushButton::clicked, this, &WelcomeWindow::pushButtonNewClicked);
 	connect(ui->pushButton_register, &QPushButton::clicked, this, &WelcomeWindow::pushButtonRegisterClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBrowseClicked);
 	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &WelcomeWindow::pushButtonConfirmRegistrationClicked);
-
+	connect(ui->commandLinkButton, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBackLoginClicked);
+	
 	//User Icon
 	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
+
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &WelcomeWindow::showUserIcon);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
+
+	//Setta le label di errore non visibili
+	ui->label_incorrect_login->setVisible(false);
+	
+	//Connect tra le lineEdit di user/passwor e tasto invio per premere bottone di login
+	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
 }
 
 WelcomeWindow::~WelcomeWindow()
@@ -78,13 +89,19 @@ void WelcomeWindow::pushButtonLoginClicked()
 		ui->stackedWidget->show();
 	}
 	else {
-		QMessageBox::warning(this, "Login", "Username and password is not correct");
+		//Setta la label di incorrect user/password non visibile
+		ui->label_incorrect_login->setVisible(true);
+		//QMessageBox::warning(this, "Login", "Username and password is not correct");
 	}
 }
 
-//Apre la pagina dedicata alla registrazione
+//Apre la pagina dedicata alla registrazione e cancella campi login
 void WelcomeWindow::pushButtonRegisterClicked()
 {
+	ui->label_incorrect_login->setVisible(false);
+	ui->lineEdit_psw->setText("");
+	ui->lineEdit_usr->setText("");
+
 	ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
 }
@@ -102,23 +119,34 @@ void WelcomeWindow::pushButtonBrowseClicked()
 //Conferma la registrazione
 void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 {
-	QString name = ui->lineEdit_regName->text();
-	QString surname = ui->lineEdit_regSurname->text();
+	QString nick = ui->lineEdit_regNick->text();
 	QString username = ui->lineEdit_regUsr->text();
 	QString password = ui->lineEdit_regPsw->text();
 	QString passwordConf = ui->lineEdit_regPswConf->text();
 	QString iconPath = ui->lineEdit_UsrIconPath->text();
 
 	//Controllo se i dati sono stati inseriti correttamente
-	if (name.isEmpty() || surname.isEmpty() || username.isEmpty() || password.isEmpty() || password.isEmpty()) {
-		QMessageBox::warning(this, "Registration", "Please fill all the required fields");
+	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
+		//QMessageBox::warning(this, "Registration", "Please fill all the required fields");
+		ui->label_incorrect_reg->setText("Please fill all the required fields");
 		return;
 	}
+
+	//Controllo se esiste già un username
+	bool userExist = true;
+
+	if (userExist) {
+		ui->label_incorrect_reg->setText("Username already taken");
+	}
+
+
 	//Controllo sulla corrispondenza password
 	if (password != passwordConf) {
-		QMessageBox::warning(this, "Registration", "Passwords does not match");
+		//QMessageBox::warning(this, "Registration", "Passwords does not match");
+		ui->label_incorrect_reg->setText("Passwords does not match");
 		return;
 	}
+	
 	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
 	if (!iconPath.isEmpty() && fileExist(iconPath)) {
 		QPixmap userPix(iconPath);
@@ -126,6 +154,21 @@ void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 	else {
 		QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
 	}
+}
+
+void WelcomeWindow::pushButtonBackLoginClicked()
+{
+	//Pulisco i campi inseriti in registrazione se torno alla schermata di login
+	ui->lineEdit_regUsr->setText("");
+	ui->lineEdit_regPsw->setText("");
+	ui->lineEdit_regPswConf->setText("");
+	ui->lineEdit_regNick->setText("");
+	ui->lineEdit_UsrIconPath->setText("");
+	ui->label_incorrect_reg->setText("");
+
+	//Cambio schermata tornando a quella di login
+	ui->stackedWidget->setCurrentIndex(0);
+	ui->stackedWidget->show();
 }
 
 //Funzione per verificare se un file esiste e se non è una directory
@@ -145,18 +188,20 @@ bool WelcomeWindow::fileExist(QString path) {
 //Se la nuova immagine esiste la visualizza altrimenti visualizza l'icona di default
 void WelcomeWindow::showUserIcon(QString path)
 {
+	int w = ui->label_UsrIcon->width();
+	int h = ui->label_UsrIcon->height();
+		
 	if (fileExist(path)) {
 		QPixmap userPix(path);
-		int w = ui->label_UsrIcon->width();
-		int h = ui->label_UsrIcon->height();
-		ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+		
+		if (!userPix.isNull()) {
+			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+			return;
+		}
 	}
-	else {
-		QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
-		int w = ui->label_UsrIcon->width();
-		int h = ui->label_UsrIcon->height();
-		ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
-	}
+
+	QPixmap default(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::IgnoreAspectRatio));
 }
 
 //Quando viene aperto un nuovo file apre l'editor
