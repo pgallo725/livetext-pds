@@ -165,7 +165,7 @@
         <property name="geometry">
          <rect>
           <x>50</x>
-          <y>50</y>
+          <y>30</y>
           <width>171</width>
           <height>171</height>
          </rect>
@@ -178,9 +178,9 @@
         <property name="geometry">
          <rect>
           <x>50</x>
-          <y>260</y>
+          <y>220</y>
           <width>171</width>
-          <height>61</height>
+          <height>41</height>
          </rect>
         </property>
         <property name="text">
@@ -257,7 +257,7 @@ a.a 2018/2019</string>
          </palette>
         </property>
         <property name="text">
-         <string>Username and password does not match</string>
+         <string/>
         </property>
         <property name="textFormat">
          <enum>Qt::AutoText</enum>
@@ -265,6 +265,110 @@ a.a 2018/2019</string>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
         </property>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_4">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>270</y>
+          <width>221</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Server settings</string>
+        </property>
+        <widget class="QWidget" name="gridLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>201</width>
+           <height>68</height>
+          </rect>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit_serverIP1">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="maxLength">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="lineEdit_serverIP2">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="maxLength">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="lineEdit_serverIP3">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="maxLength">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="lineEdit_serverIP4">
+            <property name="maximumSize">
+             <size>
+              <width>30</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="maxLength">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="4">
+           <widget class="QLineEdit" name="lineEdit_serverPort">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="maxLength">
+             <number>32</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Port</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Address</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </widget>
       <widget class="QWidget" name="page_register">
@@ -338,9 +442,6 @@ a.a 2018/2019</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="lineEdit_regUsr"/>
-          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_regNick">
             <property name="text">
@@ -356,18 +457,28 @@ a.a 2018/2019</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="lineEdit_regPsw">
-            <property name="echoMode">
-             <enum>QLineEdit::Password</enum>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0">
            <widget class="QLabel" name="label_regPswConf">
             <property name="text">
              <string>Confirm
 password</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit_regUsr"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_regNick">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="lineEdit_regPsw">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
             </property>
            </widget>
           </item>
@@ -378,22 +489,15 @@ password</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit_regNick">
-            <property name="echoMode">
-             <enum>QLineEdit::Password</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
         <widget class="QLabel" name="label_UsrIcon">
          <property name="geometry">
           <rect>
-           <x>410</x>
+           <x>420</x>
            <y>90</y>
-           <width>140</width>
-           <height>140</height>
+           <width>131</width>
+           <height>131</height>
           </rect>
          </property>
          <property name="font">
@@ -461,6 +565,9 @@ password</string>
          </layout>
         </widget>
         <widget class="QPushButton" name="pushButton_regConf">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="geometry">
           <rect>
            <x>370</x>
@@ -471,6 +578,7 @@ password</string>
          </property>
          <property name="font">
           <font>
+           <family>MS Shell Dlg 2</family>
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -535,6 +643,9 @@ password</string>
          </property>
         </widget>
         <widget class="QCommandLinkButton" name="commandLinkButton">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="geometry">
           <rect>
            <x>30</x>
@@ -542,6 +653,24 @@ password</string>
            <width>71</width>
            <height>41</height>
           </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <family>Segoe UI</family>
+           <kerning>true</kerning>
+          </font>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
          </property>
          <property name="text">
           <string>Back</string>
@@ -558,7 +687,7 @@ password</string>
         <property name="geometry">
          <rect>
           <x>390</x>
-          <y>70</y>
+          <y>60</y>
           <width>211</width>
           <height>91</height>
          </rect>
@@ -570,10 +699,10 @@ password</string>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="geometry">
          <rect>
-          <x>50</x>
+          <x>30</x>
           <y>20</y>
           <width>301</width>
-          <height>271</height>
+          <height>141</height>
          </rect>
         </property>
         <property name="title">
@@ -583,25 +712,12 @@ password</string>
          <property name="geometry">
           <rect>
            <x>10</x>
-           <y>20</y>
-           <width>291</width>
-           <height>231</height>
+           <y>30</y>
+           <width>281</width>
+           <height>101</height>
           </rect>
          </property>
         </widget>
-       </widget>
-       <widget class="QPushButton" name="pushButton">
-        <property name="geometry">
-         <rect>
-          <x>60</x>
-          <y>300</y>
-          <width>291</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Open selected file</string>
-        </property>
        </widget>
        <widget class="QPushButton" name="pushButton_openuri">
         <property name="geometry">

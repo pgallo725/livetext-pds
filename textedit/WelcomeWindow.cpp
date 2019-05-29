@@ -24,7 +24,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
-	
+
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
@@ -48,25 +48,39 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBrowseClicked);
 	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &WelcomeWindow::pushButtonConfirmRegistrationClicked);
 	connect(ui->commandLinkButton, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBackLoginClicked);
-	
+
+	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
+	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+
 	//User Icon
 	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
-
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
-
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &WelcomeWindow::showUserIcon);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
 
-	//Setta le label di errore non visibili
-	ui->label_incorrect_login->setVisible(false);
-	
-	//Connect tra le lineEdit di user/passwor e tasto invio per premere bottone di login
-	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
-	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File1");
+	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File2");
+	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File3");
+	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File4");
+	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File5");
+
+	ui->listWidget->addItem(item);
+	ui->listWidget->addItem(item2);
+	ui->listWidget->addItem(item3);
+	ui->listWidget->addItem(item4);
+	ui->listWidget->addItem(item5);
+
+	//Validator per non inserire lettere nei campi server/port
+	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
+	ui->lineEdit_serverIP1->setValidator(new QIntValidator(0, 100, this));
+	ui->lineEdit_serverIP2->setValidator(new QIntValidator(0, 100, this));
+	ui->lineEdit_serverIP3->setValidator(new QIntValidator(0, 100, this));
+	ui->lineEdit_serverIP4->setValidator(new QIntValidator(0, 100, this));
 }
 
 WelcomeWindow::~WelcomeWindow()
@@ -81,24 +95,28 @@ void WelcomeWindow::pushButtonLoginClicked()
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
+	QString serverIP = ui->lineEdit_serverIP1->text() + "." + ui->lineEdit_serverIP2->text() + "." + ui->lineEdit_serverIP3->text() + "." + ui->lineEdit_serverIP4->text();
+	QString serverPort = ui->lineEdit_serverPort->text();
 
 	//Controllo user e password
-	if (username == "test" && password == "test") {
+	if (username != "test" || password != "test") {
+		ui->label_incorrect_login->setText("Username and password does not match");
+	}
+	else if (serverIP != "127.0.0.1" || serverPort != "999"){
+		ui->label_incorrect_login->setText("Server " + serverIP + ":" + serverPort + " unreachable");
+	}
+	else {
 		//Apre seconda landing page con operazioni sui file
 		ui->stackedWidget->setCurrentIndex(2);
 		ui->stackedWidget->show();
-	}
-	else {
-		//Setta la label di incorrect user/password non visibile
-		ui->label_incorrect_login->setVisible(true);
-		//QMessageBox::warning(this, "Login", "Username and password is not correct");
+		
 	}
 }
 
 //Apre la pagina dedicata alla registrazione e cancella campi login
 void WelcomeWindow::pushButtonRegisterClicked()
 {
-	ui->label_incorrect_login->setVisible(false);
+	ui->label_incorrect_login->setText("");
 	ui->lineEdit_psw->setText("");
 	ui->lineEdit_usr->setText("");
 
@@ -146,7 +164,7 @@ void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 		ui->label_incorrect_reg->setText("Passwords does not match");
 		return;
 	}
-	
+
 	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
 	if (!iconPath.isEmpty() && fileExist(iconPath)) {
 		QPixmap userPix(iconPath);
@@ -175,13 +193,8 @@ void WelcomeWindow::pushButtonBackLoginClicked()
 bool WelcomeWindow::fileExist(QString path) {
 
 	QFileInfo file(path);
-	
-	if (file.exists() && file.isFile()) {
-		return true;
-	}
-	else {
-		return false;
-	}
+
+	return (file.exists() && file.isFile());
 }
 
 //Slot attivato quando viene modificato il percorso dell'icona
@@ -190,14 +203,16 @@ void WelcomeWindow::showUserIcon(QString path)
 {
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
-		
+
 	if (fileExist(path)) {
 		QPixmap userPix(path);
-		
+
 		if (!userPix.isNull()) {
 			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
 			return;
 		}
+
+		ui->label_incorrect_reg->setText("Please choose a valid image file");
 	}
 
 	QPixmap default(rsrcPath + "/WelcomeWindow/defaultProfile.png");
