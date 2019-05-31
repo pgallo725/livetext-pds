@@ -136,9 +136,9 @@ public:
     {
         if (WelcomeWindow->objectName().isEmpty())
             WelcomeWindow->setObjectName(QString::fromUtf8("WelcomeWindow"));
-        WelcomeWindow->resize(1575, 490);
-        WelcomeWindow->setMinimumSize(QSize(700, 490));
-        WelcomeWindow->setMaximumSize(QSize(10000, 10000));
+        WelcomeWindow->resize(700, 584);
+        WelcomeWindow->setMinimumSize(QSize(0, 0));
+        WelcomeWindow->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
         font.setPointSize(10);
         font.setKerning(true);
@@ -434,7 +434,7 @@ public:
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
         verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
-        verticalSpacer_11 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_11 = new QSpacerItem(20, 35, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_6->addItem(verticalSpacer_11);
 
@@ -453,7 +453,7 @@ public:
 
         verticalLayout_6->addLayout(horizontalLayout_10);
 
-        verticalSpacer_12 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_12 = new QSpacerItem(20, 70, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_6->addItem(verticalSpacer_12);
 
@@ -531,7 +531,7 @@ public:
 
         verticalLayout_10->addLayout(formLayout_2);
 
-        verticalSpacer_14 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_14 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_10->addItem(verticalSpacer_14);
 
@@ -604,7 +604,7 @@ public:
 
         verticalLayout_7->addLayout(horizontalLayout_14);
 
-        verticalSpacer_15 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_15 = new QSpacerItem(20, 5, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_7->addItem(verticalSpacer_15);
 
@@ -767,7 +767,7 @@ public:
 
         retranslateUi(WelcomeWindow);
 
-        stackedWidget->setCurrentIndex(2);
+        stackedWidget->setCurrentIndex(1);
         pushButton_login->setDefault(true);
 
 

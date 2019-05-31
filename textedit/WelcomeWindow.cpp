@@ -251,7 +251,7 @@ void WelcomeWindow::openEditor() {
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(mw);
 
 	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
-	mw->resize(availableGeometry.width() / 2, (availableGeometry.height() * 2) / 3);
+	mw->resize(availableGeometry.width()*0.6, (availableGeometry.height() * 2) / 3);
 	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
 
 	//Apre il file example.html se lo trova, altrimenti ne crea uno nuovo come se lo passassi da linea di comando
@@ -265,12 +265,17 @@ void WelcomeWindow::openEditor() {
 
 void WelcomeWindow::centerAndResize() {
 	// get the dimension available on this screen
-	QSize availableSize = qApp->desktop()->availableGeometry().size();
+	QSize availableSize = QApplication::desktop()->availableGeometry().size();
 	int width = availableSize.width();
 	int height = availableSize.height();
 	
-	width *= 0.6; // 90% of the screen size
-	height *= 0.5; // 90% of the screen size
+	width *= 0.5; // 90% of the screen size
+	height *= 0.65; // 90% of the screen size
+	
+	setMaximumHeight(height);
+	setMinimumHeight(height);
+	setMaximumWidth(width);
+	setMinimumWidth(width);
 	
 	QSize newSize(width, height);
 
@@ -279,7 +284,7 @@ void WelcomeWindow::centerAndResize() {
 			Qt::LeftToRight,
 			Qt::AlignCenter,
 			newSize,
-			qApp->desktop()->availableGeometry()
+			QApplication::desktop()->availableGeometry()
 		)
 	);
 }
