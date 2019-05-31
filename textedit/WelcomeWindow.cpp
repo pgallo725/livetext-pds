@@ -18,13 +18,19 @@
 const QString rsrcPath = ":/images/win";
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::WelcomeWindow) {
-	//Cistruttore landing page
+
+	
+	
+	//Costruttore landing page
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
-
+	//Setup dimensione finestra
+	centerAndResize();
+	
+	
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
@@ -79,7 +85,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 	
 
-	centerAndResize();
 }
 
 WelcomeWindow::~WelcomeWindow()
@@ -91,6 +96,10 @@ WelcomeWindow::~WelcomeWindow()
 
 void WelcomeWindow::pushButtonLoginClicked()
 {
+	//Bypass login
+	ui->stackedWidget->setCurrentIndex(2);
+	ui->stackedWidget->show();
+
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
@@ -107,8 +116,7 @@ void WelcomeWindow::pushButtonLoginClicked()
 	else {
 		//Apre seconda landing page con operazioni sui file
 		ui->stackedWidget->setCurrentIndex(2);
-		ui->stackedWidget->show();
-		
+		ui->stackedWidget->show();	
 	}
 }
 
@@ -261,8 +269,8 @@ void WelcomeWindow::centerAndResize() {
 	int width = availableSize.width();
 	int height = availableSize.height();
 	
-	width *= 0.5; // 90% of the screen size
-	height *= 0.4; // 90% of the screen size
+	width *= 0.6; // 90% of the screen size
+	height *= 0.5; // 90% of the screen size
 	
 	QSize newSize(width, height);
 
