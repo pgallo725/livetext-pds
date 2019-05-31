@@ -77,10 +77,9 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
-	ui->lineEdit_serverIP1->setValidator(new QIntValidator(0, 100, this));
-	ui->lineEdit_serverIP2->setValidator(new QIntValidator(0, 100, this));
-	ui->lineEdit_serverIP3->setValidator(new QIntValidator(0, 100, this));
-	ui->lineEdit_serverIP4->setValidator(new QIntValidator(0, 100, this));
+	
+
+	centerAndResize();
 }
 
 WelcomeWindow::~WelcomeWindow()
@@ -95,7 +94,7 @@ void WelcomeWindow::pushButtonLoginClicked()
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
-	QString serverIP = ui->lineEdit_serverIP1->text() + "." + ui->lineEdit_serverIP2->text() + "." + ui->lineEdit_serverIP3->text() + "." + ui->lineEdit_serverIP4->text();
+	QString serverIP = ui->lineEdit_serverIP->text();
 	QString serverPort = ui->lineEdit_serverPort->text();
 
 	//Controllo user e password
@@ -256,3 +255,23 @@ void WelcomeWindow::openEditor() {
 	mw->show();
 }
 
+void WelcomeWindow::centerAndResize() {
+	// get the dimension available on this screen
+	QSize availableSize = qApp->desktop()->availableGeometry().size();
+	int width = availableSize.width();
+	int height = availableSize.height();
+	
+	width *= 0.5; // 90% of the screen size
+	height *= 0.4; // 90% of the screen size
+	
+	QSize newSize(width, height);
+
+	setGeometry(
+		QStyle::alignedRect(
+			Qt::LeftToRight,
+			Qt::AlignCenter,
+			newSize,
+			qApp->desktop()->availableGeometry()
+		)
+	);
+}

@@ -30,6 +30,8 @@ private:
 	Ui::WelcomeWindow* ui;
 	void openEditor();
 	bool fileExist(QString path);
+
+	void centerAndResize();
 	
 };
 
