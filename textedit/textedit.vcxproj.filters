@@ -88,8 +88,86 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <None Include="images\win\WelcomeWindow\defaultProfile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\editcopy.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\editcut.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\editpaste.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\editredo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\editundo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="example.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\exportpdf.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\filenew.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\fileopen.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\fileprint.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\filesave.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\logo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\WelcomeWindow\new.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\WelcomeWindow\newuri.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\share.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textbold.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textcenter.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <QtRcc Include="textedit.qrc">
       <Filter>Resource Files</Filter>
     </QtRcc>
+    <None Include="images\win\textitalic.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textjustify.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textleft.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textright.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\textunder.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\user.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\zoomin.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\zoomout.png">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

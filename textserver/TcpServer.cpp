@@ -1,7 +1,36 @@
 #include "TcpServer.h"
 #include <string>
 
-TcpServer::TcpServer(QObject* parent) : QObject(parent) {
+bool TcpServer::login(std::string username, std::string passwd)
+{
+	std::map<std::string, User>::iterator it = users.find(username);
+
+	if (it == users.end()) {
+		return false;	/* no user with this name */
+	}
+
+	if (!users.at(username).authentication(passwd)) {
+		return false;	/* password doesn't match */
+	}
+
+	return true;
+}
+
+std::optional<User> TcpServer::createNewAccount(std::string username, std::string name, std::string suername, std::string passwd)
+{
+	std::map<std::string, User>::iterator it = users.find(username);
+
+	if (it != users.end()) {
+		return std::optional<User>();
+	}
+	
+	User nUser(name, suername, username, passwd, _userIdCounter++, 0);	/* create a new user		*/
+	users.insert({ username, nUser });									/* insert new user in map	*/
+
+	return nUser;
+}
+
+TcpServer::TcpServer(QObject* parent) : QObject(parent) , _userIdCounter(0){
 	/* create a new object TCP server */
 	textServer = new QTcpServer(this);
 	
@@ -40,19 +69,31 @@ void TcpServer::newClientConnection()
 
 	qDebug() << " - new connection from a client";
 
-	/* write on socket */
-	socket->write("Hello client\r\n");
-	/* forse the socket to send all the data stored */
-	socket->flush();
+	/* get message login/register */
+	if (socket->waitForReadyRead(TIMEOUT)) {
+		QByteArray m = socket->readLine(BUFFLEN);
+		qDebug() << m;
 
-	/* This function blocks until at least one byte has been written on the socket */
-	socket->waitForBytesWritten(3000);
+		Message msg(m.toStdString());
 
-	/* This function blocks until new data is available for reading and the readyRead() signal has been emitted
-	 * returns true if theres a new data */
-	if (socket->waitForReadyRead(10000)) {
-		QByteArray r = socket->readLine(30);
-		qDebug() << r;
+		if (msg.getType() == loginRequest) {
+			/* login */
+			if (login(msg.getUserName(), msg.getPasswd())) {
+				/* access granted */
+			}
+			else {
+				/* access denied */
+			}
+		}
+		else if (msg.getType() == AccountCreate) {
+			/* create a new account */
+			if (auto newAccount = createNewAccount(msg.getUserName(), msg.getName(), msg.getSurname(), msg.getPasswd())) {
+				/* new account created */
+			}
+			else {
+				/* cannot create account with those credential */
+			}
+		}
 	}
 
 }
@@ -64,27 +105,3 @@ void TcpServer::clientDisconnection()
 	socket->close();
 }
 
-/*
-
- ----------- MESSAGE -----------------
-
- from client to server 
- 
- 0: nuova registrazione + username + pswd + ...
- 2: login + username + pswd
- 4: modify users + ...
- 6: create new doc + newDocName
- 8: ask a doc + docName
- 10: insert a char + symbol
- 12: delete a char + symbol
-
- from server to client
-
- 1: success on registration/login/modify + siteId
- 3: success on create a newDoc / open a doc + URI
- -1: error: cannot register/login/modify
- -3: error: general
-
-
-
-*/
