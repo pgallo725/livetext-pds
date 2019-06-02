@@ -29,8 +29,7 @@ private slots:
 private:
 	Ui::WelcomeWindow* ui;
 	void openEditor();
-	bool fileExist(QString path);
-
+	void setupFileList();
 	void centerAndResize();
 	
 };

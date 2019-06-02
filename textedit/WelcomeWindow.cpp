@@ -18,9 +18,6 @@
 const QString rsrcPath = ":/images/win";
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::WelcomeWindow) {
-
-	
-	
 	//Costruttore landing page
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -29,8 +26,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	ui->setupUi(this);
 	//Setup dimensione finestra
 	centerAndResize();
-	
-	
+
+
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
@@ -63,27 +60,20 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
+
+	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &WelcomeWindow::showUserIcon);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
 
-	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File1");
-	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File2");
-	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File3");
-	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File4");
-	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File5");
-
-	ui->listWidget->addItem(item);
-	ui->listWidget->addItem(item2);
-	ui->listWidget->addItem(item3);
-	ui->listWidget->addItem(item4);
-	ui->listWidget->addItem(item5);
+	//Prende file dal server e li mostra nella lista dei files recenti
+	setupFileList();
 
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
-	
+
 
 }
 
@@ -110,30 +100,33 @@ void WelcomeWindow::pushButtonLoginClicked()
 	if (username != "test" || password != "test") {
 		ui->label_incorrect_login->setText("Username and password does not match");
 	}
-	else if (serverIP != "127.0.0.1" || serverPort != "999"){
+	else if (serverIP != "127.0.0.1" || serverPort != "999") {
 		ui->label_incorrect_login->setText("Server " + serverIP + ":" + serverPort + " unreachable");
 	}
 	else {
 		//Apre seconda landing page con operazioni sui file
 		ui->stackedWidget->setCurrentIndex(2);
-		ui->stackedWidget->show();	
+		ui->stackedWidget->show();
 	}
 }
 
-//Apre la pagina dedicata alla registrazione e cancella campi login
+
 void WelcomeWindow::pushButtonRegisterClicked()
 {
+	//Cancellazione campi login
 	ui->label_incorrect_login->setText("");
 	ui->lineEdit_psw->setText("");
 	ui->lineEdit_usr->setText("");
 
+	//Switch alla pagina di registrazione
 	ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
 }
 
-//Apre il dialogo per la scelta dell'icona utente
+
 void WelcomeWindow::pushButtonBrowseClicked()
 {
+	//Apre il dialogo per la scelta dell'icona utente
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
 		QDir::homePath(), "Image files(*.png *.jpg *.bmp) ;; All files (*.*)");
 
@@ -173,12 +166,12 @@ void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 	}
 
 	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
-	if (!iconPath.isEmpty() && fileExist(iconPath)) {
+	/*if (!iconPath.isEmpty() && fileExist(iconPath)) {
 		QPixmap userPix(iconPath);
 	}
 	else {
 		QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
-	}
+	}*/
 }
 
 void WelcomeWindow::pushButtonBackLoginClicked()
@@ -196,53 +189,61 @@ void WelcomeWindow::pushButtonBackLoginClicked()
 	ui->stackedWidget->show();
 }
 
-//Funzione per verificare se un file esiste e se non è una directory
-bool WelcomeWindow::fileExist(QString path) {
 
-	QFileInfo file(path);
 
-	return (file.exists() && file.isFile());
+void WelcomeWindow::setupFileList()
+{
+	//Prende i file dal server e li mostra nella lista
+	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File1");
+	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File2");
+	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File3");
+	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File4");
+	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File5");
+
+	ui->listWidget->addItem(item);
+	ui->listWidget->addItem(item2);
+	ui->listWidget->addItem(item3);
+	ui->listWidget->addItem(item4);
+	ui->listWidget->addItem(item5);
 }
+
 
 //Slot attivato quando viene modificato il percorso dell'icona
 //Se la nuova immagine esiste la visualizza altrimenti visualizza l'icona di default
 void WelcomeWindow::showUserIcon(QString path)
 {
+	QFileInfo file(path);
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 
-	if (fileExist(path)) {
+	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
 
 		if (!userPix.isNull()) {
 			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+			ui->label_incorrect_reg->setText("");
 			return;
 		}
 
-		ui->label_incorrect_reg->setText("Please choose a valid image file");
 	}
 
+	//Mostra errore in caso di immagine non visualizzabile
+	ui->label_incorrect_reg->setText("Please choose a valid image file");
+
 	QPixmap default(rsrcPath + "/WelcomeWindow/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::IgnoreAspectRatio));
+	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
 }
 
-//Quando viene aperto un nuovo file apre l'editor
+
 void WelcomeWindow::pushButtonNewClicked()
 {
+	//Quando viene aperto un nuovo file apre l'editor
 	openEditor();
 }
 
 void WelcomeWindow::openEditor() {
-
+	//Chiude finestra attuale
 	this->close();
-
-
-	/*QCommandLineParser parser;
-	parser.setApplicationDescription(QCoreApplication::applicationName());
-	parser.addHelpOption();
-	parser.addVersionOption();
-	parser.addPositionalArgument("file", "The file to open.");
-	parser.process(a);*/
 
 	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
 	TextEdit* mw = new TextEdit();
@@ -251,40 +252,34 @@ void WelcomeWindow::openEditor() {
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(mw);
 
 	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
-	mw->resize(availableGeometry.width()*0.6, (availableGeometry.height() * 2) / 3);
+	mw->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
 
-	//Apre il file example.html se lo trova, altrimenti ne crea uno nuovo come se lo passassi da linea di comando
-	//if (!mw.load(parser.positionalArguments().value(0, QLatin1String(":/example.html"))))
 	mw->fileNew();
-
 
 	//Mostra la finestra di mw formata
 	mw->show();
 }
 
 void WelcomeWindow::centerAndResize() {
-	// get the dimension available on this screen
+	//Ricava dimensione desktop
 	QSize availableSize = QApplication::desktop()->availableGeometry().size();
 	int width = availableSize.width();
 	int height = availableSize.height();
-	
-	width *= 0.5; // 90% of the screen size
-	height *= 0.65; // 90% of the screen size
-	
+
+	//Proporzionamento
+	width *= 0.5;
+	height *= 0.6;
+
+	//Le dimensioni vengono fissate per rendere la finestra non resizable
 	setMaximumHeight(height);
 	setMinimumHeight(height);
 	setMaximumWidth(width);
 	setMinimumWidth(width);
-	
+
+	//Nuova dimensione
 	QSize newSize(width, height);
 
-	setGeometry(
-		QStyle::alignedRect(
-			Qt::LeftToRight,
-			Qt::AlignCenter,
-			newSize,
-			QApplication::desktop()->availableGeometry()
-		)
-	);
+	//Crea il nuovo rettangolo su cui aprire la finestra
+	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }

@@ -347,7 +347,7 @@ a.a 2018/2019</string>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
-                   <height>8</height>
+                   <height>15</height>
                   </size>
                  </property>
                 </spacer>
@@ -764,6 +764,12 @@ password</string>
                      <height>130</height>
                     </size>
                    </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>130</width>
+                     <height>130</height>
+                    </size>
+                   </property>
                    <property name="frameShape">
                     <enum>QFrame::StyledPanel</enum>
                    </property>
@@ -971,7 +977,7 @@ password</string>
            <number>40</number>
           </property>
           <property name="rightMargin">
-           <number>50</number>
+           <number>20</number>
           </property>
           <item>
            <spacer name="verticalSpacer_17">
@@ -1085,7 +1091,7 @@ password</string>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <property name="leftMargin">
-           <number>50</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
            <number>40</number>

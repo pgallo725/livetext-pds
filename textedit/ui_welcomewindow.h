@@ -340,7 +340,7 @@ public:
 
         verticalLayout_4->addLayout(formLayout_5);
 
-        verticalSpacer_9 = new QSpacerItem(20, 8, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_9 = new QSpacerItem(20, 15, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_4->addItem(verticalSpacer_9);
 
@@ -563,6 +563,7 @@ public:
         sizePolicy7.setHeightForWidth(label_UsrIcon->sizePolicy().hasHeightForWidth());
         label_UsrIcon->setSizePolicy(sizePolicy7);
         label_UsrIcon->setMinimumSize(QSize(130, 130));
+        label_UsrIcon->setMaximumSize(QSize(130, 130));
         label_UsrIcon->setFrameShape(QFrame::StyledPanel);
         label_UsrIcon->setAlignment(Qt::AlignCenter);
 
@@ -659,7 +660,7 @@ public:
         verticalLayout_9 = new QVBoxLayout();
         verticalLayout_9->setSpacing(6);
         verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
-        verticalLayout_9->setContentsMargins(40, -1, 50, -1);
+        verticalLayout_9->setContentsMargins(40, -1, 20, -1);
         verticalSpacer_17 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_9->addItem(verticalSpacer_17);
@@ -727,7 +728,7 @@ public:
         verticalLayout_8 = new QVBoxLayout();
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
-        verticalLayout_8->setContentsMargins(50, -1, 40, -1);
+        verticalLayout_8->setContentsMargins(20, -1, 40, -1);
         verticalSpacer_19 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_8->addItem(verticalSpacer_19);

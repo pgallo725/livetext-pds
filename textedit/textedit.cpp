@@ -1,5 +1,6 @@
 #include <QAction>
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QClipboard>
 #include <QColorDialog>
 #include <QComboBox>
@@ -36,7 +37,7 @@
 #endif
 
 #include "textedit.h"
-#include <QKeyEvent>
+#include "ProfileEditWindow.h"
 
 const QString rsrcPath = ":/images/win";
 
@@ -647,7 +648,11 @@ void TextEdit::fileShare()
 
 void TextEdit::editProfile()
 {
-	//TODO
+	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
+	ProfileEditWindow* ew = new ProfileEditWindow();
+
+	//Mostra la finestra di mw formata
+	ew->exec();
 }
 
 void TextEdit::textBold()

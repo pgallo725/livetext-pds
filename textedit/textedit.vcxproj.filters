@@ -56,6 +56,9 @@
     <ClCompile Include="textedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ProfileEditWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="WelcomeWindow.h">
@@ -64,26 +67,26 @@
     <QtMoc Include="textedit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ProfileEditWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    
-    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    
-    
-    
-    
     <ClInclude Include="ui_welcomewindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="welcomewindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="profileeditwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

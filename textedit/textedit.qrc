@@ -29,6 +29,5 @@
   <file>images/win/WelcomeWindow/backarrow.png</file>
   <file>images/win/WelcomeWindow/textfile.png</file>
   <file>images/win/WelcomeWindow/richtext.png</file>
-  <file>example.html</file>
 </qresource>
 </RCC>
