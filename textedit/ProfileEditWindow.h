@@ -17,6 +17,8 @@ public:
 
 private slots:
 	void pushButtonUpdateClicked();
+	void pushButtonBrowseClicked();
+	void pushButtonCancelClicked();
 	void showUserIcon(QString path);
 
 private:

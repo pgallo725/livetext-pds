@@ -30,6 +30,8 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 
 	//Connect dei segnali dei vari pushbutton
 	connect(ui->pushButton_updateProfile, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonUpdateClicked);
+	connect(ui->pushButton_browse, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonBrowseClicked);
+	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
 
 	//User icon
 	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
@@ -42,12 +44,28 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 
 
 	//Set username
-	ui->label_username->setText("defaultUsername");
+	ui->label_username->setText("currentUsername");
+	ui->lineEdit_editNick->setText("currentNickname");
 }
 
 ProfileEditWindow::~ProfileEditWindow()
 {
 	delete ui;
+}
+
+void ProfileEditWindow::pushButtonBrowseClicked()
+{
+	//Apre il dialogo per la scelta dell'icona utente
+	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp) ;; All files (*.*)");
+
+	//Setta nel form il path scelto
+	ui->lineEdit_UsrIconPath->setText(filename);
+}
+
+void ProfileEditWindow::pushButtonCancelClicked()
+{
+	this->close();
 }
 
 void ProfileEditWindow::showUserIcon(QString path)

@@ -97,7 +97,9 @@ public:
     QLabel *label_11;
     QLineEdit *lineEdit_regPswConf;
     QSpacerItem *verticalSpacer_14;
+    QHBoxLayout *horizontalLayout_12;
     QCommandLinkButton *commandLinkButton;
+    QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout_15;
     QLabel *label_UsrIcon;
@@ -122,7 +124,7 @@ public:
     QListWidget *listWidget;
     QHBoxLayout *horizontalLayout_4;
     QSpacerItem *horizontalSpacer;
-    QPushButton *pushButton;
+    QPushButton *pushButton_open;
     QSpacerItem *verticalSpacer_16;
     QVBoxLayout *verticalLayout_8;
     QSpacerItem *verticalSpacer_19;
@@ -136,7 +138,7 @@ public:
     {
         if (WelcomeWindow->objectName().isEmpty())
             WelcomeWindow->setObjectName(QString::fromUtf8("WelcomeWindow"));
-        WelcomeWindow->resize(700, 584);
+        WelcomeWindow->resize(834, 492);
         WelcomeWindow->setMinimumSize(QSize(0, 0));
         WelcomeWindow->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -428,7 +430,7 @@ public:
         groupBox = new QGroupBox(page_register);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
         QFont font1;
-        font1.setPointSize(11);
+        font1.setPointSize(10);
         groupBox->setFont(font1);
         verticalLayout_6 = new QVBoxLayout(groupBox);
         verticalLayout_6->setSpacing(6);
@@ -468,7 +470,7 @@ public:
         formLayout_2->setSpacing(6);
         formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
         formLayout_2->setLabelAlignment(Qt::AlignCenter);
-        formLayout_2->setHorizontalSpacing(10);
+        formLayout_2->setHorizontalSpacing(14);
         formLayout_2->setVerticalSpacing(30);
         formLayout_2->setContentsMargins(-1, -1, -1, 0);
         label_2 = new QLabel(groupBox);
@@ -535,6 +537,9 @@ public:
 
         verticalLayout_10->addItem(verticalSpacer_14);
 
+        horizontalLayout_12 = new QHBoxLayout();
+        horizontalLayout_12->setSpacing(6);
+        horizontalLayout_12->setObjectName(QString::fromUtf8("horizontalLayout_12"));
         commandLinkButton = new QCommandLinkButton(groupBox);
         commandLinkButton->setObjectName(QString::fromUtf8("commandLinkButton"));
         sizePolicy3.setHeightForWidth(commandLinkButton->sizePolicy().hasHeightForWidth());
@@ -544,7 +549,14 @@ public:
         icon.addFile(QString::fromUtf8("images/win/WelcomeWindow/backarrow.png"), QSize(), QIcon::Normal, QIcon::Off);
         commandLinkButton->setIcon(icon);
 
-        verticalLayout_10->addWidget(commandLinkButton);
+        horizontalLayout_12->addWidget(commandLinkButton);
+
+        horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_12->addItem(horizontalSpacer_3);
+
+
+        verticalLayout_10->addLayout(horizontalLayout_12);
 
 
         horizontalLayout_11->addLayout(verticalLayout_10);
@@ -596,9 +608,7 @@ public:
 
         pushButton_browse = new QPushButton(groupBox);
         pushButton_browse->setObjectName(QString::fromUtf8("pushButton_browse"));
-        QFont font3;
-        font3.setPointSize(10);
-        pushButton_browse->setFont(font3);
+        pushButton_browse->setFont(font1);
 
         horizontalLayout_14->addWidget(pushButton_browse);
 
@@ -628,9 +638,9 @@ public:
         pushButton_regConf->setObjectName(QString::fromUtf8("pushButton_regConf"));
         sizePolicy6.setHeightForWidth(pushButton_regConf->sizePolicy().hasHeightForWidth());
         pushButton_regConf->setSizePolicy(sizePolicy6);
-        pushButton_regConf->setMinimumSize(QSize(230, 30));
+        pushButton_regConf->setMinimumSize(QSize(230, 28));
         pushButton_regConf->setMaximumSize(QSize(350, 16777215));
-        pushButton_regConf->setFont(font3);
+        pushButton_regConf->setFont(font1);
 
         horizontalLayout_16->addWidget(pushButton_regConf);
 
@@ -667,12 +677,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font4;
-        font4.setFamily(QString::fromUtf8("Calibri"));
-        font4.setPointSize(14);
-        font4.setBold(false);
-        font4.setWeight(50);
-        groupBox_2->setFont(font4);
+        QFont font3;
+        font3.setFamily(QString::fromUtf8("Calibri"));
+        font3.setPointSize(14);
+        font3.setBold(false);
+        font3.setWeight(50);
+        groupBox_2->setFont(font3);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -690,24 +700,24 @@ public:
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setSpacing(6);
         horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Preferred, QSizePolicy::Minimum);
+        horizontalSpacer = new QSpacerItem(100, 20, QSizePolicy::Preferred, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer);
 
-        pushButton = new QPushButton(groupBox_2);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setEnabled(false);
-        sizePolicy3.setHeightForWidth(pushButton->sizePolicy().hasHeightForWidth());
-        pushButton->setSizePolicy(sizePolicy3);
-        pushButton->setMinimumSize(QSize(0, 30));
-        QFont font5;
-        font5.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font5.setPointSize(10);
-        font5.setBold(false);
-        font5.setWeight(50);
-        pushButton->setFont(font5);
+        pushButton_open = new QPushButton(groupBox_2);
+        pushButton_open->setObjectName(QString::fromUtf8("pushButton_open"));
+        pushButton_open->setEnabled(true);
+        sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
+        pushButton_open->setSizePolicy(sizePolicy3);
+        pushButton_open->setMinimumSize(QSize(0, 30));
+        QFont font4;
+        font4.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font4.setPointSize(10);
+        font4.setBold(false);
+        font4.setWeight(50);
+        pushButton_open->setFont(font4);
 
-        horizontalLayout_4->addWidget(pushButton);
+        horizontalLayout_4->addWidget(pushButton_open);
 
 
         verticalLayout_11->addLayout(horizontalLayout_4);
@@ -806,7 +816,7 @@ public:
         label_incorrect_reg->setText(QString());
         pushButton_regConf->setText(QApplication::translate("WelcomeWindow", "Register", nullptr));
         groupBox_2->setTitle(QApplication::translate("WelcomeWindow", "Open existing file", nullptr));
-        pushButton->setText(QApplication::translate("WelcomeWindow", "Open selected", nullptr));
+        pushButton_open->setText(QApplication::translate("WelcomeWindow", "Open selected", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
     } // retranslateUi

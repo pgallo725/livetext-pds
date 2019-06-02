@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>584</height>
+    <width>834</width>
+    <height>492</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -524,7 +524,7 @@ a.a 2018/2019</string>
          <widget class="QGroupBox" name="groupBox">
           <property name="font">
            <font>
-            <pointsize>11</pointsize>
+            <pointsize>10</pointsize>
            </font>
           </property>
           <property name="title">
@@ -595,7 +595,7 @@ a.a 2018/2019</string>
                   <set>Qt::AlignCenter</set>
                  </property>
                  <property name="horizontalSpacing">
-                  <number>10</number>
+                  <number>14</number>
                  </property>
                  <property name="verticalSpacing">
                   <number>30</number>
@@ -722,27 +722,44 @@ password</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QCommandLinkButton" name="commandLinkButton">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>85</width>
-                   <height>32</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>Back</string>
-                 </property>
-                 <property name="icon">
-                  <iconset>
-                   <normaloff>images/win/WelcomeWindow/backarrow.png</normaloff>images/win/WelcomeWindow/backarrow.png</iconset>
-                 </property>
-                </widget>
+                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <item>
+                  <widget class="QCommandLinkButton" name="commandLinkButton">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>85</width>
+                     <height>32</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Back</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>images/win/WelcomeWindow/backarrow.png</normaloff>images/win/WelcomeWindow/backarrow.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>
@@ -926,7 +943,7 @@ password</string>
                    <property name="minimumSize">
                     <size>
                      <width>230</width>
-                     <height>30</height>
+                     <height>28</height>
                     </size>
                    </property>
                    <property name="maximumSize">
@@ -1030,16 +1047,16 @@ password</string>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
-                     <width>40</width>
+                     <width>100</width>
                      <height>20</height>
                     </size>
                    </property>
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="pushButton">
+                  <widget class="QPushButton" name="pushButton_open">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">

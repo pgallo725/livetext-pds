@@ -50,11 +50,15 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	connect(ui->pushButton_register, &QPushButton::clicked, this, &WelcomeWindow::pushButtonRegisterClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBrowseClicked);
 	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &WelcomeWindow::pushButtonConfirmRegistrationClicked);
-	connect(ui->commandLinkButton, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBackLoginClicked);
+	connect(ui->pushButton_open, &QPushButton::clicked, this, &WelcomeWindow::pushButtonOpenClicked);
+	connect(ui->commandLinkButton, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
 	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+
+	//Connect lista file (QListWidget)
+	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &WelcomeWindow::pushButtonOpenClicked);
 
 	//User Icon
 	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
@@ -70,6 +74,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 	//Prende file dal server e li mostra nella lista dei files recenti
 	setupFileList();
+
 
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
@@ -174,7 +179,7 @@ void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 	}*/
 }
 
-void WelcomeWindow::pushButtonBackLoginClicked()
+void WelcomeWindow::pushButtonBackClicked()
 {
 	//Pulisco i campi inseriti in registrazione se torno alla schermata di login
 	ui->lineEdit_regUsr->setText("");
@@ -187,6 +192,11 @@ void WelcomeWindow::pushButtonBackLoginClicked()
 	//Cambio schermata tornando a quella di login
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
+}
+
+void WelcomeWindow::pushButtonOpenClicked()
+{
+	openEditor(ui->listWidget->currentItem()->text());
 }
 
 
@@ -205,6 +215,10 @@ void WelcomeWindow::setupFileList()
 	ui->listWidget->addItem(item3);
 	ui->listWidget->addItem(item4);
 	ui->listWidget->addItem(item5);
+
+	if (ui->listWidget->count() == 0) {
+		ui->pushButton_open->setEnabled(false);
+	}
 }
 
 
@@ -241,7 +255,7 @@ void WelcomeWindow::pushButtonNewClicked()
 	openEditor();
 }
 
-void WelcomeWindow::openEditor() {
+void WelcomeWindow::openEditor(QString path) {
 	//Chiude finestra attuale
 	this->close();
 
@@ -255,7 +269,14 @@ void WelcomeWindow::openEditor() {
 	mw->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
 
-	mw->fileNew();
+	if (path == nullptr) {
+		mw->fileNew();
+	}
+	else 
+	{
+		mw->load(path);
+	}
+
 
 	//Mostra la finestra di mw formata
 	mw->show();

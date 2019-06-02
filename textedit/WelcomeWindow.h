@@ -21,14 +21,15 @@ private slots:
 	void pushButtonRegisterClicked();
 	void pushButtonBrowseClicked();
 	void pushButtonConfirmRegistrationClicked();
-	void pushButtonBackLoginClicked();
+	void pushButtonBackClicked();
+	void pushButtonOpenClicked();
 
 
 	void showUserIcon(QString path);
 
 private:
 	Ui::WelcomeWindow* ui;
-	void openEditor();
+	void openEditor(QString path = nullptr);
 	void setupFileList();
 	void centerAndResize();
 	

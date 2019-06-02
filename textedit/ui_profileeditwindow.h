@@ -61,6 +61,8 @@ public:
     QPushButton *pushButton_browse;
     QSpacerItem *verticalSpacer_4;
     QLabel *label_incorrect_edit;
+    QHBoxLayout *horizontalLayout_2;
+    QPushButton *pushButton_cancel;
     QPushButton *pushButton_updateProfile;
     QSpacerItem *verticalSpacer_13;
 
@@ -68,13 +70,13 @@ public:
     {
         if (ProfileEditWindow->objectName().isEmpty())
             ProfileEditWindow->setObjectName(QString::fromUtf8("ProfileEditWindow"));
-        ProfileEditWindow->resize(1192, 656);
+        ProfileEditWindow->resize(807, 460);
         gridLayout_2 = new QGridLayout(ProfileEditWindow);
         gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
         groupBox = new QGroupBox(ProfileEditWindow);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
         QFont font;
-        font.setPointSize(11);
+        font.setPointSize(10);
         groupBox->setFont(font);
         verticalLayout_6 = new QVBoxLayout(groupBox);
         verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
@@ -96,7 +98,7 @@ public:
 
         verticalLayout_6->addLayout(horizontalLayout_10);
 
-        verticalSpacer_12 = new QSpacerItem(20, 70, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_12 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_6->addItem(verticalSpacer_12);
 
@@ -113,7 +115,7 @@ public:
         formLayout_2 = new QFormLayout();
         formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
         formLayout_2->setLabelAlignment(Qt::AlignCenter);
-        formLayout_2->setHorizontalSpacing(10);
+        formLayout_2->setHorizontalSpacing(14);
         formLayout_2->setVerticalSpacing(30);
         formLayout_2->setContentsMargins(-1, -1, -1, 0);
         label_2 = new QLabel(groupBox);
@@ -253,9 +255,7 @@ public:
 
         pushButton_browse = new QPushButton(groupBox);
         pushButton_browse->setObjectName(QString::fromUtf8("pushButton_browse"));
-        QFont font2;
-        font2.setPointSize(10);
-        pushButton_browse->setFont(font2);
+        pushButton_browse->setFont(font);
 
         horizontalLayout_14->addWidget(pushButton_browse);
 
@@ -280,12 +280,24 @@ public:
 
         verticalLayout->addWidget(label_incorrect_edit);
 
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        horizontalLayout_2->setContentsMargins(-1, 0, -1, -1);
+        pushButton_cancel = new QPushButton(groupBox);
+        pushButton_cancel->setObjectName(QString::fromUtf8("pushButton_cancel"));
+        pushButton_cancel->setMinimumSize(QSize(0, 28));
+
+        horizontalLayout_2->addWidget(pushButton_cancel);
+
         pushButton_updateProfile = new QPushButton(groupBox);
         pushButton_updateProfile->setObjectName(QString::fromUtf8("pushButton_updateProfile"));
-        pushButton_updateProfile->setMinimumSize(QSize(0, 30));
-        pushButton_updateProfile->setFont(font2);
+        pushButton_updateProfile->setMinimumSize(QSize(190, 28));
+        pushButton_updateProfile->setFont(font);
 
-        verticalLayout->addWidget(pushButton_updateProfile);
+        horizontalLayout_2->addWidget(pushButton_updateProfile);
+
+
+        verticalLayout->addLayout(horizontalLayout_2);
 
 
         horizontalLayout_11->addLayout(verticalLayout);
@@ -293,7 +305,7 @@ public:
 
         verticalLayout_6->addLayout(horizontalLayout_11);
 
-        verticalSpacer_13 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_13 = new QSpacerItem(20, 60, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_6->addItem(verticalSpacer_13);
 
@@ -320,12 +332,13 @@ public:
         label_11->setText(QApplication::translate("ProfileEditWindow", "New\n"
 "password", nullptr));
         label_4->setText(QApplication::translate("ProfileEditWindow", "Confirm\n"
-"new password", nullptr));
+"password", nullptr));
         label_UsrIcon->setText(QString());
         label_3->setText(QApplication::translate("ProfileEditWindow", "Choose your profile icon (optional)", nullptr));
         pushButton_browse->setText(QApplication::translate("ProfileEditWindow", "Browse...", nullptr));
         label_incorrect_edit->setText(QString());
-        pushButton_updateProfile->setText(QApplication::translate("ProfileEditWindow", "Update your profile", nullptr));
+        pushButton_cancel->setText(QApplication::translate("ProfileEditWindow", "Cancel", nullptr));
+        pushButton_updateProfile->setText(QApplication::translate("ProfileEditWindow", "Update profile", nullptr));
     } // retranslateUi
 
 };

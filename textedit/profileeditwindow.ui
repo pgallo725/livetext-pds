@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1192</width>
-    <height>656</height>
+    <width>807</width>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <widget class="QGroupBox" name="groupBox">
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>10</pointsize>
       </font>
      </property>
      <property name="title">
@@ -65,7 +65,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>70</height>
+          <height>10</height>
          </size>
         </property>
        </spacer>
@@ -105,7 +105,7 @@
              <set>Qt::AlignCenter</set>
             </property>
             <property name="horizontalSpacing">
-             <number>10</number>
+             <number>14</number>
             </property>
             <property name="verticalSpacing">
              <number>30</number>
@@ -246,7 +246,7 @@ password</string>
              <widget class="QLabel" name="label_4">
               <property name="text">
                <string>Confirm
-new password</string>
+password</string>
               </property>
              </widget>
             </item>
@@ -473,22 +473,42 @@ new password</string>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_updateProfile">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <property name="topMargin">
+             <number>0</number>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>10</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Update your profile</string>
-            </property>
-           </widget>
+            <item>
+             <widget class="QPushButton" name="pushButton_cancel">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>28</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Cancel</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_updateProfile">
+              <property name="minimumSize">
+               <size>
+                <width>190</width>
+                <height>28</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>10</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Update profile</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -505,7 +525,7 @@ new password</string>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>30</height>
+          <height>60</height>
          </size>
         </property>
        </spacer>
