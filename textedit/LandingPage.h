@@ -2,18 +2,19 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDialog>
 
 namespace Ui {
-	class WelcomeWindow;
+	class LandingPage;
 }
 
-class WelcomeWindow : public QMainWindow
+class LandingPage : public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	WelcomeWindow(QWidget * parent = nullptr);
-	~WelcomeWindow();
+	LandingPage(QWidget * parent = nullptr);
+	~LandingPage();
 
 private slots:
 	void pushButtonLoginClicked();
@@ -23,12 +24,13 @@ private slots:
 	void pushButtonConfirmRegistrationClicked();
 	void pushButtonBackClicked();
 	void pushButtonOpenClicked();
+	void enablePushButtonOpen();
 
 
 	void showUserIcon(QString path);
 
 private:
-	Ui::WelcomeWindow* ui;
+	Ui::LandingPage* ui;
 	void openEditor(QString path = nullptr);
 	void setupFileList();
 	void centerAndResize();

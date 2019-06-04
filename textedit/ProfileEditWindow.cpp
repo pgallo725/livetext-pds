@@ -34,7 +34,7 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
 
 	//User icon
-	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
@@ -88,7 +88,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 	//Mostra errore in caso di immagine non visualizzabile
 	ui->label_incorrect_edit->setText("Please choose a valid image file");
 
-	QPixmap default(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
 }
 
@@ -122,7 +122,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 		QPixmap userPix(iconPath);
 	}
 	else {
-		QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	}*/
 }
 

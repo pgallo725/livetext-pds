@@ -214,7 +214,7 @@ void TextEdit::setupUserActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 	const QIcon userIcon = QIcon::fromTheme("user", QIcon(rsrcPath + "/user.png"));
-	actionUser = menu->addAction(userIcon, tr("&Profile"), this, &TextEdit::editProfile);
+	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
 	tb->addAction(actionUser);
 }
 

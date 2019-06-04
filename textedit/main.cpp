@@ -1,5 +1,5 @@
 #include "textedit.h"
-#include "WelcomeWindow.h"
+#include "LandingPage.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("LiveText");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 	
-	WelcomeWindow mw;
+	LandingPage mw;
 	
 	//Mostra la finestra di mw formata
 	mw.show();

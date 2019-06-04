@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'welcomewindow.ui'
+** Form generated from reading UI file 'landingpage.ui'
 **
 ** Created by: Qt User Interface Compiler version 5.12.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_WELCOMEWINDOW_H
-#define UI_WELCOMEWINDOW_H
+#ifndef UI_LANDINGPAGE_H
+#define UI_LANDINGPAGE_H
 
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
@@ -31,7 +31,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_WelcomeWindow
+class Ui_LandingPage
 {
 public:
     QWidget *centralWidget;
@@ -134,18 +134,18 @@ public:
     QSpacerItem *verticalSpacer_20;
     QStatusBar *statusBar;
 
-    void setupUi(QMainWindow *WelcomeWindow)
+    void setupUi(QMainWindow *LandingPage)
     {
-        if (WelcomeWindow->objectName().isEmpty())
-            WelcomeWindow->setObjectName(QString::fromUtf8("WelcomeWindow"));
-        WelcomeWindow->resize(834, 492);
-        WelcomeWindow->setMinimumSize(QSize(0, 0));
-        WelcomeWindow->setMaximumSize(QSize(16777215, 16777215));
+        if (LandingPage->objectName().isEmpty())
+            LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
+        LandingPage->resize(834, 492);
+        LandingPage->setMinimumSize(QSize(0, 0));
+        LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
         font.setPointSize(10);
         font.setKerning(true);
-        WelcomeWindow->setFont(font);
-        centralWidget = new QWidget(WelcomeWindow);
+        LandingPage->setFont(font);
+        centralWidget = new QWidget(LandingPage);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
         sizePolicy.setHorizontalStretch(0);
@@ -545,8 +545,12 @@ public:
         sizePolicy3.setHeightForWidth(commandLinkButton->sizePolicy().hasHeightForWidth());
         commandLinkButton->setSizePolicy(sizePolicy3);
         commandLinkButton->setMaximumSize(QSize(85, 32));
+        QFont font3;
+        font3.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font3.setPointSize(11);
+        commandLinkButton->setFont(font3);
         QIcon icon;
-        icon.addFile(QString::fromUtf8("images/win/WelcomeWindow/backarrow.png"), QSize(), QIcon::Normal, QIcon::Off);
+        icon.addFile(QString::fromUtf8("images/win/LandingPage/backarrow.png"), QSize(), QIcon::Normal, QIcon::Off);
         commandLinkButton->setIcon(icon);
 
         horizontalLayout_12->addWidget(commandLinkButton);
@@ -677,12 +681,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font3;
-        font3.setFamily(QString::fromUtf8("Calibri"));
-        font3.setPointSize(14);
-        font3.setBold(false);
-        font3.setWeight(50);
-        groupBox_2->setFont(font3);
+        QFont font4;
+        font4.setFamily(QString::fromUtf8("Calibri"));
+        font4.setPointSize(14);
+        font4.setBold(false);
+        font4.setWeight(50);
+        groupBox_2->setFont(font4);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -710,12 +714,12 @@ public:
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font4;
-        font4.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font4.setPointSize(10);
-        font4.setBold(false);
-        font4.setWeight(50);
-        pushButton_open->setFont(font4);
+        QFont font5;
+        font5.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font5.setPointSize(10);
+        font5.setBold(false);
+        font5.setWeight(50);
+        pushButton_open->setFont(font5);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -770,53 +774,53 @@ public:
 
         gridLayout->addWidget(stackedWidget, 0, 1, 1, 1);
 
-        WelcomeWindow->setCentralWidget(centralWidget);
-        statusBar = new QStatusBar(WelcomeWindow);
+        LandingPage->setCentralWidget(centralWidget);
+        statusBar = new QStatusBar(LandingPage);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
         statusBar->setSizeGripEnabled(false);
-        WelcomeWindow->setStatusBar(statusBar);
+        LandingPage->setStatusBar(statusBar);
 
-        retranslateUi(WelcomeWindow);
+        retranslateUi(LandingPage);
 
         stackedWidget->setCurrentIndex(1);
         pushButton_login->setDefault(true);
 
 
-        QMetaObject::connectSlotsByName(WelcomeWindow);
+        QMetaObject::connectSlotsByName(LandingPage);
     } // setupUi
 
-    void retranslateUi(QMainWindow *WelcomeWindow)
+    void retranslateUi(QMainWindow *LandingPage)
     {
-        WelcomeWindow->setWindowTitle(QApplication::translate("WelcomeWindow", "LiveText", nullptr));
+        LandingPage->setWindowTitle(QApplication::translate("LandingPage", "LiveText", nullptr));
         label_logo->setText(QString());
-        label_7->setText(QApplication::translate("WelcomeWindow", "Politecnico di Torino\n"
+        label_7->setText(QApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
-        groupBox_5->setTitle(QApplication::translate("WelcomeWindow", "Server settings", nullptr));
-        label_8->setText(QApplication::translate("WelcomeWindow", "Address", nullptr));
-        label_9->setText(QApplication::translate("WelcomeWindow", "Port", nullptr));
-        groupBox_6->setTitle(QApplication::translate("WelcomeWindow", "Sign in", nullptr));
-        label_12->setText(QApplication::translate("WelcomeWindow", "Username", nullptr));
-        label_13->setText(QApplication::translate("WelcomeWindow", "Password", nullptr));
-        pushButton_login->setText(QApplication::translate("WelcomeWindow", "Login", nullptr));
+        groupBox_5->setTitle(QApplication::translate("LandingPage", "Server settings", nullptr));
+        label_8->setText(QApplication::translate("LandingPage", "Address", nullptr));
+        label_9->setText(QApplication::translate("LandingPage", "Port", nullptr));
+        groupBox_6->setTitle(QApplication::translate("LandingPage", "Sign in", nullptr));
+        label_12->setText(QApplication::translate("LandingPage", "Username", nullptr));
+        label_13->setText(QApplication::translate("LandingPage", "Password", nullptr));
+        pushButton_login->setText(QApplication::translate("LandingPage", "Login", nullptr));
         label_incorrect_login->setText(QString());
-        label_10->setText(QApplication::translate("WelcomeWindow", "If you don't have an account", nullptr));
-        pushButton_register->setText(QApplication::translate("WelcomeWindow", "Register", nullptr));
-        groupBox->setTitle(QApplication::translate("WelcomeWindow", "Registration form", nullptr));
-        label->setText(QApplication::translate("WelcomeWindow", "Please fill the form with required information to create your account", nullptr));
-        label_2->setText(QApplication::translate("WelcomeWindow", "Username", nullptr));
-        label_5->setText(QApplication::translate("WelcomeWindow", "Nickname\n"
+        label_10->setText(QApplication::translate("LandingPage", "If you don't have an account", nullptr));
+        pushButton_register->setText(QApplication::translate("LandingPage", "Register", nullptr));
+        groupBox->setTitle(QApplication::translate("LandingPage", "Registration form", nullptr));
+        label->setText(QApplication::translate("LandingPage", "Please fill the form with required information to create your account", nullptr));
+        label_2->setText(QApplication::translate("LandingPage", "Username", nullptr));
+        label_5->setText(QApplication::translate("LandingPage", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QApplication::translate("WelcomeWindow", "Password", nullptr));
-        label_11->setText(QApplication::translate("WelcomeWindow", "Confirm\n"
+        label_6->setText(QApplication::translate("LandingPage", "Password", nullptr));
+        label_11->setText(QApplication::translate("LandingPage", "Confirm\n"
 "password", nullptr));
-        commandLinkButton->setText(QApplication::translate("WelcomeWindow", "Back", nullptr));
+        commandLinkButton->setText(QApplication::translate("LandingPage", "Back", nullptr));
         label_UsrIcon->setText(QString());
-        label_15->setText(QApplication::translate("WelcomeWindow", "Choose your profile icon (optional)", nullptr));
-        pushButton_browse->setText(QApplication::translate("WelcomeWindow", "Browse...", nullptr));
+        label_15->setText(QApplication::translate("LandingPage", "Choose your profile icon (optional)", nullptr));
+        pushButton_browse->setText(QApplication::translate("LandingPage", "Browse...", nullptr));
         label_incorrect_reg->setText(QString());
-        pushButton_regConf->setText(QApplication::translate("WelcomeWindow", "Register", nullptr));
-        groupBox_2->setTitle(QApplication::translate("WelcomeWindow", "Open existing file", nullptr));
-        pushButton_open->setText(QApplication::translate("WelcomeWindow", "Open selected", nullptr));
+        pushButton_regConf->setText(QApplication::translate("LandingPage", "Register", nullptr));
+        groupBox_2->setTitle(QApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_open->setText(QApplication::translate("LandingPage", "Open selected", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
     } // retranslateUi
@@ -824,9 +828,9 @@ public:
 };
 
 namespace Ui {
-    class WelcomeWindow: public Ui_WelcomeWindow {};
+    class LandingPage: public Ui_LandingPage {};
 } // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_WELCOMEWINDOW_H
+#endif // UI_LANDINGPAGE_H

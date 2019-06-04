@@ -1,5 +1,5 @@
-#include "WelcomeWindow.h"
-#include "ui_welcomewindow.h"
+#include "LandingPage.h"
+#include "ui_landingpage.h"
 #include "textedit.h"
 
 #include <QMessageBox>
@@ -17,7 +17,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::WelcomeWindow) {
+LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage) {
 	//Costruttore landing page
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -32,11 +32,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
 	ui->pushButton_new->setIconSize(QSize::QSize(w, h));
-	ui->pushButton_new->setIcon(QIcon::QIcon(rsrcPath + "/WelcomeWindow/new.png"));
+	ui->pushButton_new->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/new.png"));
 
 	//Icona "Open from URI"
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
-	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/WelcomeWindow/openuri.png"));
+	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
 
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
@@ -45,29 +45,30 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
 
 	//Connect dei segnali dei vari pushbutton
-	connect(ui->pushButton_login, &QPushButton::clicked, this, &WelcomeWindow::pushButtonLoginClicked);
-	connect(ui->pushButton_new, &QPushButton::clicked, this, &WelcomeWindow::pushButtonNewClicked);
-	connect(ui->pushButton_register, &QPushButton::clicked, this, &WelcomeWindow::pushButtonRegisterClicked);
-	connect(ui->pushButton_browse, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBrowseClicked);
-	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &WelcomeWindow::pushButtonConfirmRegistrationClicked);
-	connect(ui->pushButton_open, &QPushButton::clicked, this, &WelcomeWindow::pushButtonOpenClicked);
-	connect(ui->commandLinkButton, &QPushButton::clicked, this, &WelcomeWindow::pushButtonBackClicked);
+	connect(ui->pushButton_login, &QPushButton::clicked, this, &LandingPage::pushButtonLoginClicked);
+	connect(ui->pushButton_new, &QPushButton::clicked, this, &LandingPage::pushButtonNewClicked);
+	connect(ui->pushButton_register, &QPushButton::clicked, this, &LandingPage::pushButtonRegisterClicked);
+	connect(ui->pushButton_browse, &QPushButton::clicked, this, &LandingPage::pushButtonBrowseClicked);
+	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &LandingPage::pushButtonConfirmRegistrationClicked);
+	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->commandLinkButton, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
-	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
-	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &WelcomeWindow::pushButtonLoginClicked);
+	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::pushButtonLoginClicked);
+	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &LandingPage::pushButtonLoginClicked);
 
 	//Connect lista file (QListWidget)
-	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &WelcomeWindow::pushButtonOpenClicked);
+	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->listWidget, &QListWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
 
 	//User Icon
-	QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
-	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &WelcomeWindow::showUserIcon);
+	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
@@ -82,14 +83,15 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::
 
 }
 
-WelcomeWindow::~WelcomeWindow()
+LandingPage::~LandingPage()
 {
+	
 	delete ui;
 }
 
 
 
-void WelcomeWindow::pushButtonLoginClicked()
+void LandingPage::pushButtonLoginClicked()
 {
 	//Bypass login
 	ui->stackedWidget->setCurrentIndex(2);
@@ -116,7 +118,7 @@ void WelcomeWindow::pushButtonLoginClicked()
 }
 
 
-void WelcomeWindow::pushButtonRegisterClicked()
+void LandingPage::pushButtonRegisterClicked()
 {
 	//Cancellazione campi login
 	ui->label_incorrect_login->setText("");
@@ -129,7 +131,7 @@ void WelcomeWindow::pushButtonRegisterClicked()
 }
 
 
-void WelcomeWindow::pushButtonBrowseClicked()
+void LandingPage::pushButtonBrowseClicked()
 {
 	//Apre il dialogo per la scelta dell'icona utente
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
@@ -140,7 +142,7 @@ void WelcomeWindow::pushButtonBrowseClicked()
 }
 
 //Conferma la registrazione
-void WelcomeWindow::pushButtonConfirmRegistrationClicked()
+void LandingPage::pushButtonConfirmRegistrationClicked()
 {
 	QString nick = ui->lineEdit_regNick->text();
 	QString username = ui->lineEdit_regUsr->text();
@@ -175,11 +177,11 @@ void WelcomeWindow::pushButtonConfirmRegistrationClicked()
 		QPixmap userPix(iconPath);
 	}
 	else {
-		QPixmap userPix(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	}*/
 }
 
-void WelcomeWindow::pushButtonBackClicked()
+void LandingPage::pushButtonBackClicked()
 {
 	//Pulisco i campi inseriti in registrazione se torno alla schermata di login
 	ui->lineEdit_regUsr->setText("");
@@ -194,21 +196,30 @@ void WelcomeWindow::pushButtonBackClicked()
 	ui->stackedWidget->show();
 }
 
-void WelcomeWindow::pushButtonOpenClicked()
+void LandingPage::pushButtonOpenClicked()
 {
-	openEditor(ui->listWidget->currentItem()->text());
+	QString fileSelected = ui->listWidget->currentItem()->text();
+	if (fileSelected != "<No files found>")
+		openEditor(fileSelected);
+}
+
+void LandingPage::enablePushButtonOpen()
+{
+	if(ui->listWidget->currentItem()->text() != "<No files found>")
+		if(!ui->pushButton_open->isEnabled())
+			ui->pushButton_open->setEnabled(true);
 }
 
 
 
-void WelcomeWindow::setupFileList()
+void LandingPage::setupFileList()
 {
 	//Prende i file dal server e li mostra nella lista
-	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File1");
-	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File2");
-	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/textfile.png"), "File3");
-	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File4");
-	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/WelcomeWindow/richtext.png"), "File5");
+	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File1");
+	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File2");
+	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File3");
+	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), "File4");
+	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), "File5");
 
 	ui->listWidget->addItem(item);
 	ui->listWidget->addItem(item2);
@@ -216,15 +227,19 @@ void WelcomeWindow::setupFileList()
 	ui->listWidget->addItem(item4);
 	ui->listWidget->addItem(item5);
 
+	//Se non vengono trovati files viene visualizzato "<No files found>"
 	if (ui->listWidget->count() == 0) {
-		ui->pushButton_open->setEnabled(false);
+		ui->listWidget->addItem("<No files found>");
+		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
+	
+	ui->pushButton_open->setEnabled(false);
 }
 
 
 //Slot attivato quando viene modificato il percorso dell'icona
 //Se la nuova immagine esiste la visualizza altrimenti visualizza l'icona di default
-void WelcomeWindow::showUserIcon(QString path)
+void LandingPage::showUserIcon(QString path)
 {
 	QFileInfo file(path);
 	int w = ui->label_UsrIcon->width();
@@ -244,18 +259,18 @@ void WelcomeWindow::showUserIcon(QString path)
 	//Mostra errore in caso di immagine non visualizzabile
 	ui->label_incorrect_reg->setText("Please choose a valid image file");
 
-	QPixmap default(rsrcPath + "/WelcomeWindow/defaultProfile.png");
+	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
-void WelcomeWindow::pushButtonNewClicked()
+void LandingPage::pushButtonNewClicked()
 {
 	//Quando viene aperto un nuovo file apre l'editor
 	openEditor();
 }
 
-void WelcomeWindow::openEditor(QString path) {
+void LandingPage::openEditor(QString path) {
 	//Chiude finestra attuale
 	this->close();
 
@@ -282,7 +297,7 @@ void WelcomeWindow::openEditor(QString path) {
 	mw->show();
 }
 
-void WelcomeWindow::centerAndResize() {
+void LandingPage::centerAndResize() {
 	//Ricava dimensione desktop
 	QSize availableSize = QApplication::desktop()->availableGeometry().size();
 	int width = availableSize.width();

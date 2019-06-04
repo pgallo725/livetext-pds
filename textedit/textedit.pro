@@ -6,16 +6,19 @@ TEMPLATE        = app
 TARGET          = textedit
 
 HEADERS         = textedit.h \
-		  WelcomeWindow.h \
-		  ProfileEditWindow.h
+		  LandingPage.h \
+		  ProfileEditWindow.h \
+		  OpenUriWindow.h
 
 SOURCES         = textedit.cpp \
                   main.cpp \
-		  WelcomeWindow.cpp \
-		  ProfileEditWindow.cpp
+		  LandingPage.cpp \
+		  ProfileEditWindow.cpp \
+		  OpenUriWindow.cpp
 
-FORMS 		= welcomewindow.ui \
-		  profileeditwindow.ui
+FORMS 		= landingpage.ui \
+		  profileeditwindow.ui \
+		  openuriwindow.ui
 
 RESOURCES += textedit.qrc
 build_all:!build_pass {

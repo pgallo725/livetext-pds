@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WelcomeWindow</class>
- <widget class="QMainWindow" name="WelcomeWindow">
+ <class>LandingPage</class>
+ <widget class="QMainWindow" name="LandingPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -737,12 +737,18 @@ password</string>
                      <height>32</height>
                     </size>
                    </property>
+                   <property name="font">
+                    <font>
+                     <family>MS Shell Dlg 2</family>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
                    <property name="text">
                     <string>Back</string>
                    </property>
                    <property name="icon">
                     <iconset>
-                     <normaloff>images/win/WelcomeWindow/backarrow.png</normaloff>images/win/WelcomeWindow/backarrow.png</iconset>
+                     <normaloff>images/win/LandingPage/backarrow.png</normaloff>images/win/LandingPage/backarrow.png</iconset>
                    </property>
                   </widget>
                  </item>
