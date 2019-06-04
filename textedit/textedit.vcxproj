@@ -206,7 +206,8 @@
   <ItemGroup>
     <QtMoc Include="LandingPage.h">
     </QtMoc>
-    <ClInclude Include="OpenUriWindow.h" />
+    <QtMoc Include="OpenUriWindow.h">
+    </QtMoc>
     <QtMoc Include="ProfileEditWindow.h">
     </QtMoc>
     <QtMoc Include="textedit.h">

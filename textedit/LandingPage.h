@@ -24,7 +24,9 @@ private slots:
 	void pushButtonConfirmRegistrationClicked();
 	void pushButtonBackClicked();
 	void pushButtonOpenClicked();
+	void pushButtonOpenUriClicked();
 	void enablePushButtonOpen();
+
 
 
 	void showUserIcon(QString path);

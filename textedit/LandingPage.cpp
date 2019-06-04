@@ -13,7 +13,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-
+#include "OpenUriWindow.h"
 
 const QString rsrcPath = ":/images/win";
 
@@ -51,6 +51,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &LandingPage::pushButtonBrowseClicked);
 	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &LandingPage::pushButtonConfirmRegistrationClicked);
 	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
 	connect(ui->commandLinkButton, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
@@ -201,6 +202,15 @@ void LandingPage::pushButtonOpenClicked()
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
 		openEditor(fileSelected);
+}
+
+void LandingPage::pushButtonOpenUriClicked()
+{
+	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
+	OpenUriWindow* ou = new OpenUriWindow();
+
+	//Mostra la finestra di mw formata
+	ou->exec();
 }
 
 void LandingPage::enablePushButtonOpen()

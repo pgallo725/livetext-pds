@@ -39,15 +39,17 @@ public:
     {
         if (OpenUriWindow->objectName().isEmpty())
             OpenUriWindow->setObjectName(QString::fromUtf8("OpenUriWindow"));
-        OpenUriWindow->resize(442, 148);
+        OpenUriWindow->resize(420, 130);
+        OpenUriWindow->setMinimumSize(QSize(420, 130));
+        OpenUriWindow->setMaximumSize(QSize(420, 130));
         verticalLayout = new QVBoxLayout(OpenUriWindow);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         label_2 = new QLabel(OpenUriWindow);
         label_2->setObjectName(QString::fromUtf8("label_2"));
-        label_2->setMinimumSize(QSize(425, 40));
-        label_2->setMaximumSize(QSize(425, 40));
+        label_2->setMinimumSize(QSize(0, 0));
+        label_2->setMaximumSize(QSize(16777215, 1677215));
         QFont font;
-        font.setPointSize(13);
+        font.setPointSize(12);
         label_2->setFont(font);
         label_2->setAlignment(Qt::AlignCenter);
 
@@ -67,6 +69,7 @@ public:
         lineEdit_uri = new QLineEdit(OpenUriWindow);
         lineEdit_uri->setObjectName(QString::fromUtf8("lineEdit_uri"));
         lineEdit_uri->setMinimumSize(QSize(0, 27));
+        lineEdit_uri->setFont(font1);
 
         horizontalLayout->addWidget(lineEdit_uri);
 
