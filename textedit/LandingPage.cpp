@@ -206,8 +206,8 @@ void LandingPage::pushButtonOpenClicked()
 
 void LandingPage::pushButtonOpenUriClicked()
 {
-	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
-	OpenUriWindow* ou = new OpenUriWindow();
+	//Crea l'oggetto OpenUri
+	OpenUriWindow* ou = new OpenUriWindow(this);
 
 	//Mostra la finestra di mw formata
 	ou->exec();

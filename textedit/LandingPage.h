@@ -16,6 +16,8 @@ public:
 	LandingPage(QWidget * parent = nullptr);
 	~LandingPage();
 
+	void openEditor(QString path = nullptr);
+
 private slots:
 	void pushButtonLoginClicked();
 	void pushButtonNewClicked();
@@ -33,7 +35,8 @@ private slots:
 
 private:
 	Ui::LandingPage* ui;
-	void openEditor(QString path = nullptr);
+
+	
 	void setupFileList();
 	void centerAndResize();
 	

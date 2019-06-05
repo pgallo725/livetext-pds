@@ -31,7 +31,7 @@ public:
     QLineEdit *lineEdit_uri;
     QHBoxLayout *horizontalLayout_2;
     QSpacerItem *horizontalSpacer;
-    QLabel *label_3;
+    QLabel *label_incorrectUri;
     QSpacerItem *horizontalSpacer_2;
     QDialogButtonBox *buttonBox;
 
@@ -49,7 +49,7 @@ public:
         label_2->setMinimumSize(QSize(0, 0));
         label_2->setMaximumSize(QSize(16777215, 1677215));
         QFont font;
-        font.setPointSize(12);
+        font.setPointSize(11);
         label_2->setFont(font);
         label_2->setAlignment(Qt::AlignCenter);
 
@@ -82,8 +82,8 @@ public:
 
         horizontalLayout_2->addItem(horizontalSpacer);
 
-        label_3 = new QLabel(OpenUriWindow);
-        label_3->setObjectName(QString::fromUtf8("label_3"));
+        label_incorrectUri = new QLabel(OpenUriWindow);
+        label_incorrectUri->setObjectName(QString::fromUtf8("label_incorrectUri"));
         QPalette palette;
         QBrush brush(QColor(255, 0, 0, 255));
         brush.setStyle(Qt::SolidPattern);
@@ -92,10 +92,10 @@ public:
         QBrush brush1(QColor(120, 120, 120, 255));
         brush1.setStyle(Qt::SolidPattern);
         palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        label_3->setPalette(palette);
-        label_3->setFont(font1);
+        label_incorrectUri->setPalette(palette);
+        label_incorrectUri->setFont(font1);
 
-        horizontalLayout_2->addWidget(label_3);
+        horizontalLayout_2->addWidget(label_incorrectUri);
 
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -122,7 +122,7 @@ public:
         OpenUriWindow->setWindowTitle(QApplication::translate("OpenUriWindow", "Dialog", nullptr));
         label_2->setText(QApplication::translate("OpenUriWindow", "Insert a shared URI to open the document", nullptr));
         label->setText(QApplication::translate("OpenUriWindow", "Document URI", nullptr));
-        label_3->setText(QApplication::translate("OpenUriWindow", "Inserted URI is not valid", nullptr));
+        label_incorrectUri->setText(QApplication::translate("OpenUriWindow", "Inserted URI is not valid", nullptr));
     } // retranslateUi
 
 };

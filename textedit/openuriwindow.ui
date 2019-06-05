@@ -42,7 +42,7 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>11</pointsize>
       </font>
      </property>
      <property name="text">
@@ -103,7 +103,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="label_incorrectUri">
        <property name="palette">
         <palette>
          <active>
