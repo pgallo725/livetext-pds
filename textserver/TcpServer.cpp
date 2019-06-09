@@ -1,36 +1,86 @@
 #include "TcpServer.h"
-#include <string>
 
-bool TcpServer::login(std::string username, std::string passwd)
+#include <optional>
+#include <iostream>
+
+#include <QString>
+#include <QFile>
+#include <QDataStream>
+#include <QFileInfo>
+
+#include "ServerException.h"
+
+
+bool TcpServer::login(QString username, QString passwd)
 {
-	std::map<std::string, User>::iterator it = users.find(username);
+	QMap<QString, User>::iterator it = users.find(username);
 
 	if (it == users.end()) {
 		return false;	/* no user with this name */
 	}
 
-	if (!users.at(username).authentication(passwd)) {
+	if (!(*it).authentication(passwd)) {
 		return false;	/* password doesn't match */
 	}
 
 	return true;
 }
 
-std::optional<User> TcpServer::createNewAccount(std::string username, std::string name, std::string suername, std::string passwd)
+std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd)
 {
-	std::map<std::string, User>::iterator it = users.find(username);
+	QMap<QString, User>::iterator it = users.find(username);
 
 	if (it != users.end()) {
 		return std::optional<User>();
 	}
 	
-	User nUser(name, suername, username, passwd, _userIdCounter++, 0);	/* create a new user		*/
-	users.insert({ username, nUser });									/* insert new user in map	*/
+	User nUser(username, nickname, passwd);			/* create a new user		*/
+	users.insert(username, nUser);					/* insert new user in map	*/
 
 	return nUser;
 }
 
-TcpServer::TcpServer(QObject* parent) : QObject(parent) , _userIdCounter(0){
+void TcpServer::saveUsers()
+{
+	// Create the new users database file and write the data to it
+	QFile file(TMP_USERS_FILENAME);
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QDataStream usersDb(&file);
+
+		std::cout << "\nSaving users database... ";
+
+		// Write the the current users informations to file
+		// using built-in Qt Map serialization
+		usersDb << users;
+
+		QFile oldFile(USERS_FILENAME);
+		if (oldFile.exists())
+		{
+			if (oldFile.remove())
+				file.rename(USERS_FILENAME);
+			else
+			{
+				QFileInfo info(oldFile);
+				throw FileOverwriteException(info.absoluteFilePath().toStdString());
+			}
+		}
+
+		file.close();
+
+		std::cout << "done" << std::endl;
+	}
+	else
+	{
+		QFileInfo info(file);
+		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+	}
+}
+
+
+TcpServer::TcpServer(QObject* parent) 
+	: QObject(parent) , _userIdCounter(0)
+{
 	/* create a new object TCP server */
 	textServer = new QTcpServer(this);
 	
@@ -44,17 +94,45 @@ TcpServer::TcpServer(QObject* parent) : QObject(parent) , _userIdCounter(0){
 	}
 	else
 	{
-		/* take ip address and port */
+		/* Get IP address and port */
 		QString ip_address = textServer->serverAddress().toString();
 		quint16 port = textServer->serverPort();
-		qDebug() << "Server started at "<< ip_address <<":"<< port;
+		qDebug() << "Server started at " << ip_address << ":" << port;
 	}
 }
+
 
 TcpServer::~TcpServer()
 {
 	// TODO
 }
+
+
+void TcpServer::initialize()
+{
+	// Open the file and read the users database
+	QFile file(USERS_FILENAME);
+	if (file.open(QIODevice::ReadOnly))
+	{
+		std::cout << "\nLoading users database... ";
+
+		QDataStream usersDbStream(&file);
+
+		// Load the users database in the server's memory
+		// using built-in Qt Map deserialization
+		usersDbStream >> users;
+
+		file.close();
+
+		std::cout << "done" << std::endl;
+	}
+	else
+	{
+		QFileInfo info(file);
+		throw FileLoadException(info.absoluteFilePath().toStdString());
+	}
+}
+
 
 /* handle a new connection from a client */
 void TcpServer::newClientConnection()
@@ -78,7 +156,7 @@ void TcpServer::newClientConnection()
 
 		if (msg.getType() == loginRequest) {
 			/* login */
-			if (login(msg.getUserName(), msg.getPasswd())) {
+			if (1/*login(msg.getUserName(), msg.getPasswd())*/) {
 				/* access granted */
 			}
 			else {
@@ -87,7 +165,7 @@ void TcpServer::newClientConnection()
 		}
 		else if (msg.getType() == AccountCreate) {
 			/* create a new account */
-			if (auto newAccount = createNewAccount(msg.getUserName(), msg.getName(), msg.getSurname(), msg.getPasswd())) {
+			if (1/*auto newAccount = createNewAccount(msg.getUserName(), msg.getName(), msg.getSurname(), msg.getPasswd())*/) {
 				/* new account created */
 			}
 			else {
@@ -98,9 +176,10 @@ void TcpServer::newClientConnection()
 
 }
 
+
 void TcpServer::clientDisconnection()
 {
-	/* take the object (socket) where the signal was send */
+	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	socket->close();
 }

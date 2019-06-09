@@ -1,9 +1,10 @@
 #pragma once
-#include <qobject.h>
-#include <qtcpserver.h>
-#include <qtcpsocket.h>
-#include <map>
+
 #include <optional>
+
+#include <QObject>
+#include <QTcpServer>
+#include <QTcpSocket>
 
 #include "User.h"
 #include "Document.h"
@@ -11,20 +12,33 @@
 
 #define TIMEOUT 15000 /* ms */
 
-class TcpServer : public QObject {
+#define USERS_FILENAME "users.dat"
+#define TMP_USERS_FILENAME "users.tmp"
+
+
+class TcpServer : public QObject 
+{
 	Q_OBJECT
+
 private:
+
 	QTcpServer* textServer;
-	std::map<std::string, User> users;
-	std::map<std::string, Document> documents;
-	std::map<std::string, WorkSpace> workspaces;
+	QMap<QString, User> users;
+	QMap<QString, Document> documents;
+	QMap<std::string, WorkSpace> workspaces;
 	int _userIdCounter;
 
-	bool login(std::string username, std::string passwd);
-	std::optional<User> createNewAccount(std::string userName, std::string name, std::string suername, std::string passwd);
+	bool login(QString username, QString passwd);
+	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
+
+	void saveUsers();
+
 public:
+
 	TcpServer(QObject *parent = 0);
 	~TcpServer();
+
+	void initialize();
 	
 public slots:
 	void newClientConnection();

@@ -1,38 +1,83 @@
 #include "User.h"
 
-User::User(std::string name, std::string surname, std::string username, 
-	std::string passwd, int siteId, int color):
-	name(name), surname(surname), username(username),
-	passwd(passwd), _siteId(siteId), color(color), _counter(0)
+#include <QString>
+#include <QDataStream>
+
+
+
+User::User(QString username, QString nickname, QString passwd)
+	: m_username(username), m_nickname(nickname),
+	m_passwd(passwd),
+	m_icon(QPixmap())
 {
-	// TODO: add image init
+}
+
+User::User(QString username, QString nickname, QString passwd, QPixmap icon)
+	: m_username(username), m_nickname(nickname),
+	m_passwd(passwd),
+	m_icon(icon)
+{
 }
 
 User::~User()
 {
 }
 
-std::string User::getUserInfo()
+
+QString User::getInfo()
 {
-	return std::string("name:"+name+" - surname:"+surname+" - nickname:"+username);
+	return QString("Username: " + m_username + " - Nickname: " + m_nickname);
 }
 
-bool User::authentication(std::string passwd)
+QString User::getUsername()
+{
+	return m_username;
+}
+
+
+bool User::authentication(QString passwd)
 {
 	// TODO check and pars on passwd
 
-	if (!this->passwd.compare(passwd)) {
+	if (!this->m_passwd.compare(passwd)) {
 		return true;
 	}
 	return false;
 }
 
-int User::getSiteId()
+
+void User::addDocument(QString docUri)
 {
-	return _siteId;
+	m_documents.push_back(docUri);
 }
 
-void User::addDocument(std::string doc)
+
+QDataStream& operator>>(QDataStream& in, User& user)
 {
-	documents.push_back(doc);
+	// Object deserialized reading field by field from the stream
+
+	/*QString username;
+	QString nickname;
+	QString password;
+	QPixmap icon;
+	QList<QString> documents;*/
+
+	in >> user.m_username >> user.m_nickname
+		>> user.m_passwd
+		>> user.m_icon
+		>> user.m_documents;
+
+	return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const User& user)
+{
+	// Object serialized as the sequence of its member fields
+
+	out << user.m_username << user.m_nickname
+		<< user.m_passwd
+		<< user.m_icon
+		<< user.m_documents;
+
+	return out;
 }
