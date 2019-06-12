@@ -120,6 +120,9 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	
 	//Stringa vuota
 	setCurrentFileName(QString());
+
+
+	
 }
 
 void TextEdit::closeEvent(QCloseEvent* e)
@@ -145,20 +148,20 @@ void TextEdit::setupFileActions()
 	const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(rsrcPath + "/filenew.png"));
 
 	//Creo l'azione riferita alla creazione del nuovo file chiama il metodo fileNew
-	QAction * a = menu->addAction(newIcon, tr("&New"), this, &TextEdit::fileNew);
+	//QAction * a = menu->addAction(newIcon, tr("&New"), this, &TextEdit::fileNew);
 
 	//Aggiungo action alla toolbar
-	tb->addAction(a);
+	//tb->addAction(a);
 
 	//Assegno priorita all'action
-	a->setPriority(QAction::LowPriority);
+	//a->setPriority(QAction::LowPriority);
 
 	//Aggiunge scorciatoia di tasti
-	a->setShortcut(QKeySequence::New);
+	//a->setShortcut(QKeySequence::New);
 
 
 	const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(rsrcPath + "/fileopen.png"));
-	a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
+	QAction*  a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
 	a->setShortcut(QKeySequence::Open);
 	tb->addAction(a);
 
@@ -480,13 +483,13 @@ void TextEdit::setCurrentFileName(const QString & fileName)
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare
-void TextEdit::fileNew()
+void TextEdit::fileNew(QString name)
 {
 	if (maybeSave()) {
 		//Cancella editor
 		textEdit->clear();
 		//Mette il nuovo file untitled.txt
-		setCurrentFileName(QString());
+		setCurrentFileName(name);
 	}
 }
 

@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDialog>
 
+
 namespace Ui {
 	class LandingPage;
 }
@@ -16,7 +17,8 @@ public:
 	LandingPage(QWidget * parent = nullptr);
 	~LandingPage();
 
-	void openEditor(QString path = nullptr);
+	void openEditor(int mode, QString path = nullptr);
+	enum openMode {uri, newfile};
 
 private slots:
 	void pushButtonLoginClicked();

@@ -2,6 +2,7 @@
 #include "ui_landingpage.h"
 #include "textedit.h"
 
+
 #include <QMessageBox>
 #include <QPixmap>
 #include <QBitmap>
@@ -14,6 +15,8 @@
 #include <QDesktopWidget>
 
 #include "OpenUriWindow.h"
+#include "NewFileWindow.h"
+
 
 const QString rsrcPath = ":/images/win";
 
@@ -201,13 +204,14 @@ void LandingPage::pushButtonOpenClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
-		openEditor(fileSelected);
+		openEditor(uri,fileSelected);
 }
 
 void LandingPage::pushButtonOpenUriClicked()
 {
 	//Crea l'oggetto OpenUri
 	OpenUriWindow* ou = new OpenUriWindow(this);
+
 
 	//Mostra la finestra di mw formata
 	ou->exec();
@@ -276,11 +280,15 @@ void LandingPage::showUserIcon(QString path)
 
 void LandingPage::pushButtonNewClicked()
 {
-	//Quando viene aperto un nuovo file apre l'editor
-	openEditor();
+	//Crea l'oggetto OpenUri
+	NewFileWindow* ou = new NewFileWindow(this);
+
+
+	//Mostra la finestra di mw formata
+	ou->exec();
 }
 
-void LandingPage::openEditor(QString path) {
+void LandingPage::openEditor(int mode, QString path) {
 	//Chiude finestra attuale
 	this->close();
 
@@ -294,14 +302,18 @@ void LandingPage::openEditor(QString path) {
 	mw->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
 
-	if (path == nullptr) {
-		mw->fileNew();
-	}
-	else 
-	{
-		mw->load(path);
-	}
+	switch (mode) {
+	case newfile:
+		mw->fileNew(path);
+		break;
 
+	case uri:
+		mw->load(path);
+		break;
+
+	default:
+		break;
+	};
 
 	//Mostra la finestra di mw formata
 	mw->show();

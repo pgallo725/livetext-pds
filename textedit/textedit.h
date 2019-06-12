@@ -25,7 +25,7 @@ public:
 	bool load(const QString &f);
 
 public slots:
-	void fileNew();
+	void fileNew(QString name);
 
 protected:
 	void closeEvent(QCloseEvent *e) override;

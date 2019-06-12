@@ -198,6 +198,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LandingPage.cpp" />
+    <ClCompile Include="NewFileWindow.cpp" />
     <ClCompile Include="OpenUriWindow.cpp" />
     <ClCompile Include="ProfileEditWindow.cpp" />
     <ClCompile Include="main.cpp" />
@@ -205,6 +206,8 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="LandingPage.h">
+    </QtMoc>
+    <QtMoc Include="NewFileWindow.h">
     </QtMoc>
     <QtMoc Include="OpenUriWindow.h">
     </QtMoc>
@@ -231,6 +234,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <ClInclude Include="ui_landingpage.h" />
+    <ClInclude Include="ui_newfilewindow.h" />
     <ClInclude Include="ui_openuriwindow.h" />
     <ClInclude Include="ui_profileeditwindow.h" />
   </ItemGroup>
@@ -238,6 +242,10 @@
     <QtUic Include="landingpage.ui">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ui_landingpage.h</OutputFile>
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ui_landingpage.h</OutputFile>
+    </QtUic>
+    <QtUic Include="newfilewindow.ui">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ui_newfilewindow.h</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ui_newfilewindow.h</OutputFile>
     </QtUic>
     <QtUic Include="openuriwindow.ui">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ui_openuriwindow.h</OutputFile>

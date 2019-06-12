@@ -15,12 +15,12 @@ class OpenUriWindow : public QDialog
 public:
 	OpenUriWindow(LandingPage* lp, QWidget* parent = nullptr);
 	~OpenUriWindow();
-
+	Ui::OpenUriWindow* ui;
 private slots:
 	void acceptClicked();
 	void rejectClicked();
 private:
-	Ui::OpenUriWindow* ui;
+	
 	void centerAndResize();
 
 	LandingPage* landingPage;

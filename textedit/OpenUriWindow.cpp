@@ -38,7 +38,7 @@ void OpenUriWindow::acceptClicked()
 	}
 	else {
 		this->close();
-		landingPage->openEditor(uri);	
+		landingPage->openEditor(landingPage->uri,uri);	
 	}
 }
 

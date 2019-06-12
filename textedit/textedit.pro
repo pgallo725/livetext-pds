@@ -8,17 +8,20 @@ TARGET          = textedit
 HEADERS         = textedit.h \
 		  LandingPage.h \
 		  ProfileEditWindow.h \
-		  OpenUriWindow.h
+		  OpenUriWindow.h \
+		  NewFileWindow.h
 
 SOURCES         = textedit.cpp \
                   main.cpp \
 		  LandingPage.cpp \
 		  ProfileEditWindow.cpp \
-		  OpenUriWindow.cpp
+		  OpenUriWindow.cpp \
+		  NewFileWindow.cpp
 
 FORMS 		= landingpage.ui \
 		  profileeditwindow.ui \
-		  openuriwindow.ui
+		  openuriwindow.ui \
+		  newfilewindow.ui
 
 RESOURCES += textedit.qrc
 build_all:!build_pass {
