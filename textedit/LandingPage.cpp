@@ -302,7 +302,7 @@ void LandingPage::openEditor(int mode, QString path) {
 	mw->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
 
-	switch (mode) {
+	/*switch (mode) {
 	case newfile:
 		mw->fileNew(path);
 		break;
@@ -313,7 +313,7 @@ void LandingPage::openEditor(int mode, QString path) {
 
 	default:
 		break;
-	};
+	};*/
 
 	//Mostra la finestra di mw formata
 	mw->show();

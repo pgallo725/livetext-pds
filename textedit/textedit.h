@@ -14,6 +14,8 @@ class QTextEdit;
 class QTextCharFormat;
 class QMenu;
 class QPrinter;
+class QLabel;
+
 
 class TextEdit : public QMainWindow
 {
@@ -75,6 +77,10 @@ private:
 	void colorChanged(const QColor &c);
 	void alignmentChanged(Qt::Alignment a);
 
+	void handleLabel();
+	QLabel *guestCursor;
+	QLabel* guestCursor2;
+
 	QAction *actionSave;
 	QAction *actionTextBold;
 	QAction *actionTextUnderline;
@@ -101,6 +107,7 @@ private:
 	QToolBar *tb;
 	QString fileName;
 	QTextEdit *textEdit;
+
 };
 
 #endif // TEXTEDIT_H

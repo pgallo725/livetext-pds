@@ -17,12 +17,18 @@
 #include <QStatusBar>
 #include <QToolBar>
 #include <QTextCursor>
+#include <QPainter>
 #include <QTextDocumentWriter>
 #include <QTextList>
 #include <QtDebug>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QLabel>
 #include <QMimeData>
+#include <QScrollBar>
+#include <QRectF>
+#include <QAbstractTextDocumentLayout>
+
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
 #if QT_CONFIG(printer)
@@ -47,6 +53,12 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setWindowIcon(QIcon(":/images/logo.png"));
 
 	textEdit = new QTextEdit(this);
+
+
+	guestCursor = new QLabel(textEdit);
+	guestCursor2 = new QLabel(textEdit);
+	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleLabel);
+	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleLabel);
 
 	// Permettono di connettere le funzioni di QTextEdit con quelle di TextEdit ovvero:
 	// quando viene invocata la funzione currentCharFormatChanged genera un segnale che viene recepito
@@ -98,6 +110,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 
+
 	//Stesso discorso delle connect ma inizializza
 	setWindowModified(textEdit->document()->isModified());
 	actionSave->setEnabled(textEdit->document()->isModified());
@@ -122,7 +135,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setCurrentFileName(QString());
 
 
-	
 }
 
 void TextEdit::closeEvent(QCloseEvent* e)
@@ -646,7 +658,7 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	//TODO
+
 }
 
 void TextEdit::editProfile()
@@ -835,6 +847,8 @@ void TextEdit::currentCharFormatChanged(const QTextCharFormat & format)
 //Questa funzione aggiorna i pulsanti e i combobox a seconda della posizione del cursore
 void TextEdit::cursorPositionChanged()
 {
+
+
 	//Se cambia allineamento testo applico modifiche ai pulsanti markandoli come checked
 	alignmentChanged(textEdit->alignment());
 
@@ -877,6 +891,7 @@ void TextEdit::cursorPositionChanged()
 		int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 		comboStyle->setCurrentIndex(headingLevel ? headingLevel + 8 : 0);
 	}
+	handleLabel();
 }
 
 void TextEdit::clipboardDataChanged()
@@ -915,6 +930,9 @@ void TextEdit::fontChanged(const QFont & f)
 	//Se cambia il carattere aggiorno i ComboBox con dimensione e famiglia
 	comboFont->setCurrentIndex(comboFont->findText(QFontInfo(f).family()));
 	comboSize->setCurrentIndex(comboSize->findText(QString::number(f.pointSize())));
+
+
+	handleLabel();
 
 	//Setto i rispettivi pulsanti checkati
 	actionTextBold->setChecked(f.bold());
@@ -977,4 +995,44 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			}
 		}
 	}
+}
+
+/*
+TEST FUNCTION - TODO
+
+Function to handle extra cursor(S) position into text
+
+*/
+
+void TextEdit::handleLabel() {
+	guestCursor->close();
+	guestCursor2->close();
+	
+	QTextCursor cursor(textEdit->document());
+	QTextCursor cursor2(textEdit->document());
+
+	cursor.setPosition(textEdit->textCursor().position());
+	cursor.movePosition(QTextCursor::EndOfLine);
+
+	cursor2.setPosition(textEdit->textCursor().position());
+	cursor2.movePosition(QTextCursor::StartOfLine);
+	
+	const QRect qRect = textEdit->cursorRect(cursor);
+	const QRect qRect2 = textEdit->cursorRect(cursor2);
+	
+	QPixmap pix(qRect.width()*2.5, qRect.height());
+	pix.fill(Qt::red);
+	guestCursor->setPixmap(pix);
+	
+
+	QPixmap pix2(qRect2.width() * 2.5, qRect2.height());
+	pix2.fill(Qt::blue);
+	guestCursor2->setPixmap(pix2);
+
+
+	guestCursor->move(qRect.left(), qRect.top());
+	guestCursor->show();
+
+	guestCursor2->move(qRect2.left(), qRect2.top());
+	guestCursor2->show();
 }
