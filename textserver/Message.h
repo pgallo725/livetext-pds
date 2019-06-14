@@ -7,10 +7,10 @@
 
 // TODO: prototipo per far compilare
 
-enum typeOfmessage
+enum MessageType
 {
-loginRequest,
-loginChallenge,
+LoginRequest,
+LoginChallenge,
 LoginUnlock,
 LoginAccessGranted,
 LoginError,
@@ -19,17 +19,28 @@ AccountUpDate,
 AccountConfirmed,
 AccountDenied,
 LogoutRequest,
-LogoutConfimered
+LogoutConfirmed,
+NewDocument,
+OpenDocument,
+DocumentOpened,
+DocumentError,
+CharInsert,
+CharDelete,
+MoveCursor,
+UserNameChange,
+UserIconChange,
+AddUserPresence,
+RemoveUserPresence
 };
 
 class Message 
 {
 
 private:
-	QString msg;	/* oppure QString oppure QByteArray */
+	MessageType m_type;
 
 public:
-	Message(QString message);
+	Message(MessageType type);
 	~Message();
 
 	/* getter */

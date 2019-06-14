@@ -9,6 +9,9 @@
 #include "User.h"
 #include "Document.h"
 #include "WorkSpace.h"
+#include "LoginMessage.h"
+#include "AccountMessage.h"
+#include "LogoutMessage.h"
 
 #define TIMEOUT 15000 /* ms */
 
@@ -32,7 +35,7 @@ private:
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
 
 	void saveUsers();
-
+	void handleMessage(Message *msg);
 public:
 
 	TcpServer(QObject *parent = 0);
@@ -43,4 +46,5 @@ public:
 public slots:
 	void newClientConnection();
 	void clientDisconnection();
+	void readMessage();
 };

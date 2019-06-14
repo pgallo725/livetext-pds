@@ -78,6 +78,10 @@ void TcpServer::saveUsers()
 }
 
 
+
+
+
+
 TcpServer::TcpServer(QObject* parent) 
 	: QObject(parent) , _userIdCounter(0)
 {
@@ -149,33 +153,8 @@ void TcpServer::newClientConnection()
 
 	qDebug() << " - new connection from a client";
 
-	/* get message login/register */
-	if (socket->waitForReadyRead(TIMEOUT)) {
-		QByteArray m = socket->readLine(BUFFLEN);
-		qDebug() << m;
-
-		Message msg(m);
-
-		if (msg.getType() == loginRequest) {
-			/* login */
-			if (login(msg.getUserName(), msg.getPasswd())) {
-				/* access granted */
-			}
-			else {
-				/* access denied */
-			}
-		}
-		else if (msg.getType() == AccountCreate) {
-			/* create a new account */
-			if (auto newAccount = createNewAccount(msg.getUserName(), msg.getNickname(), msg.getPasswd())) {
-				/* new account created */
-			}
-			else {
-				/* cannot create account with those credential */
-			}
-		}
-	}
-
+	connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
+	connect(socket, SIGNAL(disconnected()), this, SLOT(clientDisconnection()));
 }
 
 
@@ -184,5 +163,63 @@ void TcpServer::clientDisconnection()
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	socket->close();
+	qDebug() << " - client disconnected";
 }
 
+void TcpServer::readMessage()
+{
+	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	QDataStream streamIn;
+	quint16 typeOfMessage;
+	Message* msg;
+
+	streamIn.setDevice(socket); /* connect stream with socket */
+
+	streamIn >> typeOfMessage;	/* take the type of incoming message */
+
+	// TODO: complete switch with others types of message
+	try {
+		switch (typeOfMessage)
+		{
+			/* LoginMessages */
+		case LoginRequest:
+			msg = new LoginMessage(LoginRequest, streamIn);
+			break;
+		case LoginUnlock:
+			msg = new LoginMessage(LoginUnlock, streamIn);
+			break;
+	
+			/* AccountMessages */
+		case AccountCreate:
+			msg = new AccountMessage(AccountCreate, streamIn);
+			break;
+		case AccountUpDate:
+			msg = new AccountMessage(AccountUpDate, streamIn);
+			break;
+
+			/* LogoutMessages */
+		case LogoutRequest:
+			msg = new LogoutMessage(LogoutRequest);
+			break;
+
+
+
+		default:
+			throw MessageUnknownTypeException(typeOfMessage);
+			break;
+		}
+	}
+	catch (MessageUnknownTypeException& e) {
+		// TODO: handle exception
+	}
+	handleMessage(msg);
+}
+
+void TcpServer::handleMessage(Message* msg)
+{
+	/*
+	if (msg->getType() == LoginRequest) {
+		qDebug() << dynamic_cast<LoginMessage *>(msg)->n_username <<" si e' collegato: ";
+	}*/
+	// TODO: cast type message and handle it
+}

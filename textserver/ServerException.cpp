@@ -25,3 +25,13 @@ FileOverwriteException::FileOverwriteException(std::string filePath)
 	: ServerException("Unable to overwrite file " + filePath)
 {
 }
+
+MessageException::MessageException(std::string msg) : 
+	ServerException(msg)
+{
+}
+
+MessageUnknownTypeException::MessageUnknownTypeException(int type) :
+	MessageException("Unknown message type : " + type)
+{
+}

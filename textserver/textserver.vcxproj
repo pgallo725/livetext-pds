@@ -172,8 +172,12 @@
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AccountMessage.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Document.cpp" />
+    <ClCompile Include="DocumentMessage.cpp" />
+    <ClCompile Include="LoginMessage.cpp" />
+    <ClCompile Include="LogoutMessage.cpp" />
     <ClCompile Include="Message.cpp" />
     <ClCompile Include="ServerException.cpp" />
     <ClCompile Include="TcpServer.cpp" />
@@ -182,8 +186,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AccountMessage.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Document.h" />
+    <ClInclude Include="DocumentMessage.h" />
+    <ClInclude Include="LoginMessage.h" />
+    <ClInclude Include="LogoutMessage.h" />
     <ClInclude Include="Message.h">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>

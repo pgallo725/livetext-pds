@@ -47,3 +47,15 @@ public:
 
 	FileOverwriteException(std::string filePath);
 };
+
+class MessageException : public ServerException
+{
+public:
+	MessageException(std::string msg);
+};
+
+class MessageUnknownTypeException : public MessageException
+{
+public:
+	MessageUnknownTypeException(int type);
+};

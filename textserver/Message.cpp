@@ -1,8 +1,8 @@
 #include "Message.h"
 
-Message::Message(QString message)
+
+Message::Message(MessageType type) : m_type(type)
 {
-	msg = message;
 }
 
 Message::~Message()
@@ -26,7 +26,7 @@ int Message::getPort()
 
 QString Message::getUserName()
 {
-	return msg;
+	return QString();
 }
 
 QString Message::getNickname()
