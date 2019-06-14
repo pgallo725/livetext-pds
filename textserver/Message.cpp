@@ -1,6 +1,6 @@
 #include "Message.h"
 
-Message::Message(std::string message)
+Message::Message(QString message)
 {
 	msg = message;
 }
@@ -24,22 +24,18 @@ int Message::getPort()
 	return 0;
 }
 
-std::string Message::getUserName()
+QString Message::getUserName()
 {
 	return msg;
 }
 
-std::string Message::getName()
+QString Message::getNickname()
 {
-	return std::string();
+	return QString();
 }
 
-std::string Message::getSurname()
-{
-	return std::string();
-}
 
-std::string Message::getPasswd()
+QString Message::getPasswd()
 {
-	return std::string();
+	return QString();
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <list>
 #include <queue>
 #include <mutex>

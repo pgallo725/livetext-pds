@@ -25,12 +25,6 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files\Exceptions">
-      <UniqueIdentifier>{9a1a0f02-8f45-4497-8873-6d069f8a287f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Exceptions">
-      <UniqueIdentifier>{92b0f950-53c3-400e-b32c-715ea16428a7}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -55,7 +49,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ServerException.cpp">
-      <Filter>Source Files\Exceptions</Filter>
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,20 +59,20 @@
     <ClInclude Include="Document.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="TcpServer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="ServerException.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="User.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkSpace.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerException.h">
-      <Filter>Header Files\Exceptions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <string>
 
 #define BUFFLEN 256
@@ -21,22 +22,22 @@ LogoutRequest,
 LogoutConfimered
 };
 
-class Message
+class Message 
 {
+
 private:
-	std::string msg;	/* oppure QString oppure QByteArray */
+	QString msg;	/* oppure QString oppure QByteArray */
 
 public:
-	Message(std::string message);
+	Message(QString message);
 	~Message();
 
 	/* getter */
 	int getType();
 	int getIP();
 	int getPort();
-	std::string getUserName();
-	std::string getName();
-	std::string getSurname();
-	std::string getPasswd();
+	QString getUserName();
+	QString getNickname();
+	QString getPasswd();
 };
 

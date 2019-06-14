@@ -9,6 +9,7 @@ WorkSpace::~WorkSpace()
 {
 }
 
+
 void WorkSpace::addMessageToQueue(Message msg)
 {
 	std::unique_lock<std::mutex> ul(mQueue);

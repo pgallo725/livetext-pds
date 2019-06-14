@@ -88,7 +88,7 @@ TcpServer::TcpServer(QObject* parent)
 	connect(textServer, SIGNAL(newConnection()), this, SLOT(newClientConnection()));
 
 	/* server listen on 0.0.0.0:9999 - return true on success */
-	if (!textServer->listen(QHostAddress::Any, 9999))
+	if (!textServer->listen(QHostAddress::Any, 1500))
 	{
 		qDebug() << "Server could not start";
 	}
@@ -97,7 +97,9 @@ TcpServer::TcpServer(QObject* parent)
 		/* Get IP address and port */
 		QString ip_address = textServer->serverAddress().toString();
 		quint16 port = textServer->serverPort();
-		qDebug() << "Server started at " << ip_address << ":" << port;
+		if (textServer->isListening()) {
+			qDebug() << "Server started at " << ip_address << ":" << port;
+		}
 	}
 }
 
@@ -152,11 +154,11 @@ void TcpServer::newClientConnection()
 		QByteArray m = socket->readLine(BUFFLEN);
 		qDebug() << m;
 
-		Message msg(m.toStdString());
+		Message msg(m);
 
 		if (msg.getType() == loginRequest) {
 			/* login */
-			if (1/*login(msg.getUserName(), msg.getPasswd())*/) {
+			if (login(msg.getUserName(), msg.getPasswd())) {
 				/* access granted */
 			}
 			else {
@@ -165,7 +167,7 @@ void TcpServer::newClientConnection()
 		}
 		else if (msg.getType() == AccountCreate) {
 			/* create a new account */
-			if (1/*auto newAccount = createNewAccount(msg.getUserName(), msg.getName(), msg.getSurname(), msg.getPasswd())*/) {
+			if (auto newAccount = createNewAccount(msg.getUserName(), msg.getNickname(), msg.getPasswd())) {
 				/* new account created */
 			}
 			else {

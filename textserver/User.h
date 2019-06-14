@@ -1,13 +1,12 @@
 #pragma once
 
-#include <QObject>
+//#include <QObject>
 #include <QPixmap>
 
 
 class User
 {
 	/* Operators for QDataStream serialization and deserialization */
-
 	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
 	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
 

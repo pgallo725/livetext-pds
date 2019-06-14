@@ -14,7 +14,7 @@
     <ProjectGuid>{B12702AD-ABFB-343A-A199-8E24837244A3}</ProjectGuid>
     <RootNamespace>textserver</RootNamespace>
     <Keyword>Qt4VSv1.0</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.17763.0</WindowsTargetPlatformMinVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -56,11 +56,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\x64\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">textserver</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\x64\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">release\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">textserver</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
@@ -74,7 +74,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ObjectFileName>debug\</ObjectFileName>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_UNICODE;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WEBENGINECORE_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_WEBCHANNEL_LIB;QT_QML_LIB;QT_WEBSOCKETS_LIB;QT_NETWORKAUTH_LIB;QT_NETWORK_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
@@ -84,6 +84,7 @@
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(QTDIR)\lib\Qt5WebEngined.lib;$(QTDIR)\lib\Qt5WebEngineWidgetsd.lib;$(QTDIR)\lib\Qt5WebEngineCored.lib;$(QTDIR)\lib\Qt5Quickd.lib;$(QTDIR)\lib\Qt5PrintSupportd.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5WebChanneld.lib;$(QTDIR)\lib\Qt5Qmld.lib;$(QTDIR)\lib\Qt5WebSocketsd.lib;$(QTDIR)\lib\Qt5NetworkAuthd.lib;$(QTDIR)\lib\Qt5Networkd.lib;$(QTDIR)\lib\Qt5Positioningd.lib;$(QTDIR)\lib\Qt5Cored.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -126,12 +127,11 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <DisableSpecificWarnings>4577;4467;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <ObjectFileName>release\</ObjectFileName>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
       <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_UNICODE;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_WEBENGINE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_WEBENGINECORE_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_WEBCHANNEL_LIB;QT_QML_LIB;QT_WEBSOCKETS_LIB;QT_NETWORKAUTH_LIB;QT_NETWORK_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
-      <ProgramDataBaseFileName>
-      </ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -184,12 +184,39 @@
   <ItemGroup>
     <ClInclude Include="Client.h" />
     <ClInclude Include="Document.h" />
-    <ClInclude Include="Message.h" />
+    <ClInclude Include="Message.h">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
+    </ClInclude>
     <QtMoc Include="TcpServer.h">
     </QtMoc>
     <ClInclude Include="ServerException.h" />
-    <ClInclude Include="User.h" />
-    <ClInclude Include="WorkSpace.h" />
+    <ClInclude Include="User.h">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
+    </ClInclude>
+    <ClInclude Include="WorkSpace.h">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\moc_TcpServer.cpp" />
@@ -210,4 +237,9 @@
     <Import Project="$(QtMsBuild)\qt.targets" />
   </ImportGroup>
   <ImportGroup Label="ExtensionTargets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties Qt5Version_x0020_x64="msvc2017_64" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
