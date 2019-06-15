@@ -1,5 +1,6 @@
 #include "textedit.h"
 #include "LandingPage.h"
+#include "Client.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -16,8 +17,10 @@ int main(int argc, char *argv[])
 	QCoreApplication::setOrganizationName("DC");
 	QCoreApplication::setApplicationName("LiveText");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+
+	Client client;
 	
-	LandingPage mw;
+	LandingPage mw(&client);
 	
 	//Mostra la finestra di mw formata
 	mw.show();

@@ -20,7 +20,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage) {
+LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent), client(client), ui(new Ui::LandingPage) {
 	//Costruttore landing page
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -98,8 +98,9 @@ LandingPage::~LandingPage()
 void LandingPage::pushButtonLoginClicked()
 {
 	//Bypass login
-	ui->stackedWidget->setCurrentIndex(2);
+	/*ui->stackedWidget->setCurrentIndex(2);
 	ui->stackedWidget->show();
+	*/
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
@@ -108,7 +109,7 @@ void LandingPage::pushButtonLoginClicked()
 	QString serverPort = ui->lineEdit_serverPort->text();
 
 	//Controllo user e password
-	if (username != "test" || password != "test") {
+	/*if (username != "test" || password != "test") {
 		ui->label_incorrect_login->setText("Username and password does not match");
 	}
 	else if (serverIP != "127.0.0.1" || serverPort != "999") {
@@ -116,6 +117,19 @@ void LandingPage::pushButtonLoginClicked()
 	}
 	else {
 		//Apre seconda landing page con operazioni sui file
+		ui->stackedWidget->setCurrentIndex(2);
+		ui->stackedWidget->show();
+	}*/
+
+	
+
+	if (!client->Connect(serverIP, serverPort.toShort())) {
+		// TODO gestione errore
+		return;
+	}
+
+
+	if (client->Login(username,password)) {
 		ui->stackedWidget->setCurrentIndex(2);
 		ui->stackedWidget->show();
 	}
