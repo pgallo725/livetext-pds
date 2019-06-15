@@ -85,8 +85,8 @@ bool Client::Login(QString username, QString password) {
 	socket->flush();
 
 	QDataStream in;
-	socket->waitForReadyRead(10000); // remove whene created exception
-	//if (!socket->waitForBytesWritten(10000))
+	if (!socket->waitForReadyRead(10000))
+		qDebug() << "recived no byte";
 		//throw ServerNotRespondException();
 
 	in.setDevice(socket);
@@ -96,15 +96,7 @@ bool Client::Login(QString username, QString password) {
 
 	switch (type1) {
 	case 0:
-		{ QString salt;
-		in >> salt;
-		//password = salt + password + salt;
-		//std::size_t hashed = std::hash<std::string>{}(password.toStdString);
-		stream << username << password;
-		socket->write(sentData);
-		socket->flush();
-		return true;
-		break; }
+		break; 
 	case 1:
 		return false;
 		break;
@@ -114,11 +106,22 @@ bool Client::Login(QString username, QString password) {
 		break;
 	}
 
+	QString salt;
+	in >> salt;
+	//password = salt + password + salt;
+	//std::size_t hashed = std::hash<std::string>{}(password.toStdString);
+	stream << username << password;
+	socket->write(sentData);
+	socket->flush();
+
+	in >> type;
+
 	return true;
 }
 
 bool Client::Connect(QString ipAddress, quint16 port) {
 
+	socket->connectToHost(ipAddress, port);
 	//socket->connectToHost(ipAddress, port);
 	if (socket->state() != QAbstractSocket::ConnectedState)
 	{
