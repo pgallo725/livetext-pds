@@ -100,7 +100,7 @@ void LandingPage::pushButtonLoginClicked()
 	//Bypass login
 	/*ui->stackedWidget->setCurrentIndex(2);
 	ui->stackedWidget->show();
-	*/
+	return;*/
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
