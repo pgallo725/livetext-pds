@@ -77,11 +77,6 @@ void TcpServer::saveUsers()
 	}
 }
 
-
-
-
-
-
 TcpServer::TcpServer(QObject* parent) 
 	: QObject(parent) , _userIdCounter(0)
 {
@@ -101,18 +96,16 @@ TcpServer::TcpServer(QObject* parent)
 		/* Get IP address and port */
 		QString ip_address = textServer->serverAddress().toString();
 		quint16 port = textServer->serverPort();
-		if (textServer->isListening()) {
+ 		if (textServer->isListening()) {
 			qDebug() << "Server started at " << ip_address << ":" << port;
 		}
 	}
 }
 
-
 TcpServer::~TcpServer()
 {
 	// TODO
 }
-
 
 void TcpServer::initialize()
 {
@@ -139,7 +132,6 @@ void TcpServer::initialize()
 	}
 }
 
-
 /* handle a new connection from a client */
 void TcpServer::newClientConnection()
 {
@@ -157,7 +149,6 @@ void TcpServer::newClientConnection()
 	connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(clientDisconnection()));
 }
-
 
 void TcpServer::clientDisconnection()
 {
@@ -211,6 +202,7 @@ void TcpServer::readMessage()
 		}
 	}
 	catch (MessageUnknownTypeException& e) {
+		(void)e;
 		// TODO: handle exception
 	}
 	handleMessage(msg);

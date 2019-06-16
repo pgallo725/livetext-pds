@@ -12,11 +12,25 @@ HEADERS += ./Client.h \
     ./Message.h \
     ./User.h \
     ./WorkSpace.h \
-    ./TcpServer.h
+    ./TcpServer.h \
+	./AccountMessage.h \
+	./DocumentMessage.h \
+	./LoginMesssage.h \
+	./LogoutMessage.h \
+	./Message.h
+	
+	
+	
+	
 SOURCES += ./Client.cpp \
     ./Document.cpp \
     ./main.cpp \
     ./Message.cpp \
     ./TcpServer.cpp \
     ./User.cpp \
-    ./WorkSpace.cpp
+    ./WorkSpace.cpp \
+	./AccountMessage.cpp \
+	./DocumentMessage.cpp \
+	./LoginMesssage.cpp \
+	./LogoutMessage.cpp \
+	./Message.cpp
