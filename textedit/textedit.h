@@ -78,6 +78,7 @@ private:
 	void alignmentChanged(Qt::Alignment a);
 
 	void handleLabel();
+	void handleMultipleSelections();
 	QLabel *guestCursor;
 	QLabel* guestCursor2;
 
