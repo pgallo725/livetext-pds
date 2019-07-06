@@ -77,11 +77,6 @@ void TcpServer::saveUsers()
 	}
 }
 
-
-
-
-
-
 TcpServer::TcpServer(QObject* parent) 
 	: QObject(parent) , _userIdCounter(0)
 {
@@ -101,18 +96,16 @@ TcpServer::TcpServer(QObject* parent)
 		/* Get IP address and port */
 		QString ip_address = textServer->serverAddress().toString();
 		quint16 port = textServer->serverPort();
-		if (textServer->isListening()) {
+ 		if (textServer->isListening()) {
 			qDebug() << "Server started at " << ip_address << ":" << port;
 		}
 	}
 }
 
-
 TcpServer::~TcpServer()
 {
 	// TODO
 }
-
 
 void TcpServer::initialize()
 {
@@ -139,10 +132,10 @@ void TcpServer::initialize()
 	}
 }
 
-
 /* handle a new connection from a client */
 void TcpServer::newClientConnection()
 {
+
 	/* need to grab the socket - socket is created as a child of server */
 	QTcpSocket* socket = textServer->nextPendingConnection();
 
@@ -156,7 +149,6 @@ void TcpServer::newClientConnection()
 	connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(clientDisconnection()));
 }
-
 
 void TcpServer::clientDisconnection()
 {
@@ -202,40 +194,25 @@ void TcpServer::readMessage()
 			msg = new LogoutMessage(LogoutRequest);
 			break;
 
-		case NewDocument:
-			break;
-		
-		case OpenDocument:
-			break;
 
-		case CharInsert:
-			break;
-
-		case CharDelete:
-			break;
-
-		case MoveCursor:
-			break;
 
 		default:
 			throw MessageUnknownTypeException(typeOfMessage);
 			break;
 		}
-
-		handleMessage(msg);
 	}
 	catch (MessageUnknownTypeException& e) {
+		(void)e;
 		// TODO: handle exception
-		// send to client "WrongMessageType"
 	}
-	
+	handleMessage(msg);
 }
 
 void TcpServer::handleMessage(Message* msg)
 {
 	
 	if (msg->getType() == LoginRequest) {
-		qDebug() << static_cast<LoginMessage *>(msg)->m_username <<" si e' collegato: ";
+		qDebug() << "si è loggato un coglione";//dynamic_cast<LoginMessage *>(msg)->n_username <<" si e' collegato: ";
 	}
 	// TODO: cast type message and handle it
 }

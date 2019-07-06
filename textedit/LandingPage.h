@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QDialog>
 
+#include "Client.h"
+
 
 namespace Ui {
 	class LandingPage;
@@ -14,7 +16,7 @@ class LandingPage : public QMainWindow
 	Q_OBJECT
 
 public:
-	LandingPage(QWidget * parent = nullptr);
+	LandingPage(Client* client, QWidget * parent = nullptr);
 	~LandingPage();
 
 	void openEditor(int mode, QString path = nullptr);
@@ -37,8 +39,9 @@ private slots:
 
 private:
 	Ui::LandingPage* ui;
+	Client* client;
 
-	
+private:
 	void setupFileList();
 	void centerAndResize();
 	
