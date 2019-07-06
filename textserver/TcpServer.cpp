@@ -92,7 +92,7 @@ TcpServer::TcpServer(QObject* parent)
 	connect(textServer, SIGNAL(newConnection()), this, SLOT(newClientConnection()));
 
 	/* server listen on 0.0.0.0:9999 - return true on success */
-	if (!textServer->listen(QHostAddress::Any, 1500))
+	if (!textServer->listen(QHostAddress::Any, 9999))
 	{
 		qDebug() << "Server could not start";
 	}
@@ -208,18 +208,20 @@ void TcpServer::readMessage()
 			throw MessageUnknownTypeException(typeOfMessage);
 			break;
 		}
+
+		handleMessage(msg);
 	}
 	catch (MessageUnknownTypeException& e) {
 		// TODO: handle exception
 	}
-	handleMessage(msg);
+	
 }
 
 void TcpServer::handleMessage(Message* msg)
 {
-	/*
+	
 	if (msg->getType() == LoginRequest) {
-		qDebug() << dynamic_cast<LoginMessage *>(msg)->n_username <<" si e' collegato: ";
-	}*/
+		qDebug() << static_cast<LoginMessage *>(msg)->m_username <<" si e' collegato: ";
+	}
 	// TODO: cast type message and handle it
 }
