@@ -1,4 +1,5 @@
 QT += widgets
+QT += network websockets
 requires(qtConfig(filedialog))
 qtHaveModule(printsupport): QT += printsupport
 
@@ -9,14 +10,16 @@ HEADERS         = textedit.h \
 		  LandingPage.h \
 		  ProfileEditWindow.h \
 		  OpenUriWindow.h \
-		  NewFileWindow.h
+		  NewFileWindow.h \
+		  Client.h
 
 SOURCES         = textedit.cpp \
                   main.cpp \
 		  LandingPage.cpp \
 		  ProfileEditWindow.cpp \
 		  OpenUriWindow.cpp \
-		  NewFileWindow.cpp
+		  NewFileWindow.cpp \
+		  Client.cpp
 
 FORMS 		= landingpage.ui \
 		  profileeditwindow.ui \

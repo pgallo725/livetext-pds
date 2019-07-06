@@ -24,8 +24,8 @@ NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp)
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewFileWindow::rejectClicked);
 
 	//Inizializzo il comboBox
-	ui->comboBox_fileType->addItem("rtf");
-	ui->comboBox_fileType->addItem("txt");
+	ui->comboBox_fileType->addItem("RTF");
+	ui->comboBox_fileType->addItem("TXT");
 }
 
 NewFileWindow::~NewFileWindow()

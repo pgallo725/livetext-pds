@@ -1025,14 +1025,47 @@ void TextEdit::handleLabel() {
 	guestCursor->setPixmap(pix);
 	
 
-	QPixmap pix2(qRect2.width() * 2.5, qRect2.height());
+	QPixmap pix2(qRect2.width() *2.5, qRect2.height());
 	pix2.fill(Qt::blue);
 	guestCursor2->setPixmap(pix2);
-
 
 	guestCursor->move(qRect.left(), qRect.top());
 	guestCursor->show();
 
 	guestCursor2->move(qRect2.left(), qRect2.top());
 	guestCursor2->show();
+
+	handleMultipleSelections();
+}
+
+/*
+TEST FUNCTION - TODO
+
+Function to handle extra selection(S) to show other users selection
+
+*/
+
+void TextEdit::handleMultipleSelections()
+{
+	QTextCursor cursor3(textEdit->document());
+	cursor3.setPosition(20);
+	cursor3.setPosition(40, QTextCursor::KeepAnchor);
+
+	QTextEdit::ExtraSelection selection3;
+	selection3.format.setBackground(QColor(255, 0, 0, 70));
+	selection3.cursor = cursor3;
+
+	QTextCursor cursor4(textEdit->document());
+	cursor4.setPosition(50);
+	cursor4.setPosition(70, QTextCursor::KeepAnchor);
+
+	QTextEdit::ExtraSelection selection4;
+	selection4.format.setBackground(QColor(0, 0, 255, 70));
+	selection4.cursor = cursor4;
+
+
+	QList<QTextEdit::ExtraSelection> sellist;
+	sellist.append(selection3);
+	sellist.append(selection4);
+	textEdit->setExtraSelections(sellist);
 }

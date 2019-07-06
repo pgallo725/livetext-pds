@@ -54,9 +54,6 @@
     <ClCompile Include="ServerException.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="AccountMessage.cpp">
-      <Filter>Source Files\Messages</Filter>
-    </ClCompile>
     <ClCompile Include="LoginMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
@@ -67,6 +64,9 @@
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="DocumentMessage.cpp">
+      <Filter>Source Files\Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="AccountMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
   </ItemGroup>
