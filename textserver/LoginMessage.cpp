@@ -18,3 +18,19 @@ LoginMessage::LoginMessage(MessageType m, QDataStream& streamIn) : Message(m)
 LoginMessage::~LoginMessage()
 {
 }
+
+QString LoginMessage::getUserName()
+{
+	return m_username;
+}
+
+QString LoginMessage::getNickname()
+{
+	return m_nickname;
+}
+
+
+QString LoginMessage::getPasswd()
+{
+	return m_passwd;
+}

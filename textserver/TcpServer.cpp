@@ -182,7 +182,7 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn;
 	quint16 typeOfMessage;
-	Message* msg;
+	std::shared_ptr<Message> msg;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -194,28 +194,23 @@ void TcpServer::readMessage()
 		{
 			/* LoginMessages */
 		case LoginRequest:
-			//LoginMessage *log_msg = new LoginMessage(LoginRequest, streamIn);
-			//std::shared_ptr<LoginMessage> sh_msg = std::make_shared<LoginMessage>(LoginRequest, streamIn);
-			//std::shared_ptr<Message> mmm;
-
-			//mmm = std::dynamic_pointer_cast<Message> (sh_msg);
-			msg = new LoginMessage(LoginRequest, streamIn);
+			msg = std::make_shared<LoginMessage>(LoginRequest, streamIn);
 			break;
 		case LoginUnlock:
-			msg = new LoginMessage(LoginUnlock, streamIn);
+			msg = std::make_shared<LoginMessage>(LoginUnlock, streamIn);
 			break;
 	
 			/* AccountMessages */
 		case AccountCreate:
-			msg = new AccountMessage(AccountCreate, streamIn);
+			msg = std::make_shared<AccountMessage>(AccountCreate, streamIn);
 			break;
 		case AccountUpDate:
-			msg = new AccountMessage(AccountUpDate, streamIn);
+			msg = std::make_shared<AccountMessage>(AccountUpDate, streamIn);
 			break;
 
 			/* LogoutMessages */
 		case LogoutRequest:
-			msg = new LogoutMessage(LogoutRequest);
+			msg =std::make_shared<LogoutMessage>(LogoutRequest);
 			break;
 
 			/* DocumentMessages */
@@ -243,14 +238,16 @@ void TcpServer::readMessage()
 		handleMessage(msg, socket);
 	}
 	catch (MessageUnknownTypeException& e) {
-		// TODO: handle exception
-		// sand "WrongMssageType" to this client
+		/* send to the client WringMessageType */
+		QDataStream streamOut;
+		streamOut.setDevice(socket);
+		streamOut << (quint16)WrongMessageType;
 	}
 	
 }
 
 
-void TcpServer::handleMessage(Message* msg, QTcpSocket* socket)
+void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage;
@@ -259,16 +256,14 @@ void TcpServer::handleMessage(Message* msg, QTcpSocket* socket)
 	streamOut.setDevice(socket); /* connect stream with socket */
 
 	if (msg->getType() == LoginRequest) {
-		qDebug() << static_cast<LoginMessage *>(msg)->m_username <<" si e' collegato: ";
+		qDebug() <<" si e' collegato: " << (msg)->getUserName();
 		if (login(msg->getUserName(), msg->getPasswd())) {
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "bellazio sei loggato";
-			//streamOut << LoginAccessGranted << "bellazio";
 		}
 		else {
 			typeOfMessage = LoginError;
 			msg_str = "you cannot fuck with Abbate";
-			//streamOut << LoginError << "you cannot fuck with Abbate";
 		}
 
 		streamOut << typeOfMessage << msg_str;

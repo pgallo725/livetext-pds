@@ -34,7 +34,7 @@ RemoveUserPresence,
 WrongMessageType
 };
 
-class Message 
+class Message
 {
 
 private:
@@ -42,14 +42,14 @@ private:
 
 public:
 	Message(MessageType type);
-	~Message();
+    ~Message();
 
 	/* getter */
 	int getType();
-	int getIP();
-	int getPort();
-	QString getUserName();
-	QString getNickname();
-	QString getPasswd();
+	virtual int getIP();
+	virtual int getPort();
+	virtual QString getUserName();
+	virtual QString getNickname();
+	virtual QString getPasswd();
 };
 

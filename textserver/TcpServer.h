@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <memory>
 
 #include <QObject>
 #include <QTcpServer>
@@ -37,7 +38,7 @@ private:
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
 
 	void saveUsers();
-	void handleMessage(Message *msg, QTcpSocket* socket);
+	void handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket);
 public:
 
 	TcpServer(QObject *parent = 0);

@@ -12,5 +12,9 @@ public:
 	QString m_username;
 	LoginMessage(MessageType m, QDataStream& streamIn);
 	~LoginMessage();
+
+	QString getUserName();
+	QString getNickname();
+	QString getPasswd();
 };
 
