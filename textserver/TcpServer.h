@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QString>
 
 #include "User.h"
 #include "Document.h"
@@ -36,7 +37,7 @@ private:
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
 
 	void saveUsers();
-	void handleMessage(Message *msg);
+	void handleMessage(Message *msg, QTcpSocket* socket);
 public:
 
 	TcpServer(QObject *parent = 0);

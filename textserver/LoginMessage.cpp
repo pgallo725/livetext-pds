@@ -8,7 +8,7 @@ LoginMessage::LoginMessage(MessageType m, QDataStream& streamIn) : Message(m)
 	{
 
 	case LoginRequest:
-		streamIn >> m_username;
+		streamIn >> m_username >> m_passwd;
 		break;
 	default:
 		break;

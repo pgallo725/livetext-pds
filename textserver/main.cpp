@@ -9,10 +9,10 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-
+	TcpServer server;
+	
 	try
 	{
-		TcpServer server;
 		server.initialize();	// may throw FileLoadException
 	}
 	catch (FileException &fe)
