@@ -130,7 +130,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
-	
+
 	//Stringa vuota
 	setCurrentFileName(QString());
 
@@ -173,7 +173,7 @@ void TextEdit::setupFileActions()
 
 
 	const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(rsrcPath + "/fileopen.png"));
-	QAction*  a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
+	QAction* a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
 	a->setShortcut(QKeySequence::Open);
 	tb->addAction(a);
 
@@ -228,9 +228,10 @@ void TextEdit::setupUserActions()
 	QToolBar* tb = addToolBar(tr("Account"));
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
-	const QIcon userIcon = QIcon::fromTheme("user", QIcon(rsrcPath + "/user.png"));
+	const QIcon userIcon(rsrcPath + "/user.png");
 	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
 	tb->addAction(actionUser);
+
 }
 
 
@@ -339,7 +340,7 @@ void TextEdit::setupTextActions()
 	actionAlignJustify->setPriority(QAction::LowPriority);
 
 	// Make sure the alignLeft  is always left of the alignRight
-	QActionGroup * alignGroup = new QActionGroup(this);
+	QActionGroup* alignGroup = new QActionGroup(this);
 	connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
 
 	//Se sei un arabo che hai il testo al contrario l'ordine dei pulsanti di allineamento è al contrario
@@ -366,7 +367,17 @@ void TextEdit::setupTextActions()
 	QPixmap pix(rsrcPath + "/textcolor.png");
 	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
+	
+	//Evidenzia con colore diverso il testo inserito da altri utenti
+	menu->addSeparator();
 
+	const QIcon HighlightUsersIcon(rsrcPath + "/highlightusers.png");
+	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
+	tb->addAction(actionHighlightUsers);
+	//Checkable
+	actionHighlightUsers->setCheckable(true);
+	
+	//Aggiungo la toolbar all'editor-
 	tb = addToolBar(tr("Format Actions"));
 	tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	addToolBarBreak(Qt::TopToolBarArea);
@@ -421,7 +432,7 @@ void TextEdit::setupTextActions()
 //Il file viene aperto in sola lettura e viene cambiato il nome del file corrente in quello appena aperto
 //copiandoci il contenuto all'interno
 
-bool TextEdit::load(const QString & f)
+bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
 	if (!QFile::exists(f))
@@ -477,7 +488,7 @@ bool TextEdit::maybeSave()
 }
 
 
-void TextEdit::setCurrentFileName(const QString & fileName)
+void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
 	textEdit->document()->setModified(false);
@@ -617,7 +628,7 @@ void TextEdit::filePrintPreview()
 #endif
 }
 
-void TextEdit::printPreview(QPrinter * printer)
+void TextEdit::printPreview(QPrinter* printer)
 {
 #ifdef QT_NO_PRINTER
 	Q_UNUSED(printer);
@@ -658,7 +669,7 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-
+	//TODO
 }
 
 void TextEdit::editProfile()
@@ -668,6 +679,17 @@ void TextEdit::editProfile()
 
 	//Mostra la finestra di mw formata
 	ew->exec();
+}
+
+void TextEdit::highlightUsersText()
+{
+	if (actionHighlightUsers->isChecked()) {
+		handleMultipleSelections();
+	}
+	else {
+		QList<QTextEdit::ExtraSelection> emptySelection;
+		textEdit->setExtraSelections(emptySelection);
+	}
 }
 
 void TextEdit::textBold()
@@ -693,14 +715,14 @@ void TextEdit::textItalic()
 }
 
 //Tipo di carattere (Arial...)
-void TextEdit::textFamily(const QString & f)
+void TextEdit::textFamily(const QString& f)
 {
 	QTextCharFormat fmt;
 	fmt.setFontFamily(f);
 	mergeFormatOnWordOrSelection(fmt);
 }
 
-void TextEdit::textSize(const QString & p)
+void TextEdit::textSize(const QString& p)
 {
 	//Casta a float (?) e imposta la dimensione del carattere
 	qreal pointSize = p.toFloat();
@@ -822,7 +844,7 @@ void TextEdit::textColor()
 
 //Funzione chiamata con il bind di triggered del gruppo di pulsanti di allineamento
 //Sono esclusivi
-void TextEdit::textAlign(QAction * a)
+void TextEdit::textAlign(QAction* a)
 {
 
 	//Applico gli allineamenti
@@ -837,7 +859,7 @@ void TextEdit::textAlign(QAction * a)
 }
 
 //Bind di QTextEdit quando cambia il formato
-void TextEdit::currentCharFormatChanged(const QTextCharFormat & format)
+void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
 {
 	//Applica cambiamenti chiamando gli slot opportuni
 	fontChanged(format.font());
@@ -891,6 +913,7 @@ void TextEdit::cursorPositionChanged()
 		int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 		comboStyle->setCurrentIndex(headingLevel ? headingLevel + 8 : 0);
 	}
+
 	handleLabel();
 }
 
@@ -911,7 +934,7 @@ void TextEdit::about()
 		"document for you to experiment with."));
 }
 
-void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat & format)
+void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat& format)
 {
 	//Chiamato quando devo cambiare il formato se ho una selezione
 	QTextCursor cursor = textEdit->textCursor();
@@ -925,7 +948,7 @@ void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat & format)
 	textEdit->mergeCurrentCharFormat(format);
 }
 
-void TextEdit::fontChanged(const QFont & f)
+void TextEdit::fontChanged(const QFont& f)
 {
 	//Se cambia il carattere aggiorno i ComboBox con dimensione e famiglia
 	comboFont->setCurrentIndex(comboFont->findText(QFontInfo(f).family()));
@@ -940,7 +963,7 @@ void TextEdit::fontChanged(const QFont & f)
 	actionTextUnderline->setChecked(f.underline());
 }
 
-void TextEdit::colorChanged(const QColor & c)
+void TextEdit::colorChanged(const QColor& c)
 {
 	//Cambio icona colore se cambia il colore
 	QPixmap pix(rsrcPath + "/textcolor.png");
@@ -1007,7 +1030,7 @@ Function to handle extra cursor(S) position into text
 void TextEdit::handleLabel() {
 	guestCursor->close();
 	guestCursor2->close();
-	
+
 	QTextCursor cursor(textEdit->document());
 	QTextCursor cursor2(textEdit->document());
 
@@ -1016,16 +1039,16 @@ void TextEdit::handleLabel() {
 
 	cursor2.setPosition(textEdit->textCursor().position());
 	cursor2.movePosition(QTextCursor::StartOfLine);
-	
+
 	const QRect qRect = textEdit->cursorRect(cursor);
 	const QRect qRect2 = textEdit->cursorRect(cursor2);
-	
-	QPixmap pix(qRect.width()*2.5, qRect.height());
+
+	QPixmap pix(qRect.width() * 2.5, qRect.height());
 	pix.fill(Qt::red);
 	guestCursor->setPixmap(pix);
-	
 
-	QPixmap pix2(qRect2.width() *2.5, qRect2.height());
+
+	QPixmap pix2(qRect2.width() * 2.5, qRect2.height());
 	pix2.fill(Qt::blue);
 	guestCursor2->setPixmap(pix2);
 
@@ -1034,6 +1057,7 @@ void TextEdit::handleLabel() {
 
 	guestCursor2->move(qRect2.left(), qRect2.top());
 	guestCursor2->show();
+
 
 	handleMultipleSelections();
 }
@@ -1047,25 +1071,28 @@ Function to handle extra selection(S) to show other users selection
 
 void TextEdit::handleMultipleSelections()
 {
-	QTextCursor cursor3(textEdit->document());
-	cursor3.setPosition(20);
-	cursor3.setPosition(40, QTextCursor::KeepAnchor);
+	if (actionHighlightUsers->isChecked()) {
+		QTextCursor cursor3(textEdit->document());
+		cursor3.setPosition(20);
+		cursor3.setPosition(40, QTextCursor::KeepAnchor);
 
-	QTextEdit::ExtraSelection selection3;
-	selection3.format.setBackground(QColor(255, 0, 0, 70));
-	selection3.cursor = cursor3;
+		QTextEdit::ExtraSelection selection3;
+		selection3.format.setBackground(QColor(255, 0, 0, 70));
+		selection3.cursor = cursor3;
 
-	QTextCursor cursor4(textEdit->document());
-	cursor4.setPosition(50);
-	cursor4.setPosition(70, QTextCursor::KeepAnchor);
+		QTextCursor cursor4(textEdit->document());
+		cursor4.setPosition(50);
+		cursor4.setPosition(70, QTextCursor::KeepAnchor);
 
-	QTextEdit::ExtraSelection selection4;
-	selection4.format.setBackground(QColor(0, 0, 255, 70));
-	selection4.cursor = cursor4;
+		QTextEdit::ExtraSelection selection4;
+		selection4.format.setBackground(QColor(0, 0, 255, 70));
+		selection4.cursor = cursor4;
 
 
-	QList<QTextEdit::ExtraSelection> sellist;
-	sellist.append(selection3);
-	sellist.append(selection4);
-	textEdit->setExtraSelections(sellist);
+		QList<QTextEdit::ExtraSelection> sellist;
+		sellist.append(selection3);
+		sellist.append(selection4);
+		textEdit->setExtraSelections(sellist);
+	}
+
 }

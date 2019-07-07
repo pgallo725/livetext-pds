@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QMovie>
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -43,6 +44,12 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
+
+	/* LOADING GIF 
+	QMovie* movie = new QMovie(rsrcPath + "/gif/loading.gif");
+	ui->label_logo->setMovie(movie);
+	movie->start();*/
+
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
@@ -98,9 +105,9 @@ LandingPage::~LandingPage()
 void LandingPage::pushButtonLoginClicked()
 {
 	//Bypass login
-	/*ui->stackedWidget->setCurrentIndex(2);
+	ui->stackedWidget->setCurrentIndex(2);
 	ui->stackedWidget->show();
-	return;*/
+	return;
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
