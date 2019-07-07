@@ -15,7 +15,7 @@ HEADERS += ./Client.h \
     ./TcpServer.h \
 	./AccountMessage.h \
 	./DocumentMessage.h \
-	./LoginMesssage.h \
+	./LoginMessage.h \
 	./LogoutMessage.h \
 	./Message.h
 	
@@ -31,6 +31,6 @@ SOURCES += ./Client.cpp \
     ./WorkSpace.cpp \
 	./AccountMessage.cpp \
 	./DocumentMessage.cpp \
-	./LoginMesssage.cpp \
+	./LoginMessage.cpp \
 	./LogoutMessage.cpp \
 	./Message.cpp

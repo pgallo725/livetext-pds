@@ -176,9 +176,10 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Document.cpp" />
     <ClCompile Include="DocumentMessage.cpp" />
-    <ClCompile Include="LoginMesssage.cpp" />
+    <ClCompile Include="LoginMessage.cpp" />
     <ClCompile Include="LogoutMessage.cpp" />
     <ClCompile Include="Message.cpp" />
+    <ClCompile Include="ServerException.cpp" />
     <ClCompile Include="TcpServer.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="WorkSpace.cpp" />
@@ -189,11 +190,12 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Document.h" />
     <ClInclude Include="DocumentMessage.h" />
-    <ClInclude Include="LoginMesssage.h" />
+    <ClInclude Include="LoginMessage.h" />
     <ClInclude Include="LogoutMessage.h" />
     <ClInclude Include="Message.h" />
     <QtMoc Include="TcpServer.h">
     </QtMoc>
+    <ClInclude Include="ServerException.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="WorkSpace.h" />
   </ItemGroup>
