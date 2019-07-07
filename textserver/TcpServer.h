@@ -9,6 +9,7 @@
 #include "User.h"
 #include "Document.h"
 #include "WorkSpace.h"
+#include "Message.h"
 #include "LoginMessage.h"
 #include "AccountMessage.h"
 #include "LogoutMessage.h"

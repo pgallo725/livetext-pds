@@ -30,7 +30,8 @@ MoveCursor,
 UserNameChange,
 UserIconChange,
 AddUserPresence,
-RemoveUserPresence
+RemoveUserPresence,
+WrongMessageType
 };
 
 class Message 
