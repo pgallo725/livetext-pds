@@ -43,6 +43,7 @@ private slots:
 	//ADDED
 	void fileShare();
 	void editProfile();
+	void highlightUsersText();
 	void contentsChange(int position, int charsRemoved, int charsAdded);
 
 	void textBold();
@@ -95,6 +96,8 @@ private:
 	QAction *actionRedo;
 	QAction *actionShare;
 	QAction *actionUser;
+	QAction* actionHighlightUsers;
+
 #ifndef QT_NO_CLIPBOARD
 	QAction *actionCut;
 	QAction *actionCopy;

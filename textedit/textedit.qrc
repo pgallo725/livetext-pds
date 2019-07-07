@@ -22,6 +22,7 @@
   <file>images/win/zoomout.png</file>
   <file>images/win/share.png</file>
   <file>images/win/user.png</file>
+  <file>images/win/highlightusers.png</file>
   <file>images/win/textcolor.png</file>
   <file>images/win/LandingPage/new.png</file>	
   <file>images/win/LandingPage/openuri.png</file>
@@ -29,5 +30,6 @@
   <file>images/win/LandingPage/backarrow.png</file>
   <file>images/win/LandingPage/textfile.png</file>
   <file>images/win/LandingPage/richtext.png</file>
+  <file>images/win/gif/loading.gif</file>
 </qresource>
 </RCC>
