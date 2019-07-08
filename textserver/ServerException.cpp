@@ -35,3 +35,15 @@ MessageUnknownTypeException::MessageUnknownTypeException(int type) :
 	MessageException("Unknown message type : " + type)
 {
 }
+
+MessageWrongTypeException::MessageWrongTypeException(std::string msg, int type) :
+	MessageException(msg + std::to_string(type))
+{
+}
+
+SocketNullException::SocketNullException(std::string msg) :
+	ServerException(msg)
+{
+}
+
+

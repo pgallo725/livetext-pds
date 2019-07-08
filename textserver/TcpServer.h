@@ -9,6 +9,7 @@
 #include <QString>
 
 #include "User.h"
+#include "Client.h"
 #include "Document.h"
 #include "WorkSpace.h"
 #include "Message.h"
@@ -32,13 +33,15 @@ private:
 	QMap<QString, User> users;
 	QMap<QString, Document> documents;
 	QMap<std::string, WorkSpace> workspaces;
+	QMap<QTcpSocket *, Client> clients;
 	int _userIdCounter;
 
-	bool login(QString username, QString passwd);
+	bool login(Client client, QString password);
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
 
 	void saveUsers();
 	void handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket);
+	void sendLoginChallenge(QTcpSocket* socket, QString username);
 public:
 
 	TcpServer(QObject *parent = 0);

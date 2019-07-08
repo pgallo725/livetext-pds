@@ -11,7 +11,7 @@ Message::~Message()
 
 int Message::getType()
 {
-	return 0;
+	return m_type;
 }
 
 int Message::getIP()

@@ -61,3 +61,15 @@ class MessageUnknownTypeException : public MessageException
 public:
 	MessageUnknownTypeException(int type);
 };
+
+class MessageWrongTypeException : public MessageException
+{
+public:
+	MessageWrongTypeException(std::string msg, int type);
+};
+
+class SocketNullException : public ServerException
+{
+public:
+	SocketNullException(std::string msg);
+};

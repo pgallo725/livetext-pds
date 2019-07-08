@@ -108,19 +108,24 @@ void TcpServer::clientDisconnection()
 }
 
 
-bool TcpServer::login(QString username, QString passwd)
+void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 {
-	QMap<QString, User>::iterator it = users.find(username);
+	QDataStream streamOut;
+	
+	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
 
-	if (it == users.end()) {
-		return false;	/* no user with this name */
-	}
+	streamOut.setDevice(socket); /* connect stream with socket */
 
-	if (!(*it).authentication(passwd)) {
-		return false;	/* password doesn't match */
-	}
+	Client client(_userIdCounter++, socket, &(*users.find(username)));
+	clients.insert(socket, client);
 
-	return true;
+	streamOut << (quint16)LoginChallenge << client.getNonce();
+}
+
+
+bool TcpServer::login(Client client, QString password)
+{
+	return client.authentication(password);
 }
 
 
@@ -238,10 +243,19 @@ void TcpServer::readMessage()
 		handleMessage(msg, socket);
 	}
 	catch (MessageUnknownTypeException& e) {
-		/* send to the client WringMessageType */
+		/* send to the client WrongMessageType */
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
 		streamOut << (quint16)WrongMessageType;
+	}
+	catch (MessageWrongTypeException& e) {
+		/* send to the client WrongMessageType + message */
+		QDataStream streamOut;
+		streamOut.setDevice(socket);
+		streamOut << (quint16)WrongMessageType << e.what();
+	}
+	catch (SocketNullException& e) {
+		// TODO
 	}
 	
 }
@@ -253,20 +267,72 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 	quint16 typeOfMessage;
 	QString msg_str;
 
+	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
+
 	streamOut.setDevice(socket); /* connect stream with socket */
 
-	if (msg->getType() == LoginRequest) {
-		qDebug() <<" si e' collegato: " << (msg)->getUserName();
-		if (login(msg->getUserName(), msg->getPasswd())) {
+	switch (msg->getType()) {
+		/* Login */
+	case LoginRequest:
+		qDebug() << " si e' collegato: " << (msg)->getUserName();
+		
+		if (users.find(msg->getUserName()) == users.end()) 
+			throw MessageWrongTypeException("User doesn't exist", WrongMessageType);
+
+		sendLoginChallenge(socket, (msg)->getUserName());
+		break;
+	case LoginUnlock:
+
+		if (login(*(clients.find(socket)), msg->getPasswd())) {
+			/* login successful */
 			typeOfMessage = LoginAccessGranted;
-			msg_str = "bellazio sei loggato";
+			msg_str = "Logged";
 		}
 		else {
 			typeOfMessage = LoginError;
-			msg_str = "you cannot fuck with Abbate";
+			msg_str = "Wrong username/password";
 		}
-
 		streamOut << typeOfMessage << msg_str;
+		break;
+
+		/* Account */
+	case AccountCreate:
+		break;
+	case AccountUpDate:
+		break;
+
+		/* LogoutMessages */
+	case LogoutRequest:
+		break;
+
+		/* DocumentMessages */
+	case NewDocument:
+		break;
+
+	case OpenDocument:
+		break;
+
+		/* textMessages */
+	case CharInsert:
+		break;
+
+	case CharDelete:
+		break;
+
+	case MoveCursor:
+		break;
+
+	default:
+		throw MessageUnknownTypeException(typeOfMessage);
+		break;
+	
 	}
+
+	
+
 	// TODO: cast type message and handle it
 }
+
+
+
+

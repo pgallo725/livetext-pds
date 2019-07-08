@@ -33,12 +33,12 @@ public:
 	/* getter methods */
 	QString getInfo();
 	QString getUsername();
+	QString getPassword();
 
 	/* setter methods */
 	void addDocument(QString docUri);
 
-	/* general methods */
-	bool authentication(QString passwd);
+	
 	
 };
 

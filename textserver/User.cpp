@@ -34,16 +34,13 @@ QString User::getUsername()
 	return m_username;
 }
 
-
-bool User::authentication(QString passwd)
+QString User::getPassword()
 {
-	// TODO check and pars on passwd
-
-	if (!this->m_passwd.compare(passwd)) {
-		return true;
-	}
-	return false;
+	return m_passwd;
 }
+
+
+
 
 
 void User::addDocument(QString docUri)
