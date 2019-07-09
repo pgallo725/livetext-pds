@@ -6,6 +6,7 @@ ServerException::ServerException(std::string msg)
 {
 }
 
+
 FileException::FileException(std::string msg)
 	: ServerException(msg)
 {

@@ -12,5 +12,9 @@ private:
 public:
 	AccountMessage(MessageType m, QDataStream& streamIn);
 	~AccountMessage();
+
+	QString getUserName();
+	QString getNickname();
+	QString getPasswd();
 };
 

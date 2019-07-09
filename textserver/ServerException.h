@@ -10,6 +10,7 @@ class ServerException : public std::exception
 protected:
 
 	ServerException(std::string msg);
+
 };
 
 

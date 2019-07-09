@@ -6,7 +6,6 @@ LoginMessage::LoginMessage(MessageType m, QDataStream& streamIn) : Message(m)
 {
 	switch (m)
 	{
-
 	case LoginRequest:
 		streamIn >> m_username;
 		break;

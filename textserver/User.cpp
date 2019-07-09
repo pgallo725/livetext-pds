@@ -34,6 +34,11 @@ QString User::getUsername()
 	return m_username;
 }
 
+QString User::getNickName()
+{
+	return m_nickname;
+}
+
 QString User::getPassword()
 {
 	return m_passwd;

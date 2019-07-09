@@ -37,7 +37,7 @@ private:
 	int _userIdCounter;
 
 	bool login(Client client, QString password);
-	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd);
+	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QTcpSocket *socket = nullptr);
 
 	void saveUsers();
 	void handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket);

@@ -26,6 +26,16 @@ QString Client::getNonce()
 	return nonce;
 }
 
+void Client::setLogged()
+{
+	logged = true;
+}
+
+void Client::resetLogged()
+{
+	logged = false;
+}
+
 bool Client::authentication(QString passwd)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);

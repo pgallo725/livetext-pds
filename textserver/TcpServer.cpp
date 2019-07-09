@@ -129,7 +129,7 @@ bool TcpServer::login(Client client, QString password)
 }
 
 
-std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd)
+std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QTcpSocket* socket)
 {
 	QMap<QString, User>::iterator it = users.find(username);
 
@@ -139,6 +139,14 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 	
 	User nUser(username, nickname, passwd);			/* create a new user		*/
 	users.insert(username, nUser);					/* insert new user in map	*/
+
+	if (socket != nullptr) {
+		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
+			return std::optional<User>();
+		Client client(_userIdCounter++, socket, &nUser);
+		client.setLogged();
+		clients.insert(socket, client);
+	}
 
 	return nUser;
 }
@@ -252,7 +260,8 @@ void TcpServer::readMessage()
 		/* send to the client WrongMessageType + message */
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
-		streamOut << (quint16)WrongMessageType << e.what();
+		QString err = e.what();
+		streamOut << (quint16)WrongMessageType << err;
 	}
 	catch (SocketNullException& e) {
 		// TODO
@@ -264,7 +273,7 @@ void TcpServer::readMessage()
 void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
-	quint16 typeOfMessage;
+	quint16 typeOfMessage = 0;
 	QString msg_str;
 
 	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
@@ -285,10 +294,12 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 
 		if (login(*(clients.find(socket)), msg->getPasswd())) {
 			/* login successful */
+			clients.find(socket)->setLogged();
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
 		}
 		else {
+			clients.remove(socket);
 			typeOfMessage = LoginError;
 			msg_str = "Wrong username/password";
 		}
@@ -297,12 +308,32 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 
 		/* Account */
 	case AccountCreate:
+		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd())) {
+			/* something went wrong, maybe this user already exist*/
+			typeOfMessage = AccountDenied;
+			msg_str = "User already exist";
+		}
+		else {
+			typeOfMessage = AccountConfirmed;
+			msg_str = "Registration completed";
+		}
+		streamOut << typeOfMessage << msg_str;
 		break;
 	case AccountUpDate:
 		break;
 
 		/* LogoutMessages */
 	case LogoutRequest:
+		if (!clients.remove(socket)) {
+			/* remove complete*/
+			typeOfMessage = LogoutDenied;
+			msg_str = "Cannot logout if you are already loggedout";
+		}
+		else {
+			typeOfMessage = LogoutConfirmed;
+			msg_str = "Logout complete";
+		}
+		streamOut << typeOfMessage << msg_str;
 		break;
 
 		/* DocumentMessages */

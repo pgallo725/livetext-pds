@@ -20,6 +20,10 @@ public:
 	User* getUser();
 	QString getNonce();
 
+	/* setter */
+	void setLogged();
+	void resetLogged();
+
 	/* general methods */
 	bool authentication(QString passwd);
 };

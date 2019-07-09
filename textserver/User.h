@@ -33,6 +33,7 @@ public:
 	/* getter methods */
 	QString getInfo();
 	QString getUsername();
+	QString getNickName();
 	QString getPassword();
 
 	/* setter methods */
