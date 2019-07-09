@@ -103,7 +103,8 @@ void TcpServer::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	socket->close();
+	clients.remove(socket);	/* remove this client from the list */
+	socket->close();		/* close the socket */
 	qDebug() << " - client disconnected";
 }
 
@@ -113,8 +114,15 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 	QDataStream streamOut;
 	
 	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
-
+	
 	streamOut.setDevice(socket); /* connect stream with socket */
+
+	/* check if this socket is already used (user already logged) */
+	if (clients.find(socket) != clients.end()) {
+		QString msg_str = "Cannot log if you are logged";
+		streamOut << (quint16)LoginError << msg_str;
+		return;
+	}
 
 	Client client(_userIdCounter++, socket, &(*users.find(username)));
 	clients.insert(socket, client);
@@ -133,6 +141,7 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 {
 	QMap<QString, User>::iterator it = users.find(username);
 
+	/* check if this user exist */
 	if (it != users.end()) {
 		return std::optional<User>();
 	}
@@ -140,6 +149,7 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 	User nUser(username, nickname, passwd);			/* create a new user		*/
 	users.insert(username, nUser);					/* insert new user in map	*/
 
+	/* check if socket is null (for static account) */
 	if (socket != nullptr) {
 		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
 			return std::optional<User>();
@@ -285,13 +295,13 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 	case LoginRequest:
 		qDebug() << " si e' collegato: " << (msg)->getUserName();
 		
+		/* check if this user exist or not */
 		if (users.find(msg->getUserName()) == users.end()) 
 			throw MessageWrongTypeException("User doesn't exist", WrongMessageType);
 
 		sendLoginChallenge(socket, (msg)->getUserName());
 		break;
 	case LoginUnlock:
-
 		if (login(*(clients.find(socket)), msg->getPasswd())) {
 			/* login successful */
 			clients.find(socket)->setLogged();
@@ -308,10 +318,10 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 
 		/* Account */
 	case AccountCreate:
-		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd())) {
-			/* something went wrong, maybe this user already exist*/
+		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd(), socket)) {
+			/* something went wrong, maybe this user already exist or this socket is already used */
 			typeOfMessage = AccountDenied;
-			msg_str = "User already exist";
+			msg_str = "User already exist or logged";
 		}
 		else {
 			typeOfMessage = AccountConfirmed;
@@ -325,11 +335,11 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 		/* LogoutMessages */
 	case LogoutRequest:
 		if (!clients.remove(socket)) {
-			/* remove complete*/
 			typeOfMessage = LogoutDenied;
 			msg_str = "Cannot logout if you are already loggedout";
 		}
 		else {
+			/* remove complete*/
 			typeOfMessage = LogoutConfirmed;
 			msg_str = "Logout complete";
 		}
