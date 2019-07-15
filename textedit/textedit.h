@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QPointer>
-
+#include <QList>
+#include "Presence.h"
 
 //Serve per incapsulare tutti i metodi delle classi
 class QAction;
@@ -70,6 +71,7 @@ private:
 	void setupTextActions();
 	void setupShareActions();
 	void setupUserActions();
+	void setupOnlineUsersActions();
 	bool maybeSave();
 	void setCurrentFileName(const QString &fileName);
 
@@ -78,10 +80,14 @@ private:
 	void colorChanged(const QColor &c);
 	void alignmentChanged(Qt::Alignment a);
 
-	void handleLabel();
+	//Extra selections and multiple cursors
+	void handleUsersCursors();
 	void handleMultipleSelections();
-	QLabel *guestCursor;
-	QLabel* guestCursor2;
+	void handleUserSelection(Presence p);
+
+
+
+	QList<Presence> onlineUsers;
 
 	QAction *actionSave;
 	QAction *actionTextBold;

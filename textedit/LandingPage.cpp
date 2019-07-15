@@ -31,7 +31,6 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	//Setup dimensione finestra
 	centerAndResize();
 
-
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
@@ -87,11 +86,8 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	//Prende file dal server e li mostra nella lista dei files recenti
 	setupFileList();
 
-
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
-
-
 }
 
 LandingPage::~LandingPage()

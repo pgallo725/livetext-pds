@@ -19,7 +19,6 @@ const QString rsrcPath = ":/images/win";
 
 ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
 	//Costruttore landing page
-	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//Setup delle varie finestre ui

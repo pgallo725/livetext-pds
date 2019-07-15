@@ -11,20 +11,25 @@ HEADERS         = textedit.h \
 		  ProfileEditWindow.h \
 		  OpenUriWindow.h \
 		  NewFileWindow.h \
-		  Client.h
+	   	  ShareUriWindow.h \
+		  Client.h \
+		  Presence.h
 
 SOURCES         = textedit.cpp \
                   main.cpp \
 		  LandingPage.cpp \
 		  ProfileEditWindow.cpp \
 		  OpenUriWindow.cpp \
+		  ShareUriWindow.cpp \
 		  NewFileWindow.cpp \
-		  Client.cpp
+		  Client.cpp \
+		  Presence.cpp
 
 FORMS 		= landingpage.ui \
 		  profileeditwindow.ui \
 		  openuriwindow.ui \
-		  newfilewindow.ui
+		  newfilewindow.ui \
+		  shareuriwindow.ui
 
 RESOURCES += textedit.qrc
 build_all:!build_pass {

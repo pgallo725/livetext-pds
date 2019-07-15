@@ -9,7 +9,7 @@
 
 NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp), QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow) {
 	//Costruttore landing page
-	setWindowTitle(QCoreApplication::applicationName());
+	setWindowTitle(tr("New file"));
 	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//Setup delle varie finestre ui

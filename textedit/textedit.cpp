@@ -44,6 +44,7 @@
 
 #include "textedit.h"
 #include "ProfileEditWindow.h"
+#include "ShareUriWindow.h"
 
 const QString rsrcPath = ":/images/win";
 
@@ -55,16 +56,26 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	textEdit = new QTextEdit(this);
 
 
-	guestCursor = new QLabel(textEdit);
-	guestCursor2 = new QLabel(textEdit);
-	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleLabel);
-	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleLabel);
-
 	// Permettono di connettere le funzioni di QTextEdit con quelle di TextEdit ovvero:
 	// quando viene invocata la funzione currentCharFormatChanged genera un segnale che viene recepito
 	// dall' oggetto TextEdit (this) che invoca la funzione (slot) currentCharFormatChanged
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::currentCharFormatChanged);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
+
+
+	//Gestione automatica della posizione del cursore degli altri utenti quando cambia la visualizzazione
+	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleUsersCursors);
+	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleUsersCursors);
+	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleUsersCursors);
+	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::handleUsersCursors);
+
+
+	//Gestione automatica della posizione delle selezioni degli altri utenti quando cambia la visualizzazione
+	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleMultipleSelections);
+	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleMultipleSelections);
+	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
+	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::handleMultipleSelections);
+
 
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
@@ -78,14 +89,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setupTextActions();
 	setupShareActions();
 	setupUserActions();
-
-	//Aggiunge un menu di Help alla barra dei menu con le conseguenti azioni (rimosso)
-	/*
-	{
-		QMenu *helpMenu = menuBar()->addMenu(tr("Help"));
-		helpMenu->addAction(tr("About"), this, &TextEdit::about);
-		helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-	}*/
 
 	//Crea il carattere e lo stile
 	QFont textFont("Helvetica");
@@ -108,7 +111,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	connect(textEdit->document(), &QTextDocument::redoAvailable, actionRedo, &QAction::setEnabled);
 
 	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
-
 
 
 	//Stesso discorso delle connect ma inizializza
@@ -135,6 +137,12 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setCurrentFileName(QString());
 
 
+	//TEST
+	onlineUsers.append(Presence("Mario", "Rossi", Qt::red, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
+	onlineUsers.append(Presence("Luca", "Verdi", Qt::green, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
+	onlineUsers.append(Presence("Giorgio", "Blu", Qt::blue, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
+	onlineUsers.append(Presence("Gianni", "Gialli", Qt::yellow, QPixmap(rsrcPath + "/filesave.png"), textEdit));
+	setupOnlineUsersActions();
 }
 
 void TextEdit::closeEvent(QCloseEvent* e)
@@ -146,7 +154,7 @@ void TextEdit::closeEvent(QCloseEvent* e)
 }
 
 /*
-	Questa funzione genera il menu di File Modifica ...
+	Queste funzioni generano il menu di File Modifica ...
 */
 void TextEdit::setupFileActions()
 {
@@ -225,14 +233,45 @@ void TextEdit::setupShareActions()
 
 void TextEdit::setupUserActions()
 {
-	QToolBar* tb = addToolBar(tr("Account"));
+	QToolBar* tb = addToolBar(tr("&Account"));
+	
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
+
 
 	const QIcon userIcon(rsrcPath + "/user.png");
 	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
 	tb->addAction(actionUser);
-
 }
+
+void TextEdit::setupOnlineUsersActions()
+{
+	QToolBar* tb = new QToolBar(tr("&Online users"));
+	addToolBar(Qt::RightToolBarArea, tb);
+
+	QList<Presence>::iterator it;
+
+	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
+
+		QPixmap background(32, 32);
+
+		QColor color = it->color();
+		background.fill(color);
+
+		QPainter painter(&background);
+		QPixmap userIcon(it->profilePicture());
+
+		painter.drawPixmap(3, 3, 26, 26, userIcon.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+		painter.end();
+
+		const QIcon users(background);
+		
+		QAction* onlineAction = new QAction(users, tr(it->nickname().toStdString().c_str()), this);
+		connect(onlineAction, &QAction::triggered, this, [this, it]() { handleUserSelection(*it); });
+		tb->addAction(onlineAction);
+
+	}
+}
+
 
 
 void TextEdit::setupEditActions()
@@ -421,6 +460,7 @@ void TextEdit::setupTextActions()
 	const QList<int> standardSizes = QFontDatabase::standardSizes();
 	foreach(int size, standardSizes)
 		comboSize->addItem(QString::number(size));
+
 	//Setta come dimensione di default la dimensione del testo appena viene caricata QApplication
 	comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
@@ -669,12 +709,21 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	//TODO
+	statusBar()->showMessage(tr("URI copied into clipboards"));
+
+	QClipboard* clipboard = QApplication::clipboard();
+	
+	QString uri = "URI DI PROVA";
+
+	clipboard->setText(uri);
+
+	ShareUriWindow* su = new ShareUriWindow(uri);
+	//Mostra la finestra di mw formata
+	su->exec();
 }
 
 void TextEdit::editProfile()
 {
-	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
 	ProfileEditWindow* ew = new ProfileEditWindow();
 
 	//Mostra la finestra di mw formata
@@ -913,8 +962,6 @@ void TextEdit::cursorPositionChanged()
 		int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 		comboStyle->setCurrentIndex(headingLevel ? headingLevel + 8 : 0);
 	}
-
-	handleLabel();
 }
 
 void TextEdit::clipboardDataChanged()
@@ -953,9 +1000,6 @@ void TextEdit::fontChanged(const QFont& f)
 	//Se cambia il carattere aggiorno i ComboBox con dimensione e famiglia
 	comboFont->setCurrentIndex(comboFont->findText(QFontInfo(f).family()));
 	comboSize->setCurrentIndex(comboSize->findText(QString::number(f.pointSize())));
-
-
-	handleLabel();
 
 	//Setto i rispettivi pulsanti checkati
 	actionTextBold->setChecked(f.bold());
@@ -1027,72 +1071,65 @@ Function to handle extra cursor(S) position into text
 
 */
 
-void TextEdit::handleLabel() {
-	guestCursor->close();
-	guestCursor2->close();
+void TextEdit::handleUsersCursors() {
+	QList<Presence>::iterator it;
+	
+	int i = 0;
+	
+	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
+		QTextCursor* cursor = it->cursor();
 
-	QTextCursor cursor(textEdit->document());
-	QTextCursor cursor2(textEdit->document());
+		it->label()->close();
+	
+		//Change to user position
+		i++;
+		cursor->setPosition(textEdit->textCursor().position());
+		cursor->movePosition(QTextCursor::StartOfLine);
+		cursor->setPosition(cursor->position() + i);
 
-	cursor.setPosition(textEdit->textCursor().position());
-	cursor.movePosition(QTextCursor::EndOfLine);
-
-	cursor2.setPosition(textEdit->textCursor().position());
-	cursor2.movePosition(QTextCursor::StartOfLine);
-
-	const QRect qRect = textEdit->cursorRect(cursor);
-	const QRect qRect2 = textEdit->cursorRect(cursor2);
-
-	QPixmap pix(qRect.width() * 2.5, qRect.height());
-	pix.fill(Qt::red);
-	guestCursor->setPixmap(pix);
-
-
-	QPixmap pix2(qRect2.width() * 2.5, qRect2.height());
-	pix2.fill(Qt::blue);
-	guestCursor2->setPixmap(pix2);
-
-	guestCursor->move(qRect.left(), qRect.top());
-	guestCursor->show();
-
-	guestCursor2->move(qRect2.left(), qRect2.top());
-	guestCursor2->show();
+		const QRect qRect = textEdit->cursorRect(*cursor);
+		
+		QPixmap pix(qRect.width() * 2.5, qRect.height());
+		pix.fill(it->color());
+		it->label()->setPixmap(pix);
 
 
-	handleMultipleSelections();
+		it->label()->move(qRect.left(), qRect.top());
+		it->label()->show();
+	}
 }
 
-/*
-TEST FUNCTION - TODO
-
-Function to handle extra selection(S) to show other users selection
-
-*/
 
 void TextEdit::handleMultipleSelections()
 {
+	QList<Presence>::iterator it;
+	QList<QTextEdit::ExtraSelection> sellist;
 	if (actionHighlightUsers->isChecked()) {
-		QTextCursor cursor3(textEdit->document());
-		cursor3.setPosition(20);
-		cursor3.setPosition(40, QTextCursor::KeepAnchor);
+		int i = 0;
+		for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
+			
+			//Change with function to check users selection
+			QTextCursor cursor3(textEdit->document());
+			cursor3.setPosition(i);
+			cursor3.setPosition(i+10, QTextCursor::KeepAnchor);
 
-		QTextEdit::ExtraSelection selection3;
-		selection3.format.setBackground(QColor(255, 0, 0, 70));
-		selection3.cursor = cursor3;
+			QTextEdit::ExtraSelection selection;
+			QColor color = it->color();
+			color.setAlpha(70);
+			selection.format.setBackground(color);
+			selection.cursor = cursor3;
 
-		QTextCursor cursor4(textEdit->document());
-		cursor4.setPosition(50);
-		cursor4.setPosition(70, QTextCursor::KeepAnchor);
+			sellist.append(selection);
+			
 
-		QTextEdit::ExtraSelection selection4;
-		selection4.format.setBackground(QColor(0, 0, 255, 70));
-		selection4.cursor = cursor4;
-
-
-		QList<QTextEdit::ExtraSelection> sellist;
-		sellist.append(selection3);
-		sellist.append(selection4);
+			i += 10;
+		}
 		textEdit->setExtraSelections(sellist);
 	}
 
+}
+
+void TextEdit::handleUserSelection(Presence p)
+{
+	//TODO Handle user icon pressed
 }

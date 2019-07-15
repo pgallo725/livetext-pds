@@ -59,6 +59,9 @@
     <ClCompile Include="OpenUriWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Presence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ProfileEditWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="textedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShareUriWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -82,34 +88,26 @@
     <QtMoc Include="OpenUriWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="Presence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="ProfileEditWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="textedit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ShareUriWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    
-    
-    
-    
     <ClInclude Include="ui_landingpage.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -134,6 +132,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="profileeditwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="shareuriwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -172,6 +173,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\filesave.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\highlightusers.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\gif\loading.gif">
@@ -231,5 +235,10 @@
     <None Include="images\win\zoomout.png">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ui_shareuriwindow.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

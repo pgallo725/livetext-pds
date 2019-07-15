@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef LANDINGPAGE_H
+#define LANDINGPAGE_H
 
 #include <QMainWindow>
 #include <QDialog>
@@ -47,4 +47,4 @@ private:
 	
 };
 
-#endif // MAINWINDOW_H
+#endif // LANDINGPAGE_H

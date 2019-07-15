@@ -9,7 +9,6 @@
 
 OpenUriWindow::OpenUriWindow(LandingPage* lp, QWidget* parent) : landingPage(lp), QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow) {
 	//Costruttore landing page
-	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//Setup delle varie finestre ui

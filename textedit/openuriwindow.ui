@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Open from URI</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
