@@ -16,6 +16,8 @@ class Client : public QObject
 	Q_OBJECT
 private:
 	QTcpSocket* socket;
+	QString username;
+	QString password;
 public:
 	Client(QObject* parent = 0);
 	~Client();
@@ -24,7 +26,11 @@ public slots:
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
-	bool Login(QString username,QString password);
+	bool Login();
 	bool Connect(QString ipAddress, quint16 port);
+	void Disconnect();
+	void setUsername(QString username);
+	void setPassword(QString password);
+
 };
 
