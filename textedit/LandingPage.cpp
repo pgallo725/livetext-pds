@@ -101,10 +101,10 @@ LandingPage::~LandingPage()
 void LandingPage::pushButtonLoginClicked()
 {
 	//Bypass login
-	ui->stackedWidget->setCurrentIndex(2);
+	/*ui->stackedWidget->setCurrentIndex(2);
 	ui->stackedWidget->show();
 	return;
-
+	*/
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
@@ -124,9 +124,10 @@ void LandingPage::pushButtonLoginClicked()
 		ui->stackedWidget->show();
 	}*/
 
-	
-
-	if (!client->Connect(serverIP, serverPort.toShort())) {
+	client->setUsername(username);
+	client->setPassword(password);
+	client->Connect(serverIP, serverPort.toShort());
+	/*	if (!client->Connect(serverIP, serverPort.toShort())) {
 		// TODO gestione errore
 		return;
 	}
@@ -136,6 +137,10 @@ void LandingPage::pushButtonLoginClicked()
 		ui->stackedWidget->setCurrentIndex(2);
 		ui->stackedWidget->show();
 	}
+	else {
+		client->Disconnect();
+	}*/
+
 }
 
 
