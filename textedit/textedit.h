@@ -16,6 +16,7 @@ class QTextCharFormat;
 class QMenu;
 class QPrinter;
 class QLabel;
+class QToolButton;
 
 
 class TextEdit : public QMainWindow
@@ -23,15 +24,15 @@ class TextEdit : public QMainWindow
 	Q_OBJECT
 
 public:
-	TextEdit(QWidget *parent = 0);
+	TextEdit(QWidget* parent = 0);
 
-	bool load(const QString &f);
+	bool load(const QString& f);
 
 public slots:
 	void fileNew(QString name);
 
 protected:
-	void closeEvent(QCloseEvent *e) override;
+	void closeEvent(QCloseEvent* e) override;
 
 private slots:
 	void fileOpen();
@@ -50,21 +51,21 @@ private slots:
 	void textBold();
 	void textUnderline();
 	void textItalic();
-	void textFamily(const QString &f);
-	void textSize(const QString &p);
+	void textFamily(const QString& f);
+	void textSize(const QString& p);
+	void listStyle(int styleIndex);
 	void textStyle(int styleIndex);
 	void textColor();
-	void textAlign(QAction *a);
+	void textAlign(QAction* a);
 
-	void currentCharFormatChanged(const QTextCharFormat &format);
+	void currentCharFormatChanged(const QTextCharFormat& format);
 	void cursorPositionChanged();
 
 
 	void clipboardDataChanged();
-	void about();
-	void printPreview(QPrinter *);
+	void printPreview(QPrinter*);
 
-	
+
 private:
 	void setupFileActions();
 	void setupEditActions();
@@ -73,11 +74,11 @@ private:
 	void setupUserActions();
 	void setupOnlineUsersActions();
 	bool maybeSave();
-	void setCurrentFileName(const QString &fileName);
+	void setCurrentFileName(const QString& fileName);
 
-	void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
-	void fontChanged(const QFont &f);
-	void colorChanged(const QColor &c);
+	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
+	void fontChanged(const QFont& f);
+	void colorChanged(const QColor& c);
 	void alignmentChanged(Qt::Alignment a);
 
 	//Extra selections and multiple cursors
@@ -85,38 +86,40 @@ private:
 	void handleMultipleSelections();
 	void handleUserSelection(Presence p);
 
-
+	//List type
+	QToolButton* listButton;
+	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
 
 	QList<Presence> onlineUsers;
 
-	QAction *actionSave;
-	QAction *actionTextBold;
-	QAction *actionTextUnderline;
-	QAction *actionTextItalic;
-	QAction *actionTextColor;
-	QAction *actionAlignLeft;
-	QAction *actionAlignCenter;
-	QAction *actionAlignRight;
-	QAction *actionAlignJustify;
-	QAction *actionUndo;
-	QAction *actionRedo;
-	QAction *actionShare;
-	QAction *actionUser;
+	QAction* actionSave;
+	QAction* actionTextBold;
+	QAction* actionTextUnderline;
+	QAction* actionTextItalic;
+	QAction* actionTextColor;
+	QAction* actionAlignLeft;
+	QAction* actionAlignCenter;
+	QAction* actionAlignRight;
+	QAction* actionAlignJustify;
+	QAction* actionUndo;
+	QAction* actionRedo;
+	QAction* actionShare;
+	QAction* actionUser;
 	QAction* actionHighlightUsers;
 
 #ifndef QT_NO_CLIPBOARD
-	QAction *actionCut;
-	QAction *actionCopy;
-	QAction *actionPaste;
+	QAction* actionCut;
+	QAction* actionCopy;
+	QAction* actionPaste;
 #endif
 
-	QComboBox *comboStyle;
-	QFontComboBox *comboFont;
-	QComboBox *comboSize;
+	QComboBox* comboStyle;
+	QFontComboBox* comboFont;
+	QComboBox* comboSize;
 
-	QToolBar *tb;
+	QToolBar* tb;
 	QString fileName;
-	QTextEdit *textEdit;
+	QTextEdit* textEdit;
 
 };
 

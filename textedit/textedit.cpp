@@ -28,6 +28,7 @@
 #include <QScrollBar>
 #include <QRectF>
 #include <QAbstractTextDocumentLayout>
+#include <QToolButton>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -234,7 +235,7 @@ void TextEdit::setupShareActions()
 void TextEdit::setupUserActions()
 {
 	QToolBar* tb = addToolBar(tr("&Account"));
-	
+
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 
@@ -264,7 +265,7 @@ void TextEdit::setupOnlineUsersActions()
 		painter.end();
 
 		const QIcon users(background);
-		
+
 		QAction* onlineAction = new QAction(users, tr(it->nickname().toStdString().c_str()), this);
 		connect(onlineAction, &QAction::triggered, this, [this, it]() { handleUserSelection(*it); });
 		tb->addAction(onlineAction);
@@ -290,6 +291,7 @@ void TextEdit::setupEditActions()
 	actionRedo->setShortcut(QKeySequence::Redo);
 	tb->addAction(actionRedo);
 	menu->addSeparator();
+
 
 #ifndef QT_NO_CLIPBOARD
 	const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(rsrcPath + "/editcut.png"));
@@ -320,6 +322,8 @@ void TextEdit::setupTextActions()
 {
 	QToolBar* tb = addToolBar(tr("Format Actions"));
 	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
+
+
 
 	const QIcon boldIcon = QIcon::fromTheme("format-text-bold", QIcon(rsrcPath + "/textbold.png"));
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
@@ -353,6 +357,7 @@ void TextEdit::setupTextActions()
 	actionTextUnderline->setCheckable(true);
 
 	menu->addSeparator();
+	tb->addSeparator();
 
 	const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
@@ -399,25 +404,50 @@ void TextEdit::setupTextActions()
 	tb->addActions(alignGroup->actions());
 	menu->addActions(alignGroup->actions());
 
-	menu->addSeparator();
+	//Lists
+	tb->addSeparator();
+
+	QMenu* menuList = new QMenu("List menu");
+	QAction* listDisc = menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
+	menuList->addAction(QIcon(rsrcPath + "/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
+	menuList->addAction(QIcon(rsrcPath + "/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
+	menuList->addAction(QIcon(rsrcPath + "/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
+	menuList->addAction(QIcon(rsrcPath + "/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
+	menuList->addAction(QIcon(rsrcPath + "/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
+	menuList->addAction(QIcon(rsrcPath + "/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
+	menuList->addAction(QIcon(rsrcPath + "/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
+
+	listButton = new QToolButton();
+	listButton->setMenu(menuList);
+	listButton->setPopupMode(QToolButton::MenuButtonPopup);
+	listButton->setDefaultAction(listDisc);
+	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
+	tb->addWidget(listButton);
+
 
 	//Gestione colore del testo
+	menu->addSeparator();
+	tb->addSeparator();
+
 	//QPixMap crea l'icona colorata a seconda del colore che selezioniamo
 	QPixmap pix(rsrcPath + "/textcolor.png");
 	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
-	
+
 	//Evidenzia con colore diverso il testo inserito da altri utenti
 	menu->addSeparator();
+	tb->addSeparator();
 
 	const QIcon HighlightUsersIcon(rsrcPath + "/highlightusers.png");
 	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
 	tb->addAction(actionHighlightUsers);
 	//Checkable
 	actionHighlightUsers->setCheckable(true);
-	
+
+
+
 	//Aggiungo la toolbar all'editor-
-	tb = addToolBar(tr("Format Actions"));
+	tb = addToolBar(tr("Font and Size"));
 	tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	addToolBarBreak(Qt::TopToolBarArea);
 	addToolBar(tb);
@@ -426,14 +456,6 @@ void TextEdit::setupTextActions()
 	comboStyle = new QComboBox(tb);
 	tb->addWidget(comboStyle);
 	comboStyle->addItem("Standard");
-	comboStyle->addItem("Bullet List (Disc)");
-	comboStyle->addItem("Bullet List (Circle)");
-	comboStyle->addItem("Bullet List (Square)");
-	comboStyle->addItem("Ordered List (Decimal)");
-	comboStyle->addItem("Ordered List (Alpha lower)");
-	comboStyle->addItem("Ordered List (Alpha upper)");
-	comboStyle->addItem("Ordered List (Roman lower)");
-	comboStyle->addItem("Ordered List (Roman upper)");
 	comboStyle->addItem("Heading 1");
 	comboStyle->addItem("Heading 2");
 	comboStyle->addItem("Heading 3");
@@ -712,7 +734,7 @@ void TextEdit::fileShare()
 	statusBar()->showMessage(tr("URI copied into clipboards"));
 
 	QClipboard* clipboard = QApplication::clipboard();
-	
+
 	QString uri = "URI DI PROVA";
 
 	clipboard->setText(uri);
@@ -782,7 +804,7 @@ void TextEdit::textSize(const QString& p)
 	}
 }
 
-void TextEdit::textStyle(int styleIndex)
+void TextEdit::listStyle(int styleIndex)
 {
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
@@ -792,28 +814,31 @@ void TextEdit::textStyle(int styleIndex)
 
 	//A seconda del combobox sovrascrivo stile
 	switch (styleIndex) {
-	case 1:
+	case standard:
+		style = QTextListFormat::ListStyleUndefined;
+		break;
+	case disc:
 		style = QTextListFormat::ListDisc;
 		break;
-	case 2:
+	case circle:
 		style = QTextListFormat::ListCircle;
 		break;
-	case 3:
+	case square:
 		style = QTextListFormat::ListSquare;
 		break;
-	case 4:
+	case decimal:
 		style = QTextListFormat::ListDecimal;
 		break;
-	case 5:
+	case alpha:
 		style = QTextListFormat::ListLowerAlpha;
 		break;
-	case 6:
+	case alphaupper:
 		style = QTextListFormat::ListUpperAlpha;
 		break;
-	case 7:
+	case roman:
 		style = QTextListFormat::ListLowerRoman;
 		break;
-	case 8:
+	case romanupper:
 		style = QTextListFormat::ListUpperRoman;
 		break;
 	default:
@@ -826,51 +851,61 @@ void TextEdit::textStyle(int styleIndex)
 	//Salva il formato del blocco
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
-	//Se Standard lo stile
-	if (style == QTextListFormat::ListStyleUndefined) {
-
-		blockFmt.setObjectIndex(-1); //(?)
-
-		//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
-		int headingLevel = styleIndex >= 9 ? styleIndex - 9 + 1 : 0; // H1 to H6, or Standard
-		blockFmt.setHeadingLevel(headingLevel);
-		cursor.setBlockFormat(blockFmt);
-
-		int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
-
-		//Crea formattazione carattere
-		QTextCharFormat fmt;
-		//Se ho degli heading mette grassetto
-		fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
-		//Aggiorna il size da +3 a -2 a seconda dell'Heading
-		fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
-
-		//Indica l'intera linea su cui sta il cursore
-		cursor.select(QTextCursor::LineUnderCursor);
-		cursor.mergeCharFormat(fmt);
-		textEdit->mergeCurrentCharFormat(fmt);
+	QTextListFormat listFmt;
+	//Indica se il cursore è gia in una lista, se sì ne prende il formato
+	if (cursor.currentList()) {
+		listFmt = cursor.currentList()->format();
 	}
 	else {
+		//Altrimenti se non sono in una lista indento di +1
+		listFmt.setIndent(blockFmt.indent() + 1);
+		blockFmt.setIndent(0);
 
-		QTextListFormat listFmt;
-		//Indica se il cursore è gia in una lista, se sì ne prende il formato
-		if (cursor.currentList()) {
-			listFmt = cursor.currentList()->format();
-		}
-		else {
-			//Altrimenti se non sono in una lista indento di +1
-			listFmt.setIndent(blockFmt.indent() + 1);
-			blockFmt.setIndent(0);
-
-			//Setto il formato del blocco
-			cursor.setBlockFormat(blockFmt);
-		}
-		//Metto lo stile scelto nello switch come formato lista
-		listFmt.setStyle(style);
-
-		//Creo la lista indentata correttamente
-		cursor.createList(listFmt);
+		//Setto il formato del blocco
+		cursor.setBlockFormat(blockFmt);
 	}
+	//Metto lo stile scelto nello switch come formato lista
+	listFmt.setStyle(style);
+
+	//Creo la lista indentata correttamente
+	cursor.createList(listFmt);
+
+	cursor.endEditBlock();
+}
+
+void TextEdit::textStyle(int styleIndex)
+{
+	//Prendo il cursore
+	QTextCursor cursor = textEdit->textCursor();
+
+	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
+	cursor.beginEditBlock();
+
+	//Salva il formato del blocco
+	QTextBlockFormat blockFmt = cursor.blockFormat();
+
+	//Se Standard lo stile
+
+	blockFmt.setObjectIndex(-1); //(?)
+
+	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
+	int headingLevel = styleIndex > 0 ? styleIndex: 0; // H1 to H6, or Standard
+	blockFmt.setHeadingLevel(headingLevel);
+	cursor.setBlockFormat(blockFmt);
+
+	int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
+
+	//Crea formattazione carattere
+	QTextCharFormat fmt;
+	//Se ho degli heading mette grassetto
+	fmt.setFontWeight(headingLevel ? QFont::Bold : QFont::Normal);
+	//Aggiorna il size da +3 a -2 a seconda dell'Heading
+	fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
+
+	//Indica l'intera linea su cui sta il cursore
+	cursor.select(QTextCursor::LineUnderCursor);
+	cursor.mergeCharFormat(fmt);
+	textEdit->mergeCurrentCharFormat(fmt);
 
 	cursor.endEditBlock();
 }
@@ -918,50 +953,13 @@ void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
 //Questa funzione aggiorna i pulsanti e i combobox a seconda della posizione del cursore
 void TextEdit::cursorPositionChanged()
 {
-
-
 	//Se cambia allineamento testo applico modifiche ai pulsanti markandoli come checked
 	alignmentChanged(textEdit->alignment());
 
-	//Ricava l'elenco puntato in cui si trova il cursore
-	//Ne ricava lo stile della lista e lo setta nel combobox
-	QTextList* list = textEdit->textCursor().currentList();
-	if (list) {
-		switch (list->format().style()) {
-		case QTextListFormat::ListDisc:
-			comboStyle->setCurrentIndex(1);
-			break;
-		case QTextListFormat::ListCircle:
-			comboStyle->setCurrentIndex(2);
-			break;
-		case QTextListFormat::ListSquare:
-			comboStyle->setCurrentIndex(3);
-			break;
-		case QTextListFormat::ListDecimal:
-			comboStyle->setCurrentIndex(4);
-			break;
-		case QTextListFormat::ListLowerAlpha:
-			comboStyle->setCurrentIndex(5);
-			break;
-		case QTextListFormat::ListUpperAlpha:
-			comboStyle->setCurrentIndex(6);
-			break;
-		case QTextListFormat::ListLowerRoman:
-			comboStyle->setCurrentIndex(7);
-			break;
-		case QTextListFormat::ListUpperRoman:
-			comboStyle->setCurrentIndex(8);
-			break;
-		default:
-			comboStyle->setCurrentIndex(-1);
-			break;
-		}
-	}
-	else {
-		//Altrimenti setta nel combobox l'heading level corretto
-		int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
-		comboStyle->setCurrentIndex(headingLevel ? headingLevel + 8 : 0);
-	}
+	
+	//Setta nel combobox l'heading level corretto
+	int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
+	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);
 }
 
 void TextEdit::clipboardDataChanged()
@@ -971,14 +969,6 @@ void TextEdit::clipboardDataChanged()
 	if (const QMimeData * md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(md->hasText());
 #endif
-}
-
-void TextEdit::about()
-{
-	//About del menu help (rimosso)
-	QMessageBox::about(this, tr("About"), tr("This example demonstrates Qt's "
-		"rich text editing facilities in action, providing an example "
-		"document for you to experiment with."));
 }
 
 void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat& format)
@@ -1073,14 +1063,14 @@ Function to handle extra cursor(S) position into text
 
 void TextEdit::handleUsersCursors() {
 	QList<Presence>::iterator it;
-	
+
 	int i = 0;
-	
+
 	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
 		QTextCursor* cursor = it->cursor();
 
 		it->label()->close();
-	
+
 		//Change to user position
 		i++;
 		cursor->setPosition(textEdit->textCursor().position());
@@ -1088,7 +1078,7 @@ void TextEdit::handleUsersCursors() {
 		cursor->setPosition(cursor->position() + i);
 
 		const QRect qRect = textEdit->cursorRect(*cursor);
-		
+
 		QPixmap pix(qRect.width() * 2.5, qRect.height());
 		pix.fill(it->color());
 		it->label()->setPixmap(pix);
@@ -1107,11 +1097,11 @@ void TextEdit::handleMultipleSelections()
 	if (actionHighlightUsers->isChecked()) {
 		int i = 0;
 		for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
-			
+
 			//Change with function to check users selection
 			QTextCursor cursor3(textEdit->document());
 			cursor3.setPosition(i);
-			cursor3.setPosition(i+10, QTextCursor::KeepAnchor);
+			cursor3.setPosition(i + 10, QTextCursor::KeepAnchor);
 
 			QTextEdit::ExtraSelection selection;
 			QColor color = it->color();
@@ -1120,7 +1110,7 @@ void TextEdit::handleMultipleSelections()
 			selection.cursor = cursor3;
 
 			sellist.append(selection);
-			
+
 
 			i += 10;
 		}

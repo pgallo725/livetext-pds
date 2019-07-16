@@ -24,6 +24,15 @@
   <file>images/win/user.png</file>
   <file>images/win/highlightusers.png</file>
   <file>images/win/textcolor.png</file>
+  <file>images/win/disc.png</file>
+  <file>images/win/circle.png</file>
+  <file>images/win/square.png</file>
+  <file>images/win/decimal.png</file>
+  <file>images/win/alpha.png</file>
+  <file>images/win/alphaupper.png</file>
+  <file>images/win/roman.png</file>
+  <file>images/win/romanupper.png</file>
+  <file>images/win/list.png</file>
   <file>images/win/LandingPage/new.png</file>	
   <file>images/win/LandingPage/openuri.png</file>
   <file>images/win/LandingPage/defaultProfile.png</file>
