@@ -92,6 +92,7 @@ bool Client::Login() {
 
 bool Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHost(ipAddress, port);
+	return true;
 }
 
 void Client::Disconnect() {
