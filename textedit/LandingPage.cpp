@@ -82,7 +82,7 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 
 	//Connect per provare il login dopo essermi connesso
-	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLogin);
+	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegistre);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
@@ -115,27 +115,15 @@ void LandingPage::pushButtonLoginClicked()
 	QString serverIP = ui->lineEdit_serverIP->text();
 	QString serverPort = ui->lineEdit_serverPort->text();
 
-	//Controllo user e password
-	/*if (username != "test" || password != "test") {
-		ui->label_incorrect_login->setText("Username and password does not match");
-	}
-	else if (serverIP != "127.0.0.1" || serverPort != "999") {
-		ui->label_incorrect_login->setText("Server " + serverIP + ":" + serverPort + " unreachable");
-	}
-	else {
-		//Apre seconda landing page con operazioni sui file
-		ui->stackedWidget->setCurrentIndex(2);
-		ui->stackedWidget->show();
-	}*/
-
+	// setto i campi necessare al login
 	client->setUsername(username);
-	client->setLogin(true);
 	client->setPassword(password);
+	client->setLogin(true);
 	client->Connect(serverIP, serverPort.toShort());
 
 }
 
-void LandingPage::tryToLogin() {
+void LandingPage::tryToLoginOrRegistre() {
 
 	qDebug() << "try to login";
 	if (client->getLogin()) {
@@ -145,11 +133,16 @@ void LandingPage::tryToLogin() {
 		}
 		else {
 			client->Disconnect();
+			qDebug() << client->getMsg();
 		}
 	}
 	else {
+		if (client->Registre())
+			qDebug() << client->getMsg();
+		else {
+			qDebug() << " non funziona un cazzo";
+		}
 		client->Disconnect();
-		qDebug() << " non funziona un cazzo";
 		//TO DO registration
 	}
 
@@ -197,11 +190,11 @@ void LandingPage::pushButtonConfirmRegistrationClicked()
 	}
 
 	//Controllo se esiste già un username
-	bool userExist = true;
+	/*bool userExist = true;
 
 	if (userExist) {
 		ui->label_incorrect_reg->setText("Username already taken");
-	}
+	}*/
 
 
 	//Controllo sulla corrispondenza password
@@ -218,6 +211,12 @@ void LandingPage::pushButtonConfirmRegistrationClicked()
 	else {
 		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	}*/
+
+	client->setUsername(username);
+	client->setPassword(password);
+	client->setNickname(nick);
+	client->setLogin(false);
+	client->Connect("127.0.0.1",1500);
 }
 
 void LandingPage::pushButtonBackClicked()

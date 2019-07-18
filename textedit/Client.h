@@ -29,7 +29,9 @@ class Client : public QObject
 private:
 	QTcpSocket* socket;
 	QString username;
+	QString nickname;
 	QString password;
+	QString msg_str; // message recived by the client
 	bool login;
 signals:
 	void connectionEstablished();
@@ -42,12 +44,16 @@ public slots:
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
+	void errorHandler();
 	bool Login();
+	bool Registre();
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
 	void setUsername(QString username);
 	void setPassword(QString password);
 	void setLogin(bool flag);
+	void setNickname(QString nickname);
 	bool getLogin();
+	QString getMsg();
 };
 
