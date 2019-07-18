@@ -45,6 +45,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Header Files\Messages">
+      <UniqueIdentifier>{338df4b8-38a3-4117-b791-c8c3987c01a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -102,28 +105,12 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    
-    
-    
-    
     <ClInclude Include="ui_landingpage.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -158,10 +145,25 @@
     </QtUic>
   </ItemGroup>
   <ItemGroup>
+    <None Include="images\win\alpha.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\alphaupper.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="images\win\LandingPage\backarrow.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="images\win\circle.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\decimal.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="images\win\LandingPage\defaultProfile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\disc.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\editcopy.png">
@@ -197,6 +199,9 @@
     <None Include="images\win\highlightusers.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="images\win\list.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="images\win\gif\loading.gif">
       <Filter>Resource Files</Filter>
     </None>
@@ -212,7 +217,16 @@
     <None Include="images\win\LandingPage\richtext.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="images\win\roman.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\romanupper.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="images\win\share.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\square.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\textbold.png">
@@ -254,5 +268,22 @@
     <None Include="images\win\zoomout.png">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\textserver\AccountMessage.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\DocumentMessage.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\LoginMessage.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\LogoutMessage.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\Message.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -80,6 +80,10 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
+
+	//Connect per provare il login dopo essermi connesso
+	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLogin);
+
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
 
@@ -124,21 +128,30 @@ void LandingPage::pushButtonLoginClicked()
 	}*/
 
 	client->setUsername(username);
+	client->setLogin(true);
 	client->setPassword(password);
 	client->Connect(serverIP, serverPort.toShort());
-	/*	if (!client->Connect(serverIP, serverPort.toShort())) {
-		// TODO gestione errore
-		return;
-	}
 
+}
 
-	if (client->Login(username,password)) {
-		ui->stackedWidget->setCurrentIndex(2);
-		ui->stackedWidget->show();
+void LandingPage::tryToLogin() {
+
+	qDebug() << "try to login";
+	if (client->getLogin()) {
+		if (client->Login()) {
+			ui->stackedWidget->setCurrentIndex(2);
+			ui->stackedWidget->show();
+		}
+		else {
+			client->Disconnect();
+		}
 	}
 	else {
 		client->Disconnect();
-	}*/
+		qDebug() << " non funziona un cazzo";
+		//TO DO registration
+	}
+
 
 }
 
