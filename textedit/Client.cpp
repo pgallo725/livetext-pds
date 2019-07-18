@@ -1,6 +1,5 @@
 #include "Client.h"
 
-
 Client::Client(QObject* parent) : QObject(parent)
 {
 	socket = new QTcpSocket(this);
@@ -8,6 +7,7 @@ Client::Client(QObject* parent) : QObject(parent)
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	//connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+
 
 	//socket->connectToHost("127.0.0.1", 1500);
 }
@@ -25,7 +25,7 @@ void Client::writeOnServer()
 
 void Client::serverConnection() {
 	qDebug() << "Client connesso al server ";
-	Login();
+	emit connectionEstablished();
 }
 
 void Client::serverDisconnection() {
@@ -41,7 +41,7 @@ void Client::readBuffer() {
 bool Client::Login() {
 	
 	QDataStream out;
-	quint16 typeOfMessage=0;
+	quint16 typeOfMessage=LoginRequest;
 
 	out.setDevice(socket);
 
@@ -59,9 +59,9 @@ bool Client::Login() {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case 1:
+	case LoginChallenge:
 		break; 
-	case 0:
+	case LoginError:
 		// user not exist
 		qDebug() << "user not exists";
 		return false;
@@ -80,18 +80,29 @@ bool Client::Login() {
 	qDebug() << "cripting salt " << salt;
 	password +=  salt;
 	hash.addData(password.toStdString().c_str(), password.length());
-	typeOfMessage = 2; 
+	typeOfMessage = LoginUnlock; 
 	out << typeOfMessage << QString::fromStdString(hash.result().toStdString());
+	
+	if (!socket->waitForReadyRead(10000)) {
+		qDebug() << "recived no byte";
+		//throw ServerNotRespondException();
+		return false;
+	}
+
 	in >> typeOfMessage;
-	if (typeOfMessage == 3) {
+	if (typeOfMessage == LoginAccessGranted) {
 		qDebug() << "access Granted";
 		return true;
 	}
+	socket->close();
+	qDebug() << "connection closed by client";
 	return false;
 }
 
-bool Client::Connect(QString ipAddress, quint16 port) {
+void Client::Connect(QString ipAddress, quint16 port) {
+	//TODO GESTIONE DATI ERRATI
 	socket->connectToHost(ipAddress, port);
+	return;
 }
 
 void Client::Disconnect() {
@@ -108,4 +119,12 @@ void Client::setPassword(QString password) {
 	
 	this->password = password;
 
+}
+
+void Client::setLogin(bool flag) {
+	login = flag;
+}
+
+bool Client::getLogin() {
+	return login;
 }

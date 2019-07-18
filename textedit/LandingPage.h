@@ -32,7 +32,7 @@ private slots:
 	void pushButtonOpenClicked();
 	void pushButtonOpenUriClicked();
 	void enablePushButtonOpen();
-
+	void tryToLogin();
 
 
 	void showUserIcon(QString path);
