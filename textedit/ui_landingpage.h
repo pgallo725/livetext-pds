@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'landingpage.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -47,15 +47,6 @@ public:
     QHBoxLayout *horizontalLayout_6;
     QLabel *label_7;
     QSpacerItem *verticalSpacer_2;
-    QHBoxLayout *horizontalLayout_2;
-    QGroupBox *groupBox_5;
-    QVBoxLayout *verticalLayout_3;
-    QFormLayout *formLayout_3;
-    QLabel *label_8;
-    QLineEdit *lineEdit_serverIP;
-    QLabel *label_9;
-    QLineEdit *lineEdit_serverPort;
-    QSpacerItem *verticalSpacer_4;
     QFrame *line_2;
     QVBoxLayout *verticalLayout;
     QSpacerItem *verticalSpacer_7;
@@ -132,13 +123,22 @@ public:
     QSpacerItem *verticalSpacer_18;
     QPushButton *pushButton_openuri;
     QSpacerItem *verticalSpacer_20;
+    QHBoxLayout *horizontalLayout_2;
+    QGroupBox *groupBox_5;
+    QHBoxLayout *horizontalLayout_13;
+    QFormLayout *formLayout_3;
+    QLabel *label_8;
+    QLineEdit *lineEdit_serverIP;
+    QLineEdit *lineEdit_serverPort;
+    QLabel *label_9;
+    QSpacerItem *horizontalSpacer_4;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *LandingPage)
     {
         if (LandingPage->objectName().isEmpty())
             LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
-        LandingPage->resize(834, 492);
+        LandingPage->resize(914, 560);
         LandingPage->setMinimumSize(QSize(0, 0));
         LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -214,79 +214,16 @@ public:
 
         verticalLayout_2->addItem(verticalSpacer_2);
 
-        horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->setSpacing(6);
-        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
-        groupBox_5 = new QGroupBox(page);
-        groupBox_5->setObjectName(QString::fromUtf8("groupBox_5"));
-        QSizePolicy sizePolicy2(QSizePolicy::Expanding, QSizePolicy::Preferred);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(groupBox_5->sizePolicy().hasHeightForWidth());
-        groupBox_5->setSizePolicy(sizePolicy2);
-        groupBox_5->setMinimumSize(QSize(0, 135));
-        verticalLayout_3 = new QVBoxLayout(groupBox_5);
-        verticalLayout_3->setSpacing(6);
-        verticalLayout_3->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
-        formLayout_3 = new QFormLayout();
-        formLayout_3->setSpacing(6);
-        formLayout_3->setObjectName(QString::fromUtf8("formLayout_3"));
-        formLayout_3->setSizeConstraint(QLayout::SetDefaultConstraint);
-        formLayout_3->setFormAlignment(Qt::AlignCenter);
-        formLayout_3->setHorizontalSpacing(12);
-        formLayout_3->setVerticalSpacing(15);
-        formLayout_3->setContentsMargins(-1, -1, -1, 0);
-        label_8 = new QLabel(groupBox_5);
-        label_8->setObjectName(QString::fromUtf8("label_8"));
-
-        formLayout_3->setWidget(0, QFormLayout::LabelRole, label_8);
-
-        lineEdit_serverIP = new QLineEdit(groupBox_5);
-        lineEdit_serverIP->setObjectName(QString::fromUtf8("lineEdit_serverIP"));
-        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy3.setHorizontalStretch(0);
-        sizePolicy3.setVerticalStretch(0);
-        sizePolicy3.setHeightForWidth(lineEdit_serverIP->sizePolicy().hasHeightForWidth());
-        lineEdit_serverIP->setSizePolicy(sizePolicy3);
-
-        formLayout_3->setWidget(0, QFormLayout::FieldRole, lineEdit_serverIP);
-
-        label_9 = new QLabel(groupBox_5);
-        label_9->setObjectName(QString::fromUtf8("label_9"));
-
-        formLayout_3->setWidget(1, QFormLayout::LabelRole, label_9);
-
-        lineEdit_serverPort = new QLineEdit(groupBox_5);
-        lineEdit_serverPort->setObjectName(QString::fromUtf8("lineEdit_serverPort"));
-        sizePolicy3.setHeightForWidth(lineEdit_serverPort->sizePolicy().hasHeightForWidth());
-        lineEdit_serverPort->setSizePolicy(sizePolicy3);
-
-        formLayout_3->setWidget(1, QFormLayout::FieldRole, lineEdit_serverPort);
-
-
-        verticalLayout_3->addLayout(formLayout_3);
-
-
-        horizontalLayout_2->addWidget(groupBox_5);
-
-
-        verticalLayout_2->addLayout(horizontalLayout_2);
-
-        verticalSpacer_4 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-        verticalLayout_2->addItem(verticalSpacer_4);
-
 
         horizontalLayout->addLayout(verticalLayout_2);
 
         line_2 = new QFrame(page);
         line_2->setObjectName(QString::fromUtf8("line_2"));
-        QSizePolicy sizePolicy4(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        sizePolicy4.setHorizontalStretch(0);
-        sizePolicy4.setVerticalStretch(0);
-        sizePolicy4.setHeightForWidth(line_2->sizePolicy().hasHeightForWidth());
-        line_2->setSizePolicy(sizePolicy4);
+        QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(line_2->sizePolicy().hasHeightForWidth());
+        line_2->setSizePolicy(sizePolicy2);
         line_2->setFrameShape(QFrame::VLine);
         line_2->setFrameShadow(QFrame::Sunken);
 
@@ -305,6 +242,9 @@ public:
         horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
         groupBox_6 = new QGroupBox(page);
         groupBox_6->setObjectName(QString::fromUtf8("groupBox_6"));
+        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
         sizePolicy3.setHeightForWidth(groupBox_6->sizePolicy().hasHeightForWidth());
         groupBox_6->setSizePolicy(sizePolicy3);
         groupBox_6->setMinimumSize(QSize(135, 0));
@@ -348,11 +288,11 @@ public:
 
         pushButton_login = new QPushButton(groupBox_6);
         pushButton_login->setObjectName(QString::fromUtf8("pushButton_login"));
-        QSizePolicy sizePolicy5(QSizePolicy::Minimum, QSizePolicy::Preferred);
-        sizePolicy5.setHorizontalStretch(0);
-        sizePolicy5.setVerticalStretch(0);
-        sizePolicy5.setHeightForWidth(pushButton_login->sizePolicy().hasHeightForWidth());
-        pushButton_login->setSizePolicy(sizePolicy5);
+        QSizePolicy sizePolicy4(QSizePolicy::Minimum, QSizePolicy::Preferred);
+        sizePolicy4.setHorizontalStretch(0);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(pushButton_login->sizePolicy().hasHeightForWidth());
+        pushButton_login->setSizePolicy(sizePolicy4);
         pushButton_login->setMinimumSize(QSize(0, 30));
         pushButton_login->setAutoDefault(false);
 
@@ -480,11 +420,11 @@ public:
 
         lineEdit_regUsr = new QLineEdit(groupBox);
         lineEdit_regUsr->setObjectName(QString::fromUtf8("lineEdit_regUsr"));
-        QSizePolicy sizePolicy6(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        sizePolicy6.setHorizontalStretch(0);
-        sizePolicy6.setVerticalStretch(0);
-        sizePolicy6.setHeightForWidth(lineEdit_regUsr->sizePolicy().hasHeightForWidth());
-        lineEdit_regUsr->setSizePolicy(sizePolicy6);
+        QSizePolicy sizePolicy5(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        sizePolicy5.setHorizontalStretch(0);
+        sizePolicy5.setVerticalStretch(0);
+        sizePolicy5.setHeightForWidth(lineEdit_regUsr->sizePolicy().hasHeightForWidth());
+        lineEdit_regUsr->setSizePolicy(sizePolicy5);
         lineEdit_regUsr->setMaximumSize(QSize(320, 16777215));
 
         formLayout_2->setWidget(0, QFormLayout::FieldRole, lineEdit_regUsr);
@@ -496,8 +436,8 @@ public:
 
         lineEdit_regNick = new QLineEdit(groupBox);
         lineEdit_regNick->setObjectName(QString::fromUtf8("lineEdit_regNick"));
-        sizePolicy6.setHeightForWidth(lineEdit_regNick->sizePolicy().hasHeightForWidth());
-        lineEdit_regNick->setSizePolicy(sizePolicy6);
+        sizePolicy5.setHeightForWidth(lineEdit_regNick->sizePolicy().hasHeightForWidth());
+        lineEdit_regNick->setSizePolicy(sizePolicy5);
         lineEdit_regNick->setMaximumSize(QSize(320, 16777215));
 
         formLayout_2->setWidget(1, QFormLayout::FieldRole, lineEdit_regNick);
@@ -509,8 +449,8 @@ public:
 
         lineEdit_regPsw = new QLineEdit(groupBox);
         lineEdit_regPsw->setObjectName(QString::fromUtf8("lineEdit_regPsw"));
-        sizePolicy6.setHeightForWidth(lineEdit_regPsw->sizePolicy().hasHeightForWidth());
-        lineEdit_regPsw->setSizePolicy(sizePolicy6);
+        sizePolicy5.setHeightForWidth(lineEdit_regPsw->sizePolicy().hasHeightForWidth());
+        lineEdit_regPsw->setSizePolicy(sizePolicy5);
         lineEdit_regPsw->setMaximumSize(QSize(320, 16777215));
         lineEdit_regPsw->setEchoMode(QLineEdit::Password);
 
@@ -523,8 +463,8 @@ public:
 
         lineEdit_regPswConf = new QLineEdit(groupBox);
         lineEdit_regPswConf->setObjectName(QString::fromUtf8("lineEdit_regPswConf"));
-        sizePolicy6.setHeightForWidth(lineEdit_regPswConf->sizePolicy().hasHeightForWidth());
-        lineEdit_regPswConf->setSizePolicy(sizePolicy6);
+        sizePolicy5.setHeightForWidth(lineEdit_regPswConf->sizePolicy().hasHeightForWidth());
+        lineEdit_regPswConf->setSizePolicy(sizePolicy5);
         lineEdit_regPswConf->setMaximumSize(QSize(320, 16777215));
         lineEdit_regPswConf->setEchoMode(QLineEdit::Password);
 
@@ -546,7 +486,7 @@ public:
         commandLinkButton->setSizePolicy(sizePolicy3);
         commandLinkButton->setMaximumSize(QSize(85, 32));
         QFont font3;
-        font3.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font3.setFamily(QString::fromUtf8("Segoe UI"));
         font3.setPointSize(11);
         commandLinkButton->setFont(font3);
         QIcon icon;
@@ -573,11 +513,11 @@ public:
         horizontalLayout_15->setObjectName(QString::fromUtf8("horizontalLayout_15"));
         label_UsrIcon = new QLabel(groupBox);
         label_UsrIcon->setObjectName(QString::fromUtf8("label_UsrIcon"));
-        QSizePolicy sizePolicy7(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        sizePolicy7.setHorizontalStretch(0);
-        sizePolicy7.setVerticalStretch(0);
-        sizePolicy7.setHeightForWidth(label_UsrIcon->sizePolicy().hasHeightForWidth());
-        label_UsrIcon->setSizePolicy(sizePolicy7);
+        QSizePolicy sizePolicy6(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy6.setHorizontalStretch(0);
+        sizePolicy6.setVerticalStretch(0);
+        sizePolicy6.setHeightForWidth(label_UsrIcon->sizePolicy().hasHeightForWidth());
+        label_UsrIcon->setSizePolicy(sizePolicy6);
         label_UsrIcon->setMinimumSize(QSize(130, 130));
         label_UsrIcon->setMaximumSize(QSize(130, 130));
         label_UsrIcon->setFrameShape(QFrame::StyledPanel);
@@ -640,8 +580,8 @@ public:
         horizontalLayout_16->setObjectName(QString::fromUtf8("horizontalLayout_16"));
         pushButton_regConf = new QPushButton(groupBox);
         pushButton_regConf->setObjectName(QString::fromUtf8("pushButton_regConf"));
-        sizePolicy6.setHeightForWidth(pushButton_regConf->sizePolicy().hasHeightForWidth());
-        pushButton_regConf->setSizePolicy(sizePolicy6);
+        sizePolicy5.setHeightForWidth(pushButton_regConf->sizePolicy().hasHeightForWidth());
+        pushButton_regConf->setSizePolicy(sizePolicy5);
         pushButton_regConf->setMinimumSize(QSize(230, 28));
         pushButton_regConf->setMaximumSize(QSize(350, 16777215));
         pushButton_regConf->setFont(font1);
@@ -774,6 +714,68 @@ public:
 
         gridLayout->addWidget(stackedWidget, 0, 1, 1, 1);
 
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setSpacing(6);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        horizontalLayout_2->setContentsMargins(10, -1, 10, -1);
+        groupBox_5 = new QGroupBox(centralWidget);
+        groupBox_5->setObjectName(QString::fromUtf8("groupBox_5"));
+        QSizePolicy sizePolicy7(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        sizePolicy7.setHorizontalStretch(0);
+        sizePolicy7.setVerticalStretch(0);
+        sizePolicy7.setHeightForWidth(groupBox_5->sizePolicy().hasHeightForWidth());
+        groupBox_5->setSizePolicy(sizePolicy7);
+        groupBox_5->setMinimumSize(QSize(0, 0));
+        horizontalLayout_13 = new QHBoxLayout(groupBox_5);
+        horizontalLayout_13->setSpacing(6);
+        horizontalLayout_13->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_13->setObjectName(QString::fromUtf8("horizontalLayout_13"));
+        horizontalLayout_13->setContentsMargins(9, -1, -1, -1);
+        formLayout_3 = new QFormLayout();
+        formLayout_3->setSpacing(6);
+        formLayout_3->setObjectName(QString::fromUtf8("formLayout_3"));
+        formLayout_3->setSizeConstraint(QLayout::SetDefaultConstraint);
+        formLayout_3->setFormAlignment(Qt::AlignCenter);
+        formLayout_3->setHorizontalSpacing(5);
+        formLayout_3->setVerticalSpacing(7);
+        formLayout_3->setContentsMargins(-1, -1, -1, 0);
+        label_8 = new QLabel(groupBox_5);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+
+        formLayout_3->setWidget(0, QFormLayout::LabelRole, label_8);
+
+        lineEdit_serverIP = new QLineEdit(groupBox_5);
+        lineEdit_serverIP->setObjectName(QString::fromUtf8("lineEdit_serverIP"));
+        sizePolicy3.setHeightForWidth(lineEdit_serverIP->sizePolicy().hasHeightForWidth());
+        lineEdit_serverIP->setSizePolicy(sizePolicy3);
+
+        formLayout_3->setWidget(0, QFormLayout::FieldRole, lineEdit_serverIP);
+
+        lineEdit_serverPort = new QLineEdit(groupBox_5);
+        lineEdit_serverPort->setObjectName(QString::fromUtf8("lineEdit_serverPort"));
+        sizePolicy3.setHeightForWidth(lineEdit_serverPort->sizePolicy().hasHeightForWidth());
+        lineEdit_serverPort->setSizePolicy(sizePolicy3);
+
+        formLayout_3->setWidget(1, QFormLayout::FieldRole, lineEdit_serverPort);
+
+        label_9 = new QLabel(groupBox_5);
+        label_9->setObjectName(QString::fromUtf8("label_9"));
+
+        formLayout_3->setWidget(1, QFormLayout::LabelRole, label_9);
+
+
+        horizontalLayout_13->addLayout(formLayout_3);
+
+        horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_13->addItem(horizontalSpacer_4);
+
+
+        horizontalLayout_2->addWidget(groupBox_5);
+
+
+        gridLayout->addLayout(horizontalLayout_2, 1, 1, 1, 1);
+
         LandingPage->setCentralWidget(centralWidget);
         statusBar = new QStatusBar(LandingPage);
         statusBar->setObjectName(QString::fromUtf8("statusBar"));
@@ -791,38 +793,38 @@ public:
 
     void retranslateUi(QMainWindow *LandingPage)
     {
-        LandingPage->setWindowTitle(QApplication::translate("LandingPage", "LiveText", nullptr));
+        LandingPage->setWindowTitle(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
         label_logo->setText(QString());
-        label_7->setText(QApplication::translate("LandingPage", "Politecnico di Torino\n"
+        label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
-        groupBox_5->setTitle(QApplication::translate("LandingPage", "Server settings", nullptr));
-        label_8->setText(QApplication::translate("LandingPage", "Address", nullptr));
-        label_9->setText(QApplication::translate("LandingPage", "Port", nullptr));
-        groupBox_6->setTitle(QApplication::translate("LandingPage", "Sign in", nullptr));
-        label_12->setText(QApplication::translate("LandingPage", "Username", nullptr));
-        label_13->setText(QApplication::translate("LandingPage", "Password", nullptr));
-        pushButton_login->setText(QApplication::translate("LandingPage", "Login", nullptr));
+        groupBox_6->setTitle(QCoreApplication::translate("LandingPage", "Sign in", nullptr));
+        label_12->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
+        label_13->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
+        pushButton_login->setText(QCoreApplication::translate("LandingPage", "Login", nullptr));
         label_incorrect_login->setText(QString());
-        label_10->setText(QApplication::translate("LandingPage", "If you don't have an account", nullptr));
-        pushButton_register->setText(QApplication::translate("LandingPage", "Register", nullptr));
-        groupBox->setTitle(QApplication::translate("LandingPage", "Registration form", nullptr));
-        label->setText(QApplication::translate("LandingPage", "Please fill the form with required information to create your account", nullptr));
-        label_2->setText(QApplication::translate("LandingPage", "Username", nullptr));
-        label_5->setText(QApplication::translate("LandingPage", "Nickname\n"
+        label_10->setText(QCoreApplication::translate("LandingPage", "If you don't have an account", nullptr));
+        pushButton_register->setText(QCoreApplication::translate("LandingPage", "Register", nullptr));
+        groupBox->setTitle(QCoreApplication::translate("LandingPage", "Registration form", nullptr));
+        label->setText(QCoreApplication::translate("LandingPage", "Please fill the form with required information to create your account", nullptr));
+        label_2->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
+        label_5->setText(QCoreApplication::translate("LandingPage", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QApplication::translate("LandingPage", "Password", nullptr));
-        label_11->setText(QApplication::translate("LandingPage", "Confirm\n"
+        label_6->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
+        label_11->setText(QCoreApplication::translate("LandingPage", "Confirm\n"
 "password", nullptr));
-        commandLinkButton->setText(QApplication::translate("LandingPage", "Back", nullptr));
+        commandLinkButton->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
         label_UsrIcon->setText(QString());
-        label_15->setText(QApplication::translate("LandingPage", "Choose your profile icon (optional)", nullptr));
-        pushButton_browse->setText(QApplication::translate("LandingPage", "Browse...", nullptr));
+        label_15->setText(QCoreApplication::translate("LandingPage", "Choose your profile icon (optional)", nullptr));
+        pushButton_browse->setText(QCoreApplication::translate("LandingPage", "Browse...", nullptr));
         label_incorrect_reg->setText(QString());
-        pushButton_regConf->setText(QApplication::translate("LandingPage", "Register", nullptr));
-        groupBox_2->setTitle(QApplication::translate("LandingPage", "Open existing file", nullptr));
-        pushButton_open->setText(QApplication::translate("LandingPage", "Open selected", nullptr));
+        pushButton_regConf->setText(QCoreApplication::translate("LandingPage", "Register", nullptr));
+        groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
+        groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
+        label_8->setText(QCoreApplication::translate("LandingPage", "Address", nullptr));
+        label_9->setText(QCoreApplication::translate("LandingPage", "Port", nullptr));
     } // retranslateUi
 
 };

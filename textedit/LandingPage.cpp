@@ -96,7 +96,6 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 LandingPage::~LandingPage()
 {
-	
 	delete ui;
 }
 
