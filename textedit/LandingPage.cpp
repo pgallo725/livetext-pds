@@ -81,8 +81,11 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
 
-	//Connect per provare il login dopo essermi connesso
+	//Connect con Client quando la connessione è stabilita
 	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegistre);
+
+	//Connect con il Client quando non riesco a connettermi al server
+	//connect(client, &Client::impossibleToConnect, this, /*aggiungere funzione*/);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
