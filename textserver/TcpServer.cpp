@@ -3,7 +3,6 @@
 #include <optional>
 #include <iostream>
 
-#include <QString>
 #include <QFile>
 #include <QDataStream>
 #include <QFileInfo>
@@ -12,32 +11,29 @@
 
 
 TcpServer::TcpServer(QObject* parent)
-	: QObject(parent), _userIdCounter(0)
+	: QTcpServer(parent), _userIdCounter(0)
 {
-	/* create a new object TCP server */
-	textServer = new QTcpServer(this);
-
 	/* connect newConnection from QTcpServer to newClientConnection() */
-	connect(textServer, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
+	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
 
 	for (quint16 i = 1500; i < 10000; i += 101) {
 
 		/* server listen on 0.0.0.0::i - return true on success */
-		if (textServer->listen(QHostAddress::Any, i)) {
+		if (this->listen(QHostAddress::Any, i)) {
 			break;
 		}
 	}
 
-	if (!textServer->isListening())
+	if (!this->isListening())
 	{
 		qDebug() << "Server could not start";
 	}
 	else
 	{
 		/* Get IP address and port */
-		QString ip_address = textServer->serverAddress().toString();
-		quint16 port = textServer->serverPort();
-		if (textServer->isListening()) {
+		QString ip_address = this->serverAddress().toString();
+		quint16 port = this->serverPort();
+		if (this->isListening()) {
 			qDebug() << "Server started at " << ip_address << ":" << port;
 		}
 	}
@@ -85,7 +81,7 @@ void TcpServer::initialize()
 void TcpServer::newClientConnection()
 {
 	/* need to grab the socket - socket is created as a child of server */
-	QTcpSocket* socket = textServer->nextPendingConnection();
+	QTcpSocket* socket = this->nextPendingConnection();
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == 0) {
@@ -233,11 +229,12 @@ void TcpServer::readMessage()
 
 			/* LogoutMessages */
 		case LogoutRequest:
-			msg =std::make_shared<LogoutMessage>(LogoutRequest);
+			msg = std::make_shared<LogoutMessage>(LogoutRequest);
 			break;
 
 			/* DocumentMessages */
 		case NewDocument:
+			msg = std::make_shared<DocumentMessage>(NewDocument, streamIn);
 			break;
 
 		case OpenDocument:
@@ -351,16 +348,6 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 		break;
 
 	case OpenDocument:
-		break;
-
-		/* textMessages */
-	case CharInsert:
-		break;
-
-	case CharDelete:
-		break;
-
-	case MoveCursor:
 		break;
 
 	default:

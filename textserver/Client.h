@@ -2,7 +2,10 @@
 
 #include <qtcpsocket.h>
 #include <QCryptographicHash>
+
 #include "User.h"
+
+class WorkSpace;	// inclusione anticipata
 
 class Client
 {
@@ -11,6 +14,7 @@ class Client
 	User* activeUser;
 	bool logged;
 	QString nonce;
+	std::shared_ptr<WorkSpace> workspace;
 public:
 	Client(int id, QTcpSocket* s, User* u);
 	~Client();
@@ -23,6 +27,8 @@ public:
 	/* setter */
 	void setLogged();
 	void resetLogged();
+	bool setWorkspace(std::shared_ptr<WorkSpace> ws);
+	void resetWorkspace();
 
 	/* general methods */
 	bool authentication(QString passwd);

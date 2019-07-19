@@ -16,6 +16,7 @@
 #include "LoginMessage.h"
 #include "AccountMessage.h"
 #include "LogoutMessage.h"
+#include "DocumentMessage.h"
 
 #define TIMEOUT 15000 /* ms */
 
@@ -23,17 +24,16 @@
 #define TMP_USERS_FILENAME "users.tmp"
 
 
-class TcpServer : public QObject 
+class TcpServer : public QTcpServer
 {
 	Q_OBJECT
 
 private:
 
-	QTcpServer* textServer;
 	QMap<QString, User> users;
-	QMap<QString, Document> documents;
-	QMap<std::string, WorkSpace> workspaces;
-	QMap<QTcpSocket *, Client> clients;
+	QMap<int, Document> documents;
+	QMap<int, WorkSpace> workspaces;
+	QMap<QTcpSocket*, Client> clients;
 	int _userIdCounter;
 
 	bool login(Client client, QString password);

@@ -1,6 +1,6 @@
 #include "Document.h"
 
-Document::Document(std::string name, int id):
+Document::Document(QString name, int id):
 	docName(name), docId(id)
 {
 }

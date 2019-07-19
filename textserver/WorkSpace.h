@@ -12,7 +12,7 @@ class WorkSpace
 {
 private:
 	Document* doc;
-	std::list<Client*> editors;
+	QList<Client*> editors;
 	std::queue<Message> msgQueue;
 
 	std::mutex mQueue;
