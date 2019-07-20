@@ -39,3 +39,13 @@ QString Message::getPasswd()
 {
 	return QString();
 }
+
+QString Message::getURI()
+{
+	return QString();
+}
+
+QString Message::getDocName()
+{
+	return QString();
+}

@@ -1,16 +1,21 @@
 #pragma once
 
+#include <QObject>
 #include <QString>
 
 class Document
 {
 private:
 	QString docName;
-	int docId;
+	QString URI;
+	QString creatorName;
 	// TODO: document structur
 
 public:
-	Document(QString name, int id);
+	Document(QString name, QString uri, QString userName);
 	~Document();
+
+	/* getter */
+	QString getURI();
 };
 

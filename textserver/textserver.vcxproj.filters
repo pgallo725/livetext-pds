@@ -74,25 +74,16 @@
     <ClInclude Include="Client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Document.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="TcpServer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="User.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorkSpace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AccountMessage.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="LogoutMessage.h">
-      <Filter>Header Files\Messages</Filter>
-    </ClInclude>
-    <ClInclude Include="Message.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="DocumentMessage.h">
@@ -104,6 +95,9 @@
     <ClInclude Include="ServerException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\moc_TcpServer.cpp">
@@ -112,5 +106,13 @@
     <CustomBuild Include="GeneratedFiles\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="WorkSpace.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Message.h">
+      <Filter>Header Files\Messages</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

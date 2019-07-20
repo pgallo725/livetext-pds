@@ -18,7 +18,12 @@ FileLoadException::FileLoadException(std::string filePath)
 }
 
 FileWriteException::FileWriteException(std::string fileName, std::string path)
-	: ServerException("Unable to create or write to file '" + fileName + "' in " + path)
+	: ServerException("Unable to write file '" + fileName + "' in " + path)
+{
+}
+
+FileCreateException::FileCreateException(std::string fileName, std::string path)
+	: FileException("Unable to create file '" + fileName + "' in " + path)
 {
 }
 
@@ -33,8 +38,13 @@ MessageException::MessageException(std::string msg) :
 }
 
 MessageUnknownTypeException::MessageUnknownTypeException(int type) :
-	MessageException("Unknown message type : " + type)
+	MessageException("Unknown message type : " + type), errType(type)
 {
+}
+
+int MessageUnknownTypeException::getErrType()
+{
+	return errType;
 }
 
 MessageWrongTypeException::MessageWrongTypeException(std::string msg, int type) :

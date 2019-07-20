@@ -26,6 +26,11 @@ QString Client::getNonce()
 	return nonce;
 }
 
+QString Client::getUserName()
+{
+	return activeUser->getUsername();
+}
+
 void Client::setLogged()
 {
 	logged = true;

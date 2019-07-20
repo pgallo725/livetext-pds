@@ -23,6 +23,7 @@ public:
 	QTcpSocket* getSocket();
 	User* getUser();
 	QString getNonce();
+	QString getUserName();
 
 	/* setter */
 	void setLogged();
