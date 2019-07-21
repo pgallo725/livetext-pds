@@ -408,7 +408,8 @@ void TextEdit::setupTextActions()
 	tb->addSeparator();
 
 	QMenu* menuList = new QMenu("List menu");
-	QAction* listDisc = menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
+	QAction* listStandard = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
+	menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
 	menuList->addAction(QIcon(rsrcPath + "/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
 	menuList->addAction(QIcon(rsrcPath + "/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
 	menuList->addAction(QIcon(rsrcPath + "/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
@@ -417,10 +418,15 @@ void TextEdit::setupTextActions()
 	menuList->addAction(QIcon(rsrcPath + "/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
 	menuList->addAction(QIcon(rsrcPath + "/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
 
+
+
 	listButton = new QToolButton();
 	listButton->setMenu(menuList);
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
-	listButton->setDefaultAction(listDisc);
+	listButton->setDefaultAction(listStandard);
+
+	listButton->setCheckable(true);
+
 	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	tb->addWidget(listButton);
 
@@ -806,8 +812,14 @@ void TextEdit::textSize(const QString& p)
 
 void TextEdit::listStyle(int styleIndex)
 {
+	//Formato lista
+	QTextListFormat listFmt;
+	
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
+
+	//Salva il formato del blocco		
+	QTextBlockFormat blockFmt = cursor.blockFormat();
 
 	//Creo un oggetto stile carattere come undefined (Standard)
 	QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
@@ -815,31 +827,59 @@ void TextEdit::listStyle(int styleIndex)
 	//A seconda del combobox sovrascrivo stile
 	switch (styleIndex) {
 	case standard:
-		style = QTextListFormat::ListStyleUndefined;
+		//Attiva/Disattiva lista --> Default disc
+		if (listButton->isChecked()) {
+			listButton->setChecked(false);
+
+			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
+		}
+		else
+		{
+			listButton->setChecked(true);
+			style = QTextListFormat::ListDisc;
+			listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
+		}
 		break;
+
 	case disc:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListDisc;
+		listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
 		break;
 	case circle:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListCircle;
+		listButton->setIcon(QIcon(rsrcPath + "/circle.png"));
 		break;
 	case square:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListSquare;
+		listButton->setIcon(QIcon(rsrcPath + "/square.png"));
 		break;
 	case decimal:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListDecimal;
+		listButton->setIcon(QIcon(rsrcPath + "/decimal.png"));
 		break;
 	case alpha:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListLowerAlpha;
+		listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
 		break;
 	case alphaupper:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListUpperAlpha;
+		listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
 		break;
 	case roman:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListLowerRoman;
+		listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
 		break;
 	case romanupper:
+		listButton->setChecked(true);
 		style = QTextListFormat::ListUpperRoman;
+		listButton->setIcon(QIcon(rsrcPath + "/romanupper.png"));
 		break;
 	default:
 		break;
@@ -848,13 +888,24 @@ void TextEdit::listStyle(int styleIndex)
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
-	//Salva il formato del blocco
-	QTextBlockFormat blockFmt = cursor.blockFormat();
+	
+	if (style == QTextListFormat::ListStyleUndefined) {
+		//Se Standard lo stile
+		blockFmt.setObjectIndex(-1); //(?)
 
-	QTextListFormat listFmt;
+		blockFmt.setHeadingLevel(0);
+		cursor.setBlockFormat(blockFmt);
+	}
 	//Indica se il cursore è gia in una lista, se sì ne prende il formato
-	if (cursor.currentList()) {
+	else if (cursor.currentList()) {
 		listFmt = cursor.currentList()->format();
+
+		//Metto lo stile scelto nello switch come formato lista
+		listFmt.setStyle(style);
+
+		//Creo la lista indentata correttamente
+		cursor.createList(listFmt);
+
 	}
 	else {
 		//Altrimenti se non sono in una lista indento di +1
@@ -863,13 +914,11 @@ void TextEdit::listStyle(int styleIndex)
 
 		//Setto il formato del blocco
 		cursor.setBlockFormat(blockFmt);
+
+		listFmt.setStyle(style);
+
+		cursor.createList(listFmt);
 	}
-	//Metto lo stile scelto nello switch come formato lista
-	listFmt.setStyle(style);
-
-	//Creo la lista indentata correttamente
-	cursor.createList(listFmt);
-
 	cursor.endEditBlock();
 }
 
@@ -885,11 +934,10 @@ void TextEdit::textStyle(int styleIndex)
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
 	//Se Standard lo stile
-
 	blockFmt.setObjectIndex(-1); //(?)
 
 	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
-	int headingLevel = styleIndex > 0 ? styleIndex: 0; // H1 to H6, or Standard
+	int headingLevel = styleIndex > 0 ? styleIndex : 0; // H1 to H6, or Standard
 	blockFmt.setHeadingLevel(headingLevel);
 	cursor.setBlockFormat(blockFmt);
 
@@ -956,7 +1004,7 @@ void TextEdit::cursorPositionChanged()
 	//Se cambia allineamento testo applico modifiche ai pulsanti markandoli come checked
 	alignmentChanged(textEdit->alignment());
 
-	
+
 	//Setta nel combobox l'heading level corretto
 	int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);

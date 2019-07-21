@@ -33,7 +33,7 @@ private slots:
 	void pushButtonOpenClicked();
 	void pushButtonOpenUriClicked();
 	void enablePushButtonOpen();
-	void tryToLoginOrRegistre();
+	void tryToLoginOrRegister();
 
 
 	void showUserIcon(QString path);

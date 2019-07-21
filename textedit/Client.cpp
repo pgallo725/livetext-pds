@@ -151,7 +151,7 @@ bool Client::Login() {
 }
 
 
-bool Client::Registre() {
+bool Client::Register() {
 
 	QDataStream out;
 	quint16 typeOfMessage = AccountCreate;

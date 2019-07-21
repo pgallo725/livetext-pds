@@ -42,6 +42,11 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
 	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
 
+
+	//Icona back
+	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/backarrow.png"));
+
+
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
 
@@ -57,7 +62,7 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &LandingPage::pushButtonConfirmRegistrationClicked);
 	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
-	connect(ui->commandLinkButton, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
+	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::pushButtonLoginClicked);
@@ -78,7 +83,7 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 
 	//Connect con Client quando la connessione è stabilita
-	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegistre);
+	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegister);
 
 	//Connect con il Client quando non riesco a connettermi al server
 	//connect(client, &Client::impossibleToConnect, this, /*aggiungere funzione*/);
@@ -127,7 +132,7 @@ void LandingPage::pushButtonLoginClicked()
 	startLoadingAnimation();
 }
 
-void LandingPage::tryToLoginOrRegistre() {
+void LandingPage::tryToLoginOrRegister() {
 
 	qDebug() << "try to login";
 	if (client->getLogin()) {
@@ -143,7 +148,7 @@ void LandingPage::tryToLoginOrRegistre() {
 		}
 	}
 	else {
-		if (client->Registre())
+		if (client->Register())
 			qDebug() << client->getMsg();
 		else {
 			qDebug() << " non funziona un cazzo";
@@ -406,5 +411,5 @@ void LandingPage::startLoadingAnimation()
 void LandingPage::stopLoadingAnimation()
 {
 	loading->close();
-	setEnabled(false);
+	setEnabled(true);
 }

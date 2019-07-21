@@ -10,9 +10,7 @@
 #define UI_LANDINGPAGE_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QCommandLinkButton>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
@@ -89,7 +87,7 @@ public:
     QLineEdit *lineEdit_regPswConf;
     QSpacerItem *verticalSpacer_14;
     QHBoxLayout *horizontalLayout_12;
-    QCommandLinkButton *commandLinkButton;
+    QPushButton *pushButton_back;
     QSpacerItem *horizontalSpacer_3;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout_15;
@@ -480,20 +478,11 @@ public:
         horizontalLayout_12 = new QHBoxLayout();
         horizontalLayout_12->setSpacing(6);
         horizontalLayout_12->setObjectName(QString::fromUtf8("horizontalLayout_12"));
-        commandLinkButton = new QCommandLinkButton(groupBox);
-        commandLinkButton->setObjectName(QString::fromUtf8("commandLinkButton"));
-        sizePolicy3.setHeightForWidth(commandLinkButton->sizePolicy().hasHeightForWidth());
-        commandLinkButton->setSizePolicy(sizePolicy3);
-        commandLinkButton->setMaximumSize(QSize(85, 32));
-        QFont font3;
-        font3.setFamily(QString::fromUtf8("Segoe UI"));
-        font3.setPointSize(11);
-        commandLinkButton->setFont(font3);
-        QIcon icon;
-        icon.addFile(QString::fromUtf8("images/win/LandingPage/backarrow.png"), QSize(), QIcon::Normal, QIcon::Off);
-        commandLinkButton->setIcon(icon);
+        pushButton_back = new QPushButton(groupBox);
+        pushButton_back->setObjectName(QString::fromUtf8("pushButton_back"));
+        pushButton_back->setMinimumSize(QSize(0, 28));
 
-        horizontalLayout_12->addWidget(commandLinkButton);
+        horizontalLayout_12->addWidget(pushButton_back);
 
         horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -621,12 +610,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font4;
-        font4.setFamily(QString::fromUtf8("Calibri"));
-        font4.setPointSize(14);
-        font4.setBold(false);
-        font4.setWeight(50);
-        groupBox_2->setFont(font4);
+        QFont font3;
+        font3.setFamily(QString::fromUtf8("Calibri"));
+        font3.setPointSize(14);
+        font3.setBold(false);
+        font3.setWeight(50);
+        groupBox_2->setFont(font3);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -654,12 +643,12 @@ public:
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font5;
-        font5.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font5.setPointSize(10);
-        font5.setBold(false);
-        font5.setWeight(50);
-        pushButton_open->setFont(font5);
+        QFont font4;
+        font4.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font4.setPointSize(10);
+        font4.setBold(false);
+        font4.setWeight(50);
+        pushButton_open->setFont(font4);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -784,7 +773,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(2);
         pushButton_login->setDefault(true);
 
 
@@ -812,7 +801,7 @@ public:
         label_6->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
         label_11->setText(QCoreApplication::translate("LandingPage", "Confirm\n"
 "password", nullptr));
-        commandLinkButton->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
+        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
         label_UsrIcon->setText(QString());
         label_15->setText(QCoreApplication::translate("LandingPage", "Choose your profile icon (optional)", nullptr));
         pushButton_browse->setText(QCoreApplication::translate("LandingPage", "Browse...", nullptr));

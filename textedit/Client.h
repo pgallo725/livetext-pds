@@ -47,7 +47,7 @@ public slots:
 	void serverDisconnection();
 	void errorHandler();
 	bool Login();
-	bool Registre();
+	bool Register();
 	bool Logout();
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
