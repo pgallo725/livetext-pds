@@ -35,9 +35,9 @@ RemoveUserPresence,
 WrongMessageType
 };
 
-class Message
+class Message : public QObject
 {
-
+	Q_OBJECT
 private:
 	MessageType m_type;
 
@@ -52,5 +52,7 @@ public:
 	virtual QString getUserName();
 	virtual QString getNickname();
 	virtual QString getPasswd();
+	virtual QString getURI();
+	virtual QString getDocName();
 };
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <list>
+
 #include "Message.h"
 #include "User.h"
 
@@ -8,10 +8,16 @@ class DocumentMessage :
 {
 private:
 	QString docName;
-	int docId;
-	std::list<User> users;
+	QString URI;
+	QString creatorName;
 public:
-	DocumentMessage(MessageType m, QDataStream& streamIn);
+	DocumentMessage(MessageType m, QDataStream& streamIn, QString username);
 	~DocumentMessage();
+
+	/* getter */
+	QString getDocName();
+	QString getURI();
+	QString getUserName();
 };
+
 

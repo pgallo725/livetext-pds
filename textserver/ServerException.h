@@ -41,6 +41,12 @@ public:
 };
 
 
+class FileCreateException : public FileException
+{
+public:
+	FileCreateException(std::string fileName, std::string path);
+};
+
 class FileOverwriteException : public ServerException
 {
 
@@ -59,8 +65,11 @@ public:
 
 class MessageUnknownTypeException : public MessageException
 {
+private:
+	int errType;
 public:
 	MessageUnknownTypeException(int type);
+	int getErrType();
 };
 
 class MessageWrongTypeException : public MessageException

@@ -7,20 +7,27 @@
 #include "Document.h"
 #include "Client.h"
 #include "Message.h"
+#include "ServerException.h"
 
-class WorkSpace
+class WorkSpace : public QObject
 {
+	Q_OBJECT
 private:
-	Document* doc;
-	std::list<Client*> editors;
-	std::queue<Message> msgQueue;
+	QSharedPointer<Document> doc;
+	QList<QSharedPointer<QTcpSocket>> editors;
 
-	std::mutex mQueue;
+	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
 
 public:
-	WorkSpace(Document* d, Client* author);
+	WorkSpace(QSharedPointer<Document> d);
 	~WorkSpace();
 
-	void addMessageToQueue(Message msg);	/* threads safe */
+public slots:
+	void newSocket(qint64 handle);
+	void clientDisconnection();
+	void readMessage();
+
+signals:
+	void notWorking();
 };
 

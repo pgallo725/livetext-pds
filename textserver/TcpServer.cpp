@@ -3,7 +3,6 @@
 #include <optional>
 #include <iostream>
 
-#include <QString>
 #include <QFile>
 #include <QDataStream>
 #include <QFileInfo>
@@ -12,32 +11,29 @@
 
 
 TcpServer::TcpServer(QObject* parent)
-	: QObject(parent), _userIdCounter(0)
+	: QTcpServer(parent), _userIdCounter(0)
 {
-	/* create a new object TCP server */
-	textServer = new QTcpServer(this);
-
 	/* connect newConnection from QTcpServer to newClientConnection() */
-	connect(textServer, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
+	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
 
 	for (quint16 i = 1500; i < 10000; i += 101) {
 
 		/* server listen on 0.0.0.0::i - return true on success */
-		if (textServer->listen(QHostAddress::Any, i)) {
+		if (this->listen(QHostAddress::Any, i)) {
 			break;
 		}
 	}
 
-	if (!textServer->isListening())
+	if (!this->isListening())
 	{
 		qDebug() << "Server could not start";
 	}
 	else
 	{
 		/* Get IP address and port */
-		QString ip_address = textServer->serverAddress().toString();
-		quint16 port = textServer->serverPort();
-		if (textServer->isListening()) {
+		QString ip_address = this->serverAddress().toString();
+		quint16 port = this->serverPort();
+		if (this->isListening()) {
 			qDebug() << "Server started at " << ip_address << ":" << port;
 		}
 	}
@@ -85,7 +81,7 @@ void TcpServer::initialize()
 void TcpServer::newClientConnection()
 {
 	/* need to grab the socket - socket is created as a child of server */
-	QTcpSocket* socket = textServer->nextPendingConnection();
+	QTcpSocket* socket = this->nextPendingConnection();
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == 0) {
@@ -124,16 +120,16 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 		return;
 	}
 
-	Client client(_userIdCounter++, socket, &(*users.find(username)));
-	clients.insert(socket, client);
+	Client* client = new Client(_userIdCounter++, socket, &(*users.find(username)));
+	clients.insert(socket, QSharedPointer<Client>(client));
 
-	streamOut << (quint16)LoginChallenge << client.getNonce();
+	streamOut << (quint16)LoginChallenge << client->getNonce();
 }
 
 
-bool TcpServer::login(Client client, QString password)
+bool TcpServer::login(QSharedPointer<Client> client, QString password)
 {
-	return client.authentication(password);
+	return client->authentication(password);
 }
 
 
@@ -153,12 +149,41 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 	if (socket != nullptr) {
 		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
 			return std::optional<User>();
-		Client client(_userIdCounter++, socket, &nUser);
-		client.setLogged();
-		clients.insert(socket, client);
+		Client* client = new Client(_userIdCounter++, socket, &nUser);
+		client->setLogged();
+		clients.insert(socket, QSharedPointer<Client>(client));
 	}
 
 	return nUser;
+}
+
+
+bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket* author)
+{
+	if (documents.find(uri) != documents.end())
+		return false;
+
+	QSharedPointer<Client> c = clients.find(author).value();
+	Document* doc = new Document(documentName, uri, c->getUserName());
+	WorkSpace* w = new WorkSpace(QSharedPointer<Document>(doc));
+	QThread *t = new QThread();
+
+	documents.insert(uri, QSharedPointer<Document>(doc));
+	workThreads.insert(uri, QSharedPointer<QThread>(t));
+
+	/* change affinity of this workspace with a new thread */
+	w->moveToThread(t);
+	t->start();
+
+	/* make the new thead connect the socket in the workspace */
+	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	/* this thread will not recives more messages from client */
+	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		/* workspace will notify where theres no one using it */
+	
+	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
+	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	/* TODO: se emetto questo segnale non ho più il segnale dal socket quando il client disconnette */
+	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
+
+	return true;
 }
 
 
@@ -205,7 +230,7 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn;
 	quint16 typeOfMessage;
-	std::shared_ptr<Message> msg;
+	QSharedPointer<Message> msg;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -217,40 +242,33 @@ void TcpServer::readMessage()
 		{
 			/* LoginMessages */
 		case LoginRequest:
-			msg = std::make_shared<LoginMessage>(LoginRequest, streamIn);
+			msg = QSharedPointer<LoginMessage>(new LoginMessage(LoginRequest, streamIn));
 			break;
 		case LoginUnlock:
-			msg = std::make_shared<LoginMessage>(LoginUnlock, streamIn);
+			msg = QSharedPointer<LoginMessage>(new LoginMessage(LoginUnlock, streamIn));
 			break;
 	
 			/* AccountMessages */
 		case AccountCreate:
-			msg = std::make_shared<AccountMessage>(AccountCreate, streamIn);
+			msg = QSharedPointer<AccountMessage>(new AccountMessage(AccountCreate, streamIn));
 			break;
 		case AccountUpDate:
-			msg = std::make_shared<AccountMessage>(AccountUpDate, streamIn);
+			msg = QSharedPointer<AccountMessage>(new AccountMessage(AccountUpDate, streamIn));
 			break;
 
 			/* LogoutMessages */
 		case LogoutRequest:
-			msg =std::make_shared<LogoutMessage>(LogoutRequest);
+			msg = QSharedPointer<LogoutMessage>(new LogoutMessage(LogoutRequest));
 			break;
 
 			/* DocumentMessages */
 		case NewDocument:
+			//auto c = clients.find(socket);
+			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
+			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(NewDocument, streamIn, clients.find(socket).value()->getUserName()));
 			break;
 
 		case OpenDocument:
-			break;
-
-			/* textMessages */
-		case CharInsert:
-			break;
-
-		case CharDelete:
-			break;
-
-		case MoveCursor:
 			break;
 
 		default:
@@ -264,7 +282,7 @@ void TcpServer::readMessage()
 		/* send to the client WrongMessageType */
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
-		streamOut << (quint16)WrongMessageType;
+		streamOut << (quint16)WrongMessageType << e.getErrType();
 	}
 	catch (MessageWrongTypeException& e) {
 		/* send to the client WrongMessageType + message */
@@ -273,14 +291,23 @@ void TcpServer::readMessage()
 		QString err = e.what();
 		streamOut << (quint16)WrongMessageType << err;
 	}
+	catch (MessageException& e) {
+		/* TODO: client not found in create new Doc */
+	}
 	catch (SocketNullException& e) {
 		// TODO
 	}
 	
 }
 
+void TcpServer::deleteWorkspace()
+{
+	// TODO: write on disk the file
 
-void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
+}
+
+
+void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
@@ -302,9 +329,9 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 		sendLoginChallenge(socket, (msg)->getUserName());
 		break;
 	case LoginUnlock:
-		if (login(*(clients.find(socket)), msg->getPasswd())) {
+		if (login(clients.find(socket).value(), msg->getPasswd())) {
 			/* login successful */
-			clients.find(socket)->setLogged();
+			clients.find(socket).value()->setLogged();
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
 		}
@@ -348,19 +375,19 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 
 		/* DocumentMessages */
 	case NewDocument:
+
+		if (!createNewDocument(msg->getDocName(), msg->getURI(), socket)) {
+			typeOfMessage = DocumentError;
+			msg_str = "Cannot create '"+msg->getDocName()+"', this document already exist";
+		}
+		else {
+			typeOfMessage = DocumentOpened;
+			msg_str = "Document created";
+		}
+		streamOut << typeOfMessage << msg_str;
 		break;
 
 	case OpenDocument:
-		break;
-
-		/* textMessages */
-	case CharInsert:
-		break;
-
-	case CharDelete:
-		break;
-
-	case MoveCursor:
 		break;
 
 	default:
@@ -368,10 +395,6 @@ void TcpServer::handleMessage(std::shared_ptr<Message> msg, QTcpSocket* socket)
 		break;
 	
 	}
-
-	
-
-	// TODO: cast type message and handle it
 }
 
 

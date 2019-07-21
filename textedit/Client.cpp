@@ -11,6 +11,7 @@ Client::Client(QObject* parent) : QObject(parent)
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
 		[&](QAbstractSocket::SocketError socketError) { qDebug() << "non funziona un cazzo";
+	emit impossibleToConnect();
 	socket->abort(); });
 
 	//socket->connectToHost("127.0.0.1", 1500);
@@ -186,4 +187,43 @@ bool Client::Registre() {
 		return false;
 		break;
 	}
+}
+
+bool Client::Logout() {
+
+	QDataStream out;
+	quint16 typeOfMessage = LogoutRequest;
+	QDataStream in;
+
+	// Link the stream to the socke and send the byte
+	out.setDevice(socket);
+	out << typeOfMessage;
+
+	//wait the response from the server
+	if (!socket->waitForReadyRead(10000)) {
+		qDebug() << "recived no byte";
+		//throw ServerNotRespondException();
+		return false;
+	}
+
+	in.setDevice(socket);
+	in >> typeOfMessage;
+	in >> msg_str;
+
+	switch (typeOfMessage) {
+	case LogoutConfirmed:
+		qDebug() << msg_str;
+		return true;
+		break;
+	case LogoutDenied:
+		// impossible to create the account
+		qDebug() << msg_str;
+		return false;
+		break;
+	default:
+		//throw MessageUnknownTypeException();
+		return false;
+		break;
+	}
+
 }

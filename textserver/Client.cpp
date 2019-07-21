@@ -1,7 +1,7 @@
 #include "Client.h"
 
 Client::Client(int id, QTcpSocket* s, User* u):
-	clientId(id), socket(s), activeUser(u), logged(false)
+	clientId(id), socket(s), activeUser(u), logged(false), workspace(false)
 {
 	// TODO: random sequence
 	nonce = "deadbeef";
@@ -26,6 +26,11 @@ QString Client::getNonce()
 	return nonce;
 }
 
+QString Client::getUserName()
+{
+	return activeUser->getUsername();
+}
+
 void Client::setLogged()
 {
 	logged = true;
@@ -34,6 +39,18 @@ void Client::setLogged()
 void Client::resetLogged()
 {
 	logged = false;
+}
+
+bool Client::setWorkspace(std::shared_ptr<WorkSpace> ws)
+{
+	if (workspace == nullptr) return false;
+	workspace = ws;
+	return true;
+}
+
+void Client::resetWorkspace()
+{
+	workspace = nullptr;
 }
 
 bool Client::authentication(QString passwd)

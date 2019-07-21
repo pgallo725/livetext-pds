@@ -35,6 +35,7 @@ private:
 	bool login;
 signals:
 	void connectionEstablished();
+	void impossibleToConnect();
 public:
 	Client(QObject* parent = 0);
 	~Client();
@@ -47,6 +48,7 @@ public slots:
 	void errorHandler();
 	bool Login();
 	bool Registre();
+	bool Logout();
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
 	void setUsername(QString username);
