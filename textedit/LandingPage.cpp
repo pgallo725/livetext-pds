@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMovie>
+#include <QSplashScreen>
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -43,11 +44,6 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
-
-	/* LOADING GIF 
-	QMovie* movie = new QMovie(rsrcPath + "/gif/loading.gif");
-	ui->label_logo->setMovie(movie);
-	movie->start();*/
 
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
@@ -92,6 +88,10 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
+
+
+	/* LOADING GIF */
+	loading = new QLabel(this);
 }
 
 LandingPage::~LandingPage()
@@ -119,7 +119,9 @@ void LandingPage::pushButtonLoginClicked()
 	client->setPassword(password);
 	client->setLogin(true);
 	client->Connect(serverIP, serverPort.toShort());
-
+	
+	//Function to show loading animation
+	startLoadingAnimation();
 }
 
 void LandingPage::tryToLoginOrRegistre() {
@@ -127,6 +129,8 @@ void LandingPage::tryToLoginOrRegistre() {
 	qDebug() << "try to login";
 	if (client->getLogin()) {
 		if (client->Login()) {
+			stopLoadingAnimation();
+
 			ui->stackedWidget->setCurrentIndex(2);
 			ui->stackedWidget->show();
 		}
@@ -373,4 +377,31 @@ void LandingPage::centerAndResize() {
 
 	//Crea il nuovo rettangolo su cui aprire la finestra
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
+}
+
+void LandingPage::startLoadingAnimation()
+{
+	//Disable main window until client->Connect(...)return the result of the connection
+	setEnabled(false);
+
+	//Loading GIF
+	QMovie* movie = new QMovie(rsrcPath + "/gif/loading.gif");
+	
+	loading->setMovie(movie);
+	movie->start();
+
+	//Center and resize
+	movie->setScaledSize(QSize(64, 64));
+	loading->resize(QSize(64, 64));
+
+	loading->move(width() / 2 - 32, height() / 2 - 32);
+
+	//loadingScreen->exec();
+	loading->show();
+}
+
+void LandingPage::stopLoadingAnimation()
+{
+	loading->close();
+	setEnabled(false);
 }

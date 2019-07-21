@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QDialog>
+#include <QLabel>
 
 #include "Client.h"
 
@@ -41,9 +42,13 @@ private:
 	Ui::LandingPage* ui;
 	Client* client;
 
+	QLabel* loading;
+
 private:
 	void setupFileList();
 	void centerAndResize();
+	void startLoadingAnimation();
+	void stopLoadingAnimation();
 	
 };
 
