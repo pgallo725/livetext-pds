@@ -6,11 +6,10 @@ Client::Client(QObject* parent) : QObject(parent)
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-	//connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-		[&](QAbstractSocket::SocketError socketError) { qDebug() << "non funziona un cazzo";
+		[&](QAbstractSocket::SocketError socketError) { // Error in connection
 	emit impossibleToConnect();
 	socket->abort(); });
 
@@ -46,11 +45,13 @@ void Client::errorHandler() {
 
 void Client::readBuffer() {
 
-	QByteArray responce = socket->read(256);
-	qDebug() << responce;
+	qDebug() << "reading socket";
+
+	//QByteArray responce = socket->read(256);
+	//qDebug() << responce;
 }
+
 void Client::Connect(QString ipAddress, quint16 port) {
-	//TODO GESTIONE DATI ERRATI
 	socket->connectToHost(ipAddress, port);
 	return;
 }
@@ -159,6 +160,7 @@ bool Client::Register() {
 	
 	// Link the stream to the socke and send the byte
 	out.setDevice(socket);
+	in.setDevice(socket);
 	out << typeOfMessage << username << nickname << password;
 
 	//wait the response from the server
@@ -168,7 +170,7 @@ bool Client::Register() {
 		return false;
 	}
 
-	in.setDevice(socket);
+
 	in >> typeOfMessage;
 	in >> msg_str;
 
@@ -223,6 +225,102 @@ bool Client::Logout() {
 	default:
 		//throw MessageUnknownTypeException();
 		return false;
+		break;
+	}
+
+}
+
+bool Client::sendCursor() {
+
+
+	return true;
+}
+
+void Client::reciveCursor() {
+
+}
+void Client::sendChar() {
+
+}
+void Client::reciveChar() {
+
+}
+void Client::openDocument(QString URI) {
+
+	QDataStream out;
+	quint16 typeOfMessage = OpenDocument;
+	QDataStream in;
+
+
+	// Link the stream to the socke and send the byte
+	out.setDevice(socket);
+	out << typeOfMessage << URI;
+
+	//wait the response from the server
+	if (!socket->waitForReadyRead(10000)) {
+		qDebug() << "recived no byte";
+		//throw ServerNotRespondException();
+		return;
+	}
+
+	in.setDevice(socket);
+	in >> typeOfMessage;
+	in >> msg_str;
+
+	switch (typeOfMessage) {
+	case DocumentOpened:
+		qDebug() << msg_str;
+		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		return;
+		break;
+	case DocumentError:
+		// impossible to create the account
+		qDebug() << msg_str;
+		return;
+		break;
+	default:
+		//throw MessageUnknownTypeException();
+		return;
+		break;
+	}
+}
+
+void Client::createDocument(QString name) {
+
+	QDataStream out;
+	quint16 typeOfMessage = NewDocument;
+	QDataStream in;
+
+
+	// Link the stream to the socke and send the byte
+	out.setDevice(socket);
+	out << typeOfMessage << name;
+
+	//wait the response from the server
+	if (!socket->waitForReadyRead(10000)) {
+		qDebug() << "recived no byte";
+		//throw ServerNotRespondException();
+		return;
+	}
+
+	in.setDevice(socket);
+	in >> typeOfMessage;
+	in >> msg_str;
+
+	switch (typeOfMessage) {
+	case DocumentOpened:
+		qDebug() << msg_str;
+		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		return;
+		break;
+	case DocumentError:
+		// impossible to create the account
+		qDebug() << msg_str;
+		return;
+		break;
+	default:
+		//throw MessageUnknownTypeException();
+		return;
 		break;
 	}
 

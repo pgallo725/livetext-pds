@@ -42,15 +42,26 @@ public:
 	void writeOnServer();
 
 public slots:
+	//signals
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
 	void errorHandler();
+	// User connection
 	bool Login();
 	bool Register();
 	bool Logout();
+	//Data Exchange
+	bool sendCursor();
+	void reciveCursor();
+	void sendChar();
+	void reciveChar();
+	void openDocument(QString URI);
+	void createDocument(QString name);
+	//Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
+	// Setter & Getter
 	void setUsername(QString username);
 	void setPassword(QString password);
 	void setLogin(bool flag);
