@@ -38,13 +38,19 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	ui->pushButton_new->setIconSize(QSize::QSize(w, h));
 	ui->pushButton_new->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/new.png"));
 
+	//Icone Tab Widget
+	ui->tabWidget->setTabIcon(0, QIcon::QIcon(rsrcPath + "/LandingPage/login.png"));
+	ui->tabWidget->setTabIcon(1, QIcon::QIcon(rsrcPath + "/LandingPage/register.png"));
+	ui->tabWidget->setIconSize(QSize(40, 65));
+
+
+	//Icona Browse...
+	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/fileopen.png"));
+
+
 	//Icona "Open from URI"
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
 	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
-
-
-	//Icona back
-	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/backarrow.png"));
 
 
 	//Logo applicazione
@@ -54,19 +60,20 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
 
+	//Tab widget cambiata
+	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &LandingPage::currentTabChanged);
+
 	//Connect dei segnali dei vari pushbutton
-	connect(ui->pushButton_login, &QPushButton::clicked, this, &LandingPage::pushButtonLoginClicked);
+	connect(ui->pushButton_confirmOperation, &QPushButton::clicked, this, &LandingPage::confirmOperation);
 	connect(ui->pushButton_new, &QPushButton::clicked, this, &LandingPage::pushButtonNewClicked);
 	connect(ui->pushButton_register, &QPushButton::clicked, this, &LandingPage::pushButtonRegisterClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &LandingPage::pushButtonBrowseClicked);
-	connect(ui->pushButton_regConf, &QPushButton::clicked, this, &LandingPage::pushButtonConfirmRegistrationClicked);
 	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
-	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
-	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::pushButtonLoginClicked);
-	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &LandingPage::pushButtonLoginClicked);
+	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::Login);
+	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &LandingPage::Login);
 
 	//Connect lista file (QListWidget)
 	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &LandingPage::pushButtonOpenClicked);
@@ -86,10 +93,14 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegister);
 
 	//Connect con il Client quando non riesco a connettermi al server
-	//connect(client, &Client::impossibleToConnect, this, /*aggiungere funzione*/);
+	connect(client, &Client::impossibleToConnect, this, &LandingPage::impossibleToConnect);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
+
+	//Indice a 0 (Login) del TabWidget
+	ui->tabWidget->setCurrentIndex(0);
+	ui->pushButton_confirmOperation->setText(tr("Login"));
 
 	//Prende file dal server e li mostra nella lista dei files recenti
 	setupFileList();
@@ -109,13 +120,15 @@ LandingPage::~LandingPage()
 
 
 
-void LandingPage::pushButtonLoginClicked()
+void LandingPage::Login()
 {
 	//Bypass login
 	/*ui->stackedWidget->setCurrentIndex(2);
 	ui->stackedWidget->show();
 	return;
 	*/
+
+
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
@@ -127,7 +140,7 @@ void LandingPage::pushButtonLoginClicked()
 	client->setPassword(password);
 	client->setLogin(true);
 	client->Connect(serverIP, serverPort.toShort());
-	
+
 	//Function to show loading animation
 	startLoadingAnimation();
 }
@@ -139,12 +152,14 @@ void LandingPage::tryToLoginOrRegister() {
 		if (client->Login()) {
 			stopLoadingAnimation();
 
-			ui->stackedWidget->setCurrentIndex(2);
+			ui->stackedWidget->setCurrentIndex(1);
 			ui->stackedWidget->show();
 		}
 		else {
+			stopLoadingAnimation();
+			ui->label_incorrect_operation->setText(client->getMsg());
 			client->Disconnect();
-			qDebug() << client->getMsg();
+
 		}
 	}
 	else {
@@ -160,17 +175,54 @@ void LandingPage::tryToLoginOrRegister() {
 
 }
 
+void LandingPage::currentTabChanged(int index)
+{
+	switch (index) {
+	case 0:
+		ui->lineEdit_regNick->setText("");
+		ui->lineEdit_regUsr->setText("");
+		ui->lineEdit_regPsw->setText("");
+		ui->lineEdit_regPswConf->setText("");
+		ui->lineEdit_UsrIconPath->setText("");
+		ui->pushButton_confirmOperation->setText(tr("Login"));
+		break;
+	case 1:
+		ui->lineEdit_psw->setText("");
+		ui->lineEdit_usr->setText("");
+		ui->pushButton_confirmOperation->setText(tr("Register"));
+		break;
+	}
+
+}
+
+void LandingPage::confirmOperation()
+{
+	switch (ui->tabWidget->currentIndex()) {
+	case 0:
+		Login();
+		break;
+	case 1:
+		Register();
+		break;
+	}
+}
+
+void LandingPage::impossibleToConnect()
+{
+	stopLoadingAnimation();
+	ui->label_incorrect_operation->setText(tr("Invalid server/port"));
+}
+
 
 void LandingPage::pushButtonRegisterClicked()
 {
 	//Cancellazione campi login
-	ui->label_incorrect_login->setText("");
+	ui->label_incorrect_operation->setText("");
 	ui->lineEdit_psw->setText("");
 	ui->lineEdit_usr->setText("");
 
 	//Switch alla pagina di registrazione
-	ui->stackedWidget->setCurrentIndex(1);
-	ui->stackedWidget->show();
+	ui->tabWidget->setCurrentIndex(1);
 }
 
 
@@ -185,7 +237,7 @@ void LandingPage::pushButtonBrowseClicked()
 }
 
 //Conferma la registrazione
-void LandingPage::pushButtonConfirmRegistrationClicked()
+void LandingPage::Register()
 {
 	QString nick = ui->lineEdit_regNick->text();
 	QString username = ui->lineEdit_regUsr->text();
@@ -196,7 +248,7 @@ void LandingPage::pushButtonConfirmRegistrationClicked()
 	//Controllo se i dati sono stati inseriti correttamente
 	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
 		//QMessageBox::warning(this, "Registration", "Please fill all the required fields");
-		ui->label_incorrect_reg->setText("Please fill all the required fields");
+		//ui->label_incorrect_reg->setText("Please fill all the required fields");
 		return;
 	}
 
@@ -211,7 +263,7 @@ void LandingPage::pushButtonConfirmRegistrationClicked()
 	//Controllo sulla corrispondenza password
 	if (password != passwordConf) {
 		//QMessageBox::warning(this, "Registration", "Passwords does not match");
-		ui->label_incorrect_reg->setText("Passwords does not match");
+		//ui->label_incorrect_reg->setText("Passwords does not match");
 		return;
 	}
 
@@ -227,29 +279,14 @@ void LandingPage::pushButtonConfirmRegistrationClicked()
 	client->setPassword(password);
 	client->setNickname(nick);
 	client->setLogin(false);
-	client->Connect("127.0.0.1",1500);
-}
-
-void LandingPage::pushButtonBackClicked()
-{
-	//Pulisco i campi inseriti in registrazione se torno alla schermata di login
-	ui->lineEdit_regUsr->setText("");
-	ui->lineEdit_regPsw->setText("");
-	ui->lineEdit_regPswConf->setText("");
-	ui->lineEdit_regNick->setText("");
-	ui->lineEdit_UsrIconPath->setText("");
-	ui->label_incorrect_reg->setText("");
-
-	//Cambio schermata tornando a quella di login
-	ui->stackedWidget->setCurrentIndex(0);
-	ui->stackedWidget->show();
+	client->Connect("127.0.0.1", 1500);
 }
 
 void LandingPage::pushButtonOpenClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
-		openEditor(uri,fileSelected);
+		openEditor(uri, fileSelected);
 }
 
 void LandingPage::pushButtonOpenUriClicked()
@@ -264,8 +301,8 @@ void LandingPage::pushButtonOpenUriClicked()
 
 void LandingPage::enablePushButtonOpen()
 {
-	if(ui->listWidget->currentItem()->text() != "<No files found>")
-		if(!ui->pushButton_open->isEnabled())
+	if (ui->listWidget->currentItem()->text() != "<No files found>")
+		if (!ui->pushButton_open->isEnabled())
 			ui->pushButton_open->setEnabled(true);
 }
 
@@ -291,7 +328,7 @@ void LandingPage::setupFileList()
 		ui->listWidget->addItem("<No files found>");
 		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
-	
+
 	ui->pushButton_open->setEnabled(false);
 }
 
@@ -309,14 +346,14 @@ void LandingPage::showUserIcon(QString path)
 
 		if (!userPix.isNull()) {
 			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
-			ui->label_incorrect_reg->setText("");
+			//ui->label_incorrect_reg->setText("");
 			return;
 		}
 
 	}
 
 	//Mostra errore in caso di immagine non visualizzabile
-	ui->label_incorrect_reg->setText("Please choose a valid image file");
+	//ui->label_incorrect_reg->setText("Please choose a valid image file");
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
@@ -394,7 +431,7 @@ void LandingPage::startLoadingAnimation()
 
 	//Loading GIF
 	QMovie* movie = new QMovie(rsrcPath + "/gif/loading.gif");
-	
+
 	loading->setMovie(movie);
 	movie->start();
 

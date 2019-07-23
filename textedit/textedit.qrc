@@ -39,6 +39,8 @@
   <file>images/win/LandingPage/backarrow.png</file>
   <file>images/win/LandingPage/textfile.png</file>
   <file>images/win/LandingPage/richtext.png</file>
+  <file>images/win/LandingPage/login.png</file>
+  <file>images/win/LandingPage/register.png</file>
   <file>images/win/gif/loading.gif</file>
 </qresource>
 </RCC>

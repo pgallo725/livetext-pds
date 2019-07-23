@@ -814,7 +814,7 @@ void TextEdit::listStyle(int styleIndex)
 {
 	//Formato lista
 	QTextListFormat listFmt;
-	
+
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
 
@@ -888,7 +888,7 @@ void TextEdit::listStyle(int styleIndex)
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
-	
+
 	if (style == QTextListFormat::ListStyleUndefined) {
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
@@ -1003,6 +1003,54 @@ void TextEdit::cursorPositionChanged()
 {
 	//Se cambia allineamento testo applico modifiche ai pulsanti markandoli come checked
 	alignmentChanged(textEdit->alignment());
+
+	//Ricava l'elenco puntato in cui si trova il cursore
+	//Ne ricava lo stile della lista e lo setta nel pulsante
+	QTextList* list = textEdit->textCursor().currentList();
+	if (list) {
+		switch (list->format().style()) {
+		case QTextListFormat::ListDisc:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
+			break;
+		case QTextListFormat::ListCircle:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/circle.png"));
+			break;
+		case QTextListFormat::ListSquare:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/square.png"));
+			break;
+		case QTextListFormat::ListDecimal:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/decimal.png"));
+			break;
+		case QTextListFormat::ListLowerAlpha:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
+			break;
+		case QTextListFormat::ListUpperAlpha:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
+			break;
+		case QTextListFormat::ListLowerRoman:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
+			break;
+		case QTextListFormat::ListUpperRoman:
+			listButton->setChecked(true);
+			listButton->setIcon(QIcon(rsrcPath + "/romanupper.png"));
+			break;
+		default:
+			break;
+		}
+	}
+	else {
+		listButton->setChecked(false);
+		listButton->setIcon(QIcon(rsrcPath + "/list.png"));
+	}
+
+
 
 
 	//Setta nel combobox l'heading level corretto

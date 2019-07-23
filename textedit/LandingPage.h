@@ -24,17 +24,16 @@ public:
 	enum openMode {uri, newfile};
 
 private slots:
-	void pushButtonLoginClicked();
 	void pushButtonNewClicked();
 	void pushButtonRegisterClicked();
 	void pushButtonBrowseClicked();
-	void pushButtonConfirmRegistrationClicked();
-	void pushButtonBackClicked();
 	void pushButtonOpenClicked();
 	void pushButtonOpenUriClicked();
 	void enablePushButtonOpen();
 	void tryToLoginOrRegister();
-
+	void currentTabChanged(int index);
+	void confirmOperation();
+	void impossibleToConnect();
 
 	void showUserIcon(QString path);
 
@@ -49,7 +48,8 @@ private:
 	void centerAndResize();
 	void startLoadingAnimation();
 	void stopLoadingAnimation();
-	
+	void Register();
+	void Login();
 };
 
 #endif // LANDINGPAGE_H
