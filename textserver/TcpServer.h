@@ -45,6 +45,7 @@ private:
 	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
+	bool openDocument(QString uri, QTcpSocket* client);
 public:
 
 	TcpServer(QObject *parent = 0);
@@ -59,7 +60,7 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
-	void deleteWorkspace();
+	void deleteWorkspace(QString document);
 	void deleteClient(qint64 handle);
 signals:
 	void newSocket(qint64 handle);

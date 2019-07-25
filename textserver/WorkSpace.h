@@ -32,7 +32,7 @@ public slots:
 	void readMessage();
 
 signals:
-	void notWorking();
+	void notWorking(QString document);
 signals:
 	void deleteClient(qint64 handle);
 };

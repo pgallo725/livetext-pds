@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[8];
-    char stringdata0[84];
+    QByteArrayData data[9];
+    char stringdata0[93];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -34,16 +34,17 @@ static const qt_meta_stringdata_WorkSpace_t qt_meta_stringdata_WorkSpace = {
 QT_MOC_LITERAL(0, 0, 9), // "WorkSpace"
 QT_MOC_LITERAL(1, 10, 10), // "notWorking"
 QT_MOC_LITERAL(2, 21, 0), // ""
-QT_MOC_LITERAL(3, 22, 12), // "deleteClient"
-QT_MOC_LITERAL(4, 35, 6), // "handle"
-QT_MOC_LITERAL(5, 42, 9), // "newSocket"
-QT_MOC_LITERAL(6, 52, 19), // "clientDisconnection"
-QT_MOC_LITERAL(7, 72, 11) // "readMessage"
+QT_MOC_LITERAL(3, 22, 8), // "document"
+QT_MOC_LITERAL(4, 31, 12), // "deleteClient"
+QT_MOC_LITERAL(5, 44, 6), // "handle"
+QT_MOC_LITERAL(6, 51, 9), // "newSocket"
+QT_MOC_LITERAL(7, 61, 19), // "clientDisconnection"
+QT_MOC_LITERAL(8, 81, 11) // "readMessage"
 
     },
-    "WorkSpace\0notWorking\0\0deleteClient\0"
-    "handle\0newSocket\0clientDisconnection\0"
-    "readMessage"
+    "WorkSpace\0notWorking\0\0document\0"
+    "deleteClient\0handle\0newSocket\0"
+    "clientDisconnection\0readMessage"
 };
 #undef QT_MOC_LITERAL
 
@@ -61,20 +62,20 @@ static const uint qt_meta_data_WorkSpace[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,   39,    2, 0x06 /* Public */,
-       3,    1,   40,    2, 0x06 /* Public */,
+       1,    1,   39,    2, 0x06 /* Public */,
+       4,    1,   42,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       5,    1,   43,    2, 0x0a /* Public */,
-       6,    0,   46,    2, 0x0a /* Public */,
-       7,    0,   47,    2, 0x0a /* Public */,
+       6,    1,   45,    2, 0x0a /* Public */,
+       7,    0,   48,    2, 0x0a /* Public */,
+       8,    0,   49,    2, 0x0a /* Public */,
 
  // signals: parameters
-    QMetaType::Void,
-    QMetaType::Void, QMetaType::LongLong,    4,
+    QMetaType::Void, QMetaType::QString,    3,
+    QMetaType::Void, QMetaType::LongLong,    5,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::LongLong,    4,
+    QMetaType::Void, QMetaType::LongLong,    5,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -87,7 +88,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         auto *_t = static_cast<WorkSpace *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->notWorking(); break;
+        case 0: _t->notWorking((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 1: _t->deleteClient((*reinterpret_cast< qint64(*)>(_a[1]))); break;
         case 2: _t->newSocket((*reinterpret_cast< qint64(*)>(_a[1]))); break;
         case 3: _t->clientDisconnection(); break;
@@ -97,7 +98,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _t = void (WorkSpace::*)();
+            using _t = void (WorkSpace::*)(QString );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&WorkSpace::notWorking)) {
                 *result = 0;
                 return;
@@ -154,9 +155,10 @@ int WorkSpace::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void WorkSpace::notWorking()
+void WorkSpace::notWorking(QString _t1)
 {
-    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 
 // SIGNAL 1

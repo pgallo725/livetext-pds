@@ -1,10 +1,21 @@
 #include "DocumentMessage.h"
+#include "ServerException.h"
 
 DocumentMessage::DocumentMessage(MessageType m, QDataStream& streamIn, QString username) :
-	Message(m), creatorName(username)
+	Message(m), userName(username)
 {
-	streamIn >> docName;
-	URI = username + "/" + docName + "/" + "deadbeef"; /* TODO: random sequence */
+	switch (m) {
+	case NewDocument:
+		streamIn >> docName;
+		URI = username + "/" + docName + "/" + "deadbeef"; /* TODO: random sequence */
+		break;
+	case OpenDocument: 
+		streamIn >> URI;
+		break;
+	default:
+		throw MessageUnknownTypeException(m);
+		break;
+	}
 }
 
 DocumentMessage::~DocumentMessage()
@@ -23,5 +34,5 @@ QString DocumentMessage::getURI()
 
 QString DocumentMessage::getUserName()
 {
-	return creatorName;
+	return userName;
 }

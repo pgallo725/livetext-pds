@@ -17,13 +17,19 @@ WorkSpace::~WorkSpace()
 void WorkSpace::newSocket(qint64 handle)
 {
 	QTcpSocket* socket = new QTcpSocket;
+	QSharedPointer<Client> c;
 
 	if (!socket->setSocketDescriptor(handle)) {
 		qDebug() << socket->error();
 		return;
 	}
 	
-	editors.insert(socket, server->getClient(handle));
+	if (!(c = server->getClient(handle))) {
+		qDebug() << "Client not found";
+		//TODO: come gestiamo?
+	}
+
+	editors.insert(socket, c);
 	emit deleteClient(handle);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
@@ -68,6 +74,16 @@ void WorkSpace::readMessage()
 		case RemoveUserPresence:
 			break;
 
+			/* account messages */
+		case AccountUpDate:
+			msg = QSharedPointer<AccountMessage>(new AccountMessage(AccountUpDate, streamIn));
+			break;
+
+			/* logout messages */
+		case LogoutRequest:
+			msg = QSharedPointer<LogoutMessage>(new LogoutMessage(LogoutRequest));
+			break;
+
 		default:
 			throw MessageUnknownTypeException(typeOfMessage);
 			break;
@@ -94,7 +110,6 @@ void WorkSpace::readMessage()
 	catch (SocketNullException& e) {
 		// TODO
 	}
-
 }
 
 
@@ -110,6 +125,49 @@ void WorkSpace::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 
 	switch (msg->getType()) {
 	
+		/* textMessages */
+	case CharInsert:
+		break;
+
+	case CharDelete:
+		break;
+
+	case MoveCursor:
+		break;
+
+	case UserNameChange:
+		break;
+
+	case UserIconChange:
+		break;
+
+	case AddUserPresence:
+		break;
+
+	case RemoveUserPresence:
+		break;
+
+		/* account messages */
+	case AccountUpDate:
+		break;
+
+		/* logout messages */
+	case LogoutRequest:
+		if (!editors.remove(socket)) {
+			typeOfMessage = LogoutDenied;
+			msg_str = "Cannot logout if you are already loggedout";
+		}
+		else {
+			typeOfMessage = LogoutConfirmed;
+			msg_str = "Logout complete";
+			//TODO: need to give client to main thread??
+		}
+		streamOut << typeOfMessage << msg_str;
+
+		if (!editors.size())
+			emit notWorking(doc->getURI());
+		break;
+
 	default:
 		throw MessageUnknownTypeException(typeOfMessage);
 		break;
@@ -128,5 +186,5 @@ void WorkSpace::clientDisconnection()
 	qDebug() << "client removed";
 
 	if(!editors.size())
-		emit notWorking();
+		emit notWorking(doc->getURI());
 }

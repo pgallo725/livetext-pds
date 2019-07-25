@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TcpServer_t {
-    QByteArrayData data[9];
-    char stringdata0[109];
+    QByteArrayData data[10];
+    char stringdata0[118];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -39,12 +39,14 @@ QT_MOC_LITERAL(4, 28, 19), // "newClientConnection"
 QT_MOC_LITERAL(5, 48, 19), // "clientDisconnection"
 QT_MOC_LITERAL(6, 68, 11), // "readMessage"
 QT_MOC_LITERAL(7, 80, 15), // "deleteWorkspace"
-QT_MOC_LITERAL(8, 96, 12) // "deleteClient"
+QT_MOC_LITERAL(8, 96, 8), // "document"
+QT_MOC_LITERAL(9, 105, 12) // "deleteClient"
 
     },
     "TcpServer\0newSocket\0\0handle\0"
     "newClientConnection\0clientDisconnection\0"
-    "readMessage\0deleteWorkspace\0deleteClient"
+    "readMessage\0deleteWorkspace\0document\0"
+    "deleteClient"
 };
 #undef QT_MOC_LITERAL
 
@@ -68,8 +70,8 @@ static const uint qt_meta_data_TcpServer[] = {
        4,    0,   47,    2, 0x0a /* Public */,
        5,    0,   48,    2, 0x0a /* Public */,
        6,    0,   49,    2, 0x0a /* Public */,
-       7,    0,   50,    2, 0x0a /* Public */,
-       8,    1,   51,    2, 0x0a /* Public */,
+       7,    1,   50,    2, 0x0a /* Public */,
+       9,    1,   53,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::LongLong,    3,
@@ -78,7 +80,7 @@ static const uint qt_meta_data_TcpServer[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,    8,
     QMetaType::Void, QMetaType::LongLong,    3,
 
        0        // eod
@@ -94,7 +96,7 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->newClientConnection(); break;
         case 2: _t->clientDisconnection(); break;
         case 3: _t->readMessage(); break;
-        case 4: _t->deleteWorkspace(); break;
+        case 4: _t->deleteWorkspace((*reinterpret_cast< QString(*)>(_a[1]))); break;
         case 5: _t->deleteClient((*reinterpret_cast< qint64(*)>(_a[1]))); break;
         default: ;
         }

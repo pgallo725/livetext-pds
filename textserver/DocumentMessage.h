@@ -9,7 +9,7 @@ class DocumentMessage :
 private:
 	QString docName;
 	QString URI;
-	QString creatorName;
+	QString userName;
 public:
 	DocumentMessage(MessageType m, QDataStream& streamIn, QString username);
 	~DocumentMessage();

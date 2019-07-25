@@ -78,10 +78,12 @@ void TcpServer::initialize()
 
 QSharedPointer<Client> TcpServer::getClient(qintptr socketDescriptor)
 {
-	/*
-	for (QMap<QTcpSocket*, QSharedPointer<Client>>::key_iterator it = clients.keyBegin(), it != clients.keyEnd(); it++) {
+	for (QSharedPointer<Client> it : clients.values()) {
+		if (it->getSocketDescriptor() == socketDescriptor) {
+			return it;
+		}
+	}
 
-	}*/
 	return QSharedPointer<Client>();
 }
 
@@ -198,16 +200,35 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	return true;
 }
 
+bool TcpServer::openDocument(QString uri, QTcpSocket* client)
+{
+	if (documents.find(uri) == documents.end())
+		return false;
 
-void TcpServer::deleteWorkspace()
+	// TODO: bin dsocket to workspace
+	return true;
+}
+
+
+void TcpServer::deleteWorkspace(QString document)
 {
 	// TODO: write on disk the file
+	workspaces.remove(document);	//TODO: necessario eliminarlo?
+	workThreads.find(document).value()->quit();
+	workThreads.find(document).value()->wait();
+
 	qDebug() << "workspace cancellato";
 }
 
+
 void TcpServer::deleteClient(qint64 handle)
 {
-	//clients.remove(handle);
+	for (QTcpSocket* it : clients.keys()) {
+		if (clients.find(it).value()->getSocketDescriptor() == static_cast<qintptr>(handle)) {
+			clients.remove(it);
+			break;
+		}
+	}
 }
 
 
@@ -293,6 +314,8 @@ void TcpServer::readMessage()
 			break;
 
 		case OpenDocument:
+			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
+			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(OpenDocument, streamIn, clients.find(socket).value()->getUserName()));
 			break;
 
 		default:
@@ -384,7 +407,6 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 			msg_str = "Cannot logout if you are already loggedout";
 		}
 		else {
-			/* remove complete*/
 			typeOfMessage = LogoutConfirmed;
 			msg_str = "Logout complete";
 		}
@@ -406,6 +428,15 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		break;
 
 	case OpenDocument:
+		if (!openDocument(msg->getURI(), socket)) {
+			typeOfMessage = DocumentError;
+			msg_str = "Cannot open '" + msg->getDocName() + "', this document doesn't exist";
+		}
+		else {
+			typeOfMessage = DocumentOpened;
+			msg_str = "Document created";
+		}
+		streamOut << typeOfMessage << msg_str;
 		break;
 
 	default:
@@ -414,7 +445,4 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 	
 	}
 }
-
-
-
 
