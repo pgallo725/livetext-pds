@@ -128,7 +128,7 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 
 
 bool TcpServer::login(QSharedPointer<Client> client, QString password)
-{
+	{
 	return client->authentication(password);
 }
 
