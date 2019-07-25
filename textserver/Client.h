@@ -10,17 +10,17 @@ class WorkSpace;	// inclusione anticipata
 class Client
 {
 	int clientId;
-	QTcpSocket* socket;
+	qintptr socket;
 	User* activeUser;
 	bool logged;
 	QString nonce;
 	std::shared_ptr<WorkSpace> workspace;
 public:
-	Client(int id, QTcpSocket* s, User* u);
+	Client(int id, qintptr s, User* u);
 	~Client();
 
 	/* getter */
-	QTcpSocket* getSocket();
+	qintptr getSocketDescriptor();
 	User* getUser();
 	QString getNonce();
 	QString getUserName();

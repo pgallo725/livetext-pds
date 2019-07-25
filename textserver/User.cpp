@@ -44,6 +44,13 @@ QString User::getPassword()
 	return m_passwd;
 }
 
+QPixmap User::getIcon()
+{
+	return m_icon;
+}
+
+
+
 
 
 

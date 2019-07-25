@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <string>
+#include <qpixmap.h>
 
 #define BUFFLEN 256
 
@@ -52,6 +53,7 @@ public:
 	virtual QString getUserName();
 	virtual QString getNickname();
 	virtual QString getPasswd();
+	virtual QPixmap getIcon();
 	virtual QString getURI();
 	virtual QString getDocName();
 };

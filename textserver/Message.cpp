@@ -40,6 +40,11 @@ QString Message::getPasswd()
 	return QString();
 }
 
+QPixmap Message::getIcon()
+{
+	return QPixmap();
+}
+
 QString Message::getURI()
 {
 	return QString();

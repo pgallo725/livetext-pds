@@ -16,5 +16,6 @@ public:
 	QString getUserName();
 	QString getNickname();
 	QString getPasswd();
+	QPixmap getIcon();
 };
 

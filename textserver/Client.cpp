@@ -1,6 +1,6 @@
 #include "Client.h"
 
-Client::Client(int id, QTcpSocket* s, User* u):
+Client::Client(int id, qintptr s, User* u):
 	clientId(id), socket(s), activeUser(u), logged(false), workspace(false)
 {
 	// TODO: random sequence
@@ -11,7 +11,7 @@ Client::~Client()
 {
 }
 
-QTcpSocket* Client::getSocket()
+qintptr Client::getSocketDescriptor()
 {
 	return socket;
 }

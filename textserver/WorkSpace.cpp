@@ -1,14 +1,20 @@
 #include "WorkSpace.h"
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d): doc(d)
+#include "ServerException.h"
+#include "TcpServer.h"
+
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server, QObject* parent):
+	doc(d), server(server), QObject(parent)
 {
 }
+
 
 WorkSpace::~WorkSpace()
 {
 }
 
-void WorkSpace::newSocket(/*qintptr*/ qint64 handle)
+
+void WorkSpace::newSocket(qint64 handle)
 {
 	QTcpSocket* socket = new QTcpSocket;
 
@@ -17,12 +23,12 @@ void WorkSpace::newSocket(/*qintptr*/ qint64 handle)
 		return;
 	}
 	
-	editors.push_back(QSharedPointer<QTcpSocket>(socket));
+	editors.insert(socket, server->getClient(handle));
+	emit deleteClient(handle);
 
-	//connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
-	//connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
+	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
 }
-
 
 
 void WorkSpace::readMessage()
@@ -107,7 +113,6 @@ void WorkSpace::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 	default:
 		throw MessageUnknownTypeException(typeOfMessage);
 		break;
-
 	}
 }
 
@@ -115,11 +120,13 @@ void WorkSpace::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	/*
-	QSharedPointer<QTcpSocket> x = QSharedPointer<QTcpSocket>(socket);
-	if (!editors.removeOne(x)) {
+	
+	if (!editors.remove(socket)) {
 		// TODO: editor not removed
-	}*/
+	}
 
-	emit notWorking();
+	qDebug() << "client removed";
+
+	if(!editors.size())
+		emit notWorking();
 }

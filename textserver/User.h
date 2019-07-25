@@ -35,6 +35,7 @@ public:
 	QString getUsername();
 	QString getNickName();
 	QString getPassword();
+	QPixmap getIcon();
 
 	/* setter methods */
 	void addDocument(QString docUri);

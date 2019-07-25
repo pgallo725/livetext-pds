@@ -27,3 +27,8 @@ QString AccountMessage::getPasswd()
 {
 	return user.getPassword();
 }
+
+QPixmap AccountMessage::getIcon()
+{
+	return user.getIcon();
+}

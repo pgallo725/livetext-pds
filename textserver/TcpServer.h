@@ -39,7 +39,7 @@ private:
 	int _userIdCounter;
 
 	bool login(QSharedPointer<Client> client, QString password);
-	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QTcpSocket *socket = nullptr);
+	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
 
 	void saveUsers();
 	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
@@ -52,11 +52,15 @@ public:
 
 	void initialize();
 	
+	/* getter */
+	QSharedPointer<Client> getClient(qintptr socketDescriptor);
+
 public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
 	void deleteWorkspace();
+	void deleteClient(qint64 handle);
 signals:
 	void newSocket(qint64 handle);
 };

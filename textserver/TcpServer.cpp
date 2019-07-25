@@ -66,7 +66,7 @@ void TcpServer::initialize()
 		std::cout << "done" << std::endl;
 
 		if (users.find("admin") == users.end()) {
-			createNewAccount("admin", "sudo", "admin");
+			createNewAccount("admin", "sudo", "admin", QPixmap());
 		}
 	}
 	else
@@ -74,6 +74,15 @@ void TcpServer::initialize()
 		QFileInfo info(file);
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
+}
+
+QSharedPointer<Client> TcpServer::getClient(qintptr socketDescriptor)
+{
+	/*
+	for (QMap<QTcpSocket*, QSharedPointer<Client>>::key_iterator it = clients.keyBegin(), it != clients.keyEnd(); it++) {
+
+	}*/
+	return QSharedPointer<Client>();
 }
 
 
@@ -120,7 +129,7 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 		return;
 	}
 
-	Client* client = new Client(_userIdCounter++, socket, &(*users.find(username)));
+	Client* client = new Client(_userIdCounter++, socket->socketDescriptor(), &(users.find(username).value()));
 	clients.insert(socket, QSharedPointer<Client>(client));
 
 	streamOut << (quint16)LoginChallenge << client->getNonce();
@@ -133,7 +142,7 @@ bool TcpServer::login(QSharedPointer<Client> client, QString password)
 }
 
 
-std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QTcpSocket* socket)
+std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QPixmap icon, QTcpSocket* socket)
 {
 	QMap<QString, User>::iterator it = users.find(username);
 
@@ -142,14 +151,14 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 		return std::optional<User>();
 	}
 	
-	User nUser(username, nickname, passwd);			/* create a new user		*/
+	User nUser(username, nickname, passwd, icon);			/* create a new user		*/
 	users.insert(username, nUser);					/* insert new user in map	*/
 
 	/* check if socket is null (for static account) */
 	if (socket != nullptr) {
 		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
 			return std::optional<User>();
-		Client* client = new Client(_userIdCounter++, socket, &nUser);
+		Client* client = new Client(_userIdCounter++, socket->socketDescriptor(), &nUser);
 		client->setLogged();
 		clients.insert(socket, QSharedPointer<Client>(client));
 	}
@@ -165,7 +174,7 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 
 	QSharedPointer<Client> c = clients.find(author).value();
 	Document* doc = new Document(documentName, uri, c->getUserName());
-	WorkSpace* w = new WorkSpace(QSharedPointer<Document>(doc));
+	WorkSpace* w = new WorkSpace(QSharedPointer<Document>(doc), QSharedPointer<TcpServer>(this));
 	QThread *t = new QThread();
 
 	documents.insert(uri, QSharedPointer<Document>(doc));
@@ -177,13 +186,28 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 
 	/* make the new thead connect the socket in the workspace */
 	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	/* this thread will not recives more messages from client */
+	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+
 	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		/* workspace will notify where theres no one using it */
-	
+	connect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
+
 	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	/* TODO: se emetto questo segnale non ho più il segnale dal socket quando il client disconnette */
 	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 
 	return true;
+}
+
+
+void TcpServer::deleteWorkspace()
+{
+	// TODO: write on disk the file
+	qDebug() << "workspace cancellato";
+}
+
+void TcpServer::deleteClient(qint64 handle)
+{
+	//clients.remove(handle);
 }
 
 
@@ -300,12 +324,6 @@ void TcpServer::readMessage()
 	
 }
 
-void TcpServer::deleteWorkspace()
-{
-	// TODO: write on disk the file
-
-}
-
 
 void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 {
@@ -345,7 +363,7 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 
 		/* Account */
 	case AccountCreate:
-		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd(), socket)) {
+		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd(), msg->getIcon(), socket)) {
 			/* something went wrong, maybe this user already exist or this socket is already used */
 			typeOfMessage = AccountDenied;
 			msg_str = "User already exist or logged";
