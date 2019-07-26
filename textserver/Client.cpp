@@ -1,7 +1,7 @@
 #include "Client.h"
 
 Client::Client(int id, qintptr s, User* u):
-	clientId(id), socket(s), activeUser(u), logged(false), workspace(false)
+	clientId(id), socket(s), activeUser(u), logged(false), workspace(nullptr)
 {
 	// TODO: random sequence
 	nonce = "deadbeef";
@@ -48,7 +48,7 @@ void Client::resetLogged()
 
 bool Client::setWorkspace(QSharedPointer<WorkSpace> ws)
 {
-	if (workspace == nullptr) return false;
+	if (workspace.isNull()) return false;
 	workspace = ws;
 	return true;
 }

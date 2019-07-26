@@ -398,6 +398,10 @@ void TcpServer::readMessage()
 			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(OpenDocument, streamIn, clients.find(socket).value()->getUserName()));
 			break;
 
+		case UriRequest:
+			//TODO
+			break;
+
 		default:
 			throw MessageUnknownTypeException(typeOfMessage);
 			break;
@@ -540,6 +544,10 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 			msg_str = "Document created";
 		}
 		streamOut << typeOfMessage << msg_str;
+		break;
+
+	case UriRequest:
+		//TODO
 		break;
 
 	default:
