@@ -432,8 +432,8 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
-	int userId = -1;
 	QString msg_str;
+	User u = User();
 
 	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
 
@@ -456,14 +456,14 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 			clients.find(socket).value()->setLogged();
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
-			userId = clients.find(socket).value()->getUserId();
+			u = *(clients.find(socket).value()->getUser());
 		}
 		else {
 			clients.remove(socket);
 			typeOfMessage = LoginError;
 			msg_str = "Wrong username/password";
 		}
-		streamOut << typeOfMessage << userId << msg_str;
+		streamOut << typeOfMessage << u << msg_str;
 		break;
 
 		/* Account */
