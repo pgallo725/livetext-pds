@@ -5,17 +5,15 @@
 
 
 
-User::User(QString username, QString nickname, QString passwd)
-	: m_username(username), m_nickname(nickname),
-	m_passwd(passwd),
-	m_icon(QPixmap())
+User::User(QString username, int userId, QString nickname, QString passwd)
+	: m_username(username), m_userId(userId), m_nickname(nickname),
+	m_passwd(passwd), m_icon(QPixmap())
 {
 }
 
-User::User(QString username, QString nickname, QString passwd, QPixmap icon)
-	: m_username(username), m_nickname(nickname),
-	m_passwd(passwd),
-	m_icon(icon)
+User::User(QString username, int userId, QString nickname, QString passwd, QPixmap icon)
+	: m_username(username), m_userId(userId), m_nickname(nickname),
+	m_passwd(passwd), m_icon(icon)
 {
 }
 
@@ -32,6 +30,11 @@ QString User::getInfo()
 QString User::getUsername()
 {
 	return m_username;
+}
+
+int User::getUserId()
+{
+	return m_userId;
 }
 
 QString User::getNickName()

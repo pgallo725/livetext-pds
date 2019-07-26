@@ -20,6 +20,7 @@ public:
 	~Client();
 
 	/* getter */
+	int getUserId();
 	qintptr getSocketDescriptor();
 	User* getUser();
 	QString getNonce();

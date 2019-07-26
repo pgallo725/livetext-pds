@@ -11,6 +11,11 @@ Client::~Client()
 {
 }
 
+int Client::getUserId()
+{
+	return clientId;
+}
+
 qintptr Client::getSocketDescriptor()
 {
 	return socket;

@@ -13,6 +13,7 @@ class User
 private:
 
 	QString m_username;
+	int m_userId;
 	QString m_nickname;
 	QString m_passwd;		// hashed
 	QPixmap m_icon;		// nullable, check with QPixmap::isNull()
@@ -22,14 +23,15 @@ public:
 
 	User() { };	 // Use this to construct an empty user and populate the fields later
 
-	User(QString username, QString nickname, QString passwd);
-	User(QString username, QString nickname, QString passwd, QPixmap icon);
+	User(QString username, int userId, QString nickname, QString passwd);
+	User(QString username, int userId, QString nickname, QString passwd, QPixmap icon);
 
 	~User();
 
 	/* getter methods */
 	QString getInfo();
 	QString getUsername();
+	int getUserId();
 	QString getNickName();
 	QString getPassword();
 	QPixmap getIcon();

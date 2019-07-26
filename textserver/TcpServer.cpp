@@ -131,7 +131,7 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 		return;
 	}
 
-	Client* client = new Client(_userIdCounter++, socket->socketDescriptor(), &(users.find(username).value()));
+	Client* client = new Client(users.find(username)->getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
 	clients.insert(socket, QSharedPointer<Client>(client));
 
 	streamOut << (quint16)LoginChallenge << client->getNonce();
@@ -139,7 +139,7 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 
 
 bool TcpServer::login(QSharedPointer<Client> client, QString password)
-	{
+{
 	return client->authentication(password);
 }
 
@@ -153,19 +153,19 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 		return std::optional<User>();
 	}
 	
-	User nUser(username, nickname, passwd, icon);			/* create a new user		*/
-	users.insert(username, nUser);					/* insert new user in map	*/
+	User newUser(username, _userIdCounter++, nickname, passwd, icon);			/* create a new user		*/
+	users.insert(username, newUser);					/* insert new user in map	*/
 
 	/* check if socket is null (for static account) */
 	if (socket != nullptr) {
 		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
 			return std::optional<User>();
-		Client* client = new Client(_userIdCounter++, socket->socketDescriptor(), &nUser);
+		Client* client = new Client(newUser.getUserId(), socket->socketDescriptor(), &newUser);
 		client->setLogged();
 		clients.insert(socket, QSharedPointer<Client>(client));
 	}
 
-	return nUser;
+	return newUser;
 }
 
 
@@ -249,11 +249,29 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	if (documents.find(uri) == documents.end())
 		return false;
 
-	WorkSpace* w = workspaces.find(uri).value().get();
 	Client* c = clients.find(client).value().get();
+	WorkSpace* w;
+
+	if (workspaces.find(uri) == workspaces.end()) {
+		QThread* t = new QThread();
+		w = new WorkSpace(documents.find(uri).value(), QSharedPointer<TcpServer>(this));
+		workspaces.insert(uri, QSharedPointer<WorkSpace>(w));
+		workThreads.insert(uri, QSharedPointer<QThread>(t));
+		w->moveToThread(t);
+		t->start();
+
+		connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		
+		connect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
+	}
+	else {
+		w = workspaces.find(uri).value().get();
+	}
 
 	c->setWorkspace(QSharedPointer<WorkSpace>(w));
 	c->getUser()->addDocument(uri);
+
+	disconnect(client, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(client, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 	emit newSocket(static_cast<qint64>(client->socketDescriptor()));
@@ -266,9 +284,18 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 void TcpServer::deleteWorkspace(QString document)
 {
 	// TODO: write on disk the file
-	workspaces.remove(document);	//TODO: necessario eliminarlo?
+	WorkSpace* w = workspaces.find(document).value().get();
+	QThread* t = workThreads.find(document).value().get();
+
+	disconnect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
+	disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
+	workspaces.remove(document);	
+	delete w;
+
 	workThreads.find(document).value()->quit();
 	workThreads.find(document).value()->wait();
+	workThreads.remove(document);
+	delete t;
 
 	qDebug() << "workspace cancellato";
 }
@@ -405,6 +432,7 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
+	int userId = -1;
 	QString msg_str;
 
 	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
@@ -428,13 +456,14 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 			clients.find(socket).value()->setLogged();
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
+			userId = clients.find(socket).value()->getUserId();
 		}
 		else {
 			clients.remove(socket);
 			typeOfMessage = LoginError;
 			msg_str = "Wrong username/password";
 		}
-		streamOut << typeOfMessage << msg_str;
+		streamOut << typeOfMessage << userId << msg_str;
 		break;
 
 		/* Account */
