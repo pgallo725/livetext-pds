@@ -27,6 +27,7 @@ void WorkSpace::newSocket(qint64 handle)
 	if (!(c = server->getClient(handle))) {
 		qDebug() << "Client not found";
 		//TODO: come gestiamo?
+		return;
 	}
 
 	editors.insert(socket, c);

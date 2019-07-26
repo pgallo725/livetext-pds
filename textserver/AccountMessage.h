@@ -8,7 +8,9 @@ class AccountMessage :
 {
 private:
 	User user;
-
+	quint16 field;
+	QString newField;
+	QPixmap newIcon;
 public:
 	AccountMessage(MessageType m, QDataStream& streamIn);
 	~AccountMessage();
@@ -17,5 +19,15 @@ public:
 	QString getNickname();
 	QString getPasswd();
 	QPixmap getIcon();
+	quint16 getFiledType();
+	QString getField();
+	QPixmap getNewIcon();
 };
 
+enum fieldType {
+	changeNickname,
+	removeNickname,
+	changeIcon,
+	removeIcon,
+	changePassword
+};

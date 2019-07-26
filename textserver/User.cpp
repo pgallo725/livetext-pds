@@ -50,14 +50,36 @@ QPixmap User::getIcon()
 }
 
 
-
-
-
-
-
 void User::addDocument(QString docUri)
 {
-	m_documents.push_back(docUri);
+	if(!m_documents.contains(docUri))
+		m_documents.insert(docUri);
+}
+
+void User::setNickname(QString newNickname)
+{
+	m_nickname = newNickname;
+}
+
+void User::deleteNickname()
+{
+	m_nickname = m_username;
+}
+
+void User::setIcon(QPixmap newIcon)
+{
+	m_icon = newIcon;
+}
+
+void User::deleteIcon()
+{
+	m_icon = QPixmap();
+}
+
+void User::changePassword(QString newPassword)
+{
+	//TODO: decrypt
+	m_passwd = newPassword;
 }
 
 

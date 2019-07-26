@@ -2,7 +2,7 @@
 
 //#include <QObject>
 #include <QPixmap>
-
+#include <QSet>
 
 class User
 {
@@ -15,10 +15,8 @@ private:
 	QString m_username;
 	QString m_nickname;
 	QString m_passwd;		// hashed
-
 	QPixmap m_icon;		// nullable, check with QPixmap::isNull()
-
-	QList<QString> m_documents;
+	QSet<QString> m_documents;
 
 public:
 
@@ -29,7 +27,6 @@ public:
 
 	~User();
 
-
 	/* getter methods */
 	QString getInfo();
 	QString getUsername();
@@ -39,9 +36,11 @@ public:
 
 	/* setter methods */
 	void addDocument(QString docUri);
-
-	
-	
+	void setNickname(QString newNickname);
+	void deleteNickname();
+	void setIcon(QPixmap newIcon);
+	void deleteIcon();
+	void changePassword(QString newPassword);
 };
 
 

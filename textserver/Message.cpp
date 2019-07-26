@@ -54,3 +54,18 @@ QString Message::getDocName()
 {
 	return QString();
 }
+
+quint16 Message::getFiledType()
+{
+	return quint16();
+}
+
+QString Message::getField()
+{
+	return quint16();
+}
+
+QPixmap Message::getNewIcon()
+{
+	return QPixmap();
+}

@@ -56,5 +56,8 @@ public:
 	virtual QPixmap getIcon();
 	virtual QString getURI();
 	virtual QString getDocName();
+	virtual quint16 getFiledType();
+	virtual QString getField();
+	virtual QPixmap getNewIcon();
 };
 

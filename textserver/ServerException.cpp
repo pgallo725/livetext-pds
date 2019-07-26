@@ -52,6 +52,11 @@ MessageWrongTypeException::MessageWrongTypeException(std::string msg, int type) 
 {
 }
 
+FieldWrongException::FieldWrongException(int type) :
+	MessageException("Wrong field type : " + type), type(type)
+{
+}
+
 SocketNullException::SocketNullException(std::string msg) :
 	ServerException(msg)
 {

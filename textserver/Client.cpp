@@ -41,7 +41,7 @@ void Client::resetLogged()
 	logged = false;
 }
 
-bool Client::setWorkspace(std::shared_ptr<WorkSpace> ws)
+bool Client::setWorkspace(QSharedPointer<WorkSpace> ws)
 {
 	if (workspace == nullptr) return false;
 	workspace = ws;

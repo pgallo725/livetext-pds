@@ -14,7 +14,7 @@ class Client
 	User* activeUser;
 	bool logged;
 	QString nonce;
-	std::shared_ptr<WorkSpace> workspace;
+	QSharedPointer<WorkSpace> workspace;
 public:
 	Client(int id, qintptr s, User* u);
 	~Client();
@@ -28,7 +28,7 @@ public:
 	/* setter */
 	void setLogged();
 	void resetLogged();
-	bool setWorkspace(std::shared_ptr<WorkSpace> ws);
+	bool setWorkspace(QSharedPointer<WorkSpace> ws);
 	void resetWorkspace();
 
 	/* general methods */

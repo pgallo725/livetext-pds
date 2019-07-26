@@ -40,7 +40,8 @@ private:
 
 	bool login(QSharedPointer<Client> client, QString password);
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
-
+	bool updateAccount(User* user, quint16 field, QString newField = "");
+	bool updateAccount(User* user, quint16 field, QPixmap icon);
 	void saveUsers();
 	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
