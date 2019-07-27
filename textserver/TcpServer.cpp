@@ -149,6 +149,7 @@ bool TcpServer::login(QSharedPointer<Client> client, QString password)
 	return client->authentication(password);
 }
 
+
 bool TcpServer::logout(QTcpSocket* s)
 {
 	if (!clients.contains(s)) {
@@ -161,13 +162,13 @@ bool TcpServer::logout(QTcpSocket* s)
 }
 
 
-std::optional<User> TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QPixmap icon, QTcpSocket* socket)
+bool TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QPixmap icon, QTcpSocket* socket)
 {
 	QMap<QString, User>::iterator it = users.find(username);
 
 	/* check if this user exist */
 	if (it != users.end()) {
-		return std::optional<User>();
+		return false;
 	}
 	
 	User newUser(username, _userIdCounter++, nickname, passwd, icon);			/* create a new user		*/
@@ -175,14 +176,14 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 
 	/* check if socket is null (for static account) */
 	if (socket != nullptr) {
-		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
-			return std::optional<User>();
+		if (clients.find(socket) != clients.end())	/* this socket is already use by another user */
+			return false;
 		Client* client = new Client(newUser.getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
 		client->setLogged();
 		clients.insert(socket, QSharedPointer<Client>(client));
 	}
 
-	return newUser;
+	return true;
 }
 
 
@@ -466,7 +467,7 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 			clients.find(socket).value()->setLogged();
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
-			u = *(clients.find(socket).value()->getUser());
+			u = users.find(clients.find(socket).value()->getUserName()).value();
 		}
 		else {
 			clients.remove(socket);

@@ -1,16 +1,19 @@
 #pragma once
 
-//#include <QObject>
+#include <QObject>
 #include <QPixmap>
 #include <QSet>
 #include <QStringList>
+#include <QMutex>
+//#include <QMutexLocker>
 
-class User
+class User //: public QObject
 {
+	//Q_OBJECT
 	/* Operators for QDataStream serialization and deserialization */
 	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
 	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
-
+	
 private:
 
 	QString m_username;
@@ -19,7 +22,7 @@ private:
 	QString m_passwd;		// hashed
 	QPixmap m_icon;		// nullable, check with QPixmap::isNull()
 	QStringList m_documents;
-
+	//QMutex m;
 public:
 
 	User() { };	 // Use this to construct an empty user and populate the fields later
@@ -30,7 +33,6 @@ public:
 	~User();
 
 	/* getter methods */
-	QString getInfo();
 	QString getUsername();
 	int getUserId();
 	QString getNickName();
@@ -45,6 +47,7 @@ public:
 	void setIcon(QPixmap newIcon);
 	void deleteIcon();
 	void changePassword(QString newPassword);
+
 };
 
 

@@ -21,12 +21,6 @@ User::~User()
 {
 }
 
-
-QString User::getInfo()
-{
-	return QString("Username: " + m_username + " - Nickname: " + m_nickname);
-}
-
 QString User::getUsername()
 {
 	return m_username;
@@ -89,6 +83,7 @@ void User::changePassword(QString newPassword)
 	//TODO: decrypt
 	m_passwd = newPassword;
 }
+
 
 
 QDataStream& operator>>(QDataStream& in, User& user)

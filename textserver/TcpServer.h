@@ -39,9 +39,10 @@ private:
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
 	int _userIdCounter;
 
+	/* methods */
 	bool login(QSharedPointer<Client> client, QString password);
 	bool logout(QTcpSocket* s);
-	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
+	bool createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
 	bool updateAccount(User* user, quint16 typeField, QVariant newField);
 	void saveUsers();
 	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
@@ -49,21 +50,23 @@ private:
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
 	bool openDocument(QString uri, QTcpSocket* client);
 	QStringList getUriFromUser(QString username);
+
 public:
 
 	TcpServer(QObject *parent = 0);
 	~TcpServer();
 
 	void initialize();
-	
-	/* getter */
 	QSharedPointer<Client> getClient(qintptr socketDescriptor);
 
 public slots:
+
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
 	void deleteWorkspace(QString document);
+
 signals:
+
 	void newSocket(qint64 handle);
 };
