@@ -46,9 +46,19 @@ void Client::errorHandler() {
 void Client::readBuffer() {
 
 	qDebug() << "reading socket";
+	
+	quint16 typeOfMessage;
+	QDataStream in;
 
-	//QByteArray responce = socket->read(256);
-	//qDebug() << responce;
+	in >> typeOfMessage;
+	switch (typeOfMessage) {
+	case MoveCursor:
+		reciveCursor();
+		break;
+	default:
+		//thorw exception
+		break;
+	}
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
@@ -157,11 +167,11 @@ bool Client::Register() {
 	QDataStream out;
 	quint16 typeOfMessage = AccountCreate;
 	QDataStream in;
-	
+	QPixmap image;
 	// Link the stream to the socke and send the byte
 	out.setDevice(socket);
 	in.setDevice(socket);
-	out << typeOfMessage << username << nickname << password;
+	out << typeOfMessage << username << nickname << password << image;
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
@@ -230,18 +240,37 @@ bool Client::Logout() {
 
 }
 
-bool Client::sendCursor() {
+bool Client::sendCursor(int position) {
 
+	QDataStream out;
+	quint16 typeOfMessage = MoveCursor;
 
+	// Link the stream to the socke and send the byte
+	out.setDevice(socket);
+	out << typeOfMessage << position;
+	
 	return true;
 }
 
 void Client::reciveCursor() {
+	
+	QDataStream in;
+	int position;
+	QString user;
+
+	in >> position >> user;
+
+	emit cursorMoved(position, user);
 
 }
+
+
+
 void Client::sendChar() {
 
+
 }
+
 void Client::reciveChar() {
 
 }
@@ -323,5 +352,9 @@ void Client::createDocument(QString name) {
 		return;
 		break;
 	}
+
+}
+
+void Client::requestURI() {
 
 }

@@ -4,23 +4,28 @@
 #include <list>
 #include <queue>
 #include <mutex>
+
 #include "Document.h"
 #include "Client.h"
 #include "Message.h"
 #include "TextEditMessage.h"
 #include "ServerException.h"
 
+
+class TcpServer;
+
 class WorkSpace : public QObject
 {
 	Q_OBJECT
 private:
 	QSharedPointer<Document> doc;
-	QList<QSharedPointer<QTcpSocket>> editors;
+	QSharedPointer<TcpServer> server;
+	QMap<QTcpSocket *, QSharedPointer<Client>> editors;
 
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 
 public:
-	WorkSpace(QSharedPointer<Document> d);
+	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:
@@ -29,6 +34,8 @@ public slots:
 	void readMessage();
 
 signals:
-	void notWorking();
+	void notWorking(QString document);
+signals:
+	void deleteClient(qint64 handle);
 };
 

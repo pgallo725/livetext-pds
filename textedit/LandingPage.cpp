@@ -92,6 +92,9 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	//Connect con Client quando la connessione è stabilita
 	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegister);
 
+	//Connect con Client quando un utente sposta il cursore
+	//connect(client, &Client::cursorMoved, this, /*funzione*/);
+
 	//Connect con il Client quando non riesco a connettermi al server
 	connect(client, &Client::impossibleToConnect, this, &LandingPage::impossibleToConnect);
 
@@ -151,7 +154,10 @@ void LandingPage::tryToLoginOrRegister() {
 	if (client->getLogin()) {
 		if (client->Login()) {
 			stopLoadingAnimation();
+			
+			QString ciao = client->getMsg();
 
+			client->requestURI();
 			ui->stackedWidget->setCurrentIndex(1);
 			ui->stackedWidget->show();
 		}

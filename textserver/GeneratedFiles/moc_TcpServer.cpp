@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TcpServer_t {
-    QByteArrayData data[8];
-    char stringdata0[96];
+    QByteArrayData data[9];
+    char stringdata0[105];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -38,12 +38,13 @@ QT_MOC_LITERAL(3, 21, 6), // "handle"
 QT_MOC_LITERAL(4, 28, 19), // "newClientConnection"
 QT_MOC_LITERAL(5, 48, 19), // "clientDisconnection"
 QT_MOC_LITERAL(6, 68, 11), // "readMessage"
-QT_MOC_LITERAL(7, 80, 15) // "deleteWorkspace"
+QT_MOC_LITERAL(7, 80, 15), // "deleteWorkspace"
+QT_MOC_LITERAL(8, 96, 8) // "document"
 
     },
     "TcpServer\0newSocket\0\0handle\0"
     "newClientConnection\0clientDisconnection\0"
-    "readMessage\0deleteWorkspace"
+    "readMessage\0deleteWorkspace\0document"
 };
 #undef QT_MOC_LITERAL
 
@@ -67,7 +68,7 @@ static const uint qt_meta_data_TcpServer[] = {
        4,    0,   42,    2, 0x0a /* Public */,
        5,    0,   43,    2, 0x0a /* Public */,
        6,    0,   44,    2, 0x0a /* Public */,
-       7,    0,   45,    2, 0x0a /* Public */,
+       7,    1,   45,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::LongLong,    3,
@@ -76,7 +77,7 @@ static const uint qt_meta_data_TcpServer[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,    8,
 
        0        // eod
 };
@@ -91,7 +92,7 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 1: _t->newClientConnection(); break;
         case 2: _t->clientDisconnection(); break;
         case 3: _t->readMessage(); break;
-        case 4: _t->deleteWorkspace(); break;
+        case 4: _t->deleteWorkspace((*reinterpret_cast< QString(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {

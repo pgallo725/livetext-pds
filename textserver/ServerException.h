@@ -78,6 +78,14 @@ public:
 	MessageWrongTypeException(std::string msg, int type);
 };
 
+class FieldWrongException : public MessageException
+{
+private:
+	int type;
+public:
+	FieldWrongException(int type);
+};
+
 class SocketNullException : public ServerException
 {
 public:

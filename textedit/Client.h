@@ -36,6 +36,7 @@ private:
 signals:
 	void connectionEstablished();
 	void impossibleToConnect();
+	void cursorMoved(int position, QString user);
 public:
 	Client(QObject* parent = 0);
 	~Client();
@@ -52,12 +53,13 @@ public slots:
 	bool Register();
 	bool Logout();
 	//Data Exchange
-	bool sendCursor();
+	bool sendCursor(int position);
 	void reciveCursor();
 	void sendChar();
 	void reciveChar();
 	void openDocument(QString URI);
 	void createDocument(QString name);
+	void requestURI();
 	//Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
