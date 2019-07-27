@@ -43,7 +43,7 @@ private:
 	bool login(QSharedPointer<Client> client, QString password);
 	bool logout(QTcpSocket* s);
 	bool createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
-	bool updateAccount(User* user, quint16 typeField, QVariant newField);
+	bool updateAccount(User* user, quint16 typeField, QVariant field);
 	void saveUsers();
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);

@@ -25,7 +25,7 @@ private:
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 
 public:
-	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server, QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
 	~WorkSpace();
 
 public slots:

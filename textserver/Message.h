@@ -19,6 +19,8 @@ enum MessageType
 	LogoutDenied,
 	NewDocument,
 	OpenDocument,
+	UriRequest,
+	UriResponse,
 	DocumentOpened,
 	DocumentError,
 	CharInsert,

@@ -4,7 +4,8 @@
 #include "ServerException.h"
 #include "TcpServer.h"
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d): doc(d)
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
+	: doc(d), server(server)
 {
 }
 

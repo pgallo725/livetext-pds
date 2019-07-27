@@ -3,28 +3,26 @@
 
 AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : Message(m), user(User())
 {
-	quint16 field;
-
 	switch (m) {
 	case AccountCreate:
 		streamIn >> user;
 		break;
 	case AccountUpDate:
-		streamIn >> field;
-		switch (field) {
-		case changeNickname:
-		case changeIcon:
-		case changePassword:
-			streamIn >> newField;
+		streamIn >> fieldType;
+		switch (fieldType) {
+		case ChangeNickname:
+		case ChangeIcon:
+		case ChangePassword:
+			streamIn >> field;
 			break;
 
-		case removeNickname:
-		case removeIcon:
-			newField = QVariant();
+		case RemoveNickname:
+		case RemoveIcon:
+			field = QVariant();
 			break;
 
 		default:
-			throw FieldWrongException(field);
+			throw FieldWrongException(fieldType);
 			break;
 		}
 		break;
@@ -59,12 +57,12 @@ QPixmap AccountMessage::getIcon()
 	return user.getIcon();
 }
 
-quint16 AccountMessage::getFiledType()
+quint16 AccountMessage::getFieldType()
 {
-	return field;
+	return fieldType;
 }
 
-QVariant AccountMessage::getFiled()
+QVariant AccountMessage::getField()
 {
-	return newField;
+	return field;
 }

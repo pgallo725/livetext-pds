@@ -187,27 +187,27 @@ bool TcpServer::createNewAccount(QString username, QString nickname, QString pas
 }
 
 
-bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant newField)
+bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant field)
 {
 	switch (typeField) {
-	case changeNickname:
-		user->setNickname(newField.value<QString>());
+	case ChangeNickname:
+		user->setNickname(field.value<QString>());
 		break;
 
-	case removeNickname:
+	case RemoveNickname:
 		user->deleteNickname();
 		break;
 
-	case changeIcon:
-		user->setIcon(newField.value<QPixmap>());
+	case ChangeIcon:
+		user->setIcon(field.value<QPixmap>());
 		break;
 
-	case removeIcon:
+	case RemoveIcon:
 		user->deleteIcon();
 		break;
 
-	case changePassword:
-		user->changePassword(newField.value<QString>());
+	case ChangePassword:
+		user->changePassword(field.value<QString>());
 		break;
 
 	default:
@@ -401,12 +401,12 @@ void TcpServer::readMessage()
 
 		case OpenDocument:
 			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
-			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(OpenDocument, streamIn, clients.find(socket).value()->getUserName()));
+			msg = std::make_unique<DocumentMessage>(OpenDocument, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
 		case UriRequest:
 			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
-			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(UriRequest, streamIn, clients.find(socket).value()->getUserName()));
+			msg = std::make_unique<DocumentMessage>(UriRequest, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
 		default:
@@ -490,7 +490,8 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		/* Account */
 	case AccountCreate: {
 		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(msg.get());
-		if (!createNewAccount(accntCreate->getUserName(), accntCreate->getNickname(), accntCreate->getPasswd(), socket))
+		if (!createNewAccount(accntCreate->getUserName(), accntCreate->getNickname(), 
+			accntCreate->getPasswd(), accntCreate->getIcon(), socket))
 		{
 			/* something went wrong, maybe this user already exist or this socket is already used */
 			typeOfMessage = AccountDenied;
@@ -507,7 +508,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case AccountUpDate: 
 	{
 		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
-		if (!updateAccount(clients.find(socket).value()->getUser(), msg->getFiledType(), msg->getField())) 
+		if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
 		{
 			typeOfMessage = AccountDenied;
 			msg_str = "cannot modify this user";
@@ -519,12 +520,11 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		streamOut << typeOfMessage << msg_str;
 		break;
 	}
-		break;
-	}
 		
 
 		/* LogoutMessages */
 	case LogoutRequest:
+	{
 		if (!logout(socket)) {
 			typeOfMessage = LogoutDenied;
 			msg_str = "Cannot logout if you are already loggedout";
@@ -557,9 +557,10 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 	case OpenDocument:
 	{
-		if (!openDocument(msg->getURI(), socket)) {
+		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
+		if (!openDocument(docMsg->getURI(), socket)) {
 			typeOfMessage = DocumentError;
-			msg_str = "Cannot open '" + msg->getDocName() + "', this document doesn't exist";
+			msg_str = "Cannot open '" + docMsg->getDocName() + "', this document doesn't exist";
 		}
 		else {
 			typeOfMessage = DocumentOpened;
@@ -571,18 +572,16 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 	case UriRequest:
 	{
-		typeOfMessage = UriResponce;
-		streamOut << typeOfMessage << getUriFromUser(msg->getUserName());
+		DocumentMessage* uriRequest = dynamic_cast<DocumentMessage*>(msg.get());
+		typeOfMessage = UriResponse;
+		streamOut << typeOfMessage << getUriFromUser(uriRequest->getUserName());
 		break;
 	}
-		break;
-	}
-		
+
 
 	default:
 		throw MessageUnknownTypeException(msg->getType());
 		break;
-	
 	}
 }
 
