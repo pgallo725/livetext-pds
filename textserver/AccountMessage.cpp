@@ -13,21 +13,14 @@ AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : Message(m
 		streamIn >> field;
 		switch (field) {
 		case changeNickname:
+		case changeIcon:
+		case changePassword:
 			streamIn >> newField;
 			break;
 
 		case removeNickname:
-			break;
-
-		case changeIcon:
-			streamIn >> newIcon;
-			break;
-
 		case removeIcon:
-			break;
-
-		case changePassword:
-			streamIn >> newField;
+			newField = QVariant();
 			break;
 
 		default:
@@ -35,6 +28,7 @@ AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : Message(m
 			break;
 		}
 		break;
+
 	default:
 		throw MessageUnknownTypeException(m);
 		break;
@@ -70,12 +64,7 @@ quint16 AccountMessage::getFiledType()
 	return field;
 }
 
-QString AccountMessage::getField()
+QVariant AccountMessage::getFiled()
 {
 	return newField;
-}
-
-QPixmap AccountMessage::getNewIcon()
-{
-	return newIcon;
 }

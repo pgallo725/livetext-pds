@@ -9,6 +9,7 @@ class WorkSpace;	// inclusione anticipata
 
 class Client
 {
+private:
 	int clientId;
 	qintptr socket;
 	User* activeUser;

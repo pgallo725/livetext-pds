@@ -8,6 +8,7 @@
 #include <QTcpSocket>
 #include <QString>
 #include <QThread>
+#include <QStringList>
 
 #include "User.h"
 #include "Client.h"
@@ -39,14 +40,15 @@ private:
 	int _userIdCounter;
 
 	bool login(QSharedPointer<Client> client, QString password);
+	bool logout(QTcpSocket* s);
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QPixmap icon, QTcpSocket *socket = nullptr);
-	bool updateAccount(User* user, quint16 field, QString newField = "");
-	bool updateAccount(User* user, quint16 field, QPixmap icon);
+	bool updateAccount(User* user, quint16 typeField, QVariant newField);
 	void saveUsers();
 	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
 	bool openDocument(QString uri, QTcpSocket* client);
+	QStringList getUriFromUser(QString username);
 public:
 
 	TcpServer(QObject *parent = 0);
@@ -62,7 +64,6 @@ public slots:
 	void clientDisconnection();
 	void readMessage();
 	void deleteWorkspace(QString document);
-	void deleteClient(qint64 handle);
 signals:
 	void newSocket(qint64 handle);
 };

@@ -4,16 +4,16 @@
 #include <QDataStream>
 
 
-
+/*
 User::User(QString username, int userId, QString nickname, QString passwd)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
-	m_passwd(passwd), m_icon(QPixmap())
+	m_passwd(passwd), m_icon(QPixmap()), m_documents(QStringList())
 {
-}
+}*/
 
 User::User(QString username, int userId, QString nickname, QString passwd, QPixmap icon)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
-	m_passwd(passwd), m_icon(icon)
+	m_passwd(passwd), m_icon(icon), m_documents(QStringList())
 {
 }
 
@@ -52,11 +52,16 @@ QPixmap User::getIcon()
 	return m_icon;
 }
 
+QStringList User::getDocuments()
+{
+	return m_documents;
+}
+
 
 void User::addDocument(QString docUri)
 {
-	if(!m_documents.contains(docUri))
-		m_documents.insert(docUri);
+	if (!m_documents.contains(docUri))
+		m_documents << docUri;
 }
 
 void User::setNickname(QString newNickname)

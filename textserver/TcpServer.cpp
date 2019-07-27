@@ -76,11 +76,16 @@ void TcpServer::initialize()
 	}
 }
 
+
 QSharedPointer<Client> TcpServer::getClient(qintptr socketDescriptor)
 {
-	for (QSharedPointer<Client> it : clients.values()) {
-		if (it->getSocketDescriptor() == socketDescriptor) {
-			return it;
+	QSharedPointer<Client> c;
+
+	for (QTcpSocket* it : clients.keys()) {
+		if (clients.find(it).value()->getSocketDescriptor() == socketDescriptor) {
+			c = std::move(clients.find(it).value());
+			clients.remove(it);
+			return c;
 		}
 	}
 
@@ -110,6 +115,7 @@ void TcpServer::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	clients.find(socket).value().clear();	/* delete client object */
 	clients.remove(socket);	/* remove this client from the list */
 	socket->close();		/* close the socket */
 	qDebug() << " - client disconnected";
@@ -131,7 +137,7 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 		return;
 	}
 
-	Client* client = new Client(users.find(username)->getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
+	Client* client = new Client(users.find(username).value().getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
 	clients.insert(socket, QSharedPointer<Client>(client));
 
 	streamOut << (quint16)LoginChallenge << client->getNonce();
@@ -141,6 +147,17 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 bool TcpServer::login(QSharedPointer<Client> client, QString password)
 {
 	return client->authentication(password);
+}
+
+bool TcpServer::logout(QTcpSocket* s)
+{
+	if (!clients.contains(s)) {
+		return false;
+	}
+
+	clients.find(s).value().clear();
+	clients.remove(s);
+	return true;
 }
 
 
@@ -160,7 +177,7 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 	if (socket != nullptr) {
 		if(clients.find(socket) != clients.end())	/* this socket is already use by another user */
 			return std::optional<User>();
-		Client* client = new Client(newUser.getUserId(), socket->socketDescriptor(), &newUser);
+		Client* client = new Client(newUser.getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
 		client->setLogged();
 		clients.insert(socket, QSharedPointer<Client>(client));
 	}
@@ -169,15 +186,19 @@ std::optional<User> TcpServer::createNewAccount(QString username, QString nickna
 }
 
 
-bool TcpServer::updateAccount(User* user, quint16 field, QString newField)
+bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant newField)
 {
-	switch (field) {
+	switch (typeField) {
 	case changeNickname:
-		user->setNickname(newField);
+		user->setNickname(newField.value<QString>());
 		break;
 
 	case removeNickname:
 		user->deleteNickname();
+		break;
+
+	case changeIcon:
+		user->setIcon(newField.value<QPixmap>());
 		break;
 
 	case removeIcon:
@@ -185,7 +206,7 @@ bool TcpServer::updateAccount(User* user, quint16 field, QString newField)
 		break;
 
 	case changePassword:
-		user->changePassword(newField);
+		user->changePassword(newField.value<QString>());
 		break;
 
 	default:
@@ -195,20 +216,6 @@ bool TcpServer::updateAccount(User* user, quint16 field, QString newField)
 	return true;
 }
 
-bool TcpServer::updateAccount(User* user, quint16 field, QPixmap icon)
-{
-	switch (field) {
-
-	case changeIcon:
-		user->setIcon(icon);
-		break;
-
-	default:
-		return false;
-		break;
-	}
-	return true;
-}
 
 bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket* author)
 {
@@ -222,7 +229,7 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 
 	documents.insert(uri, QSharedPointer<Document>(doc));
 	workThreads.insert(uri, QSharedPointer<QThread>(t));
-	c->setWorkspace(QSharedPointer<WorkSpace>(w));
+	//c->setWorkspace(QSharedPointer<WorkSpace>(w));
 	c->getUser()->addDocument(uri);
 
 	/* change affinity of this workspace with a new thread */
@@ -234,7 +241,6 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		/* workspace will notify where theres no one using it */
-	connect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
 
 	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	
@@ -261,7 +267,6 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 		t->start();
 
 		connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		
-		connect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
 	}
 	else {
 		w = workspaces.find(uri).value().get();
@@ -281,34 +286,30 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 }
 
 
+QStringList TcpServer::getUriFromUser(QString username)
+{
+	return users.find(username).value().getDocuments();
+}
+
+
 void TcpServer::deleteWorkspace(QString document)
 {
 	// TODO: write on disk the file
 	WorkSpace* w = workspaces.find(document).value().get();
 	QThread* t = workThreads.find(document).value().get();
 
-	disconnect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
-	disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
+	/* they throw an exception ??? why??? */
+	//disconnect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
+	//disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
+	workspaces.find(document).value().clear();
 	workspaces.remove(document);	
-	delete w;
 
 	workThreads.find(document).value()->quit();
 	workThreads.find(document).value()->wait();
+	workThreads.find(document).value().clear();
 	workThreads.remove(document);
-	delete t;
 
 	qDebug() << "workspace cancellato";
-}
-
-
-void TcpServer::deleteClient(qint64 handle)
-{
-	for (QTcpSocket* it : clients.keys()) {
-		if (clients.find(it).value()->getSocketDescriptor() == static_cast<qintptr>(handle)) {
-			clients.remove(it);
-			break;
-		}
-	}
 }
 
 
@@ -356,6 +357,8 @@ void TcpServer::readMessage()
 	QDataStream streamIn;
 	quint16 typeOfMessage;
 	QSharedPointer<Message> msg;
+	QString tmp;
+	QSharedPointer<Client> c;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -388,9 +391,11 @@ void TcpServer::readMessage()
 
 			/* DocumentMessages */
 		case NewDocument:
-			//auto c = clients.find(socket);
+			c = clients.find(socket).value();
+			tmp = clients.find(socket).value()->getUserName();
+
 			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
-			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(NewDocument, streamIn, clients.find(socket).value()->getUserName()));
+			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(NewDocument, streamIn, tmp/*clients.find(socket).value()->getUserName()*/));
 			break;
 
 		case OpenDocument:
@@ -399,7 +404,8 @@ void TcpServer::readMessage()
 			break;
 
 		case UriRequest:
-			//TODO
+			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
+			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(UriRequest, streamIn, clients.find(socket).value()->getUserName()));
 			break;
 
 		default:
@@ -485,31 +491,20 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		break;
 
 	case AccountUpDate:
-		//TODO: responce to client
-		switch (msg->getFiledType()) {
-		case changeNickname:
-		case changePassword:
-			updateAccount(clients.find(socket).value()->getUser(), msg->getFiledType(), msg->getField());
-			break;
-
-		case removeNickname:
-		case removeIcon:
-			updateAccount(clients.find(socket).value()->getUser(), msg->getFiledType());
-			break;
-
-		case changeIcon:
-			updateAccount(clients.find(socket).value()->getUser(), msg->getFiledType(), msg->getNewIcon());
-			break;
-
-		default:
-			return throw FieldWrongException(msg->getFiledType());
-			break;
+		if (!updateAccount(clients.find(socket).value()->getUser(), msg->getFiledType(), msg->getField())) {
+			typeOfMessage = AccountDenied;
+			msg_str = "cannot modify this user";
 		}
+		else {
+			typeOfMessage = AccountConfirmed;
+			msg_str = "update completed";
+		}
+		streamOut << typeOfMessage << msg_str;
 		break;
 
 		/* LogoutMessages */
 	case LogoutRequest:
-		if (!clients.remove(socket)) {
+		if (!logout(socket)) {
 			typeOfMessage = LogoutDenied;
 			msg_str = "Cannot logout if you are already loggedout";
 		}
@@ -547,7 +542,8 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		break;
 
 	case UriRequest:
-		//TODO
+		typeOfMessage = UriResponce;
+		streamOut << typeOfMessage << getUriFromUser(msg->getUserName());
 		break;
 
 	default:

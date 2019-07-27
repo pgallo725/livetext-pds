@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QVariant>
+
 #include "Message.h"
 #include "User.h"
 
@@ -9,8 +11,7 @@ class AccountMessage :
 private:
 	User user;
 	quint16 field;
-	QString newField;
-	QPixmap newIcon;
+	QVariant newField;
 public:
 	AccountMessage(MessageType m, QDataStream& streamIn);
 	~AccountMessage();
@@ -20,8 +21,7 @@ public:
 	QString getPasswd();
 	QPixmap getIcon();
 	quint16 getFiledType();
-	QString getField();
-	QPixmap getNewIcon();
+	QVariant getFiled();
 };
 
 enum fieldType {

@@ -12,6 +12,10 @@ DocumentMessage::DocumentMessage(MessageType m, QDataStream& streamIn, QString u
 	case OpenDocument: 
 		streamIn >> URI;
 		break;
+		
+	case UriRequest:
+		break;
+
 	default:
 		throw MessageUnknownTypeException(m);
 		break;

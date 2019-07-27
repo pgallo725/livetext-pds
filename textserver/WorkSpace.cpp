@@ -31,7 +31,6 @@ void WorkSpace::newSocket(qint64 handle)
 	}
 
 	editors.insert(socket, c);
-	emit deleteClient(handle);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);

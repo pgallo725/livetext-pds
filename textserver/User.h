@@ -3,6 +3,7 @@
 //#include <QObject>
 #include <QPixmap>
 #include <QSet>
+#include <QStringList>
 
 class User
 {
@@ -17,14 +18,14 @@ private:
 	QString m_nickname;
 	QString m_passwd;		// hashed
 	QPixmap m_icon;		// nullable, check with QPixmap::isNull()
-	QSet<QString> m_documents;
+	QStringList m_documents;
 
 public:
 
 	User() { };	 // Use this to construct an empty user and populate the fields later
 
-	User(QString username, int userId, QString nickname, QString passwd);
-	User(QString username, int userId, QString nickname, QString passwd, QPixmap icon);
+	//User(QString username, int userId, QString nickname, QString passwd);
+	User(QString username, int userId, QString nickname, QString passwd, QPixmap icon = QPixmap());
 
 	~User();
 
@@ -35,6 +36,7 @@ public:
 	QString getNickName();
 	QString getPassword();
 	QPixmap getIcon();
+	QStringList getDocuments();
 
 	/* setter methods */
 	void addDocument(QString docUri);
