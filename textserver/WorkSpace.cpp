@@ -1,5 +1,8 @@
 #include "WorkSpace.h"
 
+#include <memory>
+
+
 WorkSpace::WorkSpace(QSharedPointer<Document> d): doc(d)
 {
 }
@@ -30,7 +33,7 @@ void WorkSpace::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn;
 	quint16 typeOfMessage;
-	QSharedPointer<Message> msg;
+	std::unique_ptr<Message> msg;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -42,9 +45,11 @@ void WorkSpace::readMessage()
 		{
 			/* textMessages */
 		case CharInsert:
+			msg = std::make_unique<TextEditMessage>(CharInsert, streamIn);
 			break;
 
 		case CharDelete:
+			msg = std::make_unique<TextEditMessage>(CharDelete, streamIn);
 			break;
 
 		case MoveCursor:
@@ -67,7 +72,7 @@ void WorkSpace::readMessage()
 			break;
 		}
 
-		handleMessage(msg, socket);
+		handleMessage(std::move(msg), socket);
 	}
 	catch (MessageUnknownTypeException& e) {
 		/* send to the client WrongMessageType */
@@ -92,7 +97,7 @@ void WorkSpace::readMessage()
 }
 
 
-void WorkSpace::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
+void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
@@ -100,14 +105,27 @@ void WorkSpace::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 
 	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
 
-	streamOut.setDevice(socket); /* connect stream with socket */
+	streamOut.setDevice(socket);	/* connect stream with socket */
 
 	switch (msg->getType()) {
+
+	case CharInsert:
+	{
+		TextEditMessage* insertMsg = dynamic_cast<TextEditMessage*>(msg.get());
+		doc->insert(insertMsg->getSymbol());
+		break;
+	}
+
+	case CharDelete:
+	{
+		TextEditMessage* deleteMsg = dynamic_cast<TextEditMessage*>(msg.get());
+		doc->removeAt(deleteMsg->getPosition());
+		break;
+	}
 	
 	default:
-		throw MessageUnknownTypeException(typeOfMessage);
+		throw MessageUnknownTypeException(msg->getType());
 		break;
-
 	}
 }
 

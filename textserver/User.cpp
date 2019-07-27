@@ -58,12 +58,6 @@ QDataStream& operator>>(QDataStream& in, User& user)
 {
 	// Object deserialized reading field by field from the stream
 
-	/*QString username;
-	QString nickname;
-	QString password;
-	QPixmap icon;
-	QList<QString> documents;*/
-
 	in >> user.m_username >> user.m_nickname
 		>> user.m_passwd
 		>> user.m_icon

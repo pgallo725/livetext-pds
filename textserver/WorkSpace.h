@@ -7,6 +7,7 @@
 #include "Document.h"
 #include "Client.h"
 #include "Message.h"
+#include "TextEditMessage.h"
 #include "ServerException.h"
 
 class WorkSpace : public QObject
@@ -16,7 +17,7 @@ private:
 	QSharedPointer<Document> doc;
 	QList<QSharedPointer<QTcpSocket>> editors;
 
-	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
+	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 
 public:
 	WorkSpace(QSharedPointer<Document> d);

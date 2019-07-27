@@ -230,7 +230,7 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn;
 	quint16 typeOfMessage;
-	QSharedPointer<Message> msg;
+	std::unique_ptr<Message> msg;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -242,30 +242,30 @@ void TcpServer::readMessage()
 		{
 			/* LoginMessages */
 		case LoginRequest:
-			msg = QSharedPointer<LoginMessage>(new LoginMessage(LoginRequest, streamIn));
+			msg = std::make_unique<LoginMessage>(LoginRequest, streamIn);
 			break;
 		case LoginUnlock:
-			msg = QSharedPointer<LoginMessage>(new LoginMessage(LoginUnlock, streamIn));
+			msg = std::make_unique<LoginMessage>(LoginUnlock, streamIn);
 			break;
 	
 			/* AccountMessages */
 		case AccountCreate:
-			msg = QSharedPointer<AccountMessage>(new AccountMessage(AccountCreate, streamIn));
+			msg = std::make_unique<AccountMessage>(AccountCreate, streamIn);
 			break;
 		case AccountUpDate:
-			msg = QSharedPointer<AccountMessage>(new AccountMessage(AccountUpDate, streamIn));
+			msg = std::make_unique<AccountMessage>(AccountUpDate, streamIn);
 			break;
 
 			/* LogoutMessages */
 		case LogoutRequest:
-			msg = QSharedPointer<LogoutMessage>(new LogoutMessage(LogoutRequest));
+			msg = std::make_unique<LogoutMessage>(LogoutRequest);
 			break;
 
 			/* DocumentMessages */
 		case NewDocument:
 			//auto c = clients.find(socket);
 			if (clients.find(socket) == clients.end()) throw MessageException("Client not found"); /* TODO: need a proper exception? */
-			msg = QSharedPointer<DocumentMessage>(new DocumentMessage(NewDocument, streamIn, clients.find(socket).value()->getUserName()));
+			msg = std::make_unique<DocumentMessage>(NewDocument, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
 		case OpenDocument:
@@ -276,7 +276,7 @@ void TcpServer::readMessage()
 			break;
 		}
 
-		handleMessage(msg, socket);
+		handleMessage(std::move(msg), socket);
 	}
 	catch (MessageUnknownTypeException& e) {
 		/* send to the client WrongMessageType */
@@ -307,7 +307,7 @@ void TcpServer::deleteWorkspace()
 }
 
 
-void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
+void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
 {
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
@@ -318,18 +318,26 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 	streamOut.setDevice(socket); /* connect stream with socket */
 
 	switch (msg->getType()) {
+
 		/* Login */
 	case LoginRequest:
-		qDebug() << " si e' collegato: " << (msg)->getUserName();
-		
+	{
+		LoginMessage* loginRequest = dynamic_cast<LoginMessage*>(msg.get());
+		qDebug() << " si e' collegato: " << loginRequest->getUserName();
+
 		/* check if this user exist or not */
-		if (users.find(msg->getUserName()) == users.end()) 
+		if (users.find(loginRequest->getUserName()) == users.end())
 			throw MessageWrongTypeException("User doesn't exist", WrongMessageType);
 
-		sendLoginChallenge(socket, (msg)->getUserName());
+		sendLoginChallenge(socket, loginRequest->getUserName());
 		break;
+	}
+		
 	case LoginUnlock:
-		if (login(clients.find(socket).value(), msg->getPasswd())) {
+	{
+		LoginMessage* loginUnlock = dynamic_cast<LoginMessage*>(msg.get());
+		if (login(clients.find(socket).value(), loginUnlock->getPasswd())) 
+		{
 			/* login successful */
 			clients.find(socket).value()->setLogged();
 			typeOfMessage = LoginAccessGranted;
@@ -342,10 +350,15 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		}
 		streamOut << typeOfMessage << msg_str;
 		break;
+	}
+		
 
 		/* Account */
 	case AccountCreate:
-		if (!createNewAccount(msg->getUserName(), msg->getNickname(), msg->getPasswd(), socket)) {
+	{
+		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(msg.get());
+		if (!createNewAccount(accntCreate->getUserName(), accntCreate->getNickname(), accntCreate->getPasswd(), socket)) 
+		{
 			/* something went wrong, maybe this user already exist or this socket is already used */
 			typeOfMessage = AccountDenied;
 			msg_str = "User already exist or logged";
@@ -356,11 +369,20 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		}
 		streamOut << typeOfMessage << msg_str;
 		break;
+	}
+		
 	case AccountUpDate:
+	{
+		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
+
+		// TODO: handle account update
 		break;
+	}
+		
 
 		/* LogoutMessages */
 	case LogoutRequest:
+	{
 		if (!clients.remove(socket)) {
 			typeOfMessage = LogoutDenied;
 			msg_str = "Cannot logout if you are already loggedout";
@@ -372,13 +394,17 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		}
 		streamOut << typeOfMessage << msg_str;
 		break;
+	}
+		
 
 		/* DocumentMessages */
 	case NewDocument:
-
-		if (!createNewDocument(msg->getDocName(), msg->getURI(), socket)) {
+	{
+		DocumentMessage* newDocument = dynamic_cast<DocumentMessage*>(msg.get());
+		if (!createNewDocument(newDocument->getDocName(), newDocument->getURI(), socket)) 
+		{
 			typeOfMessage = DocumentError;
-			msg_str = "Cannot create '"+msg->getDocName()+"', this document already exist";
+			msg_str = "Cannot create '" + newDocument->getDocName() + "', this document already exist";
 		}
 		else {
 			typeOfMessage = DocumentOpened;
@@ -386,12 +412,17 @@ void TcpServer::handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket)
 		}
 		streamOut << typeOfMessage << msg_str;
 		break;
+	}
 
 	case OpenDocument:
+	{
+		// TODO: handle open document
 		break;
+	}
+		
 
 	default:
-		throw MessageUnknownTypeException(typeOfMessage);
+		throw MessageUnknownTypeException(msg->getType());
 		break;
 	
 	}

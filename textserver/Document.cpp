@@ -1,5 +1,13 @@
 #include "Document.h"
 
+#include <QDataStream>
+#include <QFile>
+#include <QFileInfo>
+#include "ServerException.h"
+
+#include <iostream>
+
+
 Document::Document(QString name, QString uri, QString userName):
 	docName(name), URI(uri), creatorName(userName)
 {
@@ -9,7 +17,167 @@ Document::~Document()
 {
 }
 
+
+void Document::load()
+{
+}
+
+void Document::save()
+{
+	// Create or overwrite the document file on disk, and write data to it
+	QFile file("tmp_" + docName);
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QDataStream docFile(&file);
+
+		std::cout << "\nSaving document \"" << docName.toStdString() << "\"... ";
+
+		// Write the the current document content to file
+		// using built-in Qt Vector serialization
+		docFile << _text;
+
+		QFile oldFile(docName);
+		if (oldFile.exists())
+		{
+			if (oldFile.remove())
+				file.rename(docName);
+			else
+			{
+				// Remove temporary file if overwriting of the old file failed
+				file.remove();
+				QFileInfo info(oldFile);
+				throw FileOverwriteException(info.absoluteFilePath().toStdString());
+			}
+		}
+
+		file.close();
+
+		std::cout << "done" << std::endl;
+	}
+	else
+	{
+		QFileInfo info(file);
+		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+	}
+}
+
+
+void Document::insert(Symbol s)
+{
+	int insertionIndex = -binarySearch(s._fPos);	// should be a negative position index (for a non-existing Symbol)
+
+	if (insertionIndex >= 0)
+	{
+		QVector<Symbol>::iterator it = _text.begin() + insertionIndex;
+
+		_text.insert(it, s);	// insert the symbol in the vector
+	}
+}
+
+void Document::remove(const Symbol& s)
+{
+	this->removeAt(s._fPos);
+}
+
+void Document::removeAt(QVector<qint32> fPos)
+{
+	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
+	if (pos >= 0)
+		_text.removeAt(pos);	// and removes it
+}
+
+
 QString Document::getURI()
 {
 	return URI;
+}
+
+
+// Binary search algorithm, returns the index of the symbol at the specified
+// fractional position inside the document, otherwise negative index of where it should be
+int Document::binarySearch(QVector<qint32> position)
+{
+	int lower = 0;
+	int higher = _text.size() - 1;
+	int m = 0;
+
+	while (lower <= higher)
+	{
+		m = std::floor((lower + higher) / 2);
+
+		if (_text[m]._fPos == position)
+			return m;
+		else if (_text[m]._fPos < position)
+			lower = m + 1;
+		else  // _text[m]._fPos > position
+			higher = m - 1;
+	}
+
+	return -m;		// no match found, negative position returned
+}
+
+
+
+
+QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
+{
+	QVector<qint32> result;
+	Symbol prev = _text[prev_i];
+	Symbol next = _text[next_i];
+	int maxlen = std::max<size_t>(prev._fPos.size(), next._fPos.size());
+
+	for (int i = 0; i < maxlen; i++)
+	{
+		int a = i < prev._fPos.size() ? prev._fPos[i] : 0;
+		int b = i < next._fPos.size() ? next._fPos[i] : 0;
+
+		if (a < b)
+		{
+			if (std::abs(b - a) == 1)				// if the elements' fPos are separated by only 1, add a new level 
+			{										// and make sure it's higher than the value of prev.fPos[i + 1]
+				result.push_back(prev._fPos[i]);
+				int next_a = i + 1 < prev._fPos.size() ? prev._fPos[i + 1] : 0;
+
+				// the gap between the fPos values is increased in deeper levels to avoid making the vector
+				// become too long with subsequent insertions in between elements
+				result.push_back(next_a + i*fPosGapSize);	
+			}
+			else result.push_back((a + b) / 2);		// if the gap is wide enough, choose the middle value between the two
+
+			break;
+		}
+		else result.push_back(a);	// if the two values are the same, append them to then new fPos and iterate again
+	}
+
+	return result;
+}
+
+QVector<qint32> Document::fractionalPosBegin()
+{
+	QVector<qint32> result;
+
+	// Returns a fractional position which precedes the first symbol's fPos[0] by fPosGapSize 
+	if (!_text.empty())
+	{
+		Symbol& begin = _text.front();
+		result.push_back(begin._fPos[0] - fPosGapSize);
+	}
+	else result.push_back(0);	// or a 0 if it's the first character in the text
+
+	return result;
+}
+
+QVector<qint32> Document::fractionalPosEnd()
+{
+	QVector<qint32> result;
+
+	// Returns a fractional position which follows the last symbol's fPos[0] by fPosGapSize 
+	if (!_text.empty())
+	{
+		Symbol& end = _text.back();
+		result.push_back(end._fPos[0] + fPosGapSize);
+	}
+	else result.push_back(0);	// or a 0 if the text is currently empty
+
+	return result;
 }

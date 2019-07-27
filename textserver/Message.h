@@ -1,58 +1,51 @@
 #pragma once
 
 #include <QObject>
-#include <string>
 
-#define BUFFLEN 256
-
-// TODO: prototipo per far compilare
 
 enum MessageType
 {
-LoginRequest,
-LoginChallenge,
-LoginUnlock,
-LoginAccessGranted,
-LoginError,
-AccountCreate,
-AccountUpDate,
-AccountConfirmed,
-AccountDenied,
-LogoutRequest,
-LogoutConfirmed,
-LogoutDenied,
-NewDocument,
-OpenDocument,
-DocumentOpened,
-DocumentError,
-CharInsert,
-CharDelete,
-MoveCursor,
-UserNameChange,
-UserIconChange,
-AddUserPresence,
-RemoveUserPresence,
-WrongMessageType
+	LoginRequest,
+	LoginChallenge,
+	LoginUnlock,
+	LoginAccessGranted,
+	LoginError,
+	AccountCreate,
+	AccountUpDate,
+	AccountConfirmed,
+	AccountDenied,
+	LogoutRequest,
+	LogoutConfirmed,
+	LogoutDenied,
+	NewDocument,
+	OpenDocument,
+	DocumentOpened,
+	DocumentError,
+	CharInsert,
+	CharDelete,
+	MoveCursor,
+	UserNameChange,
+	UserIconChange,
+	AddUserPresence,
+	RemoveUserPresence,
+	WrongMessageType
 };
 
 class Message : public QObject
 {
 	Q_OBJECT
-private:
+
+protected:
+
 	MessageType m_type;
 
 public:
-	Message(MessageType type);
-    ~Message();
+
+	Message(MessageType type) : m_type(type) { };
+	~Message() { };
 
 	/* getter */
-	int getType();
-	virtual int getIP();
-	virtual int getPort();
-	virtual QString getUserName();
-	virtual QString getNickname();
-	virtual QString getPasswd();
-	virtual QString getURI();
-	virtual QString getDocName();
+	int getType() {
+		return m_type;
+	};
 };
-

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'profileeditwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.13.0
+** Created by: Qt User Interface Compiler version 5.12.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -320,25 +320,25 @@ public:
 
     void retranslateUi(QDialog *ProfileEditWindow)
     {
-        ProfileEditWindow->setWindowTitle(QCoreApplication::translate("ProfileEditWindow", "Edit profile", nullptr));
-        groupBox->setTitle(QCoreApplication::translate("ProfileEditWindow", "Edit profile", nullptr));
-        label->setText(QCoreApplication::translate("ProfileEditWindow", "Update the form to edit your profile informations", nullptr));
-        label_2->setText(QCoreApplication::translate("ProfileEditWindow", "Username", nullptr));
+        ProfileEditWindow->setWindowTitle(QApplication::translate("ProfileEditWindow", "Edit profile", nullptr));
+        groupBox->setTitle(QApplication::translate("ProfileEditWindow", "Edit profile", nullptr));
+        label->setText(QApplication::translate("ProfileEditWindow", "Update the form to edit your profile informations", nullptr));
+        label_2->setText(QApplication::translate("ProfileEditWindow", "Username", nullptr));
         label_username->setText(QString());
-        label_5->setText(QCoreApplication::translate("ProfileEditWindow", "Nickname\n"
+        label_5->setText(QApplication::translate("ProfileEditWindow", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QCoreApplication::translate("ProfileEditWindow", "Current\n"
+        label_6->setText(QApplication::translate("ProfileEditWindow", "Current\n"
 "password", nullptr));
-        label_11->setText(QCoreApplication::translate("ProfileEditWindow", "New\n"
+        label_11->setText(QApplication::translate("ProfileEditWindow", "New\n"
 "password", nullptr));
-        label_4->setText(QCoreApplication::translate("ProfileEditWindow", "Confirm\n"
+        label_4->setText(QApplication::translate("ProfileEditWindow", "Confirm\n"
 "password", nullptr));
         label_UsrIcon->setText(QString());
-        label_3->setText(QCoreApplication::translate("ProfileEditWindow", "Choose your profile icon (optional)", nullptr));
-        pushButton_browse->setText(QCoreApplication::translate("ProfileEditWindow", "Browse...", nullptr));
+        label_3->setText(QApplication::translate("ProfileEditWindow", "Choose your profile icon (optional)", nullptr));
+        pushButton_browse->setText(QApplication::translate("ProfileEditWindow", "Browse...", nullptr));
         label_incorrect_edit->setText(QString());
-        pushButton_cancel->setText(QCoreApplication::translate("ProfileEditWindow", "Cancel", nullptr));
-        pushButton_updateProfile->setText(QCoreApplication::translate("ProfileEditWindow", "Update profile", nullptr));
+        pushButton_cancel->setText(QApplication::translate("ProfileEditWindow", "Cancel", nullptr));
+        pushButton_updateProfile->setText(QApplication::translate("ProfileEditWindow", "Update profile", nullptr));
     } // retranslateUi
 
 };

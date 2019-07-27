@@ -42,7 +42,7 @@ private:
 	std::optional<User> createNewAccount(QString userName, QString nickname, QString passwd, QTcpSocket *socket = nullptr);
 
 	void saveUsers();
-	void handleMessage(QSharedPointer<Message> msg, QTcpSocket* socket);
+	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
 public:

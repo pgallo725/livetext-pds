@@ -178,9 +178,10 @@
     <ClCompile Include="DocumentMessage.cpp" />
     <ClCompile Include="LoginMessage.cpp" />
     <ClCompile Include="LogoutMessage.cpp" />
-    <ClCompile Include="Message.cpp" />
     <ClCompile Include="ServerException.cpp" />
+    <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="TcpServer.cpp" />
+    <ClCompile Include="TextEditMessage.cpp" />
     <ClCompile Include="User.cpp" />
     <ClCompile Include="WorkSpace.cpp" />
     <ClCompile Include="main.cpp" />
@@ -214,6 +215,8 @@
     <QtMoc Include="TcpServer.h">
     </QtMoc>
     <ClInclude Include="ServerException.h" />
+    <ClInclude Include="Symbol.h" />
+    <ClInclude Include="TextEditMessage.h" />
     <ClInclude Include="User.h" />
     <QtMoc Include="WorkSpace.h">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
