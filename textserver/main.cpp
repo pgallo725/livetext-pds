@@ -15,6 +15,9 @@ int main(int argc, char *argv[])
 	{
 		server.initialize();	// may throw FileLoadException
 	}
+	catch (ServerStartException& e) {
+		std::cerr << '\n' << e.what() << "\ntextserver anable to start ... please check connection" << std::endl;
+	}
 	catch (FileException &fe)
 	{
 		std::cerr << '\n' << fe.what() << "\ntextserver initialization failed\n" << std::endl;

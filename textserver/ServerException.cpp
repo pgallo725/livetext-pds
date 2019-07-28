@@ -7,6 +7,12 @@ ServerException::ServerException(std::string msg)
 }
 
 
+ServerStartException::ServerStartException(std::string msg)
+	: ServerException(msg)
+{
+}
+
+
 FileException::FileException(std::string msg)
 	: ServerException(msg)
 {
@@ -57,9 +63,42 @@ FieldWrongException::FieldWrongException(int type) :
 {
 }
 
-SocketNullException::SocketNullException(std::string msg) :
+SocketException::SocketException(std::string msg) :
 	ServerException(msg)
 {
 }
 
+SocketNullException::SocketNullException(std::string msg) :
+	SocketException(msg)
+{
+}
 
+SocketDuplicatedException::SocketDuplicatedException(std::string msg):
+	SocketException(msg)
+{
+}
+
+ObjectNotFound::ObjectNotFound(std::string msg):
+	ServerException(msg)
+{
+}
+
+ClientNotFoundException::ClientNotFoundException(std::string msg):
+	ObjectNotFound(msg)
+{
+}
+
+UserNotFoundException::UserNotFoundException(std::string msg):
+	ObjectNotFound(msg)
+{
+}
+
+WorkspaceNotFoundException::WorkspaceNotFoundException(std::string msg):
+	ObjectNotFound(msg)
+{
+}
+
+ThreadNotFoundException::ThreadNotFoundException(std::string msg):
+	ObjectNotFound(msg)
+{
+}

@@ -1,7 +1,8 @@
 #include "AccountMessage.h"
 #include "ServerException.h"
 
-AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : Message(m), user(User())
+AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : 
+	Message(m), user(User()), fieldType(-1)
 {
 	switch (m) {
 	case AccountCreate:

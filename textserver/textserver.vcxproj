@@ -188,7 +188,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AccountMessage.h" />
-    <ClInclude Include="Client.h" />
+    <ClInclude Include="Client.h">
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;%(PreprocessorDefinitions)</Define>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">output</DynamicSource>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
+      <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
+    </ClInclude>
     <ClInclude Include="Document.h">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">output</DynamicSource>

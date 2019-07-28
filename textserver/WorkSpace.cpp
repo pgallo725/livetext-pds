@@ -25,7 +25,7 @@ void WorkSpace::newSocket(qint64 handle)
 		return;
 	}
 	
-	if (!(c = server->getClient(handle))) {
+	if (!(c = server->moveClient(handle, doc->getURI()))) {
 		qDebug() << "Client not found";
 		//TODO: come gestiamo?
 		return;

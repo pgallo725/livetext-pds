@@ -57,7 +57,7 @@ public:
 	~TcpServer();
 
 	void initialize();
-	QSharedPointer<Client> getClient(qintptr socketDescriptor);
+	QSharedPointer<Client> moveClient(qintptr socketDescriptor, QString workspace);
 
 public slots:
 

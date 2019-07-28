@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <qtcpsocket.h>
 #include <QCryptographicHash>
 
@@ -7,15 +8,15 @@
 
 class WorkSpace;	// inclusione anticipata
 
-class Client
+class Client //: public QObject
 {
+	//Q_OBJECT
 private:
 	int clientId;
 	qintptr socket;
 	User* activeUser;
 	bool logged;
 	QString nonce;
-	QSharedPointer<WorkSpace> workspace;
 public:
 	Client(int id, qintptr s, User* u);
 	~Client();
@@ -30,8 +31,6 @@ public:
 	/* setter */
 	void setLogged();
 	void resetLogged();
-	bool setWorkspace(QSharedPointer<WorkSpace> ws);
-	void resetWorkspace();
 
 	/* general methods */
 	bool authentication(QString passwd);

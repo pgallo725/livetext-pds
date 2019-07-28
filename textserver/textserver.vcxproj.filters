@@ -74,9 +74,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="TcpServer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -123,5 +120,10 @@
     <QtMoc Include="Message.h">
       <Filter>Header Files\Messages</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

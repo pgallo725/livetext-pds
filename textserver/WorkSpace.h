@@ -8,6 +8,7 @@
 #include "Document.h"
 #include "Client.h"
 #include "Message.h"
+#include "AccountMessage.h"
 #include "TextEditMessage.h"
 #include "ServerException.h"
 
