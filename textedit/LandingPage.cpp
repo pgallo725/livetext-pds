@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QWidget>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QStandardPaths>
 #include <QMovie>
 #include <QSplashScreen>
@@ -93,7 +94,7 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegister);
 
 	//Connect con Client quando un utente sposta il cursore
-	//connect(client, &Client::cursorMoved, this, /*funzione*/);
+	// connect(client, &Client::cursorMoved, this, /*funzione*/);
 
 	//Connect con il Client quando non riesco a connettermi al server
 	connect(client, &Client::impossibleToConnect, this, &LandingPage::impossibleToConnect);
@@ -130,7 +131,9 @@ void LandingPage::Login()
 	ui->stackedWidget->show();
 	return;
 	*/
-
+	if (ui->checkBox_saveCredential->isChecked()) {
+		//TODO SAVE CREDENTIAL FOR NEXT ACCESS
+	}
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
@@ -147,6 +150,8 @@ void LandingPage::Login()
 	//Function to show loading animation
 	startLoadingAnimation();
 }
+
+
 
 void LandingPage::tryToLoginOrRegister() {
 
@@ -253,34 +258,25 @@ void LandingPage::Register()
 
 	//Controllo se i dati sono stati inseriti correttamente
 	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
-		//QMessageBox::warning(this, "Registration", "Please fill all the required fields");
-		//ui->label_incorrect_reg->setText("Please fill all the required fields");
+		ui->label_incorrect_operation->setText("Please fill all the required fields");
 		return;
 	}
 
 	//Controllo se esiste già un username
-	/*bool userExist = true;
+	bool userExist = true;
 
 	if (userExist) {
-		ui->label_incorrect_reg->setText("Username already taken");
-	}*/
+		ui->label_incorrect_operation->setText("Username already taken");
+	}
 
 
 	//Controllo sulla corrispondenza password
 	if (password != passwordConf) {
-		//QMessageBox::warning(this, "Registration", "Passwords does not match");
-		//ui->label_incorrect_reg->setText("Passwords does not match");
+		ui->label_incorrect_operation->setText("Passwords does not match");
 		return;
 	}
 
-	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
-	/*if (!iconPath.isEmpty() && fileExist(iconPath)) {
-		QPixmap userPix(iconPath);
-	}
-	else {
-		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
-	}*/
-
+	
 	client->setUsername(username);
 	client->setPassword(password);
 	client->setNickname(nick);
@@ -352,14 +348,14 @@ void LandingPage::showUserIcon(QString path)
 
 		if (!userPix.isNull()) {
 			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
-			//ui->label_incorrect_reg->setText("");
+			ui->label_incorrect_operation->setText("");
 			return;
 		}
 
 	}
 
 	//Mostra errore in caso di immagine non visualizzabile
-	//ui->label_incorrect_reg->setText("Please choose a valid image file");
+	ui->label_incorrect_operation->setText("Please choose a valid image file");
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));

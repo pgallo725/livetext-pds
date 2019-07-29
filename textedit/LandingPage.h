@@ -50,6 +50,7 @@ private:
 	void stopLoadingAnimation();
 	void Register();
 	void Login();
+
 };
 
 #endif // LANDINGPAGE_H
