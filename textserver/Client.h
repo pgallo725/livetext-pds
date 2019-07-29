@@ -34,5 +34,6 @@ public:
 
 	/* general methods */
 	bool authentication(QString passwd);
+	bool isLogged();
 };
 

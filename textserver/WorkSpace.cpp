@@ -12,6 +12,14 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 
 WorkSpace::~WorkSpace()
 {
+	/* clear references */
+
+	doc.clear();
+	server.clear();
+	for (auto it : editors.values()) {
+		it.clear();
+	}
+	editors.clear();
 }
 
 

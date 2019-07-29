@@ -46,7 +46,34 @@ TcpServer::~TcpServer()
 {
 	// TODO
 	saveUsers();
+
 	// save docs
+
+	/* release all document's resources */
+	for (auto it : documents.values()) {
+		it.clear();
+	}
+	documents.clear();
+
+	/* release all workspace's resources */
+	for (auto it : workspaces.values()) {
+		it.clear();
+	}
+	workspaces.clear();
+
+	/* release all workThread's resources */
+	for (auto it : workThreads.values()) {
+		it.clear();
+	}
+	workThreads.clear();
+
+	/* release all client's resources */
+	for (auto it : clients.values()) {
+		it.clear();
+	}
+	clients.clear();
+
+	qDebug() << "Server down";
 }
 
 /* load clients and documents */
@@ -458,7 +485,11 @@ void TcpServer::readMessage()
 		streamOut << (quint16)WrongMessageType << err;
 	}
 	catch (FieldWrongException& e) {
-		//TODO: send by AccountMessage
+		/* send to the client WrongFieldType + message */
+		QDataStream streamOut;
+		streamOut.setDevice(socket);
+		QString err = e.what();
+		streamOut << (quint16)WrongFieldType << err;
 	}
 	catch (ClientNotFoundException& e) {
 		//TODO
@@ -475,7 +506,6 @@ void TcpServer::readMessage()
 	catch (SocketNullException& e) {
 		// TODO
 	}
-	
 }
 
 /* handle the message create by readMessage */
@@ -558,7 +588,11 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		if (!clients.contains(socket))
 			throw ClientNotFoundException("::handleMessage - client not found");
 
-		if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
+		if (!clients.find(socket).value()->isLogged()) {
+			typeOfMessage = AccountDenied;
+			msg_str = "client not logged";
+		}
+		else if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
 		{
 			typeOfMessage = AccountDenied;
 			msg_str = "cannot modify this user";
@@ -567,6 +601,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = AccountConfirmed;
 			msg_str = "update completed";
 		}
+		
 		streamOut << typeOfMessage << msg_str;
 		break;
 	}
@@ -592,7 +627,14 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case NewDocument:
 	{
 		DocumentMessage* newDocument = dynamic_cast<DocumentMessage*>(msg.get());
-		if (!createNewDocument(newDocument->getDocName(), newDocument->getURI(), socket)) 
+		if (!clients.contains(socket))
+			throw ClientNotFoundException("::handleMessage - client not found");
+
+		if (!clients.find(socket).value()->isLogged()) {
+			typeOfMessage = DocumentError;
+			msg_str = "client not logged";
+		}
+		else if (!createNewDocument(newDocument->getDocName(), newDocument->getURI(), socket)) 
 		{
 			typeOfMessage = DocumentError;
 			msg_str = "Cannot create '" + newDocument->getDocName() + "', this document already exist";
@@ -608,7 +650,14 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case OpenDocument:
 	{
 		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
-		if (!openDocument(docMsg->getURI(), socket)) {
+		if (!clients.contains(socket))
+			throw ClientNotFoundException("::handleMessage - client not found");
+
+		if (!clients.find(socket).value()->isLogged()) {
+			typeOfMessage = DocumentError;
+			msg_str = "client not logged";
+		}
+		else if (!openDocument(docMsg->getURI(), socket)) {
 			typeOfMessage = DocumentError;
 			msg_str = "Cannot open '" + docMsg->getDocName() + "', this document doesn't exist";
 		}
@@ -623,8 +672,18 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case UriRequest:
 	{
 		DocumentMessage* uriRequest = dynamic_cast<DocumentMessage*>(msg.get());
-		typeOfMessage = UriResponse;
-		streamOut << typeOfMessage << getUriFromUser(uriRequest->getUserName());
+		if (!clients.contains(socket))
+			throw ClientNotFoundException("::handleMessage - client not found");
+
+		if (!clients.find(socket).value()->isLogged()) {
+			typeOfMessage = DocumentError;
+			msg_str = "client not logged";
+			streamOut << typeOfMessage << msg_str;
+		}
+		else {
+			typeOfMessage = UriResponse;
+			streamOut << typeOfMessage << getUriFromUser(uriRequest->getUserName());
+		}
 		break;
 	}
 

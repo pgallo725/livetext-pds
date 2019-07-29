@@ -15,6 +15,7 @@ Document::Document(QString name, QString uri, QString userName):
 
 Document::~Document()
 {
+	//NOTHING TO DO
 }
 
 

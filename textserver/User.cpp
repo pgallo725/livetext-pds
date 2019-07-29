@@ -11,6 +11,10 @@ User::User(QString username, int userId, QString nickname, QString passwd)
 {
 }*/
 
+User::User() : m_userId(-1)
+{
+}
+
 User::User(QString username, int userId, QString nickname, QString passwd, QPixmap icon)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
 	m_passwd(passwd), m_icon(icon), m_documents(QStringList())
@@ -19,6 +23,7 @@ User::User(QString username, int userId, QString nickname, QString passwd, QPixm
 
 User::~User()
 {
+	//NOTHIG TO DO
 }
 
 QString User::getUsername()

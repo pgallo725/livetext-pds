@@ -9,6 +9,7 @@ Client::Client(int id, qintptr s,User* u):
 
 Client::~Client()
 {
+	// NOTHING TO DO, activeUser is not mine
 }
 
 int Client::getUserId()
@@ -54,4 +55,9 @@ bool Client::authentication(QString passwd)
 	hash.addData(this->nonce.toStdString().c_str(), this->nonce.length());
 
 	return !QString::fromStdString(hash.result().toStdString()).compare(passwd);
+}
+
+bool Client::isLogged()
+{
+	return logged;
 }

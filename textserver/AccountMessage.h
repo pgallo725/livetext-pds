@@ -31,5 +31,6 @@ enum fieldType
 	RemoveNickname,
 	ChangeIcon,
 	RemoveIcon,
-	ChangePassword
+	ChangePassword,
+	WrongFieldType
 };

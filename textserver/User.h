@@ -25,9 +25,8 @@ private:
 	//QMutex m;
 public:
 
-	User() { };	 // Use this to construct an empty user and populate the fields later
+	User();	 // Use this to construct an empty user and populate the fields later
 
-	//User(QString username, int userId, QString nickname, QString passwd);
 	User(QString username, int userId, QString nickname, QString passwd, QPixmap icon = QPixmap());
 
 	~User();
