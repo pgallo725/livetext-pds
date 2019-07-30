@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QDataStream>
 #include <QFileInfo>
+#include <QtNetwork>
+#include <QHostAddress>
 
 #include "ServerException.h"
 
@@ -33,10 +35,16 @@ TcpServer::TcpServer(QObject* parent)
 	else
 	{
 		/* Get IP address and port */
+		QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
 		QString ip_address = this->serverAddress().toString();
 		quint16 port = this->serverPort();
 		if (this->isListening()) {
-			qDebug() << "Server started at " << ip_address << ":" << port;
+			qDebug() << "Server up\nreachable on:";
+			for (const QHostAddress& address : ipAddressesList) {
+				if (address.protocol() == QAbstractSocket::IPv4Protocol)
+					qDebug() << "\t" << address.toString();
+			}
+			qDebug() << "Server listening at " << ip_address << ":" << port;
 		}
 	}
 }
@@ -116,7 +124,7 @@ void TcpServer::initialize()
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
 
-	connect(&time, &QTimer::timeout, this, &TcpServer::saveUsers);
+	time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
 	time.start(SAVE_TIMEOUT);
 }
 
@@ -182,7 +190,6 @@ void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	if (clients.contains(socket)) {
-		clients.find(socket).value().clear();	/* delete client object */
 		clients.remove(socket);					/* remove this client from the map */
 	}
 	socket->close();						/* close the socket */
@@ -228,7 +235,6 @@ bool TcpServer::logout(QTcpSocket* s)
 		return false;
 	}
 
-	clients.find(s).value().clear();
 	clients.remove(s);
 	return true;
 }
@@ -434,13 +440,11 @@ void TcpServer::deleteWorkspace(QString document)
 	//disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
 
 	/* delete workspace and remove it from the map */
-	workspaces.find(document).value().clear();
 	workspaces.remove(document);	
 
 	/* stop the thread, wait for exit, delete thread and remove it from the map */
 	workThreads.find(document).value()->quit();
 	workThreads.find(document).value()->wait();
-	workThreads.find(document).value().clear();
 	workThreads.remove(document);
 
 	qDebug() << "workspace cancellato";

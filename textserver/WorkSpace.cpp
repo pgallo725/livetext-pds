@@ -10,7 +10,7 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 {
 	doc->load();	// Load the document contents
 
-	//connect(&time, &QTimer::timeout, doc_pointer, &Document::save);
+	//time.callOnTimeout<Document*>(d.get(), &Document::save);
 	time.start(SAVE_TIMEOUT);
 
 }
@@ -193,6 +193,7 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		break;
 	}
 }
+
 
 void WorkSpace::clientDisconnection()
 {
