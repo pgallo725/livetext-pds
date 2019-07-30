@@ -49,30 +49,6 @@ TcpServer::~TcpServer()
 
 	// save docs
 
-	/* release all document's resources */
-	for (auto it : documents.values()) {
-		it.clear();
-	}
-	documents.clear();
-
-	/* release all workspace's resources */
-	for (auto it : workspaces.values()) {
-		it.clear();
-	}
-	workspaces.clear();
-
-	/* release all workThread's resources */
-	for (auto it : workThreads.values()) {
-		it.clear();
-	}
-	workThreads.clear();
-
-	/* release all client's resources */
-	for (auto it : clients.values()) {
-		it.clear();
-	}
-	clients.clear();
-
 	qDebug() << "Server down";
 }
 
@@ -80,18 +56,18 @@ TcpServer::~TcpServer()
 void TcpServer::initialize()
 {
 	// Open the file and read the users database
-	QFile file(USERS_FILENAME);
-	if (file.open(QIODevice::ReadOnly))
+	QFile usersFile(USERS_FILENAME);
+	if (usersFile.open(QIODevice::ReadOnly))
 	{
 		std::cout << "\nLoading users database... ";
 
-		QDataStream usersDbStream(&file);
+		QDataStream usersDbStream(&usersFile);
 
 		// Load the users database in the server's memory
 		// using built-in Qt Map deserialization
 		usersDbStream >> users;
 
-		file.close();
+		usersFile.close();
 
 		std::cout << "done" << std::endl;
 
@@ -101,14 +77,47 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		QFileInfo info(file);
+		QFileInfo info(usersFile);
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
 
-	//TODO: read document index file
+
+	// Read the documents' index file
+	QFile docsFile(INDEX_FILENAME);
+	if (docsFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		std::cout << "\nLoading documents index file... ";
+
+		QTextStream docIndexStream(&docsFile);
+
+		// Load the document index in the server's memory
+		while (!docIndexStream.atEnd())
+		{
+			QString docURI;
+
+			docIndexStream >> docURI;
+
+			if (docIndexStream.status() != QTextStream::Status::Ok)
+			{
+				// TODO: handle error, throw FileFormatException ?
+			}
+
+			// Create the actual Document object and store it in the server document map
+			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+		}
+
+		docsFile.close();
+
+		std::cout << "done" << std::endl;
+	}
+	else
+	{
+		QFileInfo info(docsFile);
+		throw FileLoadException(info.absoluteFilePath().toStdString());
+	}
 }
 
-/* save on disck users */
+/* save on users on persistent storage */
 void TcpServer::saveUsers()
 {
 	// Create the new users database file and write the data to it
@@ -281,6 +290,30 @@ bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant field)
 /****************************** DOCUMENT METHODS ******************************/
 
 
+void addToIndex(QSharedPointer<Document> doc)
+{
+	QFile file(INDEX_FILENAME);
+	if (file.open(QIODevice::Append | QIODevice::Text))
+	{
+		QTextStream indexFileStream(&file);
+
+		indexFileStream << doc->getURI() << endl;
+
+		if (indexFileStream.status() == QTextStream::Status::WriteFailed)
+		{
+			// TODO: handle error, throw FileWriteException ?
+		}
+
+		file.close();
+	}
+	else
+	{
+		QFileInfo info(file);
+		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+	}
+}
+
+
 /* create a new Document */
 bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket* author)
 {
@@ -292,11 +325,16 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 		throw ClientNotFoundException("::createNewDocument - client not found");
 
 	QSharedPointer<Client> c = clients.find(author).value();
-	Document* doc = new Document(documentName, uri, c->getUserName());
-	WorkSpace* w = new WorkSpace(QSharedPointer<Document>(doc), QSharedPointer<TcpServer>(this));
+	QSharedPointer<Document> doc(new Document(uri));
+	WorkSpace* w = new WorkSpace(doc, QSharedPointer<TcpServer>(this));
 	QThread *t = new QThread();
 
-	documents.insert(uri, QSharedPointer<Document>(doc));
+	/* Add the document to the index, create the document file and update internal data structures */
+	addToIndex(doc);
+	QFile docFile(uri);
+	docFile.open(QIODevice::NewOnly);
+	docFile.close();
+	documents.insert(uri, doc);
 	workThreads.insert(uri, QSharedPointer<QThread>(t));
 	c->getUser()->addDocument(uri);
 

@@ -4,22 +4,17 @@
 #include "ServerException.h"
 #include "TcpServer.h"
 
+
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
 	: doc(d), server(server)
 {
+	doc->load();	// Load the document contents
 }
 
 
 WorkSpace::~WorkSpace()
 {
-	/* clear references */
-
-	doc.clear();
-	server.clear();
-	for (auto it : editors.values()) {
-		it.clear();
-	}
-	editors.clear();
+	doc->save();	// Saving changes to the document before closing the workspace
 }
 
 

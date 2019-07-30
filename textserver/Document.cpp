@@ -7,9 +7,11 @@
 
 #include <iostream>
 
+#define URI_FIELD_SEPARATOR '_'
 
-Document::Document(QString name, QString uri, QString userName):
-	docName(name), URI(uri), creatorName(userName)
+
+Document::Document(QString uri) :
+	URI(uri)
 {
 }
 
@@ -19,29 +21,76 @@ Document::~Document()
 }
 
 
+QString Document::getName()
+{
+	// The second field of the generated URI (fields separated by '_') 
+	// is the name of the document (including .extension)
+	return URI.section(URI_FIELD_SEPARATOR, 1, 1);
+}
+
+QString Document::getURI()
+{
+	return URI;
+}
+
+QString Document::getAuthor()
+{
+	// The first field of the generated URI (fields separated by '_') 
+	// is the name of the user which created the document
+	return URI.section(URI_FIELD_SEPARATOR, 0, 0);
+}
+
+
 void Document::load()
 {
+	// Create or overwrite the document file on disk, and write data to it
+	QFile file(URI);
+	if (file.open(QIODevice::ReadOnly))
+	{
+		QDataStream docFileStream(&file);
+
+		std::cout << "\nLoading document \"" << URI.toStdString() << "\"... ";
+
+		// Load the document content (_text vector<Symbol>) from file
+		// using built-in Qt Vector deserialization
+		if (!docFileStream.atEnd())
+			docFileStream >> _text;
+
+		if (docFileStream.status() != QDataStream::Status::Ok)
+		{
+			// TODO: handle error, throw DocumentLoadException ?
+		}
+
+		file.close();
+
+		std::cout << "done" << std::endl;
+	}
+	else
+	{
+		QFileInfo info(file);
+		throw FileLoadException(info.absolutePath().toStdString());
+	}
 }
 
 void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file("tmp_" + docName);
+	QFile file("tmp_" + URI);
 	if (file.open(QIODevice::WriteOnly))
 	{
-		QDataStream docFile(&file);
+		QDataStream docFileStream(&file);
 
-		std::cout << "\nSaving document \"" << docName.toStdString() << "\"... ";
+		std::cout << "\nSaving document \"" << URI.toStdString() << "\"... ";
 
 		// Write the the current document content to file
 		// using built-in Qt Vector serialization
-		docFile << _text;
+		docFileStream << _text;
 
-		QFile oldFile(docName);
+		QFile oldFile(URI);
 		if (oldFile.exists())
 		{
 			if (oldFile.remove())
-				file.rename(docName);
+				file.rename(URI);
 			else
 			{
 				// Remove temporary file if overwriting of the old file failed
@@ -88,11 +137,6 @@ void Document::removeAt(QVector<qint32> fPos)
 }
 
 
-QString Document::getURI()
-{
-	return URI;
-}
-
 
 // Binary search algorithm, returns the index of the symbol at the specified
 // fractional position inside the document, otherwise negative index of where it should be
@@ -116,7 +160,6 @@ int Document::binarySearch(QVector<qint32> position)
 
 	return -m;		// no match found, negative position returned
 }
-
 
 
 
