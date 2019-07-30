@@ -45,7 +45,7 @@ void Document::load()
 {
 	// Create or overwrite the document file on disk, and write data to it
 	QFile file(URI);
-	if (file.open(QIODevice::ReadOnly))
+	if (file.open(QIODevice::ReadWrite))
 	{
 		QDataStream docFileStream(&file);
 
@@ -184,7 +184,7 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 
 				// the gap between the fPos values is increased in deeper levels to avoid making the vector
 				// become too long with subsequent insertions in between elements
-				result.push_back(next_a + i*fPosGapSize);	
+				result.push_back(next_a + i*fPosGapSize);
 			}
 			else result.push_back((a + b) / 2);		// if the gap is wide enough, choose the middle value between the two
 

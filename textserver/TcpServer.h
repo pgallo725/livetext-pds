@@ -21,8 +21,8 @@
 #include "LogoutMessage.h"
 #include "DocumentMessage.h"
 
-#define CONNECT_TIMEOUT 15000 /* ms */
-#define SAVE_TIMEOUT 1000 /* ms */
+#define CONNECT_TIMEOUT 15000	/* ms */
+#define SAVE_TIMEOUT 10000		/* ms */
 #define INDEX_FILENAME "documents.dat"
 #define USERS_FILENAME "users.dat"
 #define TMP_USERS_FILENAME "users.tmp"

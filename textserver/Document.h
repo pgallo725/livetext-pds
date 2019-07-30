@@ -1,11 +1,13 @@
 #pragma once
 
+//#include <QObject>
 #include <QString>
 #include "Symbol.h"
 
 class Document //: public QObject
 {
-	//Q_OBJECT
+//	Q_OBJECT
+
 private:
 
 	QString URI;

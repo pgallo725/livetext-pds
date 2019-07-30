@@ -20,6 +20,7 @@ class TcpServer;
 class WorkSpace : public QObject
 {
 	Q_OBJECT
+
 private:
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
@@ -37,6 +38,7 @@ public slots:
 	void newSocket(qint64 handle);
 	void clientDisconnection();
 	void readMessage();
+	void saveDocument();
 
 signals:
 	void notWorking(QString document);

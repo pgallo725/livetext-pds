@@ -10,9 +10,8 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 {
 	doc->load();	// Load the document contents
 
-	//time.callOnTimeout<Document*>(d.get(), &Document::save);
+	time.callOnTimeout<WorkSpace*>(this, &WorkSpace::saveDocument);
 	time.start(SAVE_TIMEOUT);
-
 }
 
 
@@ -35,7 +34,7 @@ void WorkSpace::newSocket(qint64 handle)
 	
 	if (!(c = server->moveClient(handle, doc->getURI()))) {
 		qDebug() << "Client not found";
-		//TODO: come gestiamo?
+		//TODO: come gestiamo? throw ClientNotFoundException in moveClient
 		return;
 	}
 
@@ -85,12 +84,12 @@ void WorkSpace::readMessage()
 		case RemoveUserPresence:
 			break;
 
-			/* account messages */
+			/* Account messages */
 		case AccountUpDate:
 			msg = std::make_unique<AccountMessage>(AccountUpDate, streamIn);
 			break;
 
-			/* logout messages */
+			/* Logout messages */
 		case LogoutRequest:
 			msg = std::make_unique<LogoutMessage>(LogoutRequest);
 			break;
@@ -121,6 +120,11 @@ void WorkSpace::readMessage()
 	catch (SocketNullException& e) {
 		// TODO
 	}
+}
+
+void WorkSpace::saveDocument()
+{
+	doc->save();
 }
 
 
@@ -179,7 +183,7 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		else {
 			typeOfMessage = LogoutConfirmed;
 			msg_str = "Logout complete";
-			//TODO: need to give client to main thread??
+			// TODO: need to give client to main thread
 		}
 		streamOut << typeOfMessage << msg_str;
 
@@ -199,13 +203,11 @@ void WorkSpace::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	
-	if (!editors.remove(socket)) {
-		// TODO: editor not removed
-	}
 
+	editors.remove(socket);
 	qDebug() << "client removed";
 
+	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
-		emit notWorking(doc->getURI());
+		emit notWorking(doc->getURI());		// TODO: consider adding a timer before closing the workspace
 }

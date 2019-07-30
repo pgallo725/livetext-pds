@@ -11,7 +11,7 @@
 
 #include "ServerException.h"
 
-/* costructor */
+/* Costructor */
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), _userIdCounter(0)
 {
@@ -49,13 +49,11 @@ TcpServer::TcpServer(QObject* parent)
 	}
 }
 
-/* destructor */
+/* Destructor */
 TcpServer::~TcpServer()
 {
 	time.stop();
 	saveUsers();
-
-	// save docs
 
 	qDebug() << "Server down";
 }
@@ -124,6 +122,7 @@ void TcpServer::initialize()
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
 
+	// Setup timer for autosave
 	time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
 	time.start(SAVE_TIMEOUT);
 }
@@ -166,6 +165,7 @@ void TcpServer::saveUsers()
 	}
 }
 
+
 /* handle a new connection from a client */
 void TcpServer::newClientConnection()
 {
@@ -175,7 +175,7 @@ void TcpServer::newClientConnection()
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == 0) {
 		qDebug() << "ERROR: no pending connections!\n";
-		throw SocketNullException("::newClientConnection - no pending connections");
+		throw SocketNullException("::newClientConnection - no pending connections");		// could be ignored
 	}
 
 	qDebug() << " - new connection from a client";
@@ -189,10 +189,10 @@ void TcpServer::newClientConnection()
 void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	if (clients.contains(socket)) {
-		clients.remove(socket);					/* remove this client from the map */
-	}
+
+	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close the socket */
+
 	qDebug() << " - client disconnected";
 }
 
@@ -256,9 +256,9 @@ bool TcpServer::createNewAccount(QString username, QString nickname, QString pas
 		if (clients.contains(socket))	/* this socket is already use by another user */
 			throw SocketDuplicatedException("::createNewAccount - socket already used");
 			
-		Client* client = new Client(newUser.getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
-		client->setLogged();			/* client is automatically logged */
-		clients.insert(socket, QSharedPointer<Client>(client));
+		QSharedPointer<Client> client(new Client(newUser.getUserId(), socket->socketDescriptor(), &(users.find(username).value())));
+		client->setLogged();				/* client is automatically logged */
+		clients.insert(socket, client);
 	}
 
 	return true;
@@ -330,9 +330,6 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	if (documents.contains(uri))
 		return false;
 
-	if (!clients.contains(author))
-		throw ClientNotFoundException("::createNewDocument - client not found");
-
 	QSharedPointer<Client> c = clients.find(author).value();
 	QSharedPointer<Document> doc(new Document(uri));
 	WorkSpace* w = new WorkSpace(doc, QSharedPointer<TcpServer>(this));
@@ -351,19 +348,22 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	w->moveToThread(t);
 	t->start();
 
-	/* this thread will not recives more messages from client */
+	/* this thread will not receives more messages from client */
 	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
 	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
-	/* workspace will notify whene theres no one using it for delete */
-	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		
+	/* workspace will notify when theres no one using it for delete */
+	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
 
 	/* make the new thead connect the socket in the workspace */
 	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	
 	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 
+
 	return true;
+
+	// TODO: ADD CATCH FOR FILEWRITE OR FILECREATE EXCEPTIONS WITH RETURN FALSE
 }
 
 /* open an existing Document */
@@ -373,9 +373,6 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	if (!documents.contains(uri))
 		return false;
 
-	if (!clients.contains(client))
-		throw ClientNotFoundException("::openDocument - client not found");
-
 	QSharedPointer<Client> c = clients.find(client).value();
 	WorkSpace* w;
 
@@ -384,12 +381,12 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 		QThread* t = new QThread();
 		w = new WorkSpace(documents.find(uri).value(), QSharedPointer<TcpServer>(this));
 		workspaces.insert(uri, QSharedPointer<WorkSpace>(w));
-		workThreads.insert(uri, QSharedPointer<QThread>(t));
+		workThreads.insert(uri, QSharedPointer<QThread>(t));		// TODO: move to function
 		w->moveToThread(t);
 		t->start();
 
 		/* workspace will notify whene theres no one using it for delete */
-		connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);		
+		connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);	
 	}
 	else {								/* already load */
 		w = workspaces.find(uri).value().get();
@@ -573,7 +570,10 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		qDebug() << " -- si e' collegato: " << loginRequest->getUserName();
 
 		if (!users.contains(loginRequest->getUserName()))
+		{
+			// TODO: remove exception, respond with LoginError to client
 			throw UserNotFoundException("::handleMessage - user not found");
+		}
 		sendLoginChallenge(socket, loginRequest->getUserName());
 		break;
 	}
@@ -584,8 +584,8 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			throw ClientNotFoundException("::handleMessage - client not found");
 
 		LoginMessage* loginUnlock = dynamic_cast<LoginMessage*>(msg.get());
-		User u = User();
 		QString username = clients.find(socket).value()->getUserName();
+		User u;
 
 		if (!login(clients.find(socket).value(), loginUnlock->getPasswd())) 
 		{
@@ -600,7 +600,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = LoginAccessGranted;
 			msg_str = "Logged";
 			if (!users.contains(username))
-				throw UserNotFoundException("::handleMessage - user not found");
+				throw UserNotFoundException("::handleMessage - user not found");	// may be removed, already checked before
 			u = users.find(username).value();
 		}
 		streamOut << typeOfMessage << u << msg_str;
@@ -744,7 +744,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 
 /* allow to a secondary thread to steal a QSharedPointer from the server */
-QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor, QString workspace)
+QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor, QString workspace)	// TODO: remove workspace param, Client is not QObject
 {
 	QSharedPointer<Client> c;
 
