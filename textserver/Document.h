@@ -3,8 +3,9 @@
 #include <QString>
 #include "Symbol.h"
 
-class Document
+class Document //: public QObject
 {
+	//Q_OBJECT
 private:
 
 	QString URI;

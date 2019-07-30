@@ -9,11 +9,16 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 	: doc(d), server(server)
 {
 	doc->load();	// Load the document contents
+
+	//connect(&time, &QTimer::timeout, doc_pointer, &Document::save);
+	time.start(SAVE_TIMEOUT);
+
 }
 
 
 WorkSpace::~WorkSpace()
 {
+	time.stop();
 	doc->save();	// Saving changes to the document before closing the workspace
 }
 

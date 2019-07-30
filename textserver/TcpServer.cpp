@@ -44,7 +44,7 @@ TcpServer::TcpServer(QObject* parent)
 /* destructor */
 TcpServer::~TcpServer()
 {
-	// TODO
+	time.stop();
 	saveUsers();
 
 	// save docs
@@ -115,6 +115,9 @@ void TcpServer::initialize()
 		QFileInfo info(docsFile);
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
+
+	connect(&time, &QTimer::timeout, this, &TcpServer::saveUsers);
+	time.start(SAVE_TIMEOUT);
 }
 
 /* save on users on persistent storage */

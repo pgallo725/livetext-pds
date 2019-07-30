@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
+
 #include <list>
 #include <queue>
 #include <mutex>
@@ -22,6 +24,8 @@ private:
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
 	QMap<QTcpSocket *, QSharedPointer<Client>> editors;
+
+	QTimer time;
 
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 
