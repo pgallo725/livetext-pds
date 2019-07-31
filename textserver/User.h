@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QPixmap>
+#include <QImage>
 #include <QSet>
 #include <QStringList>
 //#include <QMutex>
@@ -20,14 +20,14 @@ private:
 	int m_userId;
 	QString m_nickname;
 	QString m_passwd;		// hashed
-	QPixmap m_icon;		// nullable, check with QPixmap::isNull()
+	QImage m_icon;		// nullable, check with QPixmap::isNull()
 	QStringList m_documents;
 	//QMutex m;
 public:
 
 	User();	 // Use this to construct an empty user and populate the fields later
 
-	User(QString username, int userId, QString nickname, QString passwd, QPixmap icon = QPixmap());
+	User(QString username, int userId, QString nickname, QString passwd, QImage icon = QImage());
 
 	~User();
 
@@ -36,14 +36,14 @@ public:
 	int getUserId();
 	QString getNickName();
 	QString getPassword();
-	QPixmap getIcon();
+	QImage getIcon();
 	QStringList getDocuments();
 
 	/* setter methods */
 	void addDocument(QString docUri);
 	void setNickname(QString newNickname);
 	void deleteNickname();
-	void setIcon(QPixmap newIcon);
+	void setIcon(QImage newIcon);
 	void deleteIcon();
 	void changePassword(QString newPassword);
 

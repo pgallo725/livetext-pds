@@ -11,7 +11,7 @@ class Document //: public QObject
 private:
 
 	QString URI;
-
+	QStringList editors;
 	// Document actual content
 	QVector<Symbol> _text;
 
@@ -37,6 +37,8 @@ public:
 	QString getName();
 	QString getURI();
 	QString getAuthor();
+
+	void insertNewEditor(QString edit);
 
 private:
 

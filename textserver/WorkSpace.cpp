@@ -122,11 +122,6 @@ void WorkSpace::readMessage()
 	}
 }
 
-void WorkSpace::saveDocument()
-{
-	doc->save();
-}
-
 
 void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
 {
@@ -210,4 +205,9 @@ void WorkSpace::clientDisconnection()
 	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
 		emit notWorking(doc->getURI());		// TODO: consider adding a timer before closing the workspace
+}
+
+void WorkSpace::saveDocument()
+{
+	doc->save();
 }

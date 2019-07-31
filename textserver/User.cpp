@@ -15,7 +15,7 @@ User::User() : m_userId(-1)
 {
 }
 
-User::User(QString username, int userId, QString nickname, QString passwd, QPixmap icon)
+User::User(QString username, int userId, QString nickname, QString passwd, QImage icon)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
 	m_passwd(passwd), m_icon(icon), m_documents(QStringList())
 {
@@ -46,7 +46,7 @@ QString User::getPassword()
 	return m_passwd;
 }
 
-QPixmap User::getIcon()
+QImage User::getIcon()
 {
 	return m_icon;
 }
@@ -73,14 +73,14 @@ void User::deleteNickname()
 	m_nickname = m_username;
 }
 
-void User::setIcon(QPixmap newIcon)
+void User::setIcon(QImage newIcon)
 {
 	m_icon = newIcon;
 }
 
 void User::deleteIcon()
 {
-	m_icon = QPixmap();
+	m_icon = QImage();
 }
 
 void User::changePassword(QString newPassword)

@@ -13,6 +13,7 @@
 Document::Document(QString uri) :
 	URI(uri)
 {
+	editors << getAuthor();
 }
 
 Document::~Document()
@@ -38,6 +39,12 @@ QString Document::getAuthor()
 	// The first field of the generated URI (fields separated by '_') 
 	// is the name of the user which created the document
 	return URI.section(URI_FIELD_SEPARATOR, 0, 0);
+}
+
+void Document::insertNewEditor(QString edit)
+{
+	if(!editors.contains(edit))
+		editors << edit;
 }
 
 

@@ -20,7 +20,7 @@ public:
 	QString getUserName();
 	QString getNickname();
 	QString getPasswd();
-	QPixmap getIcon();
+	QImage getIcon();
 	quint16 getFieldType();
 	QVariant getField();
 };
