@@ -45,6 +45,38 @@ void WorkSpace::newSocket(qint64 handle)
 }
 
 
+/* update user's fields */
+bool WorkSpace::updateAccount(User* user, quint16 typeField, QVariant field)
+{
+	switch (typeField) {
+	case ChangeNickname:
+		user->setNickname(field.value<QString>());
+		break;
+
+	case RemoveNickname:
+		user->deleteNickname();
+		break;
+
+	case ChangeIcon:
+		user->setIcon(field.value<QImage>());
+		break;
+
+	case RemoveIcon:
+		user->deleteIcon();
+		break;
+
+	case ChangePassword:
+		user->changePassword(field.value<QString>());
+		break;
+
+	default:
+		return false;
+		break;
+	}
+	return true;
+}
+
+
 void WorkSpace::readMessage()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
@@ -166,7 +198,29 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 		/* Account messages */
 	case AccountUpDate:
+	{
+		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
+
+		if (!editors.contains(socket))
+			throw ClientNotFoundException("::handleMessage - client not found");
+
+		if (!editors.find(socket).value()->isLogged()) {
+			typeOfMessage = AccountDenied;
+			msg_str = "client not logged";
+		}
+		else if (!updateAccount(editors.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
+		{
+			typeOfMessage = AccountDenied;
+			msg_str = "cannot modify this user";
+		}
+		else {
+			typeOfMessage = AccountConfirmed;
+			msg_str = "update completed";
+		}
+
+		streamOut << typeOfMessage << msg_str;
 		break;
+	}
 
 		/* Logout messages */
 	case LogoutRequest:

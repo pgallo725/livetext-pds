@@ -29,6 +29,7 @@ private:
 	QTimer time;
 
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
+	bool updateAccount(User* user, quint16 typeField, QVariant field);
 
 public:
 	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
