@@ -7,7 +7,7 @@ DocumentMessage::DocumentMessage(MessageType m, QDataStream& streamIn, QString u
 	switch (m) {
 	case NewDocument:
 		streamIn >> docName;
-		URI = username + "/" + docName + "/" + "deadbeef"; /* TODO: random sequence */
+		URI = username + "_" + docName + "_" + "deadbeef"; /* TODO: random sequence */
 		break;
 	case OpenDocument: 
 		streamIn >> URI;

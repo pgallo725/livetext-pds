@@ -20,7 +20,7 @@ public:
 	QString getUserName();
 	QString getNickname();
 	QString getPasswd();
-	QPixmap getIcon();
+	QImage getIcon();
 	quint16 getFieldType();
 	QVariant getField();
 };
@@ -28,7 +28,7 @@ public:
 enum fieldType 
 {
 	ChangeNickname,
-	RemoveNickname,
+	RemoveNickname,		// leave only ChangeNickname and ChangeIcon
 	ChangeIcon,
 	RemoveIcon,
 	ChangePassword,

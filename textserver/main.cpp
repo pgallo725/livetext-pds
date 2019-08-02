@@ -9,11 +9,14 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-	TcpServer server;
 	
 	try
 	{
+		TcpServer server;
+
 		server.initialize();	// may throw FileLoadException
+
+		return a.exec();
 	}
 	catch (ServerStartException& e) {
 		std::cerr << '\n' << e.what() << "\ntextserver anable to start ... please check connection" << std::endl;
@@ -24,6 +27,4 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	
-
-	return a.exec();
 }

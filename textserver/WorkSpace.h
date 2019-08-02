@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
+
 #include <list>
 #include <queue>
 #include <mutex>
@@ -18,12 +20,16 @@ class TcpServer;
 class WorkSpace : public QObject
 {
 	Q_OBJECT
+
 private:
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
 	QMap<QTcpSocket *, QSharedPointer<Client>> editors;
 
+	QTimer time;
+
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
+	bool updateAccount(User* user, quint16 typeField, QVariant field);
 
 public:
 	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
@@ -33,6 +39,7 @@ public slots:
 	void newSocket(qint64 handle);
 	void clientDisconnection();
 	void readMessage();
+	void saveDocument();
 
 signals:
 	void notWorking(QString document);

@@ -53,7 +53,7 @@ QString AccountMessage::getPasswd()
 	return user.getPassword();
 }
 
-QPixmap AccountMessage::getIcon()
+QImage AccountMessage::getIcon()
 {
 	return user.getIcon();
 }

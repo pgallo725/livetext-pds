@@ -4,22 +4,21 @@
 #include "ServerException.h"
 #include "TcpServer.h"
 
+
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
 	: doc(d), server(server)
 {
+	doc->load();	// Load the document contents
+
+	time.callOnTimeout<WorkSpace*>(this, &WorkSpace::saveDocument);
+	time.start(SAVE_TIMEOUT);
 }
 
 
 WorkSpace::~WorkSpace()
 {
-	/* clear references */
-
-	doc.clear();
-	server.clear();
-	for (auto it : editors.values()) {
-		it.clear();
-	}
-	editors.clear();
+	time.stop();
+	doc->save();	// Saving changes to the document before closing the workspace
 }
 
 
@@ -35,7 +34,7 @@ void WorkSpace::newSocket(qint64 handle)
 	
 	if (!(c = server->moveClient(handle, doc->getURI()))) {
 		qDebug() << "Client not found";
-		//TODO: come gestiamo?
+		//TODO: come gestiamo? throw ClientNotFoundException in moveClient
 		return;
 	}
 
@@ -43,6 +42,38 @@ void WorkSpace::newSocket(qint64 handle)
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+}
+
+
+/* update user's fields */
+bool WorkSpace::updateAccount(User* user, quint16 typeField, QVariant field)
+{
+	switch (typeField) {
+	case ChangeNickname:
+		user->setNickname(field.value<QString>());
+		break;
+
+	case RemoveNickname:
+		user->deleteNickname();
+		break;
+
+	case ChangeIcon:
+		user->setIcon(field.value<QImage>());
+		break;
+
+	case RemoveIcon:
+		user->deleteIcon();
+		break;
+
+	case ChangePassword:
+		user->changePassword(field.value<QString>());
+		break;
+
+	default:
+		return false;
+		break;
+	}
+	return true;
 }
 
 
@@ -85,12 +116,12 @@ void WorkSpace::readMessage()
 		case RemoveUserPresence:
 			break;
 
-			/* account messages */
+			/* Account messages */
 		case AccountUpDate:
 			msg = std::make_unique<AccountMessage>(AccountUpDate, streamIn);
 			break;
 
-			/* logout messages */
+			/* Logout messages */
 		case LogoutRequest:
 			msg = std::make_unique<LogoutMessage>(LogoutRequest);
 			break;
@@ -167,7 +198,29 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 		/* Account messages */
 	case AccountUpDate:
+	{
+		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
+
+		if (!editors.contains(socket))
+			throw ClientNotFoundException("::handleMessage - client not found");
+
+		if (!editors.find(socket).value()->isLogged()) {
+			typeOfMessage = AccountDenied;
+			msg_str = "client not logged";
+		}
+		else if (!updateAccount(editors.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
+		{
+			typeOfMessage = AccountDenied;
+			msg_str = "cannot modify this user";
+		}
+		else {
+			typeOfMessage = AccountConfirmed;
+			msg_str = "update completed";
+		}
+
+		streamOut << typeOfMessage << msg_str;
 		break;
+	}
 
 		/* Logout messages */
 	case LogoutRequest:
@@ -179,7 +232,7 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		else {
 			typeOfMessage = LogoutConfirmed;
 			msg_str = "Logout complete";
-			//TODO: need to give client to main thread??
+			// TODO: need to give client to main thread
 		}
 		streamOut << typeOfMessage << msg_str;
 
@@ -194,17 +247,21 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	}
 }
 
+
 void WorkSpace::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	
-	if (!editors.remove(socket)) {
-		// TODO: editor not removed
-	}
 
+	editors.remove(socket);
 	qDebug() << "client removed";
 
+	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
-		emit notWorking(doc->getURI());
+		emit notWorking(doc->getURI());		// TODO: consider adding a timer before closing the workspace
+}
+
+void WorkSpace::saveDocument()
+{
+	doc->save();
 }

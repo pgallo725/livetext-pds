@@ -167,7 +167,7 @@ bool Client::Register() {
 	QDataStream out;
 	quint16 typeOfMessage = AccountCreate;
 	QDataStream in;
-	QPixmap image;
+	QImage image;
 	// Link the stream to the socke and send the byte
 	out.setDevice(socket);
 	in.setDevice(socket);
