@@ -241,6 +241,7 @@ void TextEdit::setupUserActions()
 
 	const QIcon userIcon(rsrcPath + "/user.png");
 	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
+
 	tb->addAction(actionUser);
 }
 

@@ -29,6 +29,7 @@ private slots:
 	void pushButtonBrowseClicked();
 	void pushButtonOpenClicked();
 	void pushButtonOpenUriClicked();
+	void pushButtonBackClicked();
 	void enablePushButtonOpen();
 	void tryToLoginOrRegister();
 	void currentTabChanged(int index);

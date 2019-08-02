@@ -53,6 +53,8 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
 	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
 
+	//Icona back
+	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/backarrow.png"));
 
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
@@ -71,6 +73,7 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &LandingPage::pushButtonBrowseClicked);
 	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
+	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::Login);
@@ -299,6 +302,13 @@ void LandingPage::pushButtonOpenUriClicked()
 
 	//Mostra la finestra di mw formata
 	ou->exec();
+}
+
+void LandingPage::pushButtonBackClicked()
+{
+	//client->Logout();
+	ui->stackedWidget->setCurrentIndex(0);
+	ui->stackedWidget->show();
 }
 
 void LandingPage::enablePushButtonOpen()
