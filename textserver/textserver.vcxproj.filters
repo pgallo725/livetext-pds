@@ -25,11 +25,11 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files\Messages">
-      <UniqueIdentifier>{477c8536-f203-4998-b20e-6448bf0a7d63}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Messages">
-      <UniqueIdentifier>{26641988-3374-4d30-82b6-8daa8d0857d3}</UniqueIdentifier>
+      <UniqueIdentifier>{8fc286b7-1ed5-4736-9982-8a78db9d3f13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Messages">
+      <UniqueIdentifier>{4dfefbcb-72f7-4b41-82c3-166f30c079ba}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +37,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Document.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Symbol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TcpServer.cpp">
@@ -51,39 +57,45 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LogoutMessage.cpp">
+    <ClCompile Include="AccountMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="DocumentMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
-    <ClCompile Include="AccountMessage.cpp">
-      <Filter>Source Files\Messages</Filter>
-    </ClCompile>
     <ClCompile Include="LoginMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
-    <ClCompile Include="ServerException.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Symbol.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="LogoutMessage.cpp">
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="TextEditMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Symbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="TcpServer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="User.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <QtMoc Include="WorkSpace.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <ClInclude Include="AccountMessage.h">
-      <Filter>Header Files\Messages</Filter>
-    </ClInclude>
-    <ClInclude Include="LogoutMessage.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="DocumentMessage.h">
@@ -92,11 +104,8 @@
     <ClInclude Include="LoginMessage.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
-    <ClInclude Include="ServerException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Symbol.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="LogoutMessage.h">
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="TextEditMessage.h">
       <Filter>Header Files\Messages</Filter>
@@ -111,19 +120,8 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="WorkSpace.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Message.h">
       <Filter>Header Files\Messages</Filter>
     </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Document.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,7 +4,6 @@
 
 # This is a reminder that you are using a generated .pro file.
 # Remove it when you are finished editing this file.
-message("You are running qmake on a generated .pro file. This may not work!")
 
 
 HEADERS += ./Client.h \
@@ -13,13 +12,13 @@ HEADERS += ./Client.h \
     ./User.h \
     ./WorkSpace.h \
     ./TcpServer.h \
+	./ServerException.h \
 	./AccountMessage.h \
 	./DocumentMessage.h \
 	./LoginMessage.h \
 	./LogoutMessage.h \
 	./TextEditMessage.h \
-	./Message.h
-	
+	./Symbol.h
 	
 	
 	
@@ -27,6 +26,7 @@ SOURCES += ./Client.cpp \
     ./Document.cpp \
     ./main.cpp \
     ./TcpServer.cpp \
+	./ServerException.cpp \
     ./User.cpp \
     ./WorkSpace.cpp \
 	./AccountMessage.cpp \
@@ -34,4 +34,4 @@ SOURCES += ./Client.cpp \
 	./LoginMessage.cpp \
 	./LogoutMessage.cpp \
 	./TextEditMessage.cpp \
-	./Message.cpp
+	./Symbol.cpp
