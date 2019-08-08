@@ -23,7 +23,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent), client(client), ui(new Ui::LandingPage) {
+LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage) {
 	//Costruttore landing page
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -93,14 +93,9 @@ LandingPage::LandingPage(Client* client, QWidget* parent) : QMainWindow(parent),
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
 
-	//Connect con Client quando la connessione è stabilita
-	connect(client, &Client::connectionEstablished, this, &LandingPage::tryToLoginOrRegister);
 
 	//Connect con Client quando un utente sposta il cursore
 	// connect(client, &Client::cursorMoved, this, /*funzione*/);
-
-	//Connect con il Client quando non riesco a connettermi al server
-	connect(client, &Client::impossibleToConnect, this, &LandingPage::impossibleToConnect);
 
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
@@ -125,15 +120,27 @@ LandingPage::~LandingPage()
 	delete ui;
 }
 
+void LandingPage::confirmOperation()
+{
+	QString serverIP = ui->lineEdit_serverIP->text();
+	QString serverPort = ui->lineEdit_serverPort->text();
 
+	//Controllo se i dati sono stati inseriti correttamente
+	if (serverIP.isEmpty() || serverPort.isEmpty()) {
+		ui->label_incorrect_operation->setText(tr("Invalid server/port"));
+		return;
+	}
+
+	emit(connectToServer(serverIP, serverPort.toShort()));
+}
 
 void LandingPage::Login()
 {
 	//Bypass login
-	/*ui->stackedWidget->setCurrentIndex(2);
+	/*ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
-	return;
-	*/
+	return;*/
+
 	if (ui->checkBox_saveCredential->isChecked()) {
 		//TODO SAVE CREDENTIAL FOR NEXT ACCESS
 	}
@@ -141,53 +148,52 @@ void LandingPage::Login()
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
-	QString serverIP = ui->lineEdit_serverIP->text();
-	QString serverPort = ui->lineEdit_serverPort->text();
 
-	// setto i campi necessare al login
-	client->setUsername(username);
-	client->setPassword(password);
-	client->setLogin(true);
-	client->Connect(serverIP, serverPort.toShort());
+	//Controllo se i dati sono stati inseriti correttamente
+	if (username.isEmpty() || password.isEmpty()) {
+		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
+		return;
+	}
 
 	//Function to show loading animation
 	startLoadingAnimation();
+
+	emit(serverLogin(username, password));
 }
 
+//Conferma la registrazione
+void LandingPage::Register()
+{
+	QString nickname = ui->lineEdit_regNick->text();
+	QString username = ui->lineEdit_regUsr->text();
+	QString password = ui->lineEdit_regPsw->text();
+	QString passwordConf = ui->lineEdit_regPswConf->text();
+	QString iconPath = ui->lineEdit_UsrIconPath->text();
 
-
-void LandingPage::tryToLoginOrRegister() {
-
-	qDebug() << "try to login";
-	if (client->getLogin()) {
-		if (client->Login()) {
-			stopLoadingAnimation();
-			
-			QString ciao = client->getMsg();
-
-			client->requestURI();
-			ui->stackedWidget->setCurrentIndex(1);
-			ui->stackedWidget->show();
-		}
-		else {
-			stopLoadingAnimation();
-			ui->label_incorrect_operation->setText(client->getMsg());
-			client->Disconnect();
-
-		}
+	//Controllo se i dati sono stati inseriti correttamente
+	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
+		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
+		return;
 	}
-	else {
-		if (client->Register())
-			qDebug() << client->getMsg();
-		else {
-			qDebug() << " non funziona un cazzo";
-		}
-		client->Disconnect();
-		//TO DO registration
+
+	//Controllo se esiste già un username
+	bool userExist = false;
+
+	if (userExist) {
+		ui->label_incorrect_operation->setText(tr("Username already taken"));
+		return;
 	}
 
 
+	//Controllo sulla corrispondenza password
+	if (password != passwordConf) {
+		ui->label_incorrect_operation->setText(tr("Passwords does not match"));
+		return;
+	}
+
+	emit(serverRegister(username, password, nickname));
 }
+
 
 void LandingPage::currentTabChanged(int index)
 {
@@ -209,7 +215,15 @@ void LandingPage::currentTabChanged(int index)
 
 }
 
-void LandingPage::confirmOperation()
+
+
+void LandingPage::impossibleToConnect()
+{
+	stopLoadingAnimation();
+	ui->label_incorrect_operation->setText(tr("Invalid server/port"));
+}
+
+void LandingPage::connectionEstabilished()
 {
 	switch (ui->tabWidget->currentIndex()) {
 	case 0:
@@ -221,12 +235,20 @@ void LandingPage::confirmOperation()
 	}
 }
 
-void LandingPage::impossibleToConnect()
+
+void LandingPage::openLoggedPage()
 {
 	stopLoadingAnimation();
-	ui->label_incorrect_operation->setText(tr("Invalid server/port"));
+
+	ui->stackedWidget->setCurrentIndex(1);
+	ui->stackedWidget->show();
 }
 
+void LandingPage::incorrectOperation(QString msg)
+{
+	stopLoadingAnimation();
+	ui->label_incorrect_operation->setText(msg);
+}
 
 void LandingPage::pushButtonRegisterClicked()
 {
@@ -250,48 +272,11 @@ void LandingPage::pushButtonBrowseClicked()
 	ui->lineEdit_UsrIconPath->setText(filename);
 }
 
-//Conferma la registrazione
-void LandingPage::Register()
-{
-	QString nick = ui->lineEdit_regNick->text();
-	QString username = ui->lineEdit_regUsr->text();
-	QString password = ui->lineEdit_regPsw->text();
-	QString passwordConf = ui->lineEdit_regPswConf->text();
-	QString iconPath = ui->lineEdit_UsrIconPath->text();
-
-	//Controllo se i dati sono stati inseriti correttamente
-	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
-		ui->label_incorrect_operation->setText("Please fill all the required fields");
-		return;
-	}
-
-	//Controllo se esiste già un username
-	bool userExist = true;
-
-	if (userExist) {
-		ui->label_incorrect_operation->setText("Username already taken");
-	}
-
-
-	//Controllo sulla corrispondenza password
-	if (password != passwordConf) {
-		ui->label_incorrect_operation->setText("Passwords does not match");
-		return;
-	}
-
-	
-	client->setUsername(username);
-	client->setPassword(password);
-	client->setNickname(nick);
-	client->setLogin(false);
-	client->Connect("127.0.0.1", 1500);
-}
-
 void LandingPage::pushButtonOpenClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
-		openEditor(uri, fileSelected);
+		emit(openEditor(uri, fileSelected));
 }
 
 void LandingPage::pushButtonOpenUriClicked()
@@ -306,9 +291,10 @@ void LandingPage::pushButtonOpenUriClicked()
 
 void LandingPage::pushButtonBackClicked()
 {
-	//client->Logout();
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
+
+	emit(serverLogout());
 }
 
 void LandingPage::enablePushButtonOpen()
@@ -382,36 +368,6 @@ void LandingPage::pushButtonNewClicked()
 	ou->exec();
 }
 
-void LandingPage::openEditor(int mode, QString path) {
-	//Chiude finestra attuale
-	this->close();
-
-	//Crea l'oggetto TextEdit un wrapper di QTextEdit modificato per realizzare le funzioni base
-	TextEdit* mw = new TextEdit();
-
-	//Dimensione finestra
-	const QRect availableGeometry = QApplication::desktop()->availableGeometry(mw);
-
-	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
-	mw->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
-	mw->move((availableGeometry.width() - mw->width()) / 2, (availableGeometry.height() - mw->height()) / 2);
-
-	/*switch (mode) {
-	case newfile:
-		mw->fileNew(path);
-		break;
-
-	case uri:
-		mw->load(path);
-		break;
-
-	default:
-		break;
-	};*/
-
-	//Mostra la finestra di mw formata
-	mw->show();
-}
 
 void LandingPage::centerAndResize() {
 	//Ricava dimensione desktop

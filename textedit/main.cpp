@@ -1,12 +1,9 @@
-#include "textedit.h"
-#include "LandingPage.h"
-#include "Client.h"
-
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 
+#include "LiveText.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,12 +15,9 @@ int main(int argc, char *argv[])
 	QCoreApplication::setApplicationName("LiveText");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
-	Client client;
-	
-	LandingPage mw(&client);
-	
-	//Mostra la finestra di mw formata
-	mw.show();
+	LiveText liveText;
+
+	liveText.start();
 
 	//Entra nel loop principale dell'applicazione in attesa di azioni e attende fino alla exit (chiusura app)
 	return a.exec();

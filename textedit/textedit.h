@@ -34,6 +34,9 @@ public slots:
 protected:
 	void closeEvent(QCloseEvent* e) override;
 
+signals:
+	void logout();
+
 private slots:
 	void fileOpen();
 	bool fileSave();
@@ -106,6 +109,7 @@ private:
 	QAction* actionShare;
 	QAction* actionUser;
 	QAction* actionHighlightUsers;
+	QAction* actionLogout;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;

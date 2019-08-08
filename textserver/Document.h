@@ -2,6 +2,8 @@
 
 //#include <QObject>
 #include <QString>
+#include <QStringList>
+#include <QVector>
 #include "Symbol.h"
 
 class Document //: public QObject

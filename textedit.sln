@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.452
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textedit", "textedit\textedit.vcxproj", "{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textedit", "textedit\textedit.vcxproj", "{8050199F-C0E4-3B66-9ADE-27D895BF12F1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textserver", "textserver\textserver.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textserver", "textserver\textserver.vcxproj", "{6B889879-7442-35A3-BC6E-18244C23B9F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,18 +15,18 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x64.ActiveCfg = Debug|x64
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x64.Build.0 = Debug|x64
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Debug|x86.ActiveCfg = Debug|x64
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x64.ActiveCfg = Release|x64
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x64.Build.0 = Release|x64
-		{36D4CAE9-3345-3651-9CC2-56A3CDDDF578}.Release|x86.ActiveCfg = Release|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.ActiveCfg = Debug|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x64.Build.0 = Debug|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.ActiveCfg = Debug|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.ActiveCfg = Release|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x64.Build.0 = Release|x64
-		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Debug|x64.ActiveCfg = Debug|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Debug|x64.Build.0 = Debug|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Debug|x86.ActiveCfg = Debug|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Release|x64.ActiveCfg = Release|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Release|x64.Build.0 = Release|x64
+		{8050199F-C0E4-3B66-9ADE-27D895BF12F1}.Release|x86.ActiveCfg = Release|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Debug|x64.ActiveCfg = Debug|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Debug|x64.Build.0 = Debug|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Debug|x86.ActiveCfg = Debug|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Release|x64.ActiveCfg = Release|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Release|x64.Build.0 = Release|x64
+		{6B889879-7442-35A3-BC6E-18244C23B9F0}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

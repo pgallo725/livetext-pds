@@ -17,11 +17,14 @@ class LandingPage : public QMainWindow
 	Q_OBJECT
 
 public:
-	LandingPage(Client* client, QWidget * parent = nullptr);
+	LandingPage(QWidget* parent = nullptr);
 	~LandingPage();
 
-	void openEditor(int mode, QString path = nullptr);
-	enum openMode {uri, newfile};
+
+	enum openMode { uri, newfile };
+
+	void openLoggedPage();
+	void incorrectOperation(QString msg);
 
 private slots:
 	void pushButtonNewClicked();
@@ -31,12 +34,21 @@ private slots:
 	void pushButtonOpenUriClicked();
 	void pushButtonBackClicked();
 	void enablePushButtonOpen();
-	void tryToLoginOrRegister();
 	void currentTabChanged(int index);
+	void showUserIcon(QString path);
 	void confirmOperation();
+	
+
+public slots:
+	void connectionEstabilished();
 	void impossibleToConnect();
 
-	void showUserIcon(QString path);
+signals:
+	void openEditor(int mode, QString path = nullptr);
+	void connectToServer(QString ipAddress, quint16 port);
+	void serverLogin(QString username, QString password);
+	void serverRegister(QString username, QString password, QString nickname);
+	void serverLogout();
 
 private:
 	Ui::LandingPage* ui;

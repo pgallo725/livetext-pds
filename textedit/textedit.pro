@@ -13,12 +13,8 @@ HEADERS         = textedit.h \
 		  NewFileWindow.h \
 	   	  ShareUriWindow.h \
 		  Client.h \	
-		  AccountMessage.h \
-		  DocumentMessage.h \
-		  LoginMessage.h \
-		  LogoutMessage.h \
-		  Message.h \
-		  Presence.h
+		  Presence.h \
+		  LiveText.h
 
 SOURCES         = textedit.cpp \
                   main.cpp \
@@ -29,11 +25,7 @@ SOURCES         = textedit.cpp \
 		  NewFileWindow.cpp \
 		  Client.cpp \
 		  Presence.cpp \
-		  AccountMessage.cpp \
-		  DocumentMessage.cpp \
-		  LoginMessage.cpp \
-		  LogoutMessage.cpp \
-		  Message.cpp
+		  LiveText.cpp
 
 FORMS 		= landingpage.ui \
 		  profileeditwindow.ui \

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'openuriwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -119,10 +119,10 @@ public:
 
     void retranslateUi(QDialog *OpenUriWindow)
     {
-        OpenUriWindow->setWindowTitle(QApplication::translate("OpenUriWindow", "Open from URI", nullptr));
-        label_2->setText(QApplication::translate("OpenUriWindow", "Insert a shared URI to open the document", nullptr));
-        label->setText(QApplication::translate("OpenUriWindow", "Document URI", nullptr));
-        label_incorrectUri->setText(QApplication::translate("OpenUriWindow", "Inserted URI is not valid", nullptr));
+        OpenUriWindow->setWindowTitle(QCoreApplication::translate("OpenUriWindow", "Open from URI", nullptr));
+        label_2->setText(QCoreApplication::translate("OpenUriWindow", "Insert a shared URI to open the document", nullptr));
+        label->setText(QCoreApplication::translate("OpenUriWindow", "Document URI", nullptr));
+        label_incorrectUri->setText(QCoreApplication::translate("OpenUriWindow", "Inserted URI is not valid", nullptr));
     } // retranslateUi
 
 };

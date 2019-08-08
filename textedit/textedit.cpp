@@ -238,11 +238,15 @@ void TextEdit::setupUserActions()
 
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
-
 	const QIcon userIcon(rsrcPath + "/user.png");
 	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
-
 	tb->addAction(actionUser);
+
+
+	const QIcon logoutIcon(rsrcPath + "/logout.png");
+	actionLogout = menu->addAction(logoutIcon, tr("&Logout"), this, &TextEdit::logout);
+	tb->addAction(actionLogout);
+
 }
 
 void TextEdit::setupOnlineUsersActions()
@@ -819,6 +823,7 @@ void TextEdit::listStyle(int styleIndex)
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
 
+
 	//Salva il formato del blocco		
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
@@ -889,7 +894,7 @@ void TextEdit::listStyle(int styleIndex)
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
-
+	
 	if (style == QTextListFormat::ListStyleUndefined) {
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
@@ -898,14 +903,21 @@ void TextEdit::listStyle(int styleIndex)
 		cursor.setBlockFormat(blockFmt);
 	}
 	//Indica se il cursore è gia in una lista, se sì ne prende il formato
-	else if (cursor.currentList()) {
+	else if (cursor.currentList())
+	{
 		listFmt = cursor.currentList()->format();
 
 		//Metto lo stile scelto nello switch come formato lista
 		listFmt.setStyle(style);
 
 		//Creo la lista indentata correttamente
-		cursor.createList(listFmt);
+		QTextList* list = cursor.createList(listFmt);
+
+		for (int i = 0; i < list->count(); ++i) {
+			QTextBlock blk = list->item(i);
+			int start = blk.position();
+			int len = blk.length();
+		}
 
 	}
 	else {
@@ -918,13 +930,20 @@ void TextEdit::listStyle(int styleIndex)
 
 		listFmt.setStyle(style);
 
-		cursor.createList(listFmt);
+		QTextList* list = cursor.createList(listFmt);
+
+		for (int i = 0; i < list->count(); ++i) {
+			QTextBlock blk = list->item(i);
+			int start = blk.position();
+			int len = blk.length();
+		}
 	}
 	cursor.endEditBlock();
 }
 
 void TextEdit::textStyle(int styleIndex)
 {
+
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
 
@@ -957,6 +976,7 @@ void TextEdit::textStyle(int styleIndex)
 	textEdit->mergeCurrentCharFormat(fmt);
 
 	cursor.endEditBlock();
+
 }
 
 void TextEdit::textColor()

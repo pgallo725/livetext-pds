@@ -18,10 +18,10 @@
 #include <sstream>
 
 
-#include "..//textserver/AccountMessage.h"
-#include "..//textserver/Message.h"
-#include "..//textserver/LoginMessage.h"
-#include "..//textserver/LogoutMessage.h"
+#include "../textserver/AccountMessage.h"
+#include "../textserver/Message.h"
+#include "../textserver/LoginMessage.h"
+#include "../textserver/LogoutMessage.h"
 
 class Client : public QObject
 {
