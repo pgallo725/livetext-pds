@@ -217,8 +217,8 @@ void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 		return;
 	}
 
-	Client* client = new Client(users.find(username).value().getUserId(), socket->socketDescriptor(), &(users.find(username).value()));
-	clients.insert(socket, QSharedPointer<Client>(client));
+	QSharedPointer<Client> client (new Client(socket->socketDescriptor(), users.find(username).value()));
+	clients.insert(socket, client);
 
 	streamOut << (quint16)LoginChallenge << client->getNonce();
 }
@@ -255,44 +255,38 @@ bool TcpServer::createNewAccount(QString username, QString nickname, QString pas
 	*  static accont as Admin doesn't need a client during creation */
 	if (socket != nullptr) {
 		if (clients.contains(socket))	/* this socket is already use by another user */
-			throw SocketDuplicatedException("::createNewAccount - socket already used");
+			throw SocketDuplicateException("::createNewAccount - socket already used");
 			
-		QSharedPointer<Client> client(new Client(newUser.getUserId(), socket->socketDescriptor(), &(users.find(username).value())));
-		client->setLogged();				/* client is automatically logged */
+		QSharedPointer<Client> client(new Client(socket->socketDescriptor(), users.find(username).value()));
+		client->setLogged();				// client is automatically logged
 		clients.insert(socket, client);
 	}
 
 	return true;
 }
 
-/* update user's fields */
-bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant field)
+/* Update user's fields */
+bool TcpServer::updateAccount(User& user, quint16 typeField, QVariant field)
 {
-	switch (typeField) {
+	switch (typeField) 
+	{
 	case ChangeNickname:
-		user->setNickname(field.value<QString>());
-		break;
-
-	case RemoveNickname:
-		user->deleteNickname();
+		user.setNickname(field.value<QString>());
 		break;
 
 	case ChangeIcon:
-		user->setIcon(field.value<QImage>());
-		break;
-
-	case RemoveIcon:
-		user->deleteIcon();
+		user.setIcon(field.value<QImage>());
 		break;
 
 	case ChangePassword:
-		user->changePassword(field.value<QString>());
+		user.changePassword(field.value<QString>());
 		break;
 
 	default:
 		return false;
 		break;
 	}
+
 	return true;
 }
 
@@ -363,7 +357,7 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	docFile.close();
 	
 	/* add to client list the newDocument*/
-	c->getUser()->addDocument(uri);
+	c->getUser().addDocument(uri);
 	/* add to document list the new editor */
 	doc->insertNewEditor(c->getUserName());
 
@@ -399,7 +393,7 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	}
 
 	/* add to client list the newDocument*/
-	c->getUser()->addDocument(uri);
+	c->getUser().addDocument(uri);
 	/* add to document list the new editor */
 	d->insertNewEditor(c->getUserName());
 
@@ -433,7 +427,7 @@ void TcpServer::deleteWorkspace(QString document)
 		if (!workThreads.contains(document))
 			throw ThreadNotFoundException("::deleteWorkspace - thread '" + document.toStdString() + "' not found");
 	}
-	catch (ObjectNotFound& e) {
+	catch (ObjectNotFoundException& e) {
 		//TODO: need to be differentiate?
 	}
 
@@ -548,7 +542,7 @@ void TcpServer::readMessage()
 	catch (UserNotFoundException& e) {
 		//TODO: send by handleMessage
 	}
-	catch (SocketDuplicatedException& e) {
+	catch (SocketDuplicateException& e) {
 		//TODO: send by handleMessage -> createNewAccount
 	}
 	catch (MessageException& e) {

@@ -3,10 +3,6 @@
 #include <QObject>
 #include <QTimer>
 
-#include <list>
-#include <queue>
-#include <mutex>
-
 #include "Document.h"
 #include "Client.h"
 #include "Message.h"
@@ -22,28 +18,29 @@ class WorkSpace : public QObject
 	Q_OBJECT
 
 private:
+
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
-	QMap<QTcpSocket *, QSharedPointer<Client>> editors;
-
-	QTimer time;
+	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
+	QTimer timer;
 
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
-	bool updateAccount(User* user, quint16 typeField, QVariant field);
+	bool updateAccount(User& user, quint16 typeField, QVariant field);
 
 public:
+
 	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
 	~WorkSpace();
 
 public slots:
+
 	void newSocket(qint64 handle);
 	void clientDisconnection();
 	void readMessage();
 	void saveDocument();
 
-signals:
-	void notWorking(QString document);
-signals:
-	void deleteClient(qint64 handle);
+signals: void notWorking(QString document);
+signals: void deleteClient(qint64 handle);
+
 };
 

@@ -1,32 +1,35 @@
 #pragma once
 
-#include <QObject>
 #include <qtcpsocket.h>
 #include <QCryptographicHash>
 
 #include "User.h"
 
-class WorkSpace;	// inclusione anticipata
 
-class Client //: public QObject
+class WorkSpace;	// forward declaration
+
+class Client 
 {
-	//Q_OBJECT
+
 private:
-	int clientId;
+
 	qintptr socket;
-	User* activeUser;
+	User& activeUser;
 	bool logged;
 	QString nonce;
+
 public:
-	Client(int id, qintptr s, User* u);
+
+	Client(qintptr s, User& u);
 	~Client();
 
 	/* getter */
+	User& getUser();
 	int getUserId();
-	qintptr getSocketDescriptor();
-	User* getUser();
-	QString getNonce();
 	QString getUserName();
+	qintptr getSocketDescriptor();
+	QString getNonce();
+	
 
 	/* setter */
 	void setLogged();

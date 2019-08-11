@@ -73,32 +73,32 @@ SocketNullException::SocketNullException(std::string msg) :
 {
 }
 
-SocketDuplicatedException::SocketDuplicatedException(std::string msg):
+SocketDuplicateException::SocketDuplicateException(std::string msg):
 	SocketException(msg)
 {
 }
 
-ObjectNotFound::ObjectNotFound(std::string msg):
+ObjectNotFoundException::ObjectNotFoundException(std::string msg):
 	ServerException(msg)
 {
 }
 
 ClientNotFoundException::ClientNotFoundException(std::string msg):
-	ObjectNotFound(msg)
+	ObjectNotFoundException(msg)
 {
 }
 
 UserNotFoundException::UserNotFoundException(std::string msg):
-	ObjectNotFound(msg)
+	ObjectNotFoundException(msg)
 {
 }
 
 WorkspaceNotFoundException::WorkspaceNotFoundException(std::string msg):
-	ObjectNotFound(msg)
+	ObjectNotFoundException(msg)
 {
 }
 
 ThreadNotFoundException::ThreadNotFoundException(std::string msg):
-	ObjectNotFound(msg)
+	ObjectNotFoundException(msg)
 {
 }

@@ -1,21 +1,18 @@
 #pragma once
 
-//#include <QObject>
 #include <QString>
-#include <QStringList>
-#include <QVector>
+
 #include "Symbol.h"
 
-class Document //: public QObject
+
+class Document
 {
-//	Q_OBJECT
 
 private:
 
 	QString URI;
 	QStringList editors;
-	// Document actual content
-	QVector<Symbol> _text;
+	QVector<Symbol> _text;	// Actual document contents
 
 	static const int fPosGapSize = 4;
 
@@ -39,6 +36,8 @@ public:
 	QString getName();
 	QString getURI();
 	QString getAuthor();
+
+	QString toString();		// returns a printable representation of the document's contents
 
 	void insertNewEditor(QString edit);
 

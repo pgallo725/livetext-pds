@@ -10,14 +10,14 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 {
 	doc->load();	// Load the document contents
 
-	time.callOnTimeout<WorkSpace*>(this, &WorkSpace::saveDocument);
-	time.start(SAVE_TIMEOUT);
+	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::saveDocument);
+	timer.start(SAVE_TIMEOUT);
 }
 
 
 WorkSpace::~WorkSpace()
 {
-	time.stop();
+	timer.stop();
 	doc->save();	// Saving changes to the document before closing the workspace
 }
 
@@ -46,33 +46,27 @@ void WorkSpace::newSocket(qint64 handle)
 
 
 /* update user's fields */
-bool WorkSpace::updateAccount(User* user, quint16 typeField, QVariant field)
+bool WorkSpace::updateAccount(User& user, quint16 typeField, QVariant field)
 {
-	switch (typeField) {
+	switch (typeField) 
+	{
 	case ChangeNickname:
-		user->setNickname(field.value<QString>());
-		break;
-
-	case RemoveNickname:
-		user->deleteNickname();
+		user.setNickname(field.value<QString>());
 		break;
 
 	case ChangeIcon:
-		user->setIcon(field.value<QImage>());
-		break;
-
-	case RemoveIcon:
-		user->deleteIcon();
+		user.setIcon(field.value<QImage>());
 		break;
 
 	case ChangePassword:
-		user->changePassword(field.value<QString>());
+		user.changePassword(field.value<QString>());
 		break;
 
 	default:
 		return false;
 		break;
 	}
+
 	return true;
 }
 

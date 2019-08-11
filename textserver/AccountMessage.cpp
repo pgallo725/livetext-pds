@@ -4,22 +4,21 @@
 AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : 
 	Message(m), user(User()), fieldType(-1)
 {
-	switch (m) {
+	switch (m) 
+	{
+
 	case AccountCreate:
 		streamIn >> user;
 		break;
+
 	case AccountUpDate:
 		streamIn >> fieldType;
-		switch (fieldType) {
+		switch ((AccountFieldType)fieldType) 
+		{
 		case ChangeNickname:
 		case ChangeIcon:
 		case ChangePassword:
 			streamIn >> field;
-			break;
-
-		case RemoveNickname:
-		case RemoveIcon:
-			field = QVariant();
 			break;
 
 		default:

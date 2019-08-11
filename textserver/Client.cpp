@@ -1,7 +1,8 @@
 #include "Client.h"
 
-Client::Client(int id, qintptr s,User* u):
-	clientId(id), socket(s), activeUser(u), logged(false)
+
+Client::Client(qintptr s, User& u):
+	socket(s), activeUser(u), logged(false)
 {
 	// TODO: random sequence
 	nonce = "deadbeef";
@@ -9,12 +10,12 @@ Client::Client(int id, qintptr s,User* u):
 
 Client::~Client()
 {
-	// NOTHING TO DO, activeUser is not mine
+	// NOTHING TO DO, activeUser is owned by TcpServer and therefore it does NOT need to be destroyed
 }
 
 int Client::getUserId()
 {
-	return clientId;
+	return activeUser.getUserId();
 }
 
 qintptr Client::getSocketDescriptor()
@@ -22,7 +23,7 @@ qintptr Client::getSocketDescriptor()
 	return socket;
 }
 
-User* Client::getUser()
+User& Client::getUser()
 {
 	return activeUser;
 }
@@ -34,7 +35,7 @@ QString Client::getNonce()
 
 QString Client::getUserName()
 {
-	return activeUser->getUsername();
+	return activeUser.getUsername();
 }
 
 void Client::setLogged()
@@ -51,7 +52,7 @@ bool Client::authentication(QString passwd)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
-	hash.addData(activeUser->getPassword().toStdString().c_str(), activeUser->getPassword().length());
+	hash.addData(activeUser.getPassword().toStdString().c_str(), activeUser.getPassword().length());
 	hash.addData(this->nonce.toStdString().c_str(), this->nonce.length());
 
 	return !QString::fromStdString(hash.result().toStdString()).compare(passwd);

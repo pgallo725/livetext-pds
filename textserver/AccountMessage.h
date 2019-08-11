@@ -25,12 +25,10 @@ public:
 	QVariant getField();
 };
 
-enum fieldType 
+enum AccountFieldType 
 {
 	ChangeNickname,
-	RemoveNickname,		// leave only ChangeNickname and ChangeIcon
 	ChangeIcon,
-	RemoveIcon,
 	ChangePassword,
 	WrongFieldType
 };

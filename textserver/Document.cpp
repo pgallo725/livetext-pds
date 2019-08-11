@@ -144,6 +144,33 @@ void Document::removeAt(QVector<qint32> fPos)
 }
 
 
+QString Document::toString()
+{
+	QString text;
+
+	for (Symbol* i = _text.begin(); i != _text.end(); i++)
+	{
+		if (i->getType() == Symbol::Type::Char)
+		{
+			Char* c = static_cast<Char*>(i);
+			text.push_back(c->getChar());
+		}
+		else if (i->getType() == Symbol::Type::BlockDelimiter)
+		{
+			BlockDelimiter* b = static_cast<BlockDelimiter*>(i);
+			text.push_back(b->getDelimiterType() == Symbol::DelimiterType::Begin ? "<block>" : "</block>");
+		}
+		else if (i->getType() == Symbol::Type::ListDelimiter)
+		{
+			ListDelimiter* l = static_cast<ListDelimiter*>(i);
+			text.push_back(l->getDelimiterType() == Symbol::DelimiterType::Begin ? "<list>" : "</list>");
+		}
+	}
+	
+	return text;
+}
+
+
 
 // Binary search algorithm, returns the index of the symbol at the specified
 // fractional position inside the document, otherwise negative index of where it should be

@@ -109,37 +109,38 @@ public:
 };
 
 
-class SocketDuplicatedException : public SocketException
+class SocketDuplicateException : public SocketException
 {
 public:
-	SocketDuplicatedException(std::string msg);
+	SocketDuplicateException(std::string msg);
 };
 
-class ObjectNotFound : public ServerException
+
+class ObjectNotFoundException : public ServerException
 {
 protected:
-	ObjectNotFound(std::string msg);
+	ObjectNotFoundException(std::string msg);
 };
 
-class ClientNotFoundException : public ObjectNotFound
+class ClientNotFoundException : public ObjectNotFoundException
 {
 public:
 	ClientNotFoundException(std::string msg);
 };
 
-class UserNotFoundException : public ObjectNotFound
+class UserNotFoundException : public ObjectNotFoundException
 {
 public:
 	UserNotFoundException(std::string msg);
 };
 
-class WorkspaceNotFoundException : public ObjectNotFound
+class WorkspaceNotFoundException : public ObjectNotFoundException
 {
 public:
 	WorkspaceNotFoundException(std::string msg);
 };
 
-class ThreadNotFoundException : public ObjectNotFound
+class ThreadNotFoundException : public ObjectNotFoundException
 {
 public:
 	ThreadNotFoundException(std::string msg);
