@@ -32,13 +32,14 @@ void WorkSpace::newSocket(qint64 handle)
 		return;
 	}
 	
-	if (!(c = server->moveClient(handle, doc->getURI()))) {
+	if (!(c = server->moveClient(handle))) {
 		qDebug() << "Client not found";
 		//TODO: come gestiamo? throw ClientNotFoundException in moveClient
 		return;
 	}
 
 	editors.insert(socket, c);
+	// TODO: need to send to others clients this new presence
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
@@ -121,30 +122,17 @@ void WorkSpace::readMessage()
 			break;
 
 		default:
-			throw MessageUnknownTypeException(typeOfMessage);
+			throw MessageUnknownTypeException(msg->getType());
 			break;
 		}
 
 		handleMessage(std::move(msg), socket);
 	}
 	catch (MessageUnknownTypeException& e) {
-		/* send to the client WrongMessageType */
-		QDataStream streamOut;
-		streamOut.setDevice(socket);
-		streamOut << (quint16)WrongMessageType << e.getErrType();
-	}
-	catch (MessageWrongTypeException& e) {
-		/* send to the client WrongMessageType + message */
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
 		QString err = e.what();
-		streamOut << (quint16)WrongMessageType << err;
-	}
-	catch (MessageException& e) {
-		/* TODO: client not found in create new Doc */
-	}
-	catch (SocketNullException& e) {
-		// TODO
+		streamOut << (quint16)WrongMessageType << msg->getType();
 	}
 }
 
@@ -155,8 +143,7 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	quint16 typeOfMessage = 0;
 	QString msg_str;
 
-	if (socket == nullptr) throw SocketNullException("handleMessage reach null_ptr");
-
+	
 	streamOut.setDevice(socket);	/* connect stream with socket */
 
 	switch (msg->getType()) {
@@ -194,9 +181,6 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case AccountUpDate:
 	{
 		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
-
-		if (!editors.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
 
 		if (!editors.find(socket).value()->isLogged()) {
 			typeOfMessage = AccountDenied;
@@ -236,7 +220,8 @@ void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	}
 		
 	default:
-		throw MessageUnknownTypeException(msg->getType());
+		typeOfMessage = WrongMessageType;
+		streamOut << typeOfMessage << msg->getType();
 		break;
 	}
 }
@@ -250,10 +235,13 @@ void WorkSpace::clientDisconnection()
 	editors.remove(socket);
 	qDebug() << "client removed";
 
+	// TODO: need to send to others client that this client is disconnected
+
 	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
 		emit notWorking(doc->getURI());		// TODO: consider adding a timer before closing the workspace
 }
+
 
 void WorkSpace::saveDocument()
 {

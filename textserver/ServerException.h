@@ -79,11 +79,7 @@ public:
 };
 
 
-class MessageWrongTypeException : public MessageException
-{
-public:
-	MessageWrongTypeException(std::string msg, int type);
-};
+
 
 
 class FieldWrongException : public MessageException
@@ -116,32 +112,8 @@ public:
 };
 
 
-class ObjectNotFoundException : public ServerException
-{
-protected:
-	ObjectNotFoundException(std::string msg);
-};
-
-class ClientNotFoundException : public ObjectNotFoundException
-{
-public:
-	ClientNotFoundException(std::string msg);
-};
-
-class UserNotFoundException : public ObjectNotFoundException
+class UserNotFoundException : public ServerException
 {
 public:
 	UserNotFoundException(std::string msg);
-};
-
-class WorkspaceNotFoundException : public ObjectNotFoundException
-{
-public:
-	WorkspaceNotFoundException(std::string msg);
-};
-
-class ThreadNotFoundException : public ObjectNotFoundException
-{
-public:
-	ThreadNotFoundException(std::string msg);
 };

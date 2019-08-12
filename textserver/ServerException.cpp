@@ -53,10 +53,7 @@ int MessageUnknownTypeException::getErrType()
 	return errType;
 }
 
-MessageWrongTypeException::MessageWrongTypeException(std::string msg, int type) :
-	MessageException(msg + std::to_string(type))
-{
-}
+
 
 FieldWrongException::FieldWrongException(int type) :
 	MessageException("Wrong field type : " + type), type(type)
@@ -78,27 +75,10 @@ SocketDuplicateException::SocketDuplicateException(std::string msg):
 {
 }
 
-ObjectNotFoundException::ObjectNotFoundException(std::string msg):
+
+UserNotFoundException::UserNotFoundException(std::string msg):
 	ServerException(msg)
 {
 }
 
-ClientNotFoundException::ClientNotFoundException(std::string msg):
-	ObjectNotFoundException(msg)
-{
-}
 
-UserNotFoundException::UserNotFoundException(std::string msg):
-	ObjectNotFoundException(msg)
-{
-}
-
-WorkspaceNotFoundException::WorkspaceNotFoundException(std::string msg):
-	ObjectNotFoundException(msg)
-{
-}
-
-ThreadNotFoundException::ThreadNotFoundException(std::string msg):
-	ObjectNotFoundException(msg)
-{
-}

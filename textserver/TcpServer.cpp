@@ -398,6 +398,7 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	return true;
 }
 
+/* delete a document from a client */
 bool TcpServer::removeDocument(QString uri, QTcpSocket* client)
 {
 	if (!documents.contains(uri))
@@ -501,26 +502,17 @@ void TcpServer::readMessage()
 			break;
 
 		default:
-			QDataStream streamOut;
-			streamOut.setDevice(socket);
-			streamOut << (quint16)WrongMessageType << msg->getType();
+			throw MessageUnknownTypeException(msg->getType());
 			break;
 		}
 
 		handleMessage(std::move(msg), socket);
 	}
-	catch (MessageUnknownTypeException& e) {		/* could be deleted */
-		/* send to the client WrongMessageType */
-		QDataStream streamOut;
-		streamOut.setDevice(socket);
-		streamOut << (quint16)WrongMessageType << e.getErrType();
-	}
-	catch (MessageWrongTypeException& e) {
-		/* send to the client WrongMessageType + message */
+	catch (MessageUnknownTypeException& e) {
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
 		QString err = e.what();
-		streamOut << (quint16)WrongMessageType << err;
+		streamOut << (quint16)WrongMessageType << msg->getType();
 	}
 	catch (FieldWrongException& e) {
 		/* send to the client WrongFieldType + message */
@@ -737,7 +729,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 
 /* allow to a secondary thread to steal a QSharedPointer from the server */
-QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor, QString workspace)	// TODO: remove workspace param, Client is not QObject
+QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)	// TODO: remove workspace param, Client is not QObject
 {
 	QSharedPointer<Client> c;
 
