@@ -8,6 +8,17 @@
 #include <QTextListFormat>
 
 
+enum SymbolType
+{
+	Char,
+	BlockBegin,
+	BlockEnd,
+	ListBegin,
+	ListEnd,
+	None
+};
+
+
 class Symbol
 {
 
@@ -15,25 +26,9 @@ class Symbol
 	friend QDataStream& operator>>(QDataStream& in, Symbol& sym);				// Input
 	friend QDataStream& operator<<(QDataStream& out, const Symbol& sym);		// Output
 
-public:
-
-	enum Type 
-	{
-		Char,
-		ListDelimiter,
-		BlockDelimiter,
-		None
-	};
-
-	enum DelimiterType
-	{
-		Begin,
-		End
-	};
-
 protected:
 
-	Type _type;
+	SymbolType _type;
 	QVariant _item;		// { QChar, DelimiterType }
 	QVariant _format;	// { QTextCharFormat, QTextBlockFormat, QTextListFormat }
 
@@ -44,7 +39,7 @@ public:
 protected:
 
 	// Constructor which handles the fields that are in common to all symbol types
-	Symbol(Type type, qint32 authorId, QVector<qint32> fractionPos);
+	Symbol(SymbolType type, qint32 authorId, QVector<qint32> fractionPos);
 
 public:
 
@@ -52,9 +47,9 @@ public:
 
 	Symbol() : _type(None) { };		// Use this to construct an empty symbol and populate the fields later
 
-	Symbol(Symbol::Type type, QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
-	Symbol(Symbol::Type type, DelimiterType delimiter, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
-	Symbol(Symbol::Type type, DelimiterType delimiter, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
+	Symbol(SymbolType type, QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
+	Symbol(SymbolType type, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
+	Symbol(SymbolType type, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
 
 	/* Comparison operators */
 	bool operator==(const Symbol& other);
@@ -62,7 +57,10 @@ public:
 	bool operator>(const Symbol& other);
 
 	/* Getters */
-	Symbol::Type getType();
+	SymbolType getType();
+	bool isChar();
+	bool isBlockDelimiter();
+	bool isListDelimiter();
 	qint32 getAuthorId();
 	
 
@@ -71,11 +69,19 @@ public:
 };
 
 
+// Needed to make these types available to templates objects such as QVariant
+
+Q_DECLARE_METATYPE(QTextCharFormat);
+Q_DECLARE_METATYPE(QTextBlockFormat);
+Q_DECLARE_METATYPE(QTextListFormat);
+
+
+
 /************************************************************
 *		Interfaces for handling specific Symbol types		*
 ************************************************************/
 
-class Char : public Symbol
+class CharSymbol : public Symbol
 {
 
 public:
@@ -86,23 +92,21 @@ public:
 };
 
 
-class BlockDelimiter : public Symbol
+class BlockDelimiterSymbol : public Symbol
 {
 
 public:
 
-	Symbol::DelimiterType getDelimiterType();
 	QTextBlockFormat getBlockFormat();
 
 };
 
 
-class ListDelimiter : public Symbol
+class ListDelimiterSymbol : public Symbol
 {
 
 public:
 
-	Symbol::DelimiterType getDelimiterType();
 	QTextListFormat getListFormat();
 
 };

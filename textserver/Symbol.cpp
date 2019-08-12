@@ -5,30 +5,30 @@
 
 
 
-Symbol::Symbol(Type type, qint32 authorId, QVector<qint32> fractionPos)
+Symbol::Symbol(SymbolType type, qint32 authorId, QVector<qint32> fractionPos)
 	: _type(type), _fPos(fractionPos)
 {
 	_fPos.push_back(authorId);		// User ID is added as part of the fractional position to ensure uniqueness
 }
 
-Symbol::Symbol(Type type, QChar symbol, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
+Symbol::Symbol(SymbolType type, QChar symbol, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
 	: Symbol(type, authorId, fractionPos)
 {
 	_item = QVariant(symbol);		// Fill the unions with the QChar and its QTextCharFormat attribute
 	_format = QVariant(fmt);
 }
 
-Symbol::Symbol(Type type, DelimiterType delimiter, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
+Symbol::Symbol(SymbolType type, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
 	: Symbol(type, authorId, fractionPos)
 {
-	_item = QVariant(delimiter);	// Fill the unions with the TextBlock delimiter type and the QTextBlockFormat attributes
+	_item = QVariant();				// Fill the unions with the QTextBlockFormat attributes
 	_format = QVariant(fmt);
 }
 
-Symbol::Symbol(Type type, Symbol::DelimiterType delimiter, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
+Symbol::Symbol(SymbolType type, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
 	: Symbol(type, authorId, fractionPos)
 {
-	_item = QVariant(delimiter);	// Fills the unions with the TextList delimiter type and the QTextListFormat attribute
+	_item = QVariant();				// Fills the unions with the QTextListFormat attribute
 	_format = QVariant(fmt);
 }
 
@@ -57,11 +57,26 @@ bool Symbol::operator>(const Symbol& other)
 	return !((*this) < other || (*this) == other);
 }
 
-
-Symbol::Type Symbol::getType()
+SymbolType Symbol::getType()
 {
 	return _type;
 }
+
+bool Symbol::isChar()
+{
+	return _type == SymbolType::Char;
+}
+
+bool Symbol::isBlockDelimiter()
+{
+	return _type == SymbolType::BlockBegin || _type == SymbolType::BlockEnd;
+}
+
+bool Symbol::isListDelimiter()
+{
+	return _type == SymbolType::ListBegin || _type == SymbolType::ListEnd;
+}
+
 
 qint32 Symbol::getAuthorId()
 {
@@ -98,34 +113,24 @@ QDataStream& operator<<(QDataStream& out, const Symbol& sym)
 ********************************************************/
 
 
-QChar Char::getChar()
+QChar CharSymbol::getChar()
 {
 	return _item.value<QChar>();
 }
 
-QTextCharFormat Char::getCharFormat()
+QTextCharFormat CharSymbol::getCharFormat()
 {
 	return _format.value<QTextCharFormat>();
 }
 
 
-Symbol::DelimiterType BlockDelimiter::getDelimiterType()
-{
-	return _item.value<Symbol::DelimiterType>();
-}
-
-QTextBlockFormat BlockDelimiter::getBlockFormat()
+QTextBlockFormat BlockDelimiterSymbol::getBlockFormat()
 {
 	return _format.value<QTextBlockFormat>();
 }
 
 
-Symbol::DelimiterType ListDelimiter::getDelimiterType()
-{
-	return _item.value<Symbol::DelimiterType>();
-}
-
-QTextListFormat ListDelimiter::getListFormat()
+QTextListFormat ListDelimiterSymbol::getListFormat()
 {
 	return _format.value<QTextListFormat>();
 }

@@ -150,20 +150,20 @@ QString Document::toString()
 
 	for (Symbol* i = _text.begin(); i != _text.end(); i++)
 	{
-		if (i->getType() == Symbol::Type::Char)
+		if (i->getType() == SymbolType::Char)
 		{
-			Char* c = static_cast<Char*>(i);
+			CharSymbol* c = static_cast<CharSymbol*>(i);
 			text.push_back(c->getChar());
 		}
-		else if (i->getType() == Symbol::Type::BlockDelimiter)
+		else if (i->isBlockDelimiter())
 		{
-			BlockDelimiter* b = static_cast<BlockDelimiter*>(i);
-			text.push_back(b->getDelimiterType() == Symbol::DelimiterType::Begin ? "<block>" : "</block>");
+			BlockDelimiterSymbol* b = static_cast<BlockDelimiterSymbol*>(i);
+			text.push_back(b->getType() == SymbolType::BlockBegin ? "<block>" : "</block>");
 		}
-		else if (i->getType() == Symbol::Type::ListDelimiter)
+		else if (i->isListDelimiter())
 		{
-			ListDelimiter* l = static_cast<ListDelimiter*>(i);
-			text.push_back(l->getDelimiterType() == Symbol::DelimiterType::Begin ? "<list>" : "</list>");
+			ListDelimiterSymbol* l = static_cast<ListDelimiterSymbol*>(i);
+			text.push_back(l->getType() == SymbolType::ListBegin ? "<list>" : "</list>");
 		}
 	}
 	
