@@ -48,12 +48,13 @@ private:
 	bool login(QSharedPointer<Client> client, QString password);
 	bool logout(QTcpSocket* s);
 	bool createNewAccount(QString userName, QString nickname, QString passwd, QImage icon, QTcpSocket *socket = nullptr);
-	bool updateAccount(User& user, quint16 typeField, QVariant field);
+	bool updateAccount(User* user, quint16 typeField, QVariant field);
 	WorkSpace* createNerWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client);
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
 	bool openDocument(QString uri, QTcpSocket* client);
+	bool removeDocument(QString uri, QTcpSocket* client);
 	QStringList getUriFromUser(QString username);
 
 public:

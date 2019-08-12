@@ -183,6 +183,9 @@ void TcpServer::newClientConnection()
 
 	qDebug() << " - new connection from a client";
 
+	QSharedPointer<Client> client(new Client(socket->socketDescriptor()));
+	clients.insert(socket, client);
+
 	/* connect slots to be able to read messages */
 	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
@@ -206,21 +209,9 @@ void TcpServer::clientDisconnection()
 /* create a new client and send nonce to be solved for authentication */
 void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
 {
-	QDataStream streamOut;
-	
-	streamOut.setDevice(socket); /* connect stream with socket */
-
-	/* check if this socket is already used (user already logged) */
-	if (clients.contains(socket)) {
-		QString msg_str = "Cannot log if you are logged";
-		streamOut << (quint16)LoginError << msg_str;
-		return;
-	}
-
-	QSharedPointer<Client> client (new Client(socket->socketDescriptor(), users.find(username).value()));
-	clients.insert(socket, client);
-
-	streamOut << (quint16)LoginChallenge << client->getNonce();
+	QSharedPointer<Client> c = clients.find(socket).value();
+	c->setUser(&(users.find(username).value()));
+	c->challenge(socket);
 }
 
 /* check authentication */
@@ -232,11 +223,12 @@ bool TcpServer::login(QSharedPointer<Client> client, QString password)
 /* release resources own by a client and delete it */
 bool TcpServer::logout(QTcpSocket* s)
 {
-	if (!clients.contains(s)) {
+	QSharedPointer<Client> c = clients.find(s).value();
+	if (!c->isLogged()) {
 		return false;
 	}
 
-	clients.remove(s);
+	c->resetLogged();
 	return true;
 }
 
@@ -254,32 +246,29 @@ bool TcpServer::createNewAccount(QString username, QString nickname, QString pas
 	/* check if socket is null										*
 	*  static accont as Admin doesn't need a client during creation */
 	if (socket != nullptr) {
-		if (clients.contains(socket))	/* this socket is already use by another user */
-			throw SocketDuplicateException("::createNewAccount - socket already used");
-			
-		QSharedPointer<Client> client(new Client(socket->socketDescriptor(), users.find(username).value()));
+		QSharedPointer<Client> client = clients.find(socket).value();
+		client->setUser(&(users.find(username).value()));
 		client->setLogged();				// client is automatically logged
-		clients.insert(socket, client);
 	}
 
 	return true;
 }
 
 /* Update user's fields */
-bool TcpServer::updateAccount(User& user, quint16 typeField, QVariant field)
+bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant field)
 {
 	switch (typeField) 
 	{
 	case ChangeNickname:
-		user.setNickname(field.value<QString>());
+		user->setNickname(field.value<QString>());
 		break;
 
 	case ChangeIcon:
-		user.setIcon(field.value<QImage>());
+		user->setIcon(field.value<QImage>());
 		break;
 
 	case ChangePassword:
-		user.changePassword(field.value<QString>());
+		user->changePassword(field.value<QString>());
 		break;
 
 	default:
@@ -357,7 +346,7 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	docFile.close();
 	
 	/* add to client list the newDocument*/
-	c->getUser().addDocument(uri);
+	c->getUser()->addDocument(uri);
 	/* add to document list the new editor */
 	doc->insertNewEditor(c->getUserName());
 
@@ -393,7 +382,7 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	}
 
 	/* add to client list the newDocument*/
-	c->getUser().addDocument(uri);
+	c->getUser()->addDocument(uri);
 	/* add to document list the new editor */
 	d->insertNewEditor(c->getUserName());
 
@@ -409,6 +398,20 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 	return true;
 }
 
+bool TcpServer::removeDocument(QString uri, QTcpSocket* client)
+{
+	if (!documents.contains(uri))
+		return false;
+
+	if (!workspaces.contains(uri)) {
+		return false;
+	}
+
+	clients.find(client).value()->getUser()->removeDocument(uri);
+
+	return true;
+}
+
 /* get all the URI that a User owned */
 QStringList TcpServer::getUriFromUser(QString username)
 {
@@ -420,16 +423,6 @@ QStringList TcpServer::getUriFromUser(QString username)
 /* release all resource owned by workspace, delete it and its thread */
 void TcpServer::deleteWorkspace(QString document)
 {
-	try {
-		if (!workspaces.contains(document))
-			throw WorkspaceNotFoundException("::deleteWorkspace - workspace '"+ document.toStdString() + "' not found");
-
-		if (!workThreads.contains(document))
-			throw ThreadNotFoundException("::deleteWorkspace - thread '" + document.toStdString() + "' not found");
-	}
-	catch (ObjectNotFoundException& e) {
-		//TODO: need to be differentiate?
-	}
 
 	// TODO: write on disk the file
 	WorkSpace* w = workspaces.find(document).value().get();
@@ -492,31 +485,31 @@ void TcpServer::readMessage()
 
 			/* DocumentMessages */
 		case NewDocument:
-			if (!clients.contains(socket)) 
-				throw ClientNotFoundException("::readMessage - client not found");
 			msg = std::make_unique<DocumentMessage>(NewDocument, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
 		case OpenDocument:
-			if (!clients.contains(socket)) 
-				throw ClientNotFoundException("::readMessage - client not found");
 			msg = std::make_unique<DocumentMessage>(OpenDocument, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
+		case DocumentRemove:
+			msg = std::make_unique<DocumentMessage>(DocumentRemove, streamIn, clients.find(socket).value()->getUserName());
+			break;
+
 		case UriRequest:
-			if (!clients.contains(socket)) 
-				throw ClientNotFoundException("::readMessage - client not found");
 			msg = std::make_unique<DocumentMessage>(UriRequest, streamIn, clients.find(socket).value()->getUserName());
 			break;
 
 		default:
-			throw MessageUnknownTypeException(typeOfMessage);
+			QDataStream streamOut;
+			streamOut.setDevice(socket);
+			streamOut << (quint16)WrongMessageType << msg->getType();
 			break;
 		}
 
 		handleMessage(std::move(msg), socket);
 	}
-	catch (MessageUnknownTypeException& e) {
+	catch (MessageUnknownTypeException& e) {		/* could be deleted */
 		/* send to the client WrongMessageType */
 		QDataStream streamOut;
 		streamOut.setDevice(socket);
@@ -536,20 +529,8 @@ void TcpServer::readMessage()
 		QString err = e.what();
 		streamOut << (quint16)WrongFieldType << err;
 	}
-	catch (ClientNotFoundException& e) {
-		//TODO
-	}
 	catch (UserNotFoundException& e) {
-		//TODO: send by handleMessage
-	}
-	catch (SocketDuplicateException& e) {
-		//TODO: send by handleMessage -> createNewAccount
-	}
-	catch (MessageException& e) {
-		/* TODO: client not found in create new Doc */
-	}
-	catch (SocketNullException& e) {
-		// TODO
+		/* send by TcpServer::getUriFromUser */
 	}
 }
 
@@ -559,8 +540,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	QDataStream streamOut;
 	quint16 typeOfMessage = 0;
 	QString msg_str;
-
-	if (socket == nullptr) throw SocketNullException("::handleMessage - reach null_ptr");
 
 	streamOut.setDevice(socket); /* connect stream with socket */
 
@@ -585,9 +564,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		
 	case LoginUnlock:
 	{
-		if (!clients.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
-
 		LoginMessage* loginUnlock = dynamic_cast<LoginMessage*>(msg.get());
 		QString username = clients.find(socket).value()->getUserName();
 		User u;
@@ -632,9 +608,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	{
 		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
 		
-		if (!clients.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
-
 		if (!clients.find(socket).value()->isLogged()) {
 			typeOfMessage = AccountDenied;
 			msg_str = "client not logged";
@@ -674,8 +647,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case NewDocument:
 	{
 		DocumentMessage* newDocument = dynamic_cast<DocumentMessage*>(msg.get());
-		if (!clients.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
 
 		if (!clients.find(socket).value()->isLogged()) {
 			typeOfMessage = DocumentError;
@@ -697,8 +668,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case OpenDocument:
 	{
 		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
-		if (!clients.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
 
 		if (!clients.find(socket).value()->isLogged()) {
 			typeOfMessage = DocumentError;
@@ -710,7 +679,27 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		}
 		else {
 			typeOfMessage = DocumentOpened;
-			msg_str = "Document created";
+			msg_str = "Document opened";
+		}
+		streamOut << typeOfMessage << msg_str;
+		break;
+	}
+
+	case DocumentRemove:
+	{
+		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
+
+		if (!clients.find(socket).value()->isLogged()) {
+			typeOfMessage = DocumentError;
+			msg_str = "client not logged";
+		}
+		else if (!removeDocument(docMsg->getURI(), socket)) {
+			typeOfMessage = DocumentError;
+			msg_str = "Cannot delete '" + docMsg->getDocName() + "', this document doesn't exist";
+		}
+		else {
+			typeOfMessage = DocumentOpened;
+			msg_str = "Document deleted";
 		}
 		streamOut << typeOfMessage << msg_str;
 		break;
@@ -719,8 +708,6 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case UriRequest:
 	{
 		DocumentMessage* uriRequest = dynamic_cast<DocumentMessage*>(msg.get());
-		if (!clients.contains(socket))
-			throw ClientNotFoundException("::handleMessage - client not found");
 
 		if (!clients.find(socket).value()->isLogged()) {
 			typeOfMessage = DocumentError;
@@ -736,8 +723,12 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 
 
 	default:
-		throw MessageUnknownTypeException(msg->getType());
+	{
+		typeOfMessage = WrongMessageType;
+		streamOut << typeOfMessage << msg->getType();
 		break;
+	}
+		
 	}
 }
 

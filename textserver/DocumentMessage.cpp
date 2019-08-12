@@ -10,9 +10,10 @@ DocumentMessage::DocumentMessage(MessageType m, QDataStream& streamIn, QString u
 		URI = username + "_" + docName + "_" + "deadbeef"; /* TODO: random sequence */
 		break;
 	case OpenDocument: 
+	case DocumentRemove:
 		streamIn >> URI;
 		break;
-		
+
 	case UriRequest:
 		break;
 

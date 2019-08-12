@@ -47,6 +47,7 @@ public:
 	void deleteIcon();
 	void changePassword(QString newPassword);
 
+	void removeDocument(QString uri);
 };
 
 

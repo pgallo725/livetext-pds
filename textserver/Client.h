@@ -14,17 +14,17 @@ class Client
 private:
 
 	qintptr socket;
-	User& activeUser;
+	User* activeUser;
 	bool logged;
 	QString nonce;
 
 public:
 
-	Client(qintptr s, User& u);
+	Client(qintptr s);
 	~Client();
 
 	/* getter */
-	User& getUser();
+	User* getUser();
 	int getUserId();
 	QString getUserName();
 	qintptr getSocketDescriptor();
@@ -32,11 +32,13 @@ public:
 	
 
 	/* setter */
+	void setUser(User* u);
 	void setLogged();
 	void resetLogged();
 
 	/* general methods */
 	bool authentication(QString passwd);
+	void challenge(QTcpSocket* s);
 	bool isLogged();
 };
 

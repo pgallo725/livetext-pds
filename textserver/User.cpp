@@ -89,6 +89,11 @@ void User::changePassword(QString newPassword)
 	m_passwd = newPassword;
 }
 
+void User::removeDocument(QString uri)
+{
+	m_documents.removeOne(uri);
+}
+
 
 
 QDataStream& operator>>(QDataStream& in, User& user)

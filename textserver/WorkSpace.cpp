@@ -46,20 +46,20 @@ void WorkSpace::newSocket(qint64 handle)
 
 
 /* update user's fields */
-bool WorkSpace::updateAccount(User& user, quint16 typeField, QVariant field)
+bool WorkSpace::updateAccount(User* user, quint16 typeField, QVariant field)
 {
 	switch (typeField) 
 	{
 	case ChangeNickname:
-		user.setNickname(field.value<QString>());
+		user->setNickname(field.value<QString>());
 		break;
 
 	case ChangeIcon:
-		user.setIcon(field.value<QImage>());
+		user->setIcon(field.value<QImage>());
 		break;
 
 	case ChangePassword:
-		user.changePassword(field.value<QString>());
+		user->changePassword(field.value<QString>());
 		break;
 
 	default:

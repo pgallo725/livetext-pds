@@ -25,7 +25,7 @@ private:
 	QTimer timer;
 
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
-	bool updateAccount(User& user, quint16 typeField, QVariant field);
+	bool updateAccount(User* user, quint16 typeField, QVariant field);
 
 public:
 

@@ -22,6 +22,7 @@ enum MessageType
 	UriRequest,
 	UriResponse,
 	DocumentOpened,
+	DocumentRemove,
 	DocumentError,
 	CharInsert,
 	CharDelete,
