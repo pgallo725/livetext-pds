@@ -176,8 +176,10 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Document.cpp" />
     <ClCompile Include="DocumentMessage.cpp" />
+    <ClCompile Include="ErrorMessage.cpp" />
     <ClCompile Include="LoginMessage.cpp" />
     <ClCompile Include="LogoutMessage.cpp" />
+    <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="ServerException.cpp" />
     <ClCompile Include="Symbol.cpp" />
     <ClCompile Include="TcpServer.cpp" />
@@ -191,12 +193,14 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Document.h" />
     <ClInclude Include="DocumentMessage.h" />
+    <ClInclude Include="ErrorMessage.h" />
     <ClInclude Include="LoginMessage.h" />
     <ClInclude Include="LogoutMessage.h" />
     <QtMoc Include="Message.h">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DynamicSource>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DynamicSource>
     </QtMoc>
+    <ClInclude Include="MessageHandler.h" />
     <ClInclude Include="ServerException.h" />
     <ClInclude Include="Symbol.h" />
     <QtMoc Include="TcpServer.h">

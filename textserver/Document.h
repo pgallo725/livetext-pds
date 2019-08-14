@@ -7,6 +7,11 @@
 
 class Document
 {
+	friend class DocumentMessage;
+
+	/* Operators for QDataStream serialization and deserialization */
+	friend QDataStream& operator>>(QDataStream& in, Document& user);			// Input
+	friend QDataStream& operator<<(QDataStream& out, const Document& user);		// Output
 
 private:
 
@@ -15,6 +20,10 @@ private:
 	QVector<Symbol> _text;	// Actual document contents
 
 	static const int fPosGapSize = 4;
+
+protected:
+
+	Document();		// Only use this to construct an empty Document object for deserialization purposes
 
 public:
 

@@ -64,36 +64,32 @@ public:
 
 class MessageException : public ServerException
 {
+
 public:
+
 	MessageException(std::string msg);
 };
 
 
-class MessageUnknownTypeException : public MessageException
+class MessageUnexpectedTypeException : public MessageException
 {
 private:
+
 	int errType;
+
 public:
-	MessageUnknownTypeException(int type);
+
+	MessageUnexpectedTypeException(int type);
 	int getErrType();
 };
 
 
 
 
-
-class FieldWrongException : public MessageException
-{
-private:
-	int type;
-public:
-	FieldWrongException(int type);
-};
-
-
 class SocketException : public ServerException
 {
 protected:
+
 	SocketException(std::string msg);
 };
 
@@ -101,6 +97,7 @@ protected:
 class SocketNullException : public SocketException
 {
 public:
+
 	SocketNullException(std::string msg);
 };
 
@@ -108,6 +105,7 @@ public:
 class SocketDuplicateException : public SocketException
 {
 public:
+
 	SocketDuplicateException(std::string msg);
 };
 
@@ -115,5 +113,6 @@ public:
 class UserNotFoundException : public ServerException
 {
 public:
+
 	UserNotFoundException(std::string msg);
 };

@@ -1,68 +1,99 @@
 #include "AccountMessage.h"
 #include "ServerException.h"
 
-AccountMessage::AccountMessage(MessageType m, QDataStream& streamIn) : 
-	Message(m), user(User()), fieldType(-1)
+
+AccountMessage::AccountMessage(MessageType m)
+	: Message(m), m_userId(-1)
 {
-	switch (m) 
+}
+
+AccountMessage::AccountMessage(MessageType accountCreateOrUpdate, User account)
+	: Message(accountCreateOrUpdate), m_user(account), m_userId(-1)
+{
+}
+
+AccountMessage::AccountMessage(MessageType accountConfirmed, int userId)
+	: Message(accountConfirmed), m_userId(userId)
+{
+}
+
+AccountMessage::AccountMessage(MessageType accountDenied, QString reason)
+	: Message(accountDenied), m_reason(reason), m_userId(-1)
+{
+}
+
+
+void AccountMessage::readFrom(QDataStream& stream)
+{
+	switch (m_type)
 	{
+		case AccountCreate:
+			stream >> m_user;
+			break;
 
-	case AccountCreate:
-		streamIn >> user;
-		break;
+		case AccountUpdate:
+			stream >> m_user;
+			break;
 
-	case AccountUpDate:
-		streamIn >> fieldType;
-		switch ((AccountFieldType)fieldType) 
-		{
-		case ChangeNickname:
-		case ChangeIcon:
-		case ChangePassword:
-			streamIn >> field;
+		case AccountConfirmed:
+			stream >> m_userId;
+			break;
+
+		case AccountDenied:
+			stream >> m_reason;
 			break;
 
 		default:
-			throw FieldWrongException(fieldType);
+			throw MessageUnexpectedTypeException(m_type);	// ?
 			break;
-		}
-		break;
-
-	default:
-		throw MessageUnknownTypeException(m);
-		break;
 	}
 }
 
-AccountMessage::~AccountMessage()
+void AccountMessage::sendTo(QTcpSocket* socket)
 {
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)m_type;
+
+	switch (m_type)
+	{
+		case AccountCreate:
+			streamOut << m_user;
+			break;
+
+		case AccountUpdate:
+			streamOut << m_user;
+			break;
+
+		case AccountConfirmed:
+			streamOut << m_userId;
+			break;
+
+		case AccountDenied:
+			streamOut << m_reason;
+			break;
+
+		default:
+			throw MessageUnexpectedTypeException(m_type);	// ?
+			break;
+	}
 }
 
-QString AccountMessage::getUserName()
+
+User& AccountMessage::getUserObj()
 {
-	return user.getUsername();
+	return m_user;
 }
 
-QString AccountMessage::getNickname()
+int AccountMessage::getUserId()
 {
-	return user.getNickName();
+	if (m_type == AccountConfirmed)
+		return m_userId;
+	else return m_user.getUserId();
 }
 
-QString AccountMessage::getPasswd()
+QString AccountMessage::getErrorMessage()
 {
-	return user.getPassword();
+	return m_reason;
 }
 
-QImage AccountMessage::getIcon()
-{
-	return user.getIcon();
-}
-
-quint16 AccountMessage::getFieldType()
-{
-	return fieldType;
-}
-
-QVariant AccountMessage::getField()
-{
-	return field;
-}

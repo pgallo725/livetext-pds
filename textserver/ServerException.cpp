@@ -43,22 +43,16 @@ MessageException::MessageException(std::string msg) :
 {
 }
 
-MessageUnknownTypeException::MessageUnknownTypeException(int type) :
+MessageUnexpectedTypeException::MessageUnexpectedTypeException(int type) :
 	MessageException("Unknown message type : " + type), errType(type)
 {
 }
 
-int MessageUnknownTypeException::getErrType()
+int MessageUnexpectedTypeException::getErrType()
 {
 	return errType;
 }
 
-
-
-FieldWrongException::FieldWrongException(int type) :
-	MessageException("Wrong field type : " + type), type(type)
-{
-}
 
 SocketException::SocketException(std::string msg) :
 	ServerException(msg)

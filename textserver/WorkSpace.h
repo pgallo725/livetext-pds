@@ -8,6 +8,8 @@
 #include "Message.h"
 #include "AccountMessage.h"
 #include "TextEditMessage.h"
+#include "ErrorMessage.h"
+#include "MessageHandler.h"
 #include "ServerException.h"
 
 
@@ -17,6 +19,8 @@ class WorkSpace : public QObject
 {
 	Q_OBJECT
 
+	friend class MessageHandler;
+
 private:
 
 	QSharedPointer<Document> doc;
@@ -24,8 +28,10 @@ private:
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
 
-	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
-	bool updateAccount(User* user, quint16 typeField, QVariant field);
+	MessageHandler messageHandler;
+
+	bool updateAccount(User* oldUser, User& newUser);
+	void dispatchMessage(std::unique_ptr<Message>&& msg, QTcpSocket* sender);
 
 public:
 

@@ -1,26 +1,62 @@
 #include "TextEditMessage.h"
 
-#include <QDataStream>
 
-
-TextEditMessage::TextEditMessage(MessageType m, QDataStream& streamIn) : Message(m)
+TextEditMessage::TextEditMessage(MessageType m) 
+	: Message(m)
 {
-	switch (m)
-	{
-	case CharInsert:
-		streamIn >> m_symbol;
-		break;
+}
 
-	case CharDelete:
-		streamIn >> m_position;
-	default:
-		break;
+TextEditMessage::TextEditMessage(MessageType charInsert, Symbol symbol)
+	: Message(charInsert), m_symbol(symbol)
+{
+}
+
+TextEditMessage::TextEditMessage(MessageType charDelete, QVector<qint32> position)
+	: Message(charDelete), m_position(position)
+{
+}
+
+
+void TextEditMessage::readFrom(QDataStream& stream)
+{
+	switch (m_type)
+	{
+		case CharInsert:
+			stream >> m_symbol;
+			break;
+
+		case CharDelete:
+			stream >> m_position;
+			break;
+
+		default:
+			// throw ?
+			break;
 	}
 }
 
-TextEditMessage::~TextEditMessage()
+void TextEditMessage::sendTo(QTcpSocket* socket)
 {
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)m_type;
+
+	switch (m_type)
+	{
+		case CharInsert:
+			streamOut << m_symbol;
+			break;
+
+		case CharDelete:
+			streamOut << m_position;
+			break;
+
+		default:
+			// throw ?
+			break;
+	}
 }
+
 
 Symbol& TextEditMessage::getSymbol()
 {

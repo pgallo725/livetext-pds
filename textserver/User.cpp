@@ -36,7 +36,7 @@ int User::getUserId()
 	return m_userId;
 }
 
-QString User::getNickName()
+QString User::getNickname()
 {
 	return m_nickname;
 }

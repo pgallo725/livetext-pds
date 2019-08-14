@@ -6,7 +6,7 @@
 
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
-	: doc(d), server(server)
+	: doc(d), server(server), messageHandler(MessageHandler::Workspace, this)
 {
 	doc->load();	// Load the document contents
 
@@ -46,183 +46,90 @@ void WorkSpace::newSocket(qint64 handle)
 }
 
 
-/* update user's fields */
-bool WorkSpace::updateAccount(User* user, quint16 typeField, QVariant field)
+/* Update user's fields */
+bool WorkSpace::updateAccount(User* oldUser, User& newUser)
 {
-	switch (typeField) 
+	if (oldUser->getUserId() == newUser.getUserId() &&
+		oldUser->getUsername() == newUser.getUsername())
 	{
-	case ChangeNickname:
-		user->setNickname(field.value<QString>());
-		break;
+		oldUser->setNickname(newUser.getNickname());
+		oldUser->setIcon(newUser.getIcon());
+		oldUser->changePassword(newUser.getPassword());
 
-	case ChangeIcon:
-		user->setIcon(field.value<QImage>());
-		break;
-
-	case ChangePassword:
-		user->changePassword(field.value<QString>());
-		break;
-
-	default:
-		return false;
-		break;
+		return true;
 	}
-
-	return true;
+	else return false;
 }
 
 
 void WorkSpace::readMessage()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-	QDataStream streamIn;
+
+	QDataStream streamIn(socket);	/* connect stream with socket */
+
 	quint16 typeOfMessage;
 	std::unique_ptr<Message> msg;
 
-	streamIn.setDevice(socket); /* connect stream with socket */
+	streamIn >> typeOfMessage;		/* take the type of incoming message */
 
-	streamIn >> typeOfMessage;	/* take the type of incoming message */
 
 	// TODO: complete switch with others types of message
-	try {
-		switch (typeOfMessage)
-		{
-			/* textMessages */
-		case CharInsert:
-			msg = std::make_unique<TextEditMessage>(CharInsert, streamIn);
+	switch (typeOfMessage)
+	{
+			/* Account messages */
+
+		case AccountUpdate:
+			msg = std::make_unique<AccountMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 
+			/* Text messages */
+
+		case CharInsert:
 		case CharDelete:
-			msg = std::make_unique<TextEditMessage>(CharDelete, streamIn);
+			msg = std::make_unique<TextEditMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
+
+			/* Presence messages */
 
 		case MoveCursor:
-			break;
-
 		case UserNameChange:
-			break;
-
 		case UserIconChange:
-			break;
-
 		case AddUserPresence:
-			break;
-
 		case RemoveUserPresence:
-			break;
-
-			/* Account messages */
-		case AccountUpDate:
-			msg = std::make_unique<AccountMessage>(AccountUpDate, streamIn);
+			//msg = std::make_unique<PresenceMessage>(typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 
 			/* Logout messages */
+
 		case LogoutRequest:
-			msg = std::make_unique<LogoutMessage>(LogoutRequest);
+			msg = std::make_unique<LogoutMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
+
+			/* Unknown message type */
 
 		default:
-			throw MessageUnknownTypeException(msg->getType());
-			break;
-		}
+			msg = std::make_unique<ErrorMessage>(MessageTypeError, "Unknown message type " + typeOfMessage);
+			msg->sendTo(socket);
+			return;
+	}
 
-		handleMessage(std::move(msg), socket);
-	}
-	catch (MessageUnknownTypeException& e) {
-		QDataStream streamOut;
-		streamOut.setDevice(socket);
-		QString err = e.what();
-		streamOut << (quint16)WrongMessageType << msg->getType();
-	}
+	messageHandler.process(std::move(msg), socket);
 }
 
 
-void WorkSpace::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
+void WorkSpace::dispatchMessage(std::unique_ptr<Message>&& msg, QTcpSocket* sender)
 {
-	QDataStream streamOut;
-	quint16 typeOfMessage = 0;
-	QString msg_str;
-
-	
-	streamOut.setDevice(socket);	/* connect stream with socket */
-
-	switch (msg->getType()) {
-
-	case CharInsert:
+	for (auto target = editors.keyBegin(); target != editors.keyEnd(); ++target)
 	{
-		TextEditMessage* insertMsg = dynamic_cast<TextEditMessage*>(msg.get());
-		doc->insert(insertMsg->getSymbol());
-		break;
-	}
-
-	case CharDelete:
-	{
-		TextEditMessage* deleteMsg = dynamic_cast<TextEditMessage*>(msg.get());
-		doc->removeAt(deleteMsg->getPosition());
-		break;
-	}
-
-	case MoveCursor:
-		break;
-
-	case UserNameChange:
-		break;
-
-	case UserIconChange:
-		break;
-
-	case AddUserPresence:
-		break;
-
-	case RemoveUserPresence:
-		break;
-
-		/* Account messages */
-	case AccountUpDate:
-	{
-		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
-
-		if (!editors.find(socket).value()->isLogged()) {
-			typeOfMessage = AccountDenied;
-			msg_str = "client not logged";
-		}
-		else if (!updateAccount(editors.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
+		if (*target != sender)
 		{
-			typeOfMessage = AccountDenied;
-			msg_str = "cannot modify this user";
+			msg->sendTo(*target);
 		}
-		else {
-			typeOfMessage = AccountConfirmed;
-			msg_str = "update completed";
-		}
-
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-		/* Logout messages */
-	case LogoutRequest:
-	{
-		if (!editors.remove(socket)) {
-			typeOfMessage = LogoutDenied;
-			msg_str = "Cannot logout if you are already loggedout";
-		}
-		else {
-			typeOfMessage = LogoutConfirmed;
-			msg_str = "Logout complete";
-			// TODO: need to give client to main thread
-		}
-		streamOut << typeOfMessage << msg_str;
-
-		if (!editors.size())
-			emit notWorking(doc->getURI());
-		break;
-	}
-		
-	default:
-		typeOfMessage = WrongMessageType;
-		streamOut << typeOfMessage << msg->getType();
-		break;
 	}
 }
 

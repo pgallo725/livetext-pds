@@ -7,9 +7,8 @@
 //#include <QMutex>
 //#include <QMutexLocker>
 
-class User //: public QObject
+class User
 {
-	//Q_OBJECT
 	/* Operators for QDataStream serialization and deserialization */
 	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
 	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
@@ -34,7 +33,7 @@ public:
 	/* getter methods */
 	QString getUsername();
 	int getUserId();
-	QString getNickName();
+	QString getNickname();
 	QString getPassword();
 	QImage getIcon();
 	QStringList getDocuments();

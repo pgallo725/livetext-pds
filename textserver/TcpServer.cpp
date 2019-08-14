@@ -255,28 +255,18 @@ bool TcpServer::createNewAccount(QString username, QString nickname, QString pas
 }
 
 /* Update user's fields */
-bool TcpServer::updateAccount(User* user, quint16 typeField, QVariant field)
+bool TcpServer::updateAccount(User* oldUser, User& newUser)
 {
-	switch (typeField) 
+	if (oldUser->getUserId() == newUser.getUserId() &&
+		oldUser->getUsername() == newUser.getUsername())
 	{
-	case ChangeNickname:
-		user->setNickname(field.value<QString>());
-		break;
+		oldUser->setNickname(newUser.getNickname());
+		oldUser->setIcon(newUser.getIcon());
+		oldUser->changePassword(newUser.getPassword());
 
-	case ChangeIcon:
-		user->setIcon(field.value<QImage>());
-		break;
-
-	case ChangePassword:
-		user->changePassword(field.value<QString>());
-		break;
-
-	default:
-		return false;
-		break;
+		return true;
 	}
-
-	return true;
+	else return false;
 }
 
 
@@ -464,62 +454,47 @@ void TcpServer::readMessage()
 		switch (typeOfMessage)
 		{
 			/* LoginMessages */
+
 		case LoginRequest:
-			msg = std::make_unique<LoginMessage>(LoginRequest, streamIn);
-			break;
 		case LoginUnlock:
-			msg = std::make_unique<LoginMessage>(LoginUnlock, streamIn);
+			msg = std::make_unique<LoginMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 	
 			/* AccountMessages */
+
 		case AccountCreate:
-			msg = std::make_unique<AccountMessage>(AccountCreate, streamIn);
-			break;
-		case AccountUpDate:
-			msg = std::make_unique<AccountMessage>(AccountUpDate, streamIn);
+		case AccountUpdate:
+			msg = std::make_unique<AccountMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 
 			/* LogoutMessages */
+
 		case LogoutRequest:
-			msg = std::make_unique<LogoutMessage>(LogoutRequest);
+			msg = std::make_unique<LogoutMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 
 			/* DocumentMessages */
+
 		case NewDocument:
-			msg = std::make_unique<DocumentMessage>(NewDocument, streamIn, clients.find(socket).value()->getUserName());
-			break;
-
 		case OpenDocument:
-			msg = std::make_unique<DocumentMessage>(OpenDocument, streamIn, clients.find(socket).value()->getUserName());
-			break;
-
-		case DocumentRemove:
-			msg = std::make_unique<DocumentMessage>(DocumentRemove, streamIn, clients.find(socket).value()->getUserName());
-			break;
-
-		case UriRequest:
-			msg = std::make_unique<DocumentMessage>(UriRequest, streamIn, clients.find(socket).value()->getUserName());
+		case RemoveDocument:
+			msg = std::make_unique<DocumentMessage>((MessageType)typeOfMessage);
+			msg->readFrom(streamIn);
 			break;
 
 		default:
-			throw MessageUnknownTypeException(msg->getType());
-			break;
+			throw MessageUnexpectedTypeException(msg->getType());
+			return;
 		}
 
 		handleMessage(std::move(msg), socket);
 	}
-	catch (MessageUnknownTypeException& e) {
-		QDataStream streamOut;
-		streamOut.setDevice(socket);
-		QString err = e.what();
-		streamOut << (quint16)WrongMessageType << msg->getType();
-	}
-	catch (FieldWrongException& e) {
-		/* send to the client WrongFieldType + message */
-		QDataStream streamOut;
-		streamOut.setDevice(socket);
-		QString err = e.what();
-		streamOut << (quint16)WrongFieldType << err;
+	catch (MessageUnexpectedTypeException& e) {
+		msg = std::make_unique<ErrorMessage>(MessageTypeError, e.what());
+		msg->sendTo(socket);
 	}
 	catch (UserNotFoundException& e) {
 		/* send by TcpServer::getUriFromUser */
@@ -541,16 +516,16 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 	case LoginRequest:
 	{
 		LoginMessage* loginRequest = dynamic_cast<LoginMessage*>(msg.get());
-		qDebug() << " -- si e' collegato: " << loginRequest->getUserName();
+		qDebug() << " -- si e' collegato: " << loginRequest->getUsername();
 
-		if (!users.contains(loginRequest->getUserName()))
+		if (!users.contains(loginRequest->getUsername()))
 		{
 			typeOfMessage = LoginError;
 			msg_str = "Wrong username/password";
 			streamOut << typeOfMessage << msg_str;
 		}
 		else
-			sendLoginChallenge(socket, loginRequest->getUserName());
+			sendLoginChallenge(socket, loginRequest->getUsername());
 		break;
 	}
 		
@@ -560,7 +535,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		QString username = clients.find(socket).value()->getUserName();
 		User u;
 
-		if (!login(clients.find(socket).value(), loginUnlock->getPasswd())) 
+		if (!login(clients.find(socket).value(), loginUnlock->getToken())) 
 		{
 			/* login unsuccessful */
 			logout(socket);
@@ -582,8 +557,8 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		/* Account */
 	case AccountCreate: {
 		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(msg.get());
-		if (!createNewAccount(accntCreate->getUserName(), accntCreate->getNickname(), 
-			accntCreate->getPasswd(), accntCreate->getIcon(), socket))
+		if (!createNewAccount(accntCreate->getUserObj().getUsername(), accntCreate->getUserObj().getNickname(),
+			accntCreate->getUserObj().getPassword(), accntCreate->getUserObj().getIcon(), socket))
 		{
 			typeOfMessage = AccountDenied;
 			msg_str = "User already exist or logged";
@@ -596,7 +571,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		break;
 	}
 
-	case AccountUpDate: 
+	case AccountUpdate: 
 	{
 		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
 		
@@ -604,7 +579,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = AccountDenied;
 			msg_str = "client not logged";
 		}
-		else if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getFieldType(), accntUpdate->getField()))
+		else if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getUserObj()))
 		{
 			typeOfMessage = AccountDenied;
 			msg_str = "cannot modify this user";
@@ -644,10 +619,10 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = DocumentError;
 			msg_str = "client not logged";
 		}
-		else if (!createNewDocument(newDocument->getDocName(), newDocument->getURI(), socket)) 
+		else if (!createNewDocument(newDocument->getDocumentName(), newDocument->getDocumentURI(), socket)) 
 		{
 			typeOfMessage = DocumentError;
-			msg_str = "Cannot create '" + newDocument->getDocName() + "', this document already exist";
+			msg_str = "Cannot create '" + newDocument->getDocumentName() + "', this document already exist";
 		}
 		else {
 			typeOfMessage = DocumentOpened;
@@ -665,9 +640,9 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = DocumentError;
 			msg_str = "client not logged";
 		}
-		else if (!openDocument(docMsg->getURI(), socket)) {
+		else if (!openDocument(docMsg->getDocumentURI(), socket)) {
 			typeOfMessage = DocumentError;
-			msg_str = "Cannot open '" + docMsg->getDocName() + "', this document doesn't exist";
+			msg_str = "Cannot open '" + docMsg->getDocumentName() + "', this document doesn't exist";
 		}
 		else {
 			typeOfMessage = DocumentOpened;
@@ -677,7 +652,7 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		break;
 	}
 
-	case DocumentRemove:
+	case RemoveDocument:
 	{
 		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
 
@@ -685,9 +660,9 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 			typeOfMessage = DocumentError;
 			msg_str = "client not logged";
 		}
-		else if (!removeDocument(docMsg->getURI(), socket)) {
+		else if (!removeDocument(docMsg->getDocumentURI(), socket)) {
 			typeOfMessage = DocumentError;
-			msg_str = "Cannot delete '" + docMsg->getDocName() + "', this document doesn't exist";
+			msg_str = "Cannot delete '" + docMsg->getDocumentName() + "', this document doesn't exist";
 		}
 		else {
 			typeOfMessage = DocumentOpened;
@@ -697,26 +672,10 @@ void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket
 		break;
 	}
 
-	case UriRequest:
-	{
-		DocumentMessage* uriRequest = dynamic_cast<DocumentMessage*>(msg.get());
-
-		if (!clients.find(socket).value()->isLogged()) {
-			typeOfMessage = DocumentError;
-			msg_str = "client not logged";
-			streamOut << typeOfMessage << msg_str;
-		}
-		else {
-			typeOfMessage = UriResponse;
-			streamOut << typeOfMessage << getUriFromUser(uriRequest->getUserName());
-		}
-		break;
-	}
-
 
 	default:
 	{
-		typeOfMessage = WrongMessageType;
+		typeOfMessage = MessageTypeError;
 		streamOut << typeOfMessage << msg->getType();
 		break;
 	}

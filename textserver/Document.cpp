@@ -10,6 +10,10 @@
 #define URI_FIELD_SEPARATOR '_'
 
 
+Document::Document()
+{
+}
+
 Document::Document(QString uri) :
 	URI(uri)
 {
@@ -59,9 +63,9 @@ void Document::load()
 		std::cout << "\nLoading document \"" << URI.toStdString() << "\"... ";
 
 		// Load the document content (_text vector<Symbol>) from file
-		// using built-in Qt Vector deserialization
+		// using built-in Qt Vector and StringList deserialization
 		if (!docFileStream.atEnd())
-			docFileStream >> _text;
+			docFileStream >> editors >> _text;
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
 		{
@@ -90,8 +94,8 @@ void Document::save()
 		std::cout << "\nSaving document \"" << URI.toStdString() << "\"... ";
 
 		// Write the the current document content to file
-		// using built-in Qt Vector serialization
-		docFileStream << _text;
+		// using built-in Qt Vector and StringList serialization
+		docFileStream << editors << _text;
 
 		QFile oldFile(URI);
 		if (oldFile.exists())
@@ -258,4 +262,21 @@ QVector<qint32> Document::fractionalPosEnd()
 	else result.push_back(0);	// or a 0 if the text is currently empty
 
 	return result;
+}
+
+
+QDataStream& operator>>(QDataStream& in, Document& doc)
+{
+	// Deserialization
+	in >> doc.URI >> doc.editors >> doc._text;
+
+	return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const Document& doc)
+{
+	// Serialization
+	out << doc.URI << doc.editors << doc._text;
+
+	return out;
 }
