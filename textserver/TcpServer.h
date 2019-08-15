@@ -49,7 +49,7 @@ private:
 	bool logout(QTcpSocket* s);
 	bool createNewAccount(QString userName, QString nickname, QString passwd, QImage icon, QTcpSocket *socket = nullptr);
 	bool updateAccount(User* oldUser, User& newUser);
-	WorkSpace* createNerWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client);
+	WorkSpace* createNewWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client);
 	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
 	void sendLoginChallenge(QTcpSocket* socket, QString username);
 	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);

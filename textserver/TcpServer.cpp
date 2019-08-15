@@ -299,13 +299,14 @@ void addToIndex(QSharedPointer<Document> doc)
 
 
 /* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
-WorkSpace* TcpServer::createNerWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client)
+WorkSpace* TcpServer::createNewWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client)
 {
 	WorkSpace* w = new WorkSpace(document, QSharedPointer<TcpServer>(this));
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
 	QThread* t = new QThread();
 
 	documents.insert(uri, document);
+	workspaces.insert(uri, QSharedPointer<WorkSpace>(w));
 	workThreads.insert(uri, QSharedPointer<QThread>(t));
 
 	/* change affinity of this workspace with a new thread */
@@ -327,7 +328,7 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 
 	QSharedPointer<Client> c = clients.find(author).value();
 	QSharedPointer<Document> doc(new Document(uri));
-	WorkSpace* w = createNerWorkspace(doc, uri, c);
+	WorkSpace* w = createNewWorkspace(doc, uri, c);
 	QFile docFile(uri);
 	
 	/* Add the document to the index, create the document file and update internal data structures */
@@ -365,7 +366,7 @@ bool TcpServer::openDocument(QString uri, QTcpSocket* client)
 
 	/* check if this documents is already load in memory or not */
 	if (!workspaces.contains(uri)) {	/* need to be load */
-		w = createNerWorkspace(d, uri, c);
+		w = createNewWorkspace(d, uri, c);
 	}
 	else {								/* already load */
 		w = workspaces.find(uri).value().get();
