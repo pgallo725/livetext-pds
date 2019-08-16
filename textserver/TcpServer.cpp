@@ -196,10 +196,10 @@ void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 
+	qDebug() << " - client '" << clients.find(socket).value()->getUsername() << "' disconnected";
+
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close the socket */
-
-	qDebug() << " - client disconnected";
 }
 
 
