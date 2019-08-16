@@ -1,46 +1,139 @@
 #include "MessageHandler.h"
 
-#include "WorkSpace.h"		// TEMPORARY
+#include "TcpServer.h"
+#include "WorkSpace.h"
 
 #include "LoginMessage.h"
 #include "LogoutMessage.h"
 #include "AccountMessage.h"
 #include "DocumentMessage.h"
 #include "TextEditMessage.h"
+#include "PresenceMessage.h"
 #include "ErrorMessage.h"
 
 #include <QDataStream>
 
 
-MessageHandler::MessageHandler(OwnerType t, WorkSpace* w)
-	: _scenario(t), workspace(w)
+MessageHandler::MessageHandler(WorkSpace* w)
+	: _usecase(OwnerType::Workspace)
 {
+	// Connecting all signals to Workspace slots
+
+	connect(this, &MessageHandler::accountUpdate, w, &WorkSpace::updateAccount, Qt::DirectConnection);
+
+	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
+
+	connect(this, &MessageHandler::userLogout, w, &WorkSpace::logoutClient, Qt::DirectConnection);
 }
 
-void MessageHandler::process(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
+MessageHandler::MessageHandler(TcpServer* s)
+	: _usecase(OwnerType::Server)
 {
-	QDataStream streamOut;
-	quint16 typeOfMessage = 0;
-	QString msg_str;
+	// Connecting signals to TcpServer slots
+
+	connect(this, &MessageHandler::loginRequest, s, &TcpServer::serveLoginRequest, Qt::DirectConnection);
+	connect(this, &MessageHandler::loginUnlock, s, &TcpServer::authenticateUser, Qt::DirectConnection);
+
+	connect(this, &MessageHandler::accountCreate, s, &TcpServer::createAccount, Qt::DirectConnection);
+	connect(this, &MessageHandler::accountUpdate, s, &TcpServer::updateAccount, Qt::DirectConnection);
+
+	connect(this, &MessageHandler::documentCreate, s, &TcpServer::createDocument, Qt::DirectConnection);
+	connect(this, &MessageHandler::documentOpen, s, &TcpServer::openDocument, Qt::DirectConnection);
+	connect(this, &MessageHandler::documentRemove, s, &TcpServer::removeDocument, Qt::DirectConnection);
+
+	connect(this, &MessageHandler::userLogout, s, &TcpServer::logoutClient, Qt::DirectConnection);
+}
 
 
-	streamOut.setDevice(socket);	/* connect stream with socket */
+void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
+{
 
-	switch (msg->getType()) {
+	switch (message->getType())
+	{
+
+		/* LOGIN MESSAGES */
+
+	case LoginRequest:
+	{
+		LoginMessage* loginRqst = dynamic_cast<LoginMessage*>(message.get());
+		MessageCapsule response = emit loginRequest(socket, loginRqst->getUsername());
+		response->sendTo(socket);
+		break;
+	}
+
+	case LoginUnlock:
+	{
+		LoginMessage* loginUnlck = dynamic_cast<LoginMessage*>(message.get());
+		MessageCapsule response = emit loginUnlock(socket, loginUnlck->getToken());
+		response->sendTo(socket);
+		break;
+	}
+
+		/* ACCOUNT MESSAGES */
+
+	case AccountCreate:
+	{
+		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(message.get());
+		MessageCapsule response = emit accountCreate(socket, accntCreate->getUserObj());
+		response->sendTo(socket);
+		break;
+	}
+
+	case AccountUpdate:
+	{
+		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(message.get());
+		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getUserObj());
+		response->sendTo(socket);
+		break;
+	}
+
+		/* DOCUMENT MESSAGES */
+
+	case NewDocument:
+	{
+		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		MessageCapsule response = emit documentCreate(socket, docMsg->getDocumentName());
+		response->sendTo(socket);
+		break;
+	}
+
+	case OpenDocument:
+	{
+		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		MessageCapsule response = emit documentOpen(socket, docMsg->getDocumentURI());
+		response->sendTo(socket);
+		break;
+	}
+
+	case RemoveDocument:
+	{
+		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		MessageCapsule response = emit documentRemove(socket, docMsg->getDocumentURI());
+		response->sendTo(socket);
+		break;
+	}
+
+		/* TEXTEDIT MESSAGES */
 
 	case CharInsert:
 	{
-		TextEditMessage* insertMsg = dynamic_cast<TextEditMessage*>(msg.get());
-		workspace->doc->insert(insertMsg->getSymbol());
+		TextEditMessage* insertMsg = dynamic_cast<TextEditMessage*>(message.get());
+		emit charInsert(insertMsg->getSymbol());
+		emit messageDispatch(message, socket);
 		break;
 	}
 
 	case CharDelete:
 	{
-		TextEditMessage* deleteMsg = dynamic_cast<TextEditMessage*>(msg.get());
-		workspace->doc->removeAt(deleteMsg->getPosition());
+		TextEditMessage* deleteMsg = dynamic_cast<TextEditMessage*>(message.get());
+		emit charDelete(deleteMsg->getPosition());
+		emit messageDispatch(message, socket);
 		break;
 	}
+
+		/* PRESENCE MESSAGES */
 
 	case MoveCursor:
 		break;
@@ -57,52 +150,17 @@ void MessageHandler::process(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
 	case RemoveUserPresence:
 		break;
 
-		/* Account messages */
-	case AccountUpdate:
-	{
-		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
+		/* LOGOUT MESSAGE */
 
-		if (!workspace->editors.find(socket).value()->isLogged()) {
-			typeOfMessage = AccountDenied;
-			msg_str = "client not logged";
-		}
-		else if (!workspace->updateAccount(workspace->editors.find(socket).value()->getUser(), accntUpdate->getUserObj()))
-		{
-			typeOfMessage = AccountDenied;
-			msg_str = "cannot modify this user";
-		}
-		else {
-			typeOfMessage = AccountConfirmed;
-			msg_str = "update completed";
-		}
-
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-	/* Logout messages */
 	case LogoutRequest:
 	{
-		if (!workspace->editors.remove(socket)) {
-			typeOfMessage = LogoutDenied;
-			msg_str = "Cannot logout if you are already loggedout";
-		}
-		else {
-			typeOfMessage = LogoutConfirmed;
-			msg_str = "Logout complete";
-			// TODO: need to give client to main thread
-		}
-		streamOut << typeOfMessage << msg_str;
-
-		if (!workspace->editors.size())
-			emit workspace->notWorking(workspace->doc->getURI());
+		MessageCapsule response = emit userLogout(socket);
+		response->sendTo(socket);
 		break;
 	}
 
-	default:
-		typeOfMessage = MessageTypeError;
-		streamOut << typeOfMessage << msg->getType();
-		break;
+	default:		// Wrong message type already addressed in readMessage,
+		return;		// no need to handle error again
 	}
 }
 

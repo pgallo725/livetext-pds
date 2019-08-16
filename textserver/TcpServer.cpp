@@ -1,6 +1,5 @@
 #include "TcpServer.h"
 
-#include <optional>
 #include <iostream>
 
 #include <QFile>
@@ -12,9 +11,10 @@
 
 #include "ServerException.h"
 
+
 /* Costructor */
 TcpServer::TcpServer(QObject* parent)
-	: QTcpServer(parent), _userIdCounter(0)
+	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
 	/* connect newConnection from QTcpServer to newClientConnection() */
 	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
@@ -79,7 +79,7 @@ void TcpServer::initialize()
 		std::cout << "done" << std::endl;
 
 		if (users.find("admin") == users.end()) {
-			createNewAccount("admin", "sudo", "admin", QImage());
+			//createAccount("admin", "sudo", "admin", QImage(), nullptr);		// TODO: need to remove this at all costs
 		}
 	}
 	else
@@ -207,66 +207,97 @@ void TcpServer::clientDisconnection()
 
 
 /* create a new client and send nonce to be solved for authentication */
-void TcpServer::sendLoginChallenge(QTcpSocket* socket, QString username)
+MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString username)
 {
-	QSharedPointer<Client> c = clients.find(socket).value();
-	c->setUser(&(users.find(username).value()));
-	c->challenge(socket);
+	qDebug() << " -- (socket " << clientSocket << ") si e' collegato: " << username;
+
+	QSharedPointer<Client> client = clients.find(clientSocket).value();
+
+	if (users.contains(username))
+	{
+		if (client->isLogged())
+			return new LoginMessage(LoginError, "Your client is already logged in as '" + client->getUsername() + "'");
+
+		return new LoginMessage(LoginChallenge, client->challenge(&(users.find(username).value())));
+	}
+	else return new LoginMessage(LoginError, "The specified username is not registered on the server");
 }
 
-/* check authentication */
-bool TcpServer::login(QSharedPointer<Client> client, QString password)
+/* Authenticate the client's User and apply the login */
+MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QString token)
 {
-	return client->authentication(password);
+	QSharedPointer<Client> client = clients.find(clientSocket).value();
+
+	if (client->isLogged())
+		return new LoginMessage(LoginError, "You are already logged in");
+
+	if (client->authentication(token))
+	{
+		client->login(client->getUser());
+		return new LoginMessage(LoginAccessGranted, *client->getUser());
+	}
+	else
+	{
+		client->logout();
+		return new LoginMessage(LoginError, "Wrong username/password");
+	}
 }
+
+/* Create a new User */
+MessageCapsule TcpServer::createAccount(QTcpSocket* socket, User& newUser)
+{
+	QSharedPointer<Client> client = clients.find(socket).value();
+	if (client->isLogged())
+		return new AccountMessage(AccountDenied, "You cannot create an account while being logged in as another user");
+
+	/* check if this username is already used */
+	if (users.contains(newUser.getUsername()))
+		return new AccountMessage(AccountDenied, "That username is already taken");
+	
+	User user(newUser.getUsername(), _userIdCounter++,
+		newUser.getNickname(), newUser.getPassword(), newUser.getIcon());			/* create a new user		*/
+	QMap<QString, User>::iterator i = users.insert(newUser.getUsername(), user);	/* insert new user in map	*/
+
+	client->login(&(*i));		// client is automatically logged
+
+	return new AccountMessage(AccountConfirmed, user.getUserId());
+}
+
+
+/* Update user's fields and return response message for the client */
+MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, User& updatedUser)
+{
+	Client* client = clients.find(clientSocket).value().get();
+
+	if (!client->isLogged())
+		return new AccountMessage(AccountDenied, "You are not logged in");
+
+	User* oldUser = client->getUser();
+
+	if (oldUser->getUserId() == updatedUser.getUserId() &&
+		oldUser->getUsername() == updatedUser.getUsername())
+	{
+		oldUser->setNickname(updatedUser.getNickname());
+		oldUser->setIcon(updatedUser.getIcon());
+		oldUser->changePassword(updatedUser.getPassword());
+
+		return new AccountMessage(AccountConfirmed);
+	}
+	else return new AccountMessage(AccountDenied, "Cannot modify a different user's account");
+}
+
 
 /* release resources own by a client and delete it */
-bool TcpServer::logout(QTcpSocket* s)
+MessageCapsule TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
-	QSharedPointer<Client> c = clients.find(s).value();
-	if (!c->isLogged()) {
-		return false;
-	}
+	Client* client = clients.find(clientSocket).value().get();
 
-	c->resetLogged();
-	return true;
-}
+	if (!client->isLogged())
+		return new LogoutMessage(LogoutDenied, "You cannot logout if you're not logged in");
 
-/* create a new User */
-bool TcpServer::createNewAccount(QString username, QString nickname, QString passwd, QImage icon, QTcpSocket* socket)
-{
-	/* check if this username is already used */
-	if (users.contains(username)) {
-		return false;
-	}
-	
-	User newUser(username, _userIdCounter++, nickname, passwd, icon);	/* create a new user		*/
-	users.insert(username, newUser);									/* insert new user in map	*/
+	client->logout();
 
-	/* check if socket is null										*
-	*  static accont as Admin doesn't need a client during creation */
-	if (socket != nullptr) {
-		QSharedPointer<Client> client = clients.find(socket).value();
-		client->setUser(&(users.find(username).value()));
-		client->setLogged();				// client is automatically logged
-	}
-
-	return true;
-}
-
-/* Update user's fields */
-bool TcpServer::updateAccount(User* oldUser, User& newUser)
-{
-	if (oldUser->getUserId() == newUser.getUserId() &&
-		oldUser->getUsername() == newUser.getUsername())
-	{
-		oldUser->setNickname(newUser.getNickname());
-		oldUser->setIcon(newUser.getIcon());
-		oldUser->changePassword(newUser.getPassword());
-
-		return true;
-	}
-	else return false;
+	return new LogoutMessage(LogoutConfirmed);
 }
 
 
@@ -299,15 +330,15 @@ void addToIndex(QSharedPointer<Document> doc)
 
 
 /* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
-WorkSpace* TcpServer::createNewWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client)
+WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
 	WorkSpace* w = new WorkSpace(document, QSharedPointer<TcpServer>(this));
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
 	QThread* t = new QThread();
 
-	documents.insert(uri, document);
-	workspaces.insert(uri, QSharedPointer<WorkSpace>(w));
-	workThreads.insert(uri, QSharedPointer<QThread>(t));
+	documents.insert(document->getURI(), document);
+	workspaces.insert(document->getURI(), QSharedPointer<WorkSpace>(w));
+	workThreads.insert(document->getURI(), QSharedPointer<QThread>(t));
 
 	/* change affinity of this workspace with a new thread */
 	w->moveToThread(t);
@@ -319,27 +350,33 @@ WorkSpace* TcpServer::createNewWorkspace(QSharedPointer<Document> document, QStr
 	return w;
 }
 
-/* create a new Document */
-bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket* author)
+/* Create a new Document */
+MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 {
-	/* check if documents is already used */
-	if (documents.contains(uri))
-		return false;
+	QSharedPointer<Client> client = clients.find(author).value();
 
-	QSharedPointer<Client> c = clients.find(author).value();
-	QSharedPointer<Document> doc(new Document(uri));
-	WorkSpace* w = createNewWorkspace(doc, uri, c);
-	QFile docFile(uri);
+	if (!client->isLogged())
+		return new DocumentMessage(DocumentError, "You are not logged in");
+
+	QString docURI = client->getUsername() + "_" + docName + "_" + "deadbeef";		/* TODO: random sequence */
+
+	/* check if documents is already used */
+	if (documents.contains(docURI))
+		return new DocumentMessage(DocumentError, "A document with the same URI already exists");
+
+	QSharedPointer<Document> doc(new Document(docURI));
+	WorkSpace* w = createWorkspace(doc, client);
+	QFile docFile(docURI);
 	
-	/* Add the document to the index, create the document file and update internal data structures */
+	/* add the document to the index, create the document file and update internal data structures */
 	addToIndex(doc);
 	docFile.open(QIODevice::NewOnly);
 	docFile.close();
 	
-	/* add to client list the newDocument*/
-	c->getUser()->addDocument(uri);
+	/* add to client list the newDocument */
+	client->getUser()->addDocument(docURI);
 	/* add to document list the new editor */
-	doc->insertNewEditor(c->getUserName());
+	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not receives more messages from client */
 	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
@@ -350,73 +387,68 @@ bool TcpServer::createNewDocument(QString documentName, QString uri, QTcpSocket*
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	
 	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 
-	return true;
+	return new DocumentMessage(DocumentOpened, *doc);
 }
 
-/* open an existing Document */
-bool TcpServer::openDocument(QString uri, QTcpSocket* client)
+/* Open an existing Document */
+MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, QString docUri)
 {
-	/* check if this document doesn't exist */
-	if (!documents.contains(uri))
-		return false;
+	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
-	QSharedPointer<Client> c = clients.find(client).value();
-	QSharedPointer<Document> d = documents.find(uri).value();
+	if (!client->isLogged())
+		return new DocumentMessage(DocumentError, "You are not logged in");
+
+	/* check if this document doesn't exist */
+	if (!documents.contains(docUri))
+		return new DocumentMessage(DocumentError, "The requested document does not exist (invalid URI)");
+
+	QSharedPointer<Document> doc = documents.find(docUri).value();
 	WorkSpace* w = nullptr;
 
-	/* check if this documents is already load in memory or not */
-	if (!workspaces.contains(uri)) {	/* need to be load */
-		w = createNewWorkspace(d, uri, c);
+	/* check if this documents is already opened in a Workspace or not */
+	if (!workspaces.contains(docUri)) {
+		w = createWorkspace(doc, client);
 	}
-	else {								/* already load */
-		w = workspaces.find(uri).value().get();
+	else {
+		w = workspaces.find(docUri).value().get();
 	}
 
 	/* add to client list the newDocument*/
-	c->getUser()->addDocument(uri);
+	client->getUser()->addDocument(docUri);
 	/* add to document list the new editor */
-	d->insertNewEditor(c->getUserName());
+	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not recives more messages from client */
-	disconnect(client, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	disconnect(client, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	/* make the new thead connect the socket in the workspace */
 	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
-	emit newSocket(static_cast<qint64>(client->socketDescriptor()));
+	emit newSocket(static_cast<qint64>(clientSocket->socketDescriptor()));
 	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 
-	return true;
+	return new DocumentMessage(DocumentOpened, *doc);
 }
 
-/* delete a document from a client */
-bool TcpServer::removeDocument(QString uri, QTcpSocket* client)
+/* Delete a document from the client's list */
+MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, QString docUri)
 {
-	if (!documents.contains(uri))
-		return false;
+	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
-	if (!workspaces.contains(uri)) {
-		return false;
-	}
+	if (!client->isLogged())
+		return new DocumentMessage(DocumentError, "You are not logged in");
 
-	clients.find(client).value()->getUser()->removeDocument(uri);
+	if (!documents.contains(docUri))
+		return new DocumentMessage(DocumentError, "The specified document does not exist (invalid URI)");
 
-	return true;
+	client->getUser()->removeDocument(docUri);
+	return new DocumentMessage(DocumentRemoved);
 }
 
-/* get all the URI that a User owned */
-QStringList TcpServer::getUriFromUser(QString username)
-{
-	if (!users.contains(username))
-		throw UserNotFoundException("::openDocument - user not found");
-	return users.find(username).value().getDocuments();
-}
 
 /* release all resource owned by workspace, delete it and its thread */
 void TcpServer::deleteWorkspace(QString document)
 {
-
-	// TODO: write on disk the file
 	WorkSpace* w = workspaces.find(document).value().get();
 	QThread* t = workThreads.find(document).value().get();
 
@@ -445,7 +477,7 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn;
 	quint16 typeOfMessage;
-	std::unique_ptr<Message> msg;
+	MessageCapsule message;
 
 	streamIn.setDevice(socket); /* connect stream with socket */
 
@@ -458,23 +490,23 @@ void TcpServer::readMessage()
 
 		case LoginRequest:
 		case LoginUnlock:
-			msg = std::make_unique<LoginMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new LoginMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 	
 			/* AccountMessages */
 
 		case AccountCreate:
 		case AccountUpdate:
-			msg = std::make_unique<AccountMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new AccountMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 			/* LogoutMessages */
 
 		case LogoutRequest:
-			msg = std::make_unique<LogoutMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new LogoutMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 			/* DocumentMessages */
@@ -482,214 +514,33 @@ void TcpServer::readMessage()
 		case NewDocument:
 		case OpenDocument:
 		case RemoveDocument:
-			msg = std::make_unique<DocumentMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new DocumentMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 		default:
-			throw MessageUnexpectedTypeException(msg->getType());
+			throw MessageUnexpectedTypeException(message->getType());
 			return;
 		}
 
-		handleMessage(std::move(msg), socket);
+		messageHandler.process(message, socket);
 	}
 	catch (MessageUnexpectedTypeException& e) {
-		msg = std::make_unique<ErrorMessage>(MessageTypeError, e.what());
-		msg->sendTo(socket);
+		message = new ErrorMessage(MessageTypeError, e.what());
+		message->sendTo(socket);
 	}
 	catch (UserNotFoundException& e) {
-		/* send by TcpServer::getUriFromUser */
-	}
-}
-
-/* handle the message create by readMessage */
-void TcpServer::handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket)
-{
-	QDataStream streamOut;
-	quint16 typeOfMessage = 0;
-	QString msg_str;
-
-	streamOut.setDevice(socket); /* connect stream with socket */
-
-	switch (msg->getType()) {
-
-		/* Login */
-	case LoginRequest:
-	{
-		LoginMessage* loginRequest = dynamic_cast<LoginMessage*>(msg.get());
-		qDebug() << " -- si e' collegato: " << loginRequest->getUsername();
-
-		if (!users.contains(loginRequest->getUsername()))
-		{
-			typeOfMessage = LoginError;
-			msg_str = "Wrong username/password";
-			streamOut << typeOfMessage << msg_str;
-		}
-		else
-			sendLoginChallenge(socket, loginRequest->getUsername());
-		break;
-	}
-		
-	case LoginUnlock:
-	{
-		LoginMessage* loginUnlock = dynamic_cast<LoginMessage*>(msg.get());
-		QString username = clients.find(socket).value()->getUserName();
-		User u;
-
-		if (!login(clients.find(socket).value(), loginUnlock->getToken())) 
-		{
-			/* login unsuccessful */
-			logout(socket);
-			typeOfMessage = LoginError;
-			msg_str = "Wrong username/password";
-		}
-		else {
-			/* login successful */
-			clients.find(socket).value()->setLogged();
-			typeOfMessage = LoginAccessGranted;
-			msg_str = "Logged";
-			u = users.find(username).value();
-		}
-		streamOut << typeOfMessage << u << msg_str;
-		break;
-	}
-
-
-		/* Account */
-	case AccountCreate: {
-		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(msg.get());
-		if (!createNewAccount(accntCreate->getUserObj().getUsername(), accntCreate->getUserObj().getNickname(),
-			accntCreate->getUserObj().getPassword(), accntCreate->getUserObj().getIcon(), socket))
-		{
-			typeOfMessage = AccountDenied;
-			msg_str = "User already exist or logged";
-		}
-		else {
-			typeOfMessage = AccountConfirmed;
-			msg_str = "Registration completed";
-		}
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-	case AccountUpdate: 
-	{
-		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(msg.get());
-		
-		if (!clients.find(socket).value()->isLogged()) {
-			typeOfMessage = AccountDenied;
-			msg_str = "client not logged";
-		}
-		else if (!updateAccount(clients.find(socket).value()->getUser(), accntUpdate->getUserObj()))
-		{
-			typeOfMessage = AccountDenied;
-			msg_str = "cannot modify this user";
-		}
-		else {
-			typeOfMessage = AccountConfirmed;
-			msg_str = "update completed";
-		}
-		
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-		
-
-		/* LogoutMessages */
-	case LogoutRequest:
-	{
-		if (!logout(socket)) {
-			typeOfMessage = LogoutDenied;
-			msg_str = "Cannot logout if you are already loggedout";
-		}
-		else {
-			typeOfMessage = LogoutConfirmed;
-			msg_str = "Logout complete";
-		}
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-		
-
-		/* DocumentMessages */
-	case NewDocument:
-	{
-		DocumentMessage* newDocument = dynamic_cast<DocumentMessage*>(msg.get());
-
-		if (!clients.find(socket).value()->isLogged()) {
-			typeOfMessage = DocumentError;
-			msg_str = "client not logged";
-		}
-		else if (!createNewDocument(newDocument->getDocumentName(), newDocument->getDocumentURI(), socket)) 
-		{
-			typeOfMessage = DocumentError;
-			msg_str = "Cannot create '" + newDocument->getDocumentName() + "', this document already exist";
-		}
-		else {
-			typeOfMessage = DocumentOpened;
-			msg_str = "Document created";
-		}
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-	case OpenDocument:
-	{
-		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
-
-		if (!clients.find(socket).value()->isLogged()) {
-			typeOfMessage = DocumentError;
-			msg_str = "client not logged";
-		}
-		else if (!openDocument(docMsg->getDocumentURI(), socket)) {
-			typeOfMessage = DocumentError;
-			msg_str = "Cannot open '" + docMsg->getDocumentName() + "', this document doesn't exist";
-		}
-		else {
-			typeOfMessage = DocumentOpened;
-			msg_str = "Document opened";
-		}
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-	case RemoveDocument:
-	{
-		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(msg.get());
-
-		if (!clients.find(socket).value()->isLogged()) {
-			typeOfMessage = DocumentError;
-			msg_str = "client not logged";
-		}
-		else if (!removeDocument(docMsg->getDocumentURI(), socket)) {
-			typeOfMessage = DocumentError;
-			msg_str = "Cannot delete '" + docMsg->getDocumentName() + "', this document doesn't exist";
-		}
-		else {
-			typeOfMessage = DocumentOpened;
-			msg_str = "Document deleted";
-		}
-		streamOut << typeOfMessage << msg_str;
-		break;
-	}
-
-
-	default:
-	{
-		typeOfMessage = MessageTypeError;
-		streamOut << typeOfMessage << msg->getType();
-		break;
-	}
 		
 	}
 }
+
 
 
 /****************************** SERVER METHODS ******************************/
 
 
 /* allow to a secondary thread to steal a QSharedPointer from the server */
-QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)	// TODO: remove workspace param, Client is not QObject
+QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)
 {
 	QSharedPointer<Client> c;
 

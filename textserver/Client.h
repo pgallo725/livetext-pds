@@ -23,22 +23,17 @@ public:
 	Client(qintptr s);
 	~Client();
 
-	/* getter */
+	void login(User* user);
+	void logout();
+
+	bool authentication(QString token);
+	QString challenge(User* user);
+	bool isLogged();
+
+	/* getters */
 	User* getUser();
 	int getUserId();
-	QString getUserName();
+	QString getUsername();
 	qintptr getSocketDescriptor();
-	QString getNonce();
-	
-
-	/* setter */
-	void setUser(User* u);
-	void setLogged();
-	void resetLogged();
-
-	/* general methods */
-	bool authentication(QString passwd);
-	void challenge(QTcpSocket* s);
-	bool isLogged();
 };
 

@@ -1,19 +1,21 @@
 #pragma once
 
+#include <QObject>
 #include <QTcpSocket>
 
-#include <memory>
 #include "Message.h"
+#include "User.h"
+#include "Document.h"
 
 
-// TEMPORARY forward-declarations
 class WorkSpace;
 class TcpServer;
 
-class MessageHandler
+class MessageHandler : public QObject
 {
+	Q_OBJECT
 
-public:
+private:
 
 	enum OwnerType
 	{
@@ -23,14 +25,32 @@ public:
 
 private:
 
-	WorkSpace* workspace;	// TEMPORARY
-	OwnerType _scenario;
+	OwnerType _usecase;
 
 public:
 
-	MessageHandler(OwnerType t, WorkSpace* w);
+	MessageHandler(WorkSpace* w);
+	MessageHandler(TcpServer* s);
 
-	void process(std::unique_ptr<Message>&& msg, QTcpSocket* sender);
+	void process(MessageCapsule message, QTcpSocket* sender);
 
 	~MessageHandler();
+
+
+signals: MessageCapsule loginRequest(QTcpSocket* clientSocket, QString username);
+signals: MessageCapsule loginUnlock(QTcpSocket* clientSocket, QString token);
+
+signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, User& newUser);
+signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, User& updatedUser);
+
+signals: MessageCapsule documentCreate(QTcpSocket* çlientSocket, QString docName);
+signals: MessageCapsule documentOpen(QTcpSocket* çlientSocket, QString docUri);
+signals: MessageCapsule documentRemove(QTcpSocket* çlientSocket, QString docUri);
+
+signals: void charInsert(Symbol& s);
+signals: void charDelete(QVector<qint32> pos);
+signals: void messageDispatch(MessageCapsule message, QTcpSocket* sender);
+
+signals: MessageCapsule userLogout(QTcpSocket* clientSocket);
+
 };

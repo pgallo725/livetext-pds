@@ -1,14 +1,10 @@
 #pragma once
 
-#include <optional>
-#include <memory>
-
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QString>
 #include <QThread>
-#include <QStringList>
 #include <QTimer>
 
 #include "User.h"
@@ -20,6 +16,7 @@
 #include "AccountMessage.h"
 #include "LogoutMessage.h"
 #include "DocumentMessage.h"
+#include "Messagehandler.h"
 
 #define CONNECT_TIMEOUT 15000	/* ms */
 #define SAVE_TIMEOUT 10000		/* ms */
@@ -29,33 +26,25 @@
 
 Q_DECLARE_METATYPE(qintptr);
 
+
 class TcpServer : public QTcpServer
 {
 	Q_OBJECT
+
+	friend class MessageHandler;
 
 private:
 
 	QMap<QString, User> users;
 	QMap<QString, QSharedPointer<Document>> documents;
-	QMap<QString, QSharedPointer<WorkSpace>> workspaces;
+	QMap<QString, QSharedPointer<WorkSpace>> workspaces;	// TODO(?): can workspaces and workThreads be unified ?
 	QMap<QString, QSharedPointer<QThread>> workThreads;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
 	int _userIdCounter;
 
 	QTimer time;
 
-	/* methods */
-	bool login(QSharedPointer<Client> client, QString password);
-	bool logout(QTcpSocket* s);
-	bool createNewAccount(QString userName, QString nickname, QString passwd, QImage icon, QTcpSocket *socket = nullptr);
-	bool updateAccount(User* oldUser, User& newUser);
-	WorkSpace* createNewWorkspace(QSharedPointer<Document> document, QString uri, QSharedPointer<Client> client);
-	void handleMessage(std::unique_ptr<Message>&& msg, QTcpSocket* socket);
-	void sendLoginChallenge(QTcpSocket* socket, QString username);
-	bool createNewDocument(QString documentName, QString uri, QTcpSocket* author);
-	bool openDocument(QString uri, QTcpSocket* client);
-	bool removeDocument(QString uri, QTcpSocket* client);
-	QStringList getUriFromUser(QString username);
+	MessageHandler messageHandler;
 
 public:
 
@@ -71,7 +60,20 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
+	WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
 	void deleteWorkspace(QString document);
+
+	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);
+	MessageCapsule authenticateUser(QTcpSocket* clientSocket, QString token);
+
+	MessageCapsule createAccount(QTcpSocket* clientSocket, User& newUser);
+	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
+
+	MessageCapsule removeDocument(QTcpSocket* client, QString docUri);
+	MessageCapsule createDocument(QTcpSocket* author, QString docName);
+	MessageCapsule openDocument(QTcpSocket* clientSocket, QString docUri);
+
+	MessageCapsule logoutClient(QTcpSocket* clientSocket);
 	
 signals:
 

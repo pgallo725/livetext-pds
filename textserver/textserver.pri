@@ -6,32 +6,37 @@
 # Remove it when you are finished editing this file.
 
 
-HEADERS += ./Client.h \
-    ./Document.h \
-    ./Message.h \
-    ./User.h \
-    ./WorkSpace.h \
-    ./TcpServer.h \
+HEADERS += ./TcpServer.h \
 	./ServerException.h \
-	./AccountMessage.h \
-	./DocumentMessage.h \
+	./WorkSpace.h \
+	./Client.h \
+    ./User.h \
+    ./Document.h \
+	./Symbol.h \
+	./Message.h \
 	./LoginMessage.h \
 	./LogoutMessage.h \
+	./AccountMessage.h \
+	./DocumentMessage.h \
 	./TextEditMessage.h \
-	./Symbol.h
+	./PresenceMessage.h \
+	./ErrorMessage.h
 	
+
 	
-	
-SOURCES += ./Client.cpp \
-    ./Document.cpp \
-    ./main.cpp \
-    ./TcpServer.cpp \
+SOURCES += ./main.cpp \
+	./TcpServer.cpp \
 	./ServerException.cpp \
-    ./User.cpp \
-    ./WorkSpace.cpp \
-	./AccountMessage.cpp \
-	./DocumentMessage.cpp \
+	./WorkSpace.cpp \
+	./Client.cpp \
+	./User.cpp \
+    ./Document.cpp \
+	./Symbol.cpp \
 	./LoginMessage.cpp \
 	./LogoutMessage.cpp \
+	./AccountMessage.cpp \
+	./DocumentMessage.cpp \
 	./TextEditMessage.cpp \
-	./Symbol.cpp
+	./PresenceMessage.cpp \
+	./ErrorMessage.cpp
+	

@@ -1,16 +1,15 @@
 #include "WorkSpace.h"
 
-#include <memory>
-#include "ServerException.h"
 #include "TcpServer.h"
+#include "ServerException.h"
 
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
-	: doc(d), server(server), messageHandler(MessageHandler::Workspace, this)
+	: doc(d), server(server), messageHandler(this)
 {
 	doc->load();	// Load the document contents
 
-	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::saveDocument);
+	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(SAVE_TIMEOUT);
 }
 
@@ -34,31 +33,15 @@ void WorkSpace::newSocket(qint64 handle)
 	
 	if (!(c = server->moveClient(handle))) {
 		qDebug() << "Client not found";
-		//TODO: come gestiamo? throw ClientNotFoundException in moveClient
+		//TODO: how to handle? throw ClientNotFoundException in moveClient
 		return;
 	}
 
 	editors.insert(socket, c);
-	// TODO: need to send to others clients this new presence
+	// TODO: need to send to other clients this new presence
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
-}
-
-
-/* Update user's fields */
-bool WorkSpace::updateAccount(User* oldUser, User& newUser)
-{
-	if (oldUser->getUserId() == newUser.getUserId() &&
-		oldUser->getUsername() == newUser.getUsername())
-	{
-		oldUser->setNickname(newUser.getNickname());
-		oldUser->setIcon(newUser.getIcon());
-		oldUser->changePassword(newUser.getPassword());
-
-		return true;
-	}
-	else return false;
 }
 
 
@@ -69,27 +52,26 @@ void WorkSpace::readMessage()
 	QDataStream streamIn(socket);	/* connect stream with socket */
 
 	quint16 typeOfMessage;
-	std::unique_ptr<Message> msg;
+	MessageCapsule message;
 
 	streamIn >> typeOfMessage;		/* take the type of incoming message */
 
 
-	// TODO: complete switch with others types of message
 	switch (typeOfMessage)
 	{
 			/* Account messages */
 
 		case AccountUpdate:
-			msg = std::make_unique<AccountMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new AccountMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 			/* Text messages */
 
 		case CharInsert:
 		case CharDelete:
-			msg = std::make_unique<TextEditMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new TextEditMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 			/* Presence messages */
@@ -99,36 +81,37 @@ void WorkSpace::readMessage()
 		case UserIconChange:
 		case AddUserPresence:
 		case RemoveUserPresence:
-			//msg = std::make_unique<PresenceMessage>(typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new PresenceMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
 			/* Logout messages */
 
 		case LogoutRequest:
-			msg = std::make_unique<LogoutMessage>((MessageType)typeOfMessage);
-			msg->readFrom(streamIn);
+			message = new LogoutMessage((MessageType)typeOfMessage);
+			message->readFrom(streamIn);
 			break;
 
-			/* Unknown message type */
+			/* Unknown or unexpected message type */
 
 		default:
-			msg = std::make_unique<ErrorMessage>(MessageTypeError, "Unknown message type " + typeOfMessage);
-			msg->sendTo(socket);
+			message = new ErrorMessage(MessageTypeError, "Unknown message type " + typeOfMessage);
+			message->sendTo(socket);
 			return;
 	}
 
-	messageHandler.process(std::move(msg), socket);
+	messageHandler.process(message, socket);
 }
 
 
-void WorkSpace::dispatchMessage(std::unique_ptr<Message>&& msg, QTcpSocket* sender)
+// Send the specified message to all connected clients except the one from which the message was received
+void WorkSpace::dispatchMessage(MessageCapsule message, QTcpSocket* sender)
 {
 	for (auto target = editors.keyBegin(); target != editors.keyEnd(); ++target)
 	{
 		if (*target != sender)
 		{
-			msg->sendTo(*target);
+			message->sendTo(*target);
 		}
 	}
 }
@@ -150,7 +133,53 @@ void WorkSpace::clientDisconnection()
 }
 
 
-void WorkSpace::saveDocument()
+void WorkSpace::documentSave()
 {
 	doc->save();
+}
+
+void WorkSpace::documentInsertSymbol(Symbol& symbol)
+{
+	doc->insert(symbol);
+}
+
+void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
+{
+	doc->removeAt(position);
+}
+
+
+/* Update user's fields and return response message for the client */
+MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedUser)
+{
+	Client* client = editors.find(clientSocket).value().get();
+
+	if (!client->isLogged())
+		return new AccountMessage(AccountDenied, "You are not logged in");
+
+	User* oldUser = client->getUser();
+
+	if (oldUser->getUserId() == updatedUser.getUserId() &&
+		oldUser->getUsername() == updatedUser.getUsername())
+	{
+		oldUser->setNickname(updatedUser.getNickname());
+		oldUser->setIcon(updatedUser.getIcon());
+		oldUser->changePassword(updatedUser.getPassword());
+
+		return new AccountMessage(AccountConfirmed);
+	}
+	else return new AccountMessage(AccountDenied, "Cannot modify a different user's account");
+}
+
+
+MessageCapsule WorkSpace::logoutClient(QTcpSocket* clientSocket)
+{
+	if (!editors.remove(clientSocket))
+		return new LogoutMessage(LogoutDenied, "You cannot logout if you're not logged in");
+
+	if (editors.size() == 0)
+		emit notWorking(doc->getURI());		// TODO: should probably be the last thing to do
+
+	// TODO: need to give client to main thread
+	return new LogoutMessage(LogoutConfirmed);
 }

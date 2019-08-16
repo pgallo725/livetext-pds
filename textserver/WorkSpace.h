@@ -8,6 +8,7 @@
 #include "Message.h"
 #include "AccountMessage.h"
 #include "TextEditMessage.h"
+#include "PresenceMessage.h"
 #include "ErrorMessage.h"
 #include "MessageHandler.h"
 #include "ServerException.h"
@@ -30,9 +31,6 @@ private:
 
 	MessageHandler messageHandler;
 
-	bool updateAccount(User* oldUser, User& newUser);
-	void dispatchMessage(std::unique_ptr<Message>&& msg, QTcpSocket* sender);
-
 public:
 
 	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
@@ -43,7 +41,15 @@ public slots:
 	void newSocket(qint64 handle);
 	void clientDisconnection();
 	void readMessage();
-	void saveDocument();
+	
+	void documentSave();
+	void documentInsertSymbol(Symbol& symbol);
+	void documentDeleteSymbol(QVector<qint32> position);
+
+	void dispatchMessage(MessageCapsule message, QTcpSocket* sender);
+
+	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
+	MessageCapsule logoutClient(QTcpSocket* clientSocket);
 
 signals: void notWorking(QString document);
 signals: void deleteClient(qint64 handle);

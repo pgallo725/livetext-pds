@@ -9,21 +9,17 @@ class DocumentMessage : public Message
 private:
 
 	Document m_doc;
-	QString m_docURI;
-	QString m_docName;
-	QString m_username;
+	QString m_docNameOrURI;
 	QString m_error;
 
 public:
 
-	// Build an empty DocumentMessage, to be filled later reading data from a socket stream
+	// Build an empty DocumentMessage, to be filled later reading data from a socket stream,
+	// or a simple DocumentRemoved message which has no payload
 	DocumentMessage(MessageType m);
 
-	// Create a NewDocument message, specifying the document name and the author
-	DocumentMessage(MessageType newDocument, QString docName, QString author);
-
-	// Costruct OpenDocument/RemoveDocument or DocumentError messages specifying
-	// the target document's URI in the first 2 cases and the error reason in the last case
+	// Costruct New/Open/RemoveDocument or DocumentError messages specifying either the document's 
+	// name in the first case, the URI for Open and Remove, the error reason in the last case
 	DocumentMessage(MessageType type, QString payload);
 
 	// Use this to create a DocumentOpened response, containing the Document object
@@ -40,7 +36,6 @@ public:
 	Document getDocument();
 	QString getDocumentURI();
 	QString getDocumentName();
-	QString getAuthorName();
 	QString getErrorMessage();
 };
 

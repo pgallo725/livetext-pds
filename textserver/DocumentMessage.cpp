@@ -7,18 +7,13 @@ DocumentMessage::DocumentMessage(MessageType m)
 {
 }
 
-DocumentMessage::DocumentMessage(MessageType newDocument, QString docName, QString author)
-	: Message(newDocument), m_docName(docName), m_username(author)
-{
-}
-
 DocumentMessage::DocumentMessage(MessageType type, QString payload)
 	: Message(type)
 {
 	if (m_type == DocumentError)
 		m_error = payload;
-	else // OpenDocument or RemoveDocument
-		m_docURI = payload;
+	else // New/Open/Remove Document
+		m_docNameOrURI = payload;
 }
 
 DocumentMessage::DocumentMessage(MessageType documentOpened, Document document)
@@ -31,17 +26,16 @@ void DocumentMessage::readFrom(QDataStream& stream)
 	switch (m_type)
 	{
 		case NewDocument:
-			stream >> m_docName >> m_username;
-			m_docURI = m_username + "_" + m_docName + "_" + "deadbeef";	/* TODO: random sequence */
-			break;
-
 		case OpenDocument:
 		case RemoveDocument:
-			stream >> m_docURI;
+			stream >> m_docNameOrURI;
 			break;
 
 		case DocumentOpened:
 			stream >> m_doc;
+			break;
+
+		case DocumentRemoved:
 			break;
 
 		case DocumentError:
@@ -63,11 +57,9 @@ void DocumentMessage::sendTo(QTcpSocket* socket)
 	switch (m_type) 
 	{
 		case NewDocument:
-			streamOut >> m_docName >> m_username;
-
 		case OpenDocument:
 		case RemoveDocument:
-			streamOut << m_docURI;
+			streamOut << m_docNameOrURI;
 			break;
 
 		case DocumentOpened:
@@ -94,19 +86,14 @@ QString DocumentMessage::getDocumentName()
 {
 	if (m_type == DocumentOpened)
 		return m_doc.getName();
-	else return m_docName;
+	else return m_docNameOrURI;
 }
 
 QString DocumentMessage::getDocumentURI()
 {
 	if (m_type == DocumentOpened)
 		return m_doc.getURI();
-	else return m_docURI;
-}
-
-QString DocumentMessage::getAuthorName()
-{
-	return m_username;
+	else return m_docNameOrURI;
 }
 
 QString DocumentMessage::getErrorMessage()

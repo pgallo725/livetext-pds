@@ -78,6 +78,12 @@
     <ClCompile Include="ErrorMessage.cpp">
       <Filter>Source Files\Messages</Filter>
     </ClCompile>
+    <ClCompile Include="PresenceMessage.cpp">
+      <Filter>Source Files\Messages</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Source Files\Messages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -116,10 +122,10 @@
     <ClInclude Include="TextEditMessage.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
-    <ClInclude Include="MessageHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ErrorMessage.h">
+      <Filter>Header Files\Messages</Filter>
+    </ClInclude>
+    <ClInclude Include="PresenceMessage.h">
       <Filter>Header Files\Messages</Filter>
     </ClInclude>
   </ItemGroup>
@@ -140,6 +146,9 @@
   <ItemGroup>
     <QtMoc Include="Message.h">
       <Filter>Header Files\Messages</Filter>
+    </QtMoc>
+    <QtMoc Include="MessageHandler.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
 </Project>

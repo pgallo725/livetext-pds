@@ -28,6 +28,7 @@ enum MessageType
 	// Document messages
 	NewDocument,
 	RemoveDocument,
+	DocumentRemoved,
 	OpenDocument,
 	DocumentOpened,
 	DocumentError,
@@ -44,7 +45,8 @@ enum MessageType
 	RemoveUserPresence,
 
 	// Others
-	MessageTypeError
+	MessageTypeError,
+	ServerFailure
 };
 
 
@@ -58,7 +60,7 @@ protected:
 
 public:
 
-	Message(MessageType type) : m_type(type) { };
+	Message(MessageType type);
 	~Message() { };
 
 	// Convert the message contents into a byte-stream that will be sent on the socket
@@ -68,5 +70,35 @@ public:
 	virtual void readFrom(QDataStream& stream) = 0;
 
 	/* getter */
-	int getType() { return m_type; };
+	int getType();
+};
+
+
+class MessageCapsule
+{
+private:
+
+	Message* m_ptr;
+	int* ref;
+
+public:
+
+	MessageCapsule();
+	MessageCapsule(std::nullptr_t);
+	MessageCapsule(Message* m);
+
+	MessageCapsule(const MessageCapsule& other);
+	MessageCapsule(MessageCapsule&& other);
+
+	MessageCapsule& operator=(MessageCapsule other);
+
+	Message& operator*() const;
+	Message* operator->() const;
+
+	operator bool() const;
+
+	Message* get() const;
+	void reset();
+
+	~MessageCapsule();
 };

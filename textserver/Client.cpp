@@ -27,48 +27,40 @@ User* Client::getUser()
 	return activeUser;
 }
 
-QString Client::getNonce()
+QString Client::getUsername()
 {
-	return nonce;
+	if (!activeUser)
+		return QString::null;
+	else return activeUser->getUsername();
 }
 
-QString Client::getUserName()
-{
-	return activeUser->getUsername();
-}
-
-void Client::setUser(User* u)
-{
-	activeUser = u;
-}
-
-void Client::setLogged()
+void Client::login(User* user)
 {
 	logged = true;
+	activeUser = user;
 }
 
-void Client::resetLogged()
+void Client::logout()
 {
 	logged = false;
 	activeUser = nullptr;
 }
 
-bool Client::authentication(QString passwd)
+bool Client::authentication(QString token)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
 	hash.addData(activeUser->getPassword().toStdString().c_str(), activeUser->getPassword().length());
 	hash.addData(this->nonce.toStdString().c_str(), this->nonce.length());
 
-	return !QString::fromStdString(hash.result().toStdString()).compare(passwd);
+	return !QString::fromStdString(hash.result().toStdString()).compare(token);
 }
 
-void Client::challenge(QTcpSocket* s)
+QString Client::challenge(User* user)
 {
-	QDataStream streamOut;
-	streamOut.setDevice(s);
+	activeUser = user;
 	nonce = "deadbeef";		// TODO: random sequence
-	streamOut << (quint16)LoginChallenge << nonce;
+	return nonce;
 }
 
 bool Client::isLogged()
