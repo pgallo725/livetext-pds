@@ -9,6 +9,7 @@
 #include <QHostAddress>
 #include <QImage>
 #include <QDateTime>
+#include <QCryptographicHash>
 
 #include "ServerException.h"
 
@@ -133,15 +134,20 @@ void TcpServer::initialize()
 /* Generate the URI for a document */
 QString TcpServer::generateURI(QString authorName, QString docName) const
 {
-	QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	//QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	QCryptographicHash hash(QCryptographicHash::Md5);
 	QString uri = authorName + "_" + docName + "_";
 
+	hash.addData(uri.toStdString().c_str(), uri.length());
+	uri += QString(hash.result());
+
+	/*
 	for (int i = 0; i < 10; ++i)	// add a 10-character long random sequence to the document URI to make it unique
 	{
 		int index = qrand() % possibleCharacters.length();
 		QChar nextChar = possibleCharacters.at(index);
 		uri.append(nextChar);
-	}
+	}*/
 
 	return uri;
 }
