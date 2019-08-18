@@ -81,10 +81,6 @@ void TcpServer::initialize()
 		usersFile.close();
 
 		std::cout << "done" << std::endl;
-
-		if (users.find("admin") == users.end()) {
-			//createAccount("admin", "sudo", "admin", QImage(), nullptr);		// TODO: need to remove this at all costs
-		}
 	}
 	else
 	{
