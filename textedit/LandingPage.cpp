@@ -113,6 +113,22 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	/* LOADING GIF */
 	loading = new QLabel(this);
+
+	//If there's a saved credential it opens it
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::ReadOnly)) {
+		QTextStream stream(&file);
+		QString line = stream.readLine();
+		ui->lineEdit_usr->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverIP->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverPort->setText(line);
+	}
+
+	file.close();
 }
 
 LandingPage::~LandingPage()
@@ -131,6 +147,7 @@ void LandingPage::confirmOperation()
 		return;
 	}
 
+
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
@@ -141,10 +158,6 @@ void LandingPage::Login()
 	ui->stackedWidget->show();
 	return;*/
 
-	if (ui->checkBox_saveCredential->isChecked()) {
-		//TODO SAVE CREDENTIAL FOR NEXT ACCESS
-	}
-
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
@@ -154,6 +167,21 @@ void LandingPage::Login()
 		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
 		return;
 	}
+
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::WriteOnly)) {
+		QTextStream stream(&file);
+		if (ui->checkBox_saveCredential->isChecked()) {
+			stream << username << endl;
+			stream << ui->lineEdit_serverIP->text() << endl;
+			stream << ui->lineEdit_serverPort->text() << endl;
+		}
+		else {
+			stream << "" << endl; 
+		}
+	}
+
+	file.close();
 
 	//Function to show loading animation
 	startLoadingAnimation();
@@ -291,6 +319,14 @@ void LandingPage::pushButtonOpenUriClicked()
 
 void LandingPage::pushButtonBackClicked()
 {
+	ui->lineEdit_psw->setText("");
+	ui->lineEdit_usr->setText("");
+	ui->lineEdit_regUsr->setText("");
+	ui->lineEdit_regNick->setText("");
+	ui->lineEdit_regPsw->setText("");
+	ui->lineEdit_regPswConf->setText("");
+	ui->lineEdit_UsrIconPath->setText("");
+
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
 

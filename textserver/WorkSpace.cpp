@@ -152,7 +152,7 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 /* Update user's fields and return response message for the client */
 MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedUser)
 {
-	Client* client = editors.find(clientSocket).value().get();
+	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
 	if (!client->isLogged())
 		return new AccountMessage(AccountDenied, "You are not logged in");
