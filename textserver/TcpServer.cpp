@@ -8,6 +8,7 @@
 #include <QtNetwork>
 #include <QHostAddress>
 #include <QImage>
+#include <QDateTime>
 
 #include "ServerException.h"
 
@@ -16,6 +17,9 @@
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
+	/* initialize random number generator with timestamp */
+	qsrand(QDateTime::currentDateTime().toTime_t());
+
 	/* connect newConnection from QTcpServer to newClientConnection() */
 	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
 
@@ -128,6 +132,22 @@ void TcpServer::initialize()
 	time.start(SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
+}
+
+/* Generate the URI for a document */
+QString TcpServer::generateURI(QString authorName, QString docName) const
+{
+	QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	QString uri = authorName + "_" + docName + "_";
+
+	for (int i = 0; i < 10; ++i)	// add a 10-character long random sequence to the document URI to make it unique
+	{
+		int index = qrand() % possibleCharacters.length();
+		QChar nextChar = possibleCharacters.at(index);
+		uri.append(nextChar);
+	}
+
+	return uri;
 }
 
 /* save on users on persistent storage */
@@ -358,7 +378,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	if (!client->isLogged())
 		return new DocumentMessage(DocumentError, "You are not logged in");
 
-	QString docURI = client->getUsername() + "_" + docName + "_" + "deadbeef";		/* TODO: random sequence */
+	QString docURI = generateURI(client->getUsername(), docName);
 
 	/* check if documents is already used */
 	if (documents.contains(docURI))

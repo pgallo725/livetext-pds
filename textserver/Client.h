@@ -16,7 +16,9 @@ private:
 	qintptr socket;
 	User* activeUser;
 	bool logged;
+
 	QString nonce;
+	static const QString nonceCharacters;
 
 public:
 

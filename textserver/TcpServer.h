@@ -46,6 +46,8 @@ private:
 
 	MessageHandler messageHandler;
 
+	QString generateURI(QString authorName, QString docName) const;
+
 public:
 
 	TcpServer(QObject *parent = 0);
