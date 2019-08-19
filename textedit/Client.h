@@ -22,6 +22,7 @@
 #include "../textserver/Message.h"
 #include "../textserver/LoginMessage.h"
 #include "../textserver/LogoutMessage.h"
+#include "../textserver/User.h"
 
 class Client : public QObject
 {
@@ -37,23 +38,30 @@ signals:
 	void connectionEstablished();
 	void impossibleToConnect();
 	void cursorMoved(int position, QString user);
+	void loginSuccess();
+	void loginFailed(QString errorType);
+	void registrationCompleted();
+	void registrationFailed(QString errorType);
+	void logoutComplited();
+	void logoutFailed(QString errorType);
+
 public:
 	Client(QObject* parent = 0);
 	~Client();
-	void writeOnServer();
 
 public slots:
-	//signals
+	//signals handler
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
 	void errorHandler();
+	void writeOnServer();
 	// User connection
-	bool Login();
-	bool Register();
-	bool Logout();
+	void Login();
+	void Register();
+	void Logout();
 	//Data Exchange
-	bool sendCursor(int position);
+	void sendCursor(int position);
 	void reciveCursor();
 	void sendChar();
 	void reciveChar();
