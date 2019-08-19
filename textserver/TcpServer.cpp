@@ -8,6 +8,8 @@
 #include <QtNetwork>
 #include <QHostAddress>
 #include <QImage>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 #include "ServerException.h"
 
@@ -16,6 +18,9 @@
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
+	/* initialize random number generator with timestamp */
+	qsrand(QDateTime::currentDateTime().toTime_t());
+
 	/* connect newConnection from QTcpServer to newClientConnection() */
 	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
 
@@ -77,10 +82,6 @@ void TcpServer::initialize()
 		usersFile.close();
 
 		std::cout << "done" << std::endl;
-
-		if (users.find("admin") == users.end()) {
-			//createAccount("admin", "sudo", "admin", QImage(), nullptr);		// TODO: need to remove this at all costs
-		}
 	}
 	else
 	{
@@ -128,6 +129,27 @@ void TcpServer::initialize()
 	time.start(SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
+}
+
+/* Generate the URI for a document */
+QString TcpServer::generateURI(QString authorName, QString docName) const
+{
+	//QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	QCryptographicHash hash(QCryptographicHash::Md5);
+	QString uri = authorName + "_" + docName + "_";
+
+	hash.addData(uri.toStdString().c_str(), uri.length());
+	uri += QString(hash.result());
+
+	/*
+	for (int i = 0; i < 10; ++i)	// add a 10-character long random sequence to the document URI to make it unique
+	{
+		int index = qrand() % possibleCharacters.length();
+		QChar nextChar = possibleCharacters.at(index);
+		uri.append(nextChar);
+	}*/
+
+	return uri;
 }
 
 /* save on users on persistent storage */
@@ -358,7 +380,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	if (!client->isLogged())
 		return new DocumentMessage(DocumentError, "You are not logged in");
 
-	QString docURI = client->getUsername() + "_" + docName + "_" + "deadbeef";		/* TODO: random sequence */
+	QString docURI = generateURI(client->getUsername(), docName);
 
 	/* check if documents is already used */
 	if (documents.contains(docURI))
