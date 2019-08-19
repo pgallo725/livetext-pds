@@ -13,6 +13,7 @@ class User
 	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
 	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
 	
+	
 private:
 
 	QString m_username;
@@ -43,6 +44,7 @@ public:
 	void setNickname(QString newNickname);
 	void deleteNickname();
 	void setIcon(QImage newIcon);
+	void setId(int id);
 	void deleteIcon();
 	void changePassword(QString newPassword);
 
