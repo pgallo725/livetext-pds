@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <QTcpSocket>
 #include <QDataStream>
 
@@ -39,8 +38,7 @@ enum MessageType
 
 	// Presence messages
 	MoveCursor,
-	UserNameChange,
-	UserIconChange,
+	UserAccountUpdate,
 	AddUserPresence,
 	RemoveUserPresence,
 
@@ -50,9 +48,8 @@ enum MessageType
 };
 
 
-class Message : public QObject
+class Message
 {
-	Q_OBJECT
 
 protected:
 

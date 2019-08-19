@@ -38,7 +38,9 @@ void WorkSpace::newSocket(qint64 handle)
 	}
 
 	editors.insert(socket, c);
-	// TODO: need to send to other clients this new presence
+	dispatchMessage(new PresenceMessage(AddUserPresence,							// Send to other clients this new presence
+		c->getUserId(), c->getUser()->getNickname(), c->getUser()->getIcon()),
+		socket);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
@@ -77,10 +79,6 @@ void WorkSpace::readMessage()
 			/* Presence messages */
 
 		case MoveCursor:
-		case UserNameChange:
-		case UserIconChange:
-		case AddUserPresence:
-		case RemoveUserPresence:
 			message = new PresenceMessage((MessageType)typeOfMessage);
 			message->readFrom(streamIn);
 			break;
@@ -122,10 +120,12 @@ void WorkSpace::clientDisconnection()
 	/* Close the socket where the signal was sent */
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 
+	QSharedPointer<Client> c = editors.find(socket).value();
 	editors.remove(socket);
 	qDebug() << "client removed";
 
-	// TODO: need to send to others client that this client is disconnected
+	// Send to other clients that this client is disconnected
+	dispatchMessage(new PresenceMessage(RemoveUserPresence, c->getUserId()), socket);
 
 	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
@@ -165,6 +165,11 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedU
 		oldUser->setNickname(updatedUser.getNickname());
 		oldUser->setIcon(updatedUser.getIcon());
 		oldUser->changePassword(updatedUser.getPassword());
+
+		// Notify all other clients of the changes in this user's account
+		dispatchMessage(new PresenceMessage(UserAccountUpdate,
+			oldUser->getUserId(), oldUser->getNickname(), oldUser->getIcon()),
+			clientSocket);
 
 		return new AccountMessage(AccountConfirmed);
 	}

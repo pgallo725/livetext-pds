@@ -136,18 +136,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 		/* PRESENCE MESSAGES */
 
 	case MoveCursor:
-		break;
-
-	case UserNameChange:
-		break;
-
-	case UserIconChange:
-		break;
-
-	case AddUserPresence:
-		break;
-
-	case RemoveUserPresence:
+		emit messageDispatch(message, socket);
 		break;
 
 		/* LOGOUT MESSAGE */

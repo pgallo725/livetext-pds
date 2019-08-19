@@ -198,10 +198,10 @@
     <ClInclude Include="ErrorMessage.h" />
     <ClInclude Include="LoginMessage.h" />
     <ClInclude Include="LogoutMessage.h" />
-    <QtMoc Include="Message.h">
+    <ClInclude Include="Message.h">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DynamicSource>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DynamicSource>
-    </QtMoc>
+    </ClInclude>
     <QtMoc Include="MessageHandler.h">
       <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
@@ -225,7 +225,6 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\moc_Message.cpp" />
     <ClCompile Include="GeneratedFiles\moc_TcpServer.cpp" />
     <ClCompile Include="GeneratedFiles\moc_WorkSpace.cpp" />
     <CustomBuild Include="GeneratedFiles\moc_predefs.h.cbt">
@@ -247,7 +246,7 @@
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties Qt5Version_x0020_x64="msvc2017_64" />
+      <UserProperties Qt5Version_x0020_x64="Qt 5.12.3" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
