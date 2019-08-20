@@ -105,6 +105,7 @@ public:
     QVBoxLayout *verticalLayout_11;
     QListWidget *listWidget;
     QHBoxLayout *horizontalLayout_4;
+    QPushButton *pushButton_remove;
     QSpacerItem *horizontalSpacer;
     QPushButton *pushButton_open;
     QSpacerItem *verticalSpacer_8;
@@ -566,22 +567,33 @@ public:
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setSpacing(6);
         horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
+        pushButton_remove = new QPushButton(groupBox_2);
+        pushButton_remove->setObjectName(QString::fromUtf8("pushButton_remove"));
+        pushButton_remove->setEnabled(false);
+        pushButton_remove->setMinimumSize(QSize(0, 30));
+        QFont font6;
+        font6.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font6.setPointSize(10);
+        pushButton_remove->setFont(font6);
+
+        horizontalLayout_4->addWidget(pushButton_remove);
+
         horizontalSpacer = new QSpacerItem(100, 20, QSizePolicy::Preferred, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer);
 
         pushButton_open = new QPushButton(groupBox_2);
         pushButton_open->setObjectName(QString::fromUtf8("pushButton_open"));
-        pushButton_open->setEnabled(true);
+        pushButton_open->setEnabled(false);
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font6;
-        font6.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font6.setPointSize(10);
-        font6.setBold(false);
-        font6.setWeight(50);
-        pushButton_open->setFont(font6);
+        QFont font7;
+        font7.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font7.setPointSize(10);
+        font7.setBold(false);
+        font7.setWeight(50);
+        pushButton_open->setFont(font7);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -594,7 +606,7 @@ public:
 
         verticalLayout_9->addWidget(groupBox_2);
 
-        verticalSpacer_8 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_8 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_9->addItem(verticalSpacer_8);
 
@@ -633,7 +645,7 @@ public:
 
         verticalLayout_8->addWidget(pushButton_new);
 
-        verticalSpacer_18 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_18 = new QSpacerItem(20, 80, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_18);
 
@@ -701,6 +713,7 @@ public:
         pushButton_confirmOperation->setText(QString());
         label_incorrect_operation->setText(QString());
         groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
         pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
         pushButton_back->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
         pushButton_new->setText(QString());

@@ -27,6 +27,11 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::cursorPositionChanged);
+
+
+	//CLIENT - TEXTEDIT
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
 
 }
 
@@ -91,9 +96,10 @@ void LiveText::Login(QString username, QString password)
 	else {
 		_landingPage->incorrectOperation(_client->getMsg());
 		_client->Disconnect();
-
 	}
 }
+
+
 
 void LiveText::Register(QString username, QString password, QString nickname)
 {
@@ -122,4 +128,10 @@ void LiveText::returnToLanding()
 	_textEdit->close();
 	_landingPage->openLoggedPage();
 	_landingPage->show();
+}
+
+void LiveText::cursorPositionChanged(int position)
+{
+	//_client->sendCursor(position);
+	emit(_client->cursorMoved(3, "sda"));
 }
