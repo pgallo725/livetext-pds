@@ -14,7 +14,7 @@ public:
 	// Build an empty ErrorMessage, which will be filled with data read from the socket stream
 	ErrorMessage(MessageType m);
 
-	// Use this to construct MessageError messages
+	// Use this to construct ErrorMessage items
 	ErrorMessage(MessageType messageError, QString description);
 
 	~ErrorMessage() {};

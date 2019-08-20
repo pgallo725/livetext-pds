@@ -2,6 +2,10 @@
 #include "Message.h"
 
 
+// Set of characters that will be used to generate random sequences as nonce
+const QString Client::nonceCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+
+
 Client::Client(qintptr s):
 	socket(s), activeUser(nullptr), logged(false)
 {
@@ -58,8 +62,15 @@ bool Client::authentication(QString token)
 
 QString Client::challenge(User* user)
 {
-	activeUser = user;
-	nonce = "deadbeef";		// TODO: random sequence
+	activeUser = user;		// store the user which is trying to login on this client
+
+	for (int i = 0; i < 24; ++i)	// create a 24-character randomly generated nonce
+	{
+		int index = qrand() % nonceCharacters.length();
+		QChar nextChar = nonceCharacters.at(index);
+		nonce.append(nextChar);
+	}
+
 	return nonce;
 }
 
