@@ -50,7 +50,8 @@ void PresenceMessage::sendTo(QTcpSocket* socket)
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type;
+	streamOut << (quint16)m_type << m_userId;
+
 
 	switch (m_type)
 	{

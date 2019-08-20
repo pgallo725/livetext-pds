@@ -17,12 +17,19 @@
 #include <iostream>
 #include <sstream>
 
-
+// File to handle Message with the server
 #include "../textserver/AccountMessage.h"
 #include "../textserver/Message.h"
 #include "../textserver/LoginMessage.h"
 #include "../textserver/LogoutMessage.h"
+#include "../textserver/PresenceMessage.h"
+#include "../textserver/DocumentMessage.h"
+
+
+//File for DataStructure
 #include "../textserver/User.h"
+#include "../textserver/Symbol.h"
+
 
 class Client : public QObject
 {
@@ -32,18 +39,23 @@ private:
 	QString username;
 	QString nickname;
 	QString password;
-	QString msg_str; // message recived by the client
+	QImage image;
 	bool login;
 signals:
 	void connectionEstablished();
 	void impossibleToConnect();
-	void cursorMoved(int position, QString user);
+	void cursorMoved(qint32 position, qint32 user);
 	void loginSuccess();
 	void loginFailed(QString errorType);
 	void registrationCompleted();
 	void registrationFailed(QString errorType);
 	void logoutComplited();
 	void logoutFailed(QString errorType);
+	void openFileCompleted(Document document);
+	void openFileFailed(QString error);
+	void recivedSymbol(Symbol character);
+	void accountModified(qint32 userId,QString username,QImage image);
+	void UserPresence(qint32 userId, QString username, QImage image);
 
 public:
 	Client(QObject* parent = 0);
@@ -61,9 +73,9 @@ public slots:
 	void Register();
 	void Logout();
 	//Data Exchange
-	void sendCursor(int position);
-	void reciveCursor();
-	void sendChar();
+	void sendCursor(qint32 position);
+	void reciveCursor(QDataStream& in);
+	void sendChar(Symbol character);
 	void reciveChar();
 	void openDocument(QString URI);
 	void createDocument(QString name);
@@ -76,7 +88,11 @@ public slots:
 	void setPassword(QString password);
 	void setLogin(bool flag);
 	void setNickname(QString nickname);
+	void setImage(QImage image);
 	bool getLogin();
-	QString getMsg();
+	//Account handler
+	void newUserPresence(QDataStream& in);
+	void accountUpdate(QDataStream& in);
+	void sendAccountUpdate(qint32 userId, QString name, QImage image);
 };
 

@@ -51,10 +51,17 @@ void Client::readBuffer() {
 	QDataStream in;
 
 	in >> typeOfMessage;
+
 	switch (typeOfMessage) {
 	case MoveCursor:
-		reciveCursor();
+		reciveCursor(in);
 		break;
+	case UserAccountUpdate:
+		accountUpdate(in);
+		break;
+	case AddUserPresence:
+		newUserPresence(in);
+			break;
 	default:
 		//thorw exception
 		break;
@@ -76,6 +83,7 @@ void Client::setUsername(QString username) {
 	this->username = username;
 
 }
+
 void Client::setPassword(QString password) {
 
 	this->password = password;
@@ -87,16 +95,16 @@ void Client::setNickname(QString nickname) {
 	this->nickname = nickname;
 }
 
+void Client::setImage(QImage image) {
+	this->image = image;
+}
+
 void Client::setLogin(bool flag) {
 	login = flag;
 }
 
 bool Client::getLogin() {
 	return login;
-}
-
-QString Client::getMsg() {
-	return msg_str;
 }
 
 void Client::Login() {
@@ -126,9 +134,10 @@ void Client::Login() {
 		break; 
 	case LoginError:
 		// user not exist
-		qDebug() << "user not exists";
-		error = "user not exists";
-		emit loginFailed(error);
+		MessageCapsule loginError = new LoginMessage(LoginError);
+		loginError->readFrom(in);
+		LoginMessage* loginerror = dynamic_cast<LoginMessage*>(loginError.get());
+		emit loginFailed(loginerror->getErrorMessage());
 		return;
 		break;
 	default:
@@ -157,7 +166,7 @@ void Client::Login() {
 	if (!socket->waitForReadyRead(10000)) {
 		qDebug() << "recived no byte";
 		//throw ServerNotRespondException();
-		QString error = "recived no byte";
+		error = "recived no byte";
 		emit loginFailed(error);
 		return;
 	}
@@ -166,12 +175,18 @@ void Client::Login() {
 
 	switch (typeOfMessage) {
 	case LoginAccessGranted:
+		LoginMessage* loginAccess = new LoginMessage(LoginAccessGranted);
+		loginAccess->readFrom(in);
+		emit loginSuccess();
+		return;
+
 		break;
 	case LoginError:
 		// user not exist
-		qDebug() << "user not exists";
-		error = "user not exists";
-		emit loginFailed(error);
+		MessageCapsule loginError = new LoginMessage(LoginError);
+		loginError->readFrom(in);
+		LoginMessage* loginerror = dynamic_cast<LoginMessage*>(loginError.get());
+		emit loginFailed(loginerror->getErrorMessage());
 		return;
 		break;
 	default:
@@ -180,25 +195,14 @@ void Client::Login() {
 		return;
 		break;
 	}
-
-	LoginMessage* loginAccess = new LoginMessage(LoginAccessGranted);
-	loginAccess->readFrom(in);
-	emit loginSuccess();
-	return;
-	
 }
-
 
 void Client::Register() {
 
-
 	quint16 typeOfMessage;
-	QDataStream in;
-	QImage image;
+	QDataStream in(socket);
 	QString error;
 	// Link the stream to the socke and send the byte
-
-	in.setDevice(socket);
 
 	User* user = new User(username,-1,nickname,password,image);
 
@@ -215,7 +219,6 @@ void Client::Register() {
 		return ;
 	}
 
-
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
@@ -229,9 +232,10 @@ void Client::Register() {
 		break;
 	case AccountDenied:
 		// impossible to create the account
-		qDebug() << msg_str;
-		error = "error during creation";
-		emit registrationFailed(error);
+		MessageCapsule accountDenied = new AccountMessage(AccountDenied);
+		accountDenied->readFrom(in);
+		AccountMessage* accountdenied = dynamic_cast<AccountMessage*>(accountDenied.get());
+		emit registrationFailed(accountdenied->getErrorMessage());
 		return ;
 		break;
 	default:
@@ -245,8 +249,8 @@ void Client::Register() {
 void Client::Logout() {
 
 	QString error;
-	quint16 typeOfMessage = LogoutRequest;
-	QDataStream in;
+	quint16 typeOfMessage;
+	QDataStream in(socket);
 
 	MessageCapsule logoutRequest = new LogoutMessage(LogoutRequest);
 	logoutRequest->sendTo(socket);
@@ -260,23 +264,20 @@ void Client::Logout() {
 		return;
 	}
 
-	in.setDevice(socket);
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
 	case LogoutConfirmed:
-
-		qDebug() << msg_str;
 		MessageCapsule logoutConfirmed = new LogoutMessage(LogoutConfirmed);
 		logoutConfirmed->readFrom(in);
-
 		return;
 		break;
 	case LogoutDenied:
 		// impossible to create the account
-		qDebug() << msg_str;
-		error = "Logout Denied";
-		emit logoutFailed(error);
+		MessageCapsule logoutDenied = new AccountMessage(LogoutDenied);
+		logoutDenied->readFrom(in);
+		AccountMessage* logoutdenied = dynamic_cast<AccountMessage*>(logoutDenied.get());
+		emit logoutFailed(logoutdenied->getErrorMessage());
 		return;
 		break;
 	default:
@@ -288,74 +289,55 @@ void Client::Logout() {
 
 }
 
-void Client::sendCursor(int position) {
-
-	QDataStream out;
-	quint16 typeOfMessage = MoveCursor;
-
-	// Link the stream to the socke and send the byte
-	// TODO creazione e invio messaggio
-
-	return;
-}
-
-void Client::reciveCursor() {
+void Client::requestURI() {
 	
-	QDataStream in;
-	int position;
-	QString user;
+	QString error;
+	QDataStream in(socket);
+	qint16 typeOfMessage;
 
-	in >> position >> user; // TODO sostituire con messaggio
-
-	emit cursorMoved(position, user);
-
+	//TODO: add Message to Request URI (function called from LiveText dopo login o register)
 }
 
-
-
-void Client::sendChar() {
-
-
-}
-
-void Client::reciveChar() {
-
-}
 void Client::openDocument(QString URI) {
 
-	QDataStream out;
+	QString error;
 	quint16 typeOfMessage = OpenDocument;
-	QDataStream in;
+	QDataStream in(socket);
 
-
-	// Link the stream to the socke and send the byte
-	out.setDevice(socket);
-	out << typeOfMessage << URI;
+	MessageCapsule openDocument = new DocumentMessage(OpenDocument,URI);
+	openDocument->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
+		error = "recived no byte";
 		//throw ServerNotRespondException();
+		emit openFileFailed(error);
 		return;
 	}
 
-	in.setDevice(socket);
 	in >> typeOfMessage;
-	in >> msg_str;
 
 	switch (typeOfMessage) {
 	case DocumentOpened:
-		qDebug() << msg_str;
+		// TODO Message
+		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
+		documentOpened->readFrom(in);
+		DocumentMessage *documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
+		emit openFileCompleted(documentopened->getDocument());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 		return;
 		break;
 	case DocumentError:
 		// impossible to create the account
-		qDebug() << msg_str;
+		MessageCapsule documentError = new DocumentMessage(DocumentError);
+		documentError->readFrom(in);
+		DocumentMessage* documenterror = dynamic_cast<DocumentMessage*>(documentError.get());
+		emit openFileFailed(documenterror->getErrorMessage());
 		return;
 		break;
 	default:
 		//throw MessageUnknownTypeException();
+		//EMIT ?
 		return;
 		break;
 	}
@@ -363,45 +345,99 @@ void Client::openDocument(QString URI) {
 
 void Client::createDocument(QString name) {
 
-	QDataStream out;
+	QString error;
 	quint16 typeOfMessage = NewDocument;
-	QDataStream in;
+	QDataStream in(socket);
 
-
-	// Link the stream to the socke and send the byte
-	out.setDevice(socket);
-	out << typeOfMessage << name;
+	MessageCapsule newDocument = new DocumentMessage(NewDocument, name);
+	newDocument->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
+		error =  "recived no byte";
 		//throw ServerNotRespondException();
 		return;
 	}
 
-	in.setDevice(socket);
 	in >> typeOfMessage;
-	in >> msg_str;
 
 	switch (typeOfMessage) {
 	case DocumentOpened:
-		qDebug() << msg_str;
+		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
+		documentOpened->readFrom(in);
+		DocumentMessage* documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
+		emit openFileCompleted(documentopened->getDocument());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 		return;
 		break;
 	case DocumentError:
 		// impossible to create the account
-		qDebug() << msg_str;
+		MessageCapsule documentError = new DocumentMessage(DocumentError);
+		documentError->readFrom(in);
+		DocumentMessage* documenterror = dynamic_cast<DocumentMessage*>(documentError.get());
+		emit openFileFailed(documenterror->getErrorMessage());
 		return;
 		break;
 	default:
 		//throw MessageUnknownTypeException();
+		//EMIT ?
 		return;
 		break;
 	}
 
 }
 
-void Client::requestURI() {
+void Client::sendCursor(qint32 position) {
+
+	quint16 typeOfMessage = MoveCursor;
+
+	// Link the stream to the socke and send the byte
+	MessageCapsule moveCursor = new PresenceMessage(MoveCursor,position);
+	moveCursor->sendTo(socket);
+	return;
+}
+
+void Client::reciveCursor(QDataStream& in) {
+	
+	MessageCapsule moveCursor = new PresenceMessage(MoveCursor);
+	moveCursor->readFrom(in);
+	PresenceMessage* movecursor = dynamic_cast<PresenceMessage *>(moveCursor.get());
+	emit cursorMoved(movecursor->getCursorPosition(), movecursor->getUserId());
+
+}
+
+void Client::sendChar(Symbol character) {
+
+	//TODO message implementation
+
+}
+
+void Client::reciveChar() {
+
+	//TODO message implementation
+}
+
+void Client::accountUpdate(QDataStream& in) {
+
+	MessageCapsule accountUpdate = new PresenceMessage(UserAccountUpdate);
+	accountUpdate->readFrom(in);
+	PresenceMessage *accountupdate = dynamic_cast<PresenceMessage*>(accountUpdate.get());
+	emit accountModified(accountupdate->getUserId(),accountupdate->getNickname(),accountupdate->getIcon());
+
+}
+
+void Client::sendAccountUpdate(qint32 userId,QString name,QImage image) {
+	
+	MessageCapsule accountUpdate = new PresenceMessage(UserAccountUpdate, userId, name, image);
+	accountUpdate->sendTo(socket);
+
+}
+
+void Client::newUserPresence(QDataStream& in) {
+
+	MessageCapsule newAccountPresence = new PresenceMessage(AddUserPresence);
+	newAccountPresence->readFrom(in);
+	PresenceMessage* newaccountpresence = dynamic_cast<PresenceMessage*>(newAccountPresence.get());
+	emit UserPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
 
 }
