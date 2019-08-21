@@ -133,6 +133,7 @@ void Client::Login() {
 	case LoginChallenge:
 		break; 
 	case LoginError:
+	{
 		// user not exist
 		MessageCapsule loginError = new LoginMessage(LoginError);
 		loginError->readFrom(in);
@@ -140,6 +141,7 @@ void Client::Login() {
 		emit loginFailed(loginerror->getErrorMessage());
 		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
@@ -174,14 +176,14 @@ void Client::Login() {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case LoginAccessGranted:
+	case LoginAccessGranted: {
 		LoginMessage* loginAccess = new LoginMessage(LoginAccessGranted);
 		loginAccess->readFrom(in);
 		emit loginSuccess();
 		return;
-
 		break;
-	case LoginError:
+	}
+	case LoginError: {
 		// user not exist
 		MessageCapsule loginError = new LoginMessage(LoginError);
 		loginError->readFrom(in);
@@ -189,6 +191,7 @@ void Client::Login() {
 		emit loginFailed(loginerror->getErrorMessage());
 		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
@@ -222,22 +225,24 @@ void Client::Register() {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case AccountConfirmed:
+	case AccountConfirmed: {
 		MessageCapsule accountConfirmed = new AccountMessage(AccountConfirmed);
 		accountConfirmed->readFrom(in);
-		AccountMessage* accConf = dynamic_cast<AccountMessage *>(accountConfirmed.get());
+		AccountMessage* accConf = dynamic_cast<AccountMessage*>(accountConfirmed.get());
 		user->setId(accConf->getUserId);
 		emit registrationCompleted();
-		return ;
+		return;
 		break;
-	case AccountDenied:
+	}
+	case AccountDenied: {
 		// impossible to create the account
 		MessageCapsule accountDenied = new AccountMessage(AccountDenied);
 		accountDenied->readFrom(in);
 		AccountMessage* accountdenied = dynamic_cast<AccountMessage*>(accountDenied.get());
 		emit registrationFailed(accountdenied->getErrorMessage());
-		return ;
+		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		// EMIT?
@@ -267,12 +272,13 @@ void Client::Logout() {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case LogoutConfirmed:
+	case LogoutConfirmed: {
 		MessageCapsule logoutConfirmed = new LogoutMessage(LogoutConfirmed);
 		logoutConfirmed->readFrom(in);
 		return;
 		break;
-	case LogoutDenied:
+	}
+	case LogoutDenied: {
 		// impossible to create the account
 		MessageCapsule logoutDenied = new AccountMessage(LogoutDenied);
 		logoutDenied->readFrom(in);
@@ -280,6 +286,7 @@ void Client::Logout() {
 		emit logoutFailed(logoutdenied->getErrorMessage());
 		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		// EMIT?
@@ -318,16 +325,17 @@ void Client::openDocument(QString URI) {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case DocumentOpened:
+	case DocumentOpened: {
 		// TODO Message
 		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
 		documentOpened->readFrom(in);
-		DocumentMessage *documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
+		DocumentMessage* documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
 		emit openFileCompleted(documentopened->getDocument());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 		return;
 		break;
-	case DocumentError:
+	}
+	case DocumentError: {
 		// impossible to create the account
 		MessageCapsule documentError = new DocumentMessage(DocumentError);
 		documentError->readFrom(in);
@@ -335,6 +343,7 @@ void Client::openDocument(QString URI) {
 		emit openFileFailed(documenterror->getErrorMessage());
 		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
@@ -362,7 +371,7 @@ void Client::createDocument(QString name) {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case DocumentOpened:
+	case DocumentOpened: {
 		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
 		documentOpened->readFrom(in);
 		DocumentMessage* documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
@@ -370,7 +379,8 @@ void Client::createDocument(QString name) {
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 		return;
 		break;
-	case DocumentError:
+	}
+	case DocumentError: {
 		// impossible to create the account
 		MessageCapsule documentError = new DocumentMessage(DocumentError);
 		documentError->readFrom(in);
@@ -378,6 +388,7 @@ void Client::createDocument(QString name) {
 		emit openFileFailed(documenterror->getErrorMessage());
 		return;
 		break;
+	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
@@ -438,6 +449,6 @@ void Client::newUserPresence(QDataStream& in) {
 	MessageCapsule newAccountPresence = new PresenceMessage(AddUserPresence);
 	newAccountPresence->readFrom(in);
 	PresenceMessage* newaccountpresence = dynamic_cast<PresenceMessage*>(newAccountPresence.get());
-	emit UserPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
+	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
 
 }

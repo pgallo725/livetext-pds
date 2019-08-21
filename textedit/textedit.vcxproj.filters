@@ -230,6 +230,9 @@
     <None Include="images\logo.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="images\win\logout.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="images\win\LandingPage\new.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -237,6 +240,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\LandingPage\register.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="images\win\LandingPage\remove.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="images\win\LandingPage\richtext.png">

@@ -55,7 +55,7 @@ signals:
 	void openFileFailed(QString error);
 	void recivedSymbol(Symbol character);
 	void accountModified(qint32 userId,QString username,QImage image);
-	void UserPresence(qint32 userId, QString username, QImage image);
+	void userPresence(qint32 userId, QString username, QImage image);
 
 public:
 	Client(QObject* parent = 0);

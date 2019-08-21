@@ -24,6 +24,21 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
+	//connet(_client, &Client::loginFailed, _landingPage,);
+	//connect(_client, &Client::logoutComplited, _landingPage, );
+	//connect(_client, &Client::logoutFailed, _landingPage, );
+	//connect(_client, &Client::registrationFailed, _landingPage, );
+	//connect(_client, &Client::logoutCompleted, _landingPage, );
+
+
+	//CLIENT - LIVETEXT
+	//connect(_client, &Client::loginSuccess, this, );
+	//connect(_client, &Client::registrationCompleted, this, );
+	//connect(_client, &Client::openFileCompleted, this, );
+	//connect(_client, &Client::openFileFailed, this, );
+	//connect(_client, &Client::accountModified, this, );
+	//connect(_client, &Client::userPresence, this, );
+	
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
@@ -90,13 +105,18 @@ void LiveText::Login(QString username, QString password)
 	_client->setUsername(username);
 	_client->setPassword(password);
 
-	if (_client->Login()) {
+	_client->Login();
+
+	/*
+		if (_client->Login()) {
 		_landingPage->openLoggedPage();
 	}
 	else {
 		_landingPage->incorrectOperation(_client->getMsg());
 		_client->Disconnect();
 	}
+	*/
+
 }
 
 
@@ -107,14 +127,16 @@ void LiveText::Register(QString username, QString password, QString nickname)
 	_client->setPassword(password);
 	_client->setNickname(nickname);
 
-	if (_client->Register()) {
+	_client->Register();
+
+	/*if (_client->Register()) {
 		qDebug() << _client->getMsg();
 		_landingPage->openLoggedPage();
 	}
 	else {
 		_landingPage->incorrectOperation(_client->getMsg());
 		_client->Disconnect();
-	}
+	}*/
 }
 
 void LiveText::Logout()
@@ -133,5 +155,5 @@ void LiveText::returnToLanding()
 void LiveText::cursorPositionChanged(int position)
 {
 	//_client->sendCursor(position);
-	emit(_client->cursorMoved(3, "sda"));
+	emit(_client->cursorMoved(3, 4));
 }
