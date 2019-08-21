@@ -31,6 +31,7 @@ private slots:
 	void pushButtonRegisterClicked();
 	void pushButtonBrowseClicked();
 	void pushButtonOpenClicked();
+	void pushButtonRemoveClicked();
 	void pushButtonOpenUriClicked();
 	void pushButtonBackClicked();
 	void enablePushButtonOpen();
@@ -45,6 +46,7 @@ public slots:
 
 signals:
 	void openEditor(int mode, QString path = nullptr);
+	void removeDocument(QString path); //TODO REMOVE DOCUMENT
 	void connectToServer(QString ipAddress, quint16 port);
 	void serverLogin(QString username, QString password);
 	void serverRegister(QString username, QString password, QString nickname);

@@ -29,23 +29,21 @@ public:
 	bool load(const QString& f);
 
 public slots:
+	void userCursorPositionChanged(int position, QString user);
 	void fileNew(QString name);
+	
 
-protected:
-	void closeEvent(QCloseEvent* e) override;
 
 signals:
 	void logout();
+	void newCursorPosition(int position);
 
 private slots:
 	void fileOpen();
-	bool fileSave();
-	bool fileSaveAs();
 	void filePrint();
 	void filePrintPreview();
 	void filePrintPdf();
 
-	//ADDED
 	void fileShare();
 	void editProfile();
 	void highlightUsersText();
@@ -64,7 +62,6 @@ private slots:
 	void currentCharFormatChanged(const QTextCharFormat& format);
 	void cursorPositionChanged();
 
-
 	void clipboardDataChanged();
 	void printPreview(QPrinter*);
 
@@ -76,7 +73,6 @@ private:
 	void setupShareActions();
 	void setupUserActions();
 	void setupOnlineUsersActions();
-	bool maybeSave();
 	void setCurrentFileName(const QString& fileName);
 
 	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
@@ -95,7 +91,6 @@ private:
 
 	QList<Presence> onlineUsers;
 
-	QAction* actionSave;
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;
 	QAction* actionTextItalic;

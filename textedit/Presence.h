@@ -20,7 +20,6 @@ private:
 	QLabel* _label;
 	QTextCursor* _userCursor;
 	QList<QTextEdit::ExtraSelection> _userText;
-	int _cursorPosition;
 public:
 	Presence(QString name, QString nickname, QColor color, QPixmap profilePic, QTextEdit* textedit);
 
@@ -30,7 +29,6 @@ public:
 	QPixmap profilePicture();
 	QTextCursor* cursor();
 	QLabel* label();
-
 
 };
 

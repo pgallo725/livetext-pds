@@ -30,6 +30,7 @@ private slots:
 
 	//TEXTEDIT
 	void returnToLanding();
+	void cursorPositionChanged(int position);
 
 private:
 	LandingPage* _landingPage;

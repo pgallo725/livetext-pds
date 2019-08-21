@@ -106,7 +106,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 
 	//Connect delle azioni sul documento QTextDocument alle azioni di QAction rendendole abilitate
 	//Esempio: L'azione Save sul documento se ho appena salvato non è disponibile, appena faccio una modificia (modificationChanged) la rendo effettuabile
-	connect(textEdit->document(), &QTextDocument::modificationChanged, actionSave, &QAction::setEnabled);
 	connect(textEdit->document(), &QTextDocument::modificationChanged, this, &QWidget::setWindowModified);
 	connect(textEdit->document(), &QTextDocument::undoAvailable, actionUndo, &QAction::setEnabled);
 	connect(textEdit->document(), &QTextDocument::redoAvailable, actionRedo, &QAction::setEnabled);
@@ -116,7 +115,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 
 	//Stesso discorso delle connect ma inizializza
 	setWindowModified(textEdit->document()->isModified());
-	actionSave->setEnabled(textEdit->document()->isModified());
 	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
 	actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
 
@@ -146,14 +144,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setupOnlineUsersActions();
 }
 
-void TextEdit::closeEvent(QCloseEvent* e)
-{
-	if (maybeSave())
-		e->accept();
-	else
-		e->ignore();
-}
-
 /*
 	Queste funzioni generano il menu di File Modifica ...
 */
@@ -165,43 +155,10 @@ void TextEdit::setupFileActions()
 	//Creo il menu File
 	QMenu* menu = menuBar()->addMenu(tr("&File"));
 
-	//Assegno icona per nuovo file
-	const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(rsrcPath + "/filenew.png"));
-
-	//Creo l'azione riferita alla creazione del nuovo file chiama il metodo fileNew
-	//QAction * a = menu->addAction(newIcon, tr("&New"), this, &TextEdit::fileNew);
-
-	//Aggiungo action alla toolbar
-	//tb->addAction(a);
-
-	//Assegno priorita all'action
-	//a->setPriority(QAction::LowPriority);
-
-	//Aggiunge scorciatoia di tasti
-	//a->setShortcut(QKeySequence::New);
-
-
-	const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(rsrcPath + "/fileopen.png"));
-	QAction* a = menu->addAction(openIcon, tr("&Open..."), this, &TextEdit::fileOpen);
-	a->setShortcut(QKeySequence::Open);
-	tb->addAction(a);
-
-	//Aggiunge separatore al menu
-	menu->addSeparator();
-
-	const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(rsrcPath + "/filesave.png"));
-	actionSave = menu->addAction(saveIcon, tr("&Save"), this, &TextEdit::fileSave);
-	actionSave->setShortcut(QKeySequence::Save);
-	actionSave->setEnabled(false); //Se salvo disabilita il save
-	tb->addAction(actionSave);
-
-	a = menu->addAction(tr("Save &As..."), this, &TextEdit::fileSaveAs);
-	a->setPriority(QAction::LowPriority);
-	menu->addSeparator();
 
 #ifndef QT_NO_PRINTER
 	const QIcon exportPdfIcon = QIcon::fromTheme("exportpdf", QIcon(rsrcPath + "/exportpdf.png"));
-	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
+	QAction* a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
 	a->setPriority(QAction::LowPriority);
 	a->setShortcut(Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
@@ -538,29 +495,6 @@ bool TextEdit::load(const QString& f)
 	return true;
 }
 
-//Pop-up in caso di chiusura
-bool TextEdit::maybeSave()
-{
-
-	//Solo se modificato altrimenti chiude
-	if (!textEdit->document()->isModified())
-		return true;
-
-	//Acquisisce il valore del tasto premuto in in chiusura
-	const QMessageBox::StandardButton ret =
-		QMessageBox::warning(this, QCoreApplication::applicationName(),
-			tr("The document has been modified.\nDo you want to save your changes?"),
-			QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-
-	//Se premo salva salva il documento
-	if (ret == QMessageBox::Save)
-		return fileSave();
-	else if (ret == QMessageBox::Cancel)
-		return false;
-	return true;
-}
-
-
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
@@ -581,12 +515,10 @@ void TextEdit::setCurrentFileName(const QString& fileName)
 //Nuovo file, se ho modifiche non salvate chiede se salvare
 void TextEdit::fileNew(QString name)
 {
-	if (maybeSave()) {
-		//Cancella editor
-		textEdit->clear();
-		//Mette il nuovo file untitled.txt
-		setCurrentFileName(name);
-	}
+	//Cancella editor
+	textEdit->clear();
+	//Mette il nuovo file untitled.txt
+	setCurrentFileName(name);
 }
 
 void TextEdit::fileOpen()
@@ -617,54 +549,6 @@ void TextEdit::fileOpen()
 	else
 		statusBar()->showMessage(tr("Could not open \"%1\"").arg(QDir::toNativeSeparators(fn)));
 }
-
-bool TextEdit::fileSave()
-{
-	//Se il file è nuovo o inizia per :/ (untitled.txt) apre Save As...
-	if (fileName.isEmpty())
-		return fileSaveAs();
-	if (fileName.startsWith(QStringLiteral(":/")))
-		return fileSaveAs();
-
-	//Crea interfaccia per scrivere il QTextDocument in un file passato come parametro
-	QTextDocumentWriter writer(fileName);
-	//Scrive il documento su file
-	bool success = writer.write(textEdit->document());
-	if (success) {
-		//Se il salvataggio ha successo setta il documento come non modificato
-		textEdit->document()->setModified(false);
-		//Scrive sulla status bar "Wrote PATH"
-		statusBar()->showMessage(tr("Wrote \"%1\"").arg(QDir::toNativeSeparators(fileName)));
-	}
-	else {
-		//Altrimenti scrive sulla status bar showMessage
-		statusBar()->showMessage(tr("Could not write to file \"%1\"").arg(QDir::toNativeSeparators(fileName)));
-	}
-	return success;
-}
-
-bool TextEdit::fileSaveAs()
-{
-	//Apre finestra salva con nome
-	QFileDialog fileDialog(this, tr("Save as..."));
-	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-
-	//Mette una lista di tipi disponibili per il salvataggio .odt .html .txt
-	QStringList mimeTypes;
-	mimeTypes << "application/vnd.oasis.opendocument.text" << "text/html" << "text/plain";
-	fileDialog.setMimeTypeFilters(mimeTypes);
-
-	//Default .odt
-	fileDialog.setDefaultSuffix("odt");
-	if (fileDialog.exec() != QDialog::Accepted)
-		return false;
-
-	//Prende o il file selezionato o quello scritto e sovrascrive nome file corrente, poi chiama FileSave
-	const QString fn = fileDialog.selectedFiles().first();
-	setCurrentFileName(fn);
-	return fileSave();
-}
-
 
 void TextEdit::filePrint()
 {
@@ -894,7 +778,7 @@ void TextEdit::listStyle(int styleIndex)
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
-	
+
 	if (style == QTextListFormat::ListStyleUndefined) {
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
@@ -1071,12 +955,37 @@ void TextEdit::cursorPositionChanged()
 		listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	}
 
-
-
-
 	//Setta nel combobox l'heading level corretto
 	int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);
+
+	emit(newCursorPosition(textEdit->textCursor().position()));
+}
+
+void TextEdit::userCursorPositionChanged(int position, QString user)
+{
+	//To change with unique id
+	Presence p = onlineUsers.at(0);
+	QTextCursor* cursor = p.cursor();
+	QLabel* userCursorLabel = p.label();
+
+	//Hide label to move it
+	userCursorLabel->close();
+
+	//Change usercursor position
+	cursor->setPosition(position);
+	
+	//Draw cursor
+	const QRect qRect = textEdit->cursorRect(*cursor);
+
+	QPixmap pix(qRect.width() * 2.5, qRect.height());
+	pix.fill(p.color());
+	userCursorLabel->setPixmap(pix);
+	
+	//Show moved label
+	userCursorLabel->move(qRect.left(), qRect.top());
+	userCursorLabel->show();
+
 }
 
 void TextEdit::clipboardDataChanged()
@@ -1174,32 +1083,25 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 /*
 TEST FUNCTION - TODO
 
-Function to handle extra cursor(S) position into text
+Function to handle extra cursors position updates.
+Recomputes all positions based on document scroll positions.
 
 */
 
 void TextEdit::handleUsersCursors() {
-	QList<Presence>::iterator it;
 
-	int i = 0;
+	QList<Presence>::iterator it;
 
 	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
 		QTextCursor* cursor = it->cursor();
 
 		it->label()->close();
 
-		//Change to user position
-		i++;
-		cursor->setPosition(textEdit->textCursor().position());
-		cursor->movePosition(QTextCursor::StartOfLine);
-		cursor->setPosition(cursor->position() + i);
-
 		const QRect qRect = textEdit->cursorRect(*cursor);
 
 		QPixmap pix(qRect.width() * 2.5, qRect.height());
 		pix.fill(it->color());
 		it->label()->setPixmap(pix);
-
 
 		it->label()->move(qRect.left(), qRect.top());
 		it->label()->show();

@@ -56,6 +56,12 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Icona back
 	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/backarrow.png"));
 
+	//Icona open
+	ui->pushButton_open->setIcon(QIcon::QIcon(rsrcPath + "/filenew.png"));
+
+	//Icona remove
+	ui->pushButton_remove->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/remove.png"));
+
 	//Logo applicazione
 	QPixmap logoPix(":/images/logo.png");
 
@@ -72,6 +78,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->pushButton_register, &QPushButton::clicked, this, &LandingPage::pushButtonRegisterClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &LandingPage::pushButtonBrowseClicked);
 	connect(ui->pushButton_open, &QPushButton::clicked, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->pushButton_remove, &QPushButton::clicked, this, &LandingPage::pushButtonRemoveClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
 	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 
@@ -119,6 +126,11 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	if (file.open(QIODevice::ReadOnly)) {
 		QTextStream stream(&file);
 		QString line = stream.readLine();
+
+		if (!line.isEmpty()) {
+			ui->checkBox_saveCredential->setChecked(true);
+		}
+
 		ui->lineEdit_usr->setText(line);
 
 		line = stream.readLine();
@@ -307,6 +319,13 @@ void LandingPage::pushButtonOpenClicked()
 		emit(openEditor(uri, fileSelected));
 }
 
+void LandingPage::pushButtonRemoveClicked()
+{
+	QString fileSelected = ui->listWidget->currentItem()->text();
+	if (fileSelected != "<No files found>")
+		emit(removeDocument(fileSelected));
+}
+
 void LandingPage::pushButtonOpenUriClicked()
 {
 	//Crea l'oggetto OpenUri
@@ -336,8 +355,10 @@ void LandingPage::pushButtonBackClicked()
 void LandingPage::enablePushButtonOpen()
 {
 	if (ui->listWidget->currentItem()->text() != "<No files found>")
-		if (!ui->pushButton_open->isEnabled())
+		if (!ui->pushButton_open->isEnabled()) {
 			ui->pushButton_open->setEnabled(true);
+			ui->pushButton_remove->setEnabled(true);
+		}
 }
 
 
@@ -363,7 +384,7 @@ void LandingPage::setupFileList()
 		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
 
-	ui->pushButton_open->setEnabled(false);
+
 }
 
 
