@@ -30,7 +30,10 @@ private slots:
 
 	//TEXTEDIT
 	void returnToLanding();
-	void cursorPositionChanged(int position);
+
+	//LIVETEXT
+	void loginFailed(QString errorType);
+	void registrationFailed(QString errorType);
 
 private:
 	LandingPage* _landingPage;

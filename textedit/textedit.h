@@ -29,7 +29,7 @@ public:
 	bool load(const QString& f);
 
 public slots:
-	void userCursorPositionChanged(int position, QString user);
+	void userCursorPositionChanged(qint32 position, qint32 user);
 	void fileNew(QString name);
 	
 

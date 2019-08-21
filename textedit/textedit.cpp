@@ -962,10 +962,10 @@ void TextEdit::cursorPositionChanged()
 	emit(newCursorPosition(textEdit->textCursor().position()));
 }
 
-void TextEdit::userCursorPositionChanged(int position, QString user)
+void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
 	//To change with unique id
-	Presence p = onlineUsers.at(0);
+	Presence p = onlineUsers.at(user);
 	QTextCursor* cursor = p.cursor();
 	QLabel* userCursorLabel = p.label();
 

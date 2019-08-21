@@ -18,22 +18,24 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
 	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
 	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
-	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Register
+	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
 
 
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
-	//connet(_client, &Client::loginFailed, _landingPage,);
-	//connect(_client, &Client::logoutComplited, _landingPage, );
-	//connect(_client, &Client::logoutFailed, _landingPage, );
-	//connect(_client, &Client::registrationFailed, _landingPage, );
+	
+	connect(_client, &Client::loginSuccess, _landingPage, &LandingPage::openLoggedPage);
+	connect(_client, &Client::registrationCompleted, _landingPage, &LandingPage::openLoggedPage);
+	
+	
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
-
+	//connect(_client, &Client::logoutFailed, _landingPage, );
 
 	//CLIENT - LIVETEXT
-	//connect(_client, &Client::loginSuccess, this, );
-	//connect(_client, &Client::registrationCompleted, this, );
+	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
+	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
+	
 	//connect(_client, &Client::openFileCompleted, this, );
 	//connect(_client, &Client::openFileFailed, this, );
 	//connect(_client, &Client::accountModified, this, );
@@ -42,11 +44,12 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
-	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::cursorPositionChanged);
-
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
+
+	//TEXTEDIT - CLIENT
+	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
 
 }
 
@@ -106,17 +109,13 @@ void LiveText::Login(QString username, QString password)
 	_client->setPassword(password);
 
 	_client->Login();
+}
 
-	/*
-		if (_client->Login()) {
-		_landingPage->openLoggedPage();
-	}
-	else {
-		_landingPage->incorrectOperation(_client->getMsg());
-		_client->Disconnect();
-	}
-	*/
 
+void LiveText::loginFailed(QString errorType)
+{
+	_landingPage->incorrectOperation(errorType);
+	_client->Disconnect();
 }
 
 
@@ -128,15 +127,12 @@ void LiveText::Register(QString username, QString password, QString nickname)
 	_client->setNickname(nickname);
 
 	_client->Register();
+}
 
-	/*if (_client->Register()) {
-		qDebug() << _client->getMsg();
-		_landingPage->openLoggedPage();
-	}
-	else {
-		_landingPage->incorrectOperation(_client->getMsg());
-		_client->Disconnect();
-	}*/
+void LiveText::registrationFailed(QString errorType)
+{
+	_landingPage->incorrectOperation(errorType);
+	_client->Disconnect();
 }
 
 void LiveText::Logout()
@@ -152,8 +148,4 @@ void LiveText::returnToLanding()
 	_landingPage->show();
 }
 
-void LiveText::cursorPositionChanged(int position)
-{
-	//_client->sendCursor(position);
-	emit(_client->cursorMoved(3, 4));
-}
+

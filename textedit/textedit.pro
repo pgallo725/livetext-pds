@@ -7,31 +7,33 @@ TEMPLATE        = app
 TARGET          = textedit
 
 HEADERS         = textedit.h \
-		  LandingPage.h \
-		  ProfileEditWindow.h \
-		  OpenUriWindow.h \
-		  NewFileWindow.h \
-	   	  ShareUriWindow.h \
-		  Client.h \	
-		  Presence.h \
-		  LiveText.h
+				LandingPage.h \
+				ProfileEditWindow.h \
+				OpenUriWindow.h \
+				NewFileWindow.h \
+				ShareUriWindow.h \
+				Client.h \	
+				Presence.h \
+				LiveText.h \
+
 
 SOURCES         = textedit.cpp \
-                  main.cpp \
-		  LandingPage.cpp \
-		  ProfileEditWindow.cpp \
-		  OpenUriWindow.cpp \
-		  ShareUriWindow.cpp \
-		  NewFileWindow.cpp \
-		  Client.cpp \
-		  Presence.cpp \
-		  LiveText.cpp
+                main.cpp \
+				LandingPage.cpp \
+				ProfileEditWindow.cpp \
+				OpenUriWindow.cpp \
+				ShareUriWindow.cpp \
+				NewFileWindow.cpp \
+				Client.cpp \
+				Presence.cpp \
+				LiveText.cpp \
+
 
 FORMS 		= landingpage.ui \
-		  profileeditwindow.ui \
-		  openuriwindow.ui \
-		  newfilewindow.ui \
-		  shareuriwindow.ui
+			profileeditwindow.ui \
+			openuriwindow.ui \
+			newfilewindow.ui \
+			shareuriwindow.ui
 
 RESOURCES += textedit.qrc
 build_all:!build_pass {

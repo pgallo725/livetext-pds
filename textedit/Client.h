@@ -49,7 +49,7 @@ signals:
 	void loginFailed(QString errorType);
 	void registrationCompleted();
 	void registrationFailed(QString errorType);
-	void logoutComplited();
+	void logoutCompleted();
 	void logoutFailed(QString errorType);
 	void openFileCompleted(Document document);
 	void openFileFailed(QString error);

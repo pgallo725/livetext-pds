@@ -229,7 +229,7 @@ void Client::Register() {
 		MessageCapsule accountConfirmed = new AccountMessage(AccountConfirmed);
 		accountConfirmed->readFrom(in);
 		AccountMessage* accConf = dynamic_cast<AccountMessage*>(accountConfirmed.get());
-		user->setId(accConf->getUserId);
+		user->setId(accConf->getUserId());
 		emit registrationCompleted();
 		return;
 		break;
