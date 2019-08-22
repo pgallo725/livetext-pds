@@ -47,13 +47,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\textserver\AccountMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\Document.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\DocumentMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\ErrorMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LandingPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LiveText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\LoginMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\LogoutMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\Message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\MessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NewFileWindow.cpp">
@@ -65,10 +89,25 @@
     <ClCompile Include="Presence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\textserver\PresenceMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ProfileEditWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\textserver\ServerException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ShareUriWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\Symbol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\TextEditMessage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\textserver\User.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -79,15 +118,39 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\textserver\AccountMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="Client.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="..\textserver\Document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\DocumentMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\ErrorMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="LandingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="LiveText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\textserver\LoginMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\LogoutMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\Message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <QtMoc Include="..\textserver\MessageHandler.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="NewFileWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -97,17 +160,34 @@
     <ClInclude Include="Presence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\textserver\PresenceMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="ProfileEditWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="..\textserver\ServerException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="ShareUriWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="..\textserver\Symbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\TextEditMessage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\textserver\User.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="textedit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    
+    
     
     
     
