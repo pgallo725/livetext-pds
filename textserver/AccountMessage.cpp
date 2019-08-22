@@ -1,99 +1,123 @@
 #include "AccountMessage.h"
+
 #include "ServerException.h"
 
 
-AccountMessage::AccountMessage(MessageType m)
-	: Message(m), m_userId(-1)
+/*************** ACCOUNT CREATE MESSAGE ***************/
+
+AccountCreateMessage::AccountCreateMessage()
+	: Message(AccountCreate)
 {
 }
 
-AccountMessage::AccountMessage(MessageType accountCreateOrUpdate, User account)
-	: Message(accountCreateOrUpdate), m_user(account), m_userId(-1)
+AccountCreateMessage::AccountCreateMessage(User newUser)
+	: Message(AccountCreate), m_user(newUser)
 {
 }
 
-AccountMessage::AccountMessage(MessageType accountConfirmed, int userId)
-	: Message(accountConfirmed), m_userId(userId)
+void AccountCreateMessage::readFrom(QDataStream& stream)
 {
+	stream >> m_user;
 }
 
-AccountMessage::AccountMessage(MessageType accountDenied, QString reason)
-	: Message(accountDenied), m_reason(reason), m_userId(-1)
-{
-}
-
-
-void AccountMessage::readFrom(QDataStream& stream)
-{
-	switch (m_type)
-	{
-		case AccountCreate:
-			stream >> m_user;
-			break;
-
-		case AccountUpdate:
-			stream >> m_user;
-			break;
-
-		case AccountConfirmed:
-			stream >> m_userId;
-			break;
-
-		case AccountDenied:
-			stream >> m_reason;
-			break;
-
-		default:
-			throw MessageUnexpectedTypeException(m_type);	// ?
-			break;
-	}
-}
-
-void AccountMessage::sendTo(QTcpSocket* socket)
+void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type;
-
-	switch (m_type)
-	{
-		case AccountCreate:
-			streamOut << m_user;
-			break;
-
-		case AccountUpdate:
-			streamOut << m_user;
-			break;
-
-		case AccountConfirmed:
-			streamOut << m_userId;
-			break;
-
-		case AccountDenied:
-			streamOut << m_reason;
-			break;
-
-		default:
-			throw MessageUnexpectedTypeException(m_type);	// ?
-			break;
-	}
+	streamOut << (quint16)AccountCreate << m_user;
 }
 
-
-User& AccountMessage::getUserObj()
+User& AccountCreateMessage::getUserObj()
 {
 	return m_user;
 }
 
-int AccountMessage::getUserId()
+
+/*************** ACCOUNT UPDATE MESSAGE ***************/
+
+AccountUpdateMessage::AccountUpdateMessage()
+	: Message(AccountUpdate)
 {
-	if (m_type == AccountConfirmed)
-		return m_userId;
-	else return m_user.getUserId();
 }
 
-QString AccountMessage::getErrorMessage()
+AccountUpdateMessage::AccountUpdateMessage(User updatedUser)
+	: Message(AccountUpdate), m_user(updatedUser)
 {
-	return m_reason;
 }
 
+void AccountUpdateMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_user;
+}
+
+void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)AccountUpdate << m_user;
+}
+
+User& AccountUpdateMessage::getUserObj()
+{
+	return m_user;
+}
+
+
+/*************** ACCOUNT CONFIRMED MESSAGE ***************/
+
+AccountConfirmedMessage::AccountConfirmedMessage()
+	: Message(AccountConfirmed), m_userId(-1)
+{
+}
+
+AccountConfirmedMessage::AccountConfirmedMessage(qint32 userId)
+	: Message(AccountConfirmed), m_userId(userId)
+{
+}
+
+void AccountConfirmedMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_userId;
+}
+
+void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)AccountConfirmed << m_userId;
+}
+
+qint32 AccountConfirmedMessage::getUserId() const
+{
+	return m_userId;
+}
+
+
+/*************** ACCOUNT DENIED MESSAGE ***************/
+
+AccountErrorMessage::AccountErrorMessage()
+	: Message(AccountError)
+{
+}
+
+AccountErrorMessage::AccountErrorMessage(QString reason)
+	: Message(AccountError), m_error(reason)
+{
+}
+
+void AccountErrorMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_error;
+}
+
+void AccountErrorMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)AccountError << m_error;
+}
+
+QString AccountErrorMessage::getErrorMessage() const
+{
+	return m_error;
+}

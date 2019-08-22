@@ -1,90 +1,151 @@
 #include "LoginMessage.h"
 
 
-LoginMessage::LoginMessage(MessageType m) 
-	: Message(m)
+/*************** LOGIN REQUEST MESSAGE ***************/
+
+LoginRequestMessage::LoginRequestMessage()
+	: Message(LoginRequest)
 {
 }
 
-LoginMessage::LoginMessage(MessageType loginType, QString payload)
-	: Message(loginType), m_payload(payload)
+LoginRequestMessage::LoginRequestMessage(QString username)
+	: Message(LoginRequest), m_username(username)
 {
 }
 
-LoginMessage::LoginMessage(MessageType loginGranted, User user)
-	: Message(loginGranted), m_user(user)
+void LoginRequestMessage::readFrom(QDataStream& stream)
 {
+	stream >> m_username;
 }
 
-
-void LoginMessage::readFrom(QDataStream& stream)
-{
-	switch (m_type)
-	{
-		case LoginRequest:
-		case LoginChallenge:
-		case LoginUnlock:
-		case LoginError:
-			stream >> m_payload;
-			break;
-
-		case LoginAccessGranted:
-			stream >> m_user;
-			break;
-
-		default:
-			// throw ?
-			break;
-	}
-}
-
-void LoginMessage::sendTo(QTcpSocket* socket)
+void LoginRequestMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type;
-
-	switch (m_type)
-	{
-		case LoginRequest:
-		case LoginChallenge:
-		case LoginUnlock:
-		case LoginError:
-			streamOut << m_payload;
-			break;
-
-		case LoginAccessGranted:
-			streamOut << m_user;
-			break;
-
-		default:
-			// throw ?
-			break;
-	}
+	streamOut << (quint16)LoginRequest << m_username;
 }
 
-
-QString LoginMessage::getUsername()
+QString LoginRequestMessage::getUsername() const
 {
-	return m_payload;
+	return m_username;
 }
 
-QString LoginMessage::getNonce()
+
+/*************** LOGIN CHALLENGE MESSAGE ***************/
+
+LoginChallengeMessage::LoginChallengeMessage()
+	: Message(LoginChallenge)
 {
-	return m_payload;
 }
 
-QString LoginMessage::getToken()
+LoginChallengeMessage::LoginChallengeMessage(QString nonce)
+	: Message(LoginChallenge), m_nonce(nonce)
 {
-	return m_payload;
 }
 
-QString LoginMessage::getErrorMessage()
+void LoginChallengeMessage::readFrom(QDataStream& stream)
 {
-	return m_payload;
+	stream >> m_nonce;
 }
 
-User LoginMessage::getLoggedUser()
+void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)LoginChallenge << m_nonce;
+}
+
+QString LoginChallengeMessage::getNonce() const
+{
+	return m_nonce;
+}
+
+
+/*************** LOGIN UNLOCK MESSAGE ***************/
+
+LoginUnlockMessage::LoginUnlockMessage()
+	: Message(LoginUnlock)
+{
+}
+
+LoginUnlockMessage::LoginUnlockMessage(QString token)
+	: Message(LoginUnlock), m_token(token)
+{
+}
+
+void LoginUnlockMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_token;
+}
+
+void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)LoginUnlock << m_token;
+}
+
+QString LoginUnlockMessage::getToken() const
+{
+	return m_token;
+}
+
+
+/*************** LOGIN GRANTED MESSAGE ***************/
+
+LoginGrantedMessage::LoginGrantedMessage()
+	: Message(LoginGranted)
+{
+}
+
+LoginGrantedMessage::LoginGrantedMessage(User loggedUser)
+	: Message(LoginGranted), m_user(loggedUser)
+{
+}
+
+void LoginGrantedMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_user;
+}
+
+void LoginGrantedMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)LoginGranted << m_user;
+}
+
+User& LoginGrantedMessage::getLoggedUser()
 {
 	return m_user;
+}
+
+
+/*************** LOGIN ERROR MESSAGE ***************/
+
+LoginErrorMessage::LoginErrorMessage()
+	: Message(LoginError)
+{
+}
+
+LoginErrorMessage::LoginErrorMessage(QString reason)
+	: Message(LoginError), m_error(reason)
+{
+}
+
+void LoginErrorMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_error;
+}
+
+void LoginErrorMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)LoginError << m_error;
+}
+
+QString LoginErrorMessage::getErrorMessage() const
+{
+	return m_error;
 }

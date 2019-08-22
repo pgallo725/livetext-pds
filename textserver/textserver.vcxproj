@@ -176,9 +176,10 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Document.cpp" />
     <ClCompile Include="DocumentMessage.cpp" />
-    <ClCompile Include="ErrorMessage.cpp" />
+    <ClCompile Include="FailureMessage.cpp" />
     <ClCompile Include="LoginMessage.cpp" />
     <ClCompile Include="LogoutMessage.cpp" />
+    <ClCompile Include="MessageFactory.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="Message.cpp" />
     <ClCompile Include="PresenceMessage.cpp" />
@@ -195,7 +196,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Document.h" />
     <ClInclude Include="DocumentMessage.h" />
-    <ClInclude Include="ErrorMessage.h" />
+    <ClInclude Include="FailureMessage.h" />
     <ClInclude Include="LoginMessage.h" />
     <ClInclude Include="LogoutMessage.h" />
     <ClInclude Include="Message.h">
@@ -210,6 +211,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;$(QTDIR)\include\QtWebEngine;$(QTDIR)\include\QtWebEngineWidgets;$(QTDIR)\include\QtWebEngineCore;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtPrintSupport;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWebChannel;$(QTDIR)\include\QtQml;$(QTDIR)\include\QtWebSockets;$(QTDIR)\include\QtNetworkAuth;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtPositioning;$(QTDIR)\include\QtCore;\include;$(QTDIR)\mkspecs\win32-msvc</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|x64'">_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_DLL;QT_NETWORK_LIB;QT_NETWORKAUTH_LIB;QT_WEBCHANNEL_LIB;QT_WEBSOCKETS_LIB;QT_WEBENGINE_LIB;QT_WEBENGINECORE_LIB;QT_WEBENGINEWIDGETS_LIB;QT_NO_DEBUG;QT_QUICK_LIB;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_QML_LIB;QT_POSITIONING_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
     </QtMoc>
+    <ClInclude Include="MessageFactory.h" />
     <ClInclude Include="PresenceMessage.h" />
     <ClInclude Include="ServerException.h" />
     <ClInclude Include="Symbol.h" />
@@ -246,7 +248,7 @@
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties Qt5Version_x0020_x64="msvc2017_64" />
+      <UserProperties Qt5Version_x0020_x64="Qt 5.12.3" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

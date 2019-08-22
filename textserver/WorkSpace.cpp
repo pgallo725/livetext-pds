@@ -1,6 +1,7 @@
 #include "WorkSpace.h"
 
 #include "TcpServer.h"
+#include "MessageFactory.h"
 #include "ServerException.h"
 
 
@@ -38,9 +39,8 @@ void WorkSpace::newSocket(qint64 handle)
 	}
 
 	editors.insert(socket, c);
-	dispatchMessage(new PresenceMessage(AddUserPresence,							// Send to other clients this new presence
-		c->getUserId(), c->getUser()->getNickname(), c->getUser()->getIcon()),
-		socket);
+	dispatchMessage(MessageFactory::PresenceAdd(c->getUserId(),		// Send to other clients this new presence
+		c->getUser()->getNickname(), c->getUser()->getIcon()), socket);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
@@ -53,52 +53,22 @@ void WorkSpace::readMessage()
 
 	QDataStream streamIn(socket);	/* connect stream with socket */
 
-	quint16 typeOfMessage;
-	MessageCapsule message;
+	quint16 mType;
+	streamIn >> mType;		 /* take the type of incoming message */
 
-	streamIn >> typeOfMessage;		/* take the type of incoming message */
+	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+	message->readFrom(streamIn);
 
-
-	switch (typeOfMessage)
+	if (mType == CursorMove || mType == CharInsert || mType == CharDelete ||
+		mType == AccountUpdate || mType == LogoutRequest)
 	{
-			/* Account messages */
-
-		case AccountUpdate:
-			message = new AccountMessage((MessageType)typeOfMessage);
-			message->readFrom(streamIn);
-			break;
-
-			/* Text messages */
-
-		case CharInsert:
-		case CharDelete:
-			message = new TextEditMessage((MessageType)typeOfMessage);
-			message->readFrom(streamIn);
-			break;
-
-			/* Presence messages */
-
-		case MoveCursor:
-			message = new PresenceMessage((MessageType)typeOfMessage);
-			message->readFrom(streamIn);
-			break;
-
-			/* Logout messages */
-
-		case LogoutRequest:
-			message = new LogoutMessage((MessageType)typeOfMessage);
-			message->readFrom(streamIn);
-			break;
-
-			/* Unknown or unexpected message type */
-
-		default:
-			message = new ErrorMessage(MessageTypeError, "Unknown message type " + typeOfMessage);
-			message->sendTo(socket);
-			return;
+		messageHandler.process(message, socket);
 	}
-
-	messageHandler.process(message, socket);
+	else
+	{
+		message = MessageFactory::Failure("Unknown message type " + mType);
+		message->sendTo(socket);
+	}
 }
 
 
@@ -125,7 +95,7 @@ void WorkSpace::clientDisconnection()
 	qDebug() << "client removed";
 
 	// Send to other clients that this client is disconnected
-	dispatchMessage(new PresenceMessage(RemoveUserPresence, c->getUserId()), socket);
+	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), socket);
 
 	// If there are no more clients using this workspace, emit notWorking signal
 	if (!editors.size())
@@ -155,7 +125,7 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedU
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
 	if (!client->isLogged())
-		return new AccountMessage(AccountDenied, "You are not logged in");
+		return MessageFactory::AccountError("You are not logged in");
 
 	User* oldUser = client->getUser();
 
@@ -167,24 +137,23 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedU
 		oldUser->changePassword(updatedUser.getPassword());
 
 		// Notify all other clients of the changes in this user's account
-		dispatchMessage(new PresenceMessage(UserAccountUpdate,
-			oldUser->getUserId(), oldUser->getNickname(), oldUser->getIcon()),
-			clientSocket);
+		dispatchMessage(MessageFactory::PresenceUpdate(oldUser->getUserId(),
+			oldUser->getNickname(), oldUser->getIcon()), clientSocket);
 
-		return new AccountMessage(AccountConfirmed);
+		return MessageFactory::AccountConfirmed(oldUser->getUserId());
 	}
-	else return new AccountMessage(AccountDenied, "Cannot modify a different user's account");
+	else return MessageFactory::AccountError("Cannot modify a different user's account");
 }
 
 
 MessageCapsule WorkSpace::logoutClient(QTcpSocket* clientSocket)
 {
 	if (!editors.remove(clientSocket))
-		return new LogoutMessage(LogoutDenied, "You cannot logout if you're not logged in");
+		return MessageFactory::LogoutError("You cannot logout if you're not logged in");
 
 	if (editors.size() == 0)
 		emit notWorking(doc->getURI());		// TODO: should probably be the last thing to do
 
 	// TODO: need to give client to main thread
-	return new LogoutMessage(LogoutConfirmed);
+	return MessageFactory::LogoutConfirmed();
 }

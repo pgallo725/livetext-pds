@@ -1,43 +1,118 @@
 #pragma once
 
 #include "Message.h"
-#include "User.h"
+#include <QImage>
 
 
-class PresenceMessage : public Message
+class CursorMoveMessage : public Message
 {
+	friend MessageFactory;
+
+private:
+
+	qint32 m_userId;
+	qint32 m_cursorPos;
+
+protected:
+
+	CursorMoveMessage();	// empty constructor
+
+	// Construct a CursorMove message, specifying the new position of the user's cursor
+	CursorMoveMessage(qint32 userId, qint32 newPosition);
+
+public:
+
+	~CursorMoveMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	qint32 getUserId() const;
+	qint32 getCursorPosition() const;
+};
+
+
+class PresenceUpdateMessage : public Message
+{
+	friend MessageFactory;
+
 private:
 
 	qint32 m_userId;
 	QString m_userName;
 	QImage m_userIcon;
-	qint32 m_cursorPos;
-	
+
+protected:
+
+	PresenceUpdateMessage();	// empty constructor
+
+	// Construct a PresenceUpdate message, specifying the updated user's data
+	PresenceUpdateMessage(qint32 userId, QString nickname, QImage icon);
 
 public:
 
-	// Build an empty PresenceMessage, to be filled later by reading data from a socket stream
-	PresenceMessage(MessageType m);
-
-	// Construct a MoveCursor message, specifying the new position of the user's cursor
-	PresenceMessage(MessageType moveCursor, qint32 id, qint32 newPosition);
-
-	// Construct an AddUserPresence or UserAccountUpdate message, specifying the new or updated user's data
-	PresenceMessage(MessageType newOrUpdatePresence, qint32 id, QString nickname, QImage icon);
-
-	// Construct a RemoveUserPresence message, specifying the id of the user which disconnected
-	PresenceMessage(MessageType removePresence, qint32 id);
-
-	~PresenceMessage() {};
-
+	~PresenceUpdateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) override;
+	void sendTo(QTcpSocket* socket) const override;
 
-
-	/* getters */
 	qint32 getUserId() const;
 	QString getNickname() const;
 	QImage getIcon() const;
-	qint32 getCursorPosition() const;
+};
+
+
+class PresenceAddMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	qint32 m_userId;
+	QString m_userName;
+	QImage m_userIcon;
+
+protected:
+
+	PresenceAddMessage();	// empty constructor
+
+	// Construct a PresenceAdd message, specifying the new user's data
+	PresenceAddMessage(qint32 userId, QString nickname, QImage icon);
+
+public:
+
+	~PresenceAddMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	qint32 getUserId() const;
+	QString getNickname() const;
+	QImage getIcon() const;
+};
+
+
+class PresenceRemoveMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	qint32 m_userId;
+
+protected:
+
+	PresenceRemoveMessage();	// empty constructor
+
+	// Construct a PresenceRemove message, specifying the id of the user which disconnected
+	PresenceRemoveMessage(qint32 userId);
+
+public:
+
+	~PresenceRemoveMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	qint32 getUserId() const;
 };

@@ -4,38 +4,155 @@
 #include "Document.h"
 
 
-class DocumentMessage : public Message
+class DocumentCreateMessage : public Message
 {
+	friend MessageFactory;
+
 private:
 
-	Document m_doc;
-	QString m_docNameOrURI;
-	QString m_error;
+	QString m_docName;
+
+protected:
+
+	DocumentCreateMessage();		// empty constructor
+
+	// Costruct DocumentCreate message specifying the document's name
+	DocumentCreateMessage(QString documentName);
 
 public:
 
-	// Build an empty DocumentMessage, to be filled later reading data from a socket stream,
-	// or a simple DocumentRemoved message which has no payload
-	DocumentMessage(MessageType m);
-
-	// Costruct New/Open/RemoveDocument or DocumentError messages specifying either the document's 
-	// name in the first case, the URI for Open and Remove, the error reason in the last case
-	DocumentMessage(MessageType type, QString payload);
-
-	// Use this to create a DocumentOpened response, containing the Document object
-	DocumentMessage(MessageType documentOpened, Document document);
-
-	~DocumentMessage() {};
-
+	~DocumentCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) override;
+	void sendTo(QTcpSocket* socket) const override;
 
-
-	/* getter */
-	Document getDocument();
-	QString getDocumentURI();
-	QString getDocumentName();
-	QString getErrorMessage();
+	QString getDocumentName() const;
 };
 
+
+
+class DocumentRemoveMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QString m_docURI;
+
+protected:
+
+	DocumentRemoveMessage();	 // empty constructor
+
+	// Costruct DocumentRemove message with the URI of the document to be removed
+	DocumentRemoveMessage(QString documentURI);
+
+public:
+
+	~DocumentRemoveMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	QString getDocumentURI() const;
+};
+
+
+
+class DocumentOpenMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QString m_docURI;
+
+protected:
+
+	DocumentOpenMessage();		// empty constructor
+
+	// Costruct DocumentOpen message specifying the document's URI
+	DocumentOpenMessage(QString documentURI);
+
+public:
+
+	~DocumentOpenMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	QString getDocumentURI() const;
+};
+
+
+
+class DocumentDismissedMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+protected:
+
+	DocumentDismissedMessage();	 // empty constructor
+
+public:
+
+	~DocumentDismissedMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+};
+
+
+
+class DocumentReadyMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	Document m_document;
+
+protected:
+
+	DocumentReadyMessage();	// empty constructor
+
+	// Use this to create a DocumentReady response, containing the Document object
+	DocumentReadyMessage(Document doc);
+
+public:
+
+	~DocumentReadyMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	Document getDocument() const;
+};
+
+
+
+class DocumentErrorMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QString m_error;
+
+protected:
+
+	DocumentErrorMessage();		// empty constructor
+
+	// Costruct DocumentError message with a string describing the error
+	DocumentErrorMessage(QString reason);
+
+public:
+
+	~DocumentErrorMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	QString getErrorMessage() const;
+};

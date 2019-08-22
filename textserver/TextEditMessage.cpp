@@ -1,71 +1,61 @@
 #include "TextEditMessage.h"
 
 
-TextEditMessage::TextEditMessage(MessageType m) 
-	: Message(m)
+/*************** CHAR INSERT MESSAGE ***************/
+
+CharInsertMessage::CharInsertMessage()
+	: Message(CharInsert)
 {
 }
 
-TextEditMessage::TextEditMessage(MessageType charInsert, Symbol symbol)
-	: Message(charInsert), m_symbol(symbol)
+CharInsertMessage::CharInsertMessage(Symbol symbol)
+	: Message(CharInsert), m_symbol(symbol)
 {
 }
 
-TextEditMessage::TextEditMessage(MessageType charDelete, QVector<qint32> position)
-	: Message(charDelete), m_position(position)
+void CharInsertMessage::readFrom(QDataStream& stream)
 {
+	stream >> m_symbol;
 }
 
-
-void TextEditMessage::readFrom(QDataStream& stream)
-{
-	switch (m_type)
-	{
-		case CharInsert:
-			stream >> m_symbol;
-			break;
-
-		case CharDelete:
-			stream >> m_position;
-			break;
-
-		default:
-			// throw ?
-			break;
-	}
-}
-
-void TextEditMessage::sendTo(QTcpSocket* socket)
+void CharInsertMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type;
-
-	switch (m_type)
-	{
-		case CharInsert:
-			streamOut << m_symbol;
-			break;
-
-		case CharDelete:
-			streamOut << m_position;
-			break;
-
-		default:
-			// throw ?
-			break;
-	}
+	streamOut << (quint16)CharInsert << m_symbol;
 }
 
-
-Symbol& TextEditMessage::getSymbol()
+Symbol& CharInsertMessage::getSymbol()
 {
 	return m_symbol;
 }
 
-QVector<qint32> TextEditMessage::getPosition()
+
+/*************** CHAR DELETE MESSAGE ***************/
+
+CharDeleteMessage::CharDeleteMessage()
+	: Message(CharDelete)
 {
-	if (m_type == CharInsert)
-		return m_symbol._fPos;
-	else return m_position;
+}
+
+CharDeleteMessage::CharDeleteMessage(QVector<qint32> position)
+	: Message(CharDelete), m_fPos(position)
+{
+}
+
+void CharDeleteMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_fPos;
+}
+
+void CharDeleteMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)CharDelete << m_fPos;
+}
+
+QVector<qint32> CharDeleteMessage::getPosition() const
+{
+	return m_fPos;
 }

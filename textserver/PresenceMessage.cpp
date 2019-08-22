@@ -1,96 +1,146 @@
 #include "PresenceMessage.h"
 
 
-PresenceMessage::PresenceMessage(MessageType m)
-	: Message(m), m_userId(-1), m_cursorPos(-1)
+/*************** CURSOR MOVEMENT MESSAGE ***************/
+
+CursorMoveMessage::CursorMoveMessage()
+	: Message(CursorMove), m_userId(-1)
 {
 }
 
-PresenceMessage::PresenceMessage(MessageType moveCursor, qint32 id, qint32 newPosition)
-	: Message(moveCursor), m_userId(id), m_cursorPos(newPosition)
+CursorMoveMessage::CursorMoveMessage(qint32 userId, qint32 newPosition)
+	: Message(CursorMove), m_userId(userId), m_cursorPos(newPosition)
 {
 }
 
-PresenceMessage::PresenceMessage(MessageType newOrUpdatePresence, qint32 id, QString username, QImage icon)
-	: Message(newOrUpdatePresence), m_userId(id), m_userName(username), m_userIcon(icon), m_cursorPos(-1)
+void CursorMoveMessage::readFrom(QDataStream& stream)
 {
+	stream >> m_cursorPos;
 }
 
-PresenceMessage::PresenceMessage(MessageType removePresence, qint32 id)
-	: Message(removePresence), m_userId(id), m_cursorPos(-1)
-{
-}
-	
-
-void PresenceMessage::readFrom(QDataStream& stream)
-{
-	stream >> m_userId;
-
-	switch (m_type)
-	{
-	case MoveCursor:
-		stream >> m_cursorPos;
-		break;
-
-	case UserAccountUpdate:
-	case AddUserPresence:
-		stream >> m_userName >> m_userIcon;
-		break;
-
-	case RemoveUserPresence:
-		break;
-
-	default:
-		// throw ?
-		break;
-	}
-}
-
-void PresenceMessage::sendTo(QTcpSocket* socket)
+void CursorMoveMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type << m_userId;
-
-
-	switch (m_type)
-	{
-	case MoveCursor:
-		streamOut << m_cursorPos;
-		break;
-
-	case UserAccountUpdate:
-	case AddUserPresence:
-		streamOut << m_userName << m_userIcon;
-		break;
-
-	case RemoveUserPresence:
-		break;
-
-	default:
-		// throw ?
-		break;
-	}
+	streamOut << (quint16)CursorMove << m_userId << m_cursorPos;
 }
 
-
-
-qint32 PresenceMessage::getUserId() const
+qint32 CursorMoveMessage::getUserId() const
 {
 	return m_userId;
 }
 
-QString PresenceMessage::getNickname() const
+qint32 CursorMoveMessage::getCursorPosition() const
+{
+	return m_cursorPos;
+}
+
+
+/*************** PRESENCE UPDATE MESSAGE ***************/
+
+PresenceUpdateMessage::PresenceUpdateMessage()
+	: Message(PresenceUpdate), m_userId(-1)
+{
+}
+
+PresenceUpdateMessage::PresenceUpdateMessage(qint32 userId, QString nickname, QImage icon)
+	: Message(PresenceUpdate), m_userId(userId), m_userName(nickname), m_userIcon(icon)
+{
+}
+
+void PresenceUpdateMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_userId >> m_userName >> m_userIcon;
+}
+
+void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)PresenceUpdate << m_userId << m_userName << m_userIcon;
+}
+
+qint32 PresenceUpdateMessage::getUserId() const
+{
+	return m_userId;
+}
+
+QString PresenceUpdateMessage::getNickname() const
 {
 	return m_userName;
 }
 
-QImage PresenceMessage::getIcon() const
+QImage PresenceUpdateMessage::getIcon() const
 {
 	return m_userIcon;
 }
 
-qint32 PresenceMessage::getCursorPosition() const
+
+/*************** PRESENCE ADD MESSAGE ***************/
+
+PresenceAddMessage::PresenceAddMessage()
+	: Message(PresenceAdd), m_userId(-1)
 {
-	return m_cursorPos;
+}
+
+PresenceAddMessage::PresenceAddMessage(qint32 userId, QString nickname, QImage icon)
+	: Message(PresenceAdd), m_userId(userId), m_userName(nickname), m_userIcon(icon)
+{
+}
+
+void PresenceAddMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_userId >> m_userName >> m_userIcon;
+}
+
+void PresenceAddMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)PresenceAdd << m_userId << m_userName << m_userIcon;
+}
+
+qint32 PresenceAddMessage::getUserId() const
+{
+	return m_userId;
+}
+
+QString PresenceAddMessage::getNickname() const
+{
+	return m_userName;
+}
+
+QImage PresenceAddMessage::getIcon() const
+{
+	return m_userIcon;
+}
+
+
+/*************** PRESENCE REMOVE MESSAGE ***************/
+
+PresenceRemoveMessage::PresenceRemoveMessage()
+	: Message(PresenceRemove), m_userId(-1)
+{
+}
+
+PresenceRemoveMessage::PresenceRemoveMessage(qint32 userId)
+	: Message(PresenceRemove), m_userId(userId)
+{
+}
+
+void PresenceRemoveMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_userId;
+}
+
+void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)PresenceRemove << m_userId;
+}
+
+qint32 PresenceRemoveMessage::getUserId() const
+{
+	return m_userId;
 }

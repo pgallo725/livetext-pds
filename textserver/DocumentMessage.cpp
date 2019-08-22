@@ -1,102 +1,171 @@
 #include "DocumentMessage.h"
-#include "ServerException.h"
 
 
-DocumentMessage::DocumentMessage(MessageType m)
-	: Message(m)
+/*************** NEW DOCUMENT MESSAGE ***************/
+
+DocumentCreateMessage::DocumentCreateMessage()
+	: Message(DocumentCreate)
 {
 }
 
-DocumentMessage::DocumentMessage(MessageType type, QString payload)
-	: Message(type)
-{
-	if (m_type == DocumentError)
-		m_error = payload;
-	else // New/Open/Remove Document
-		m_docNameOrURI = payload;
-}
-
-DocumentMessage::DocumentMessage(MessageType documentOpened, Document document)
-	: Message(documentOpened), m_doc(document)
+DocumentCreateMessage::DocumentCreateMessage(QString documentName)
+	: Message(DocumentCreate), m_docName(documentName)
 {
 }
 
-void DocumentMessage::readFrom(QDataStream& stream)
+void DocumentCreateMessage::readFrom(QDataStream& stream)
 {
-	switch (m_type)
-	{
-		case NewDocument:
-		case OpenDocument:
-		case RemoveDocument:
-			stream >> m_docNameOrURI;
-			break;
-
-		case DocumentOpened:
-			stream >> m_doc;
-			break;
-
-		case DocumentRemoved:
-			break;
-
-		case DocumentError:
-			stream >> m_error;
-			break;
-
-		default:
-			throw MessageUnexpectedTypeException(m_type);	// ?
-			break;
-	}
+	stream >> m_docName;
 }
 
-void DocumentMessage::sendTo(QTcpSocket* socket)
+void DocumentCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type;
-
-	switch (m_type) 
-	{
-		case NewDocument:
-		case OpenDocument:
-		case RemoveDocument:
-			streamOut << m_docNameOrURI;
-			break;
-
-		case DocumentOpened:
-			streamOut << m_doc;
-			break;
-
-		case DocumentError:
-			streamOut << m_error;
-			break;
-
-		default:
-			throw MessageUnexpectedTypeException(m_type);	// ?
-			break;
-	}
+	streamOut << (quint16)DocumentCreate << m_docName;
 }
 
-
-Document DocumentMessage::getDocument()
+QString DocumentCreateMessage::getDocumentName() const
 {
-	return m_doc;
+	return m_docName;
 }
 
-QString DocumentMessage::getDocumentName()
+
+/*************** REMOVE DOCUMENT MESSAGE ***************/
+
+DocumentRemoveMessage::DocumentRemoveMessage()
+	: Message(DocumentRemove)
 {
-	if (m_type == DocumentOpened)
-		return m_doc.getName();
-	else return m_docNameOrURI;
 }
 
-QString DocumentMessage::getDocumentURI()
+DocumentRemoveMessage::DocumentRemoveMessage(QString documentURI)
+	: Message(DocumentRemove), m_docURI(documentURI)
 {
-	if (m_type == DocumentOpened)
-		return m_doc.getURI();
-	else return m_docNameOrURI;
 }
 
-QString DocumentMessage::getErrorMessage()
+void DocumentRemoveMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_docURI;
+}
+
+void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)DocumentRemove << m_docURI;
+}
+
+QString DocumentRemoveMessage::getDocumentURI() const
+{
+	return m_docURI;
+}
+
+
+/*************** OPEN DOCUMENT MESSAGE ***************/
+
+DocumentOpenMessage::DocumentOpenMessage()
+	: Message(DocumentOpen)
+{
+}
+
+DocumentOpenMessage::DocumentOpenMessage(QString documentURI)
+	: Message(DocumentOpen), m_docURI(documentURI)
+{
+}
+
+void DocumentOpenMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_docURI;
+}
+
+void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)DocumentRemove << m_docURI;
+}
+
+QString DocumentOpenMessage::getDocumentURI() const
+{
+	return m_docURI;
+}
+
+
+/*************** DOCUMENT REMOVED MESSAGE ***************/
+
+DocumentDismissedMessage::DocumentDismissedMessage()
+	: Message(DocumentDismissed)
+{
+}
+
+void DocumentDismissedMessage::readFrom(QDataStream& stream)
+{
+	// NO CONTENT TO READ
+}
+
+void DocumentDismissedMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)DocumentDismissed;
+}
+
+
+/*************** DOCUMENT OPENED MESSAGE ***************/
+
+DocumentReadyMessage::DocumentReadyMessage()
+	: Message(DocumentReady)
+{
+}
+
+DocumentReadyMessage::DocumentReadyMessage(Document doc)
+	: Message(DocumentReady), m_document(doc)
+{
+}
+
+void DocumentReadyMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_document;
+}
+
+void DocumentReadyMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)DocumentReady << m_document;
+}
+
+Document DocumentReadyMessage::getDocument() const
+{
+	return m_document;
+}
+
+
+/*************** DOCUMENT ERROR MESSAGE ***************/
+
+DocumentErrorMessage::DocumentErrorMessage()
+	: Message(DocumentError)
+{
+}
+
+DocumentErrorMessage::DocumentErrorMessage(QString reason)
+	: Message(DocumentError), m_error(reason)
+{
+}
+
+void DocumentErrorMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_error;
+}
+
+void DocumentErrorMessage::sendTo(QTcpSocket* socket) const
+{
+	QDataStream streamOut(socket);
+
+	streamOut << (quint16)DocumentError << m_error;
+}
+
+QString DocumentErrorMessage::getErrorMessage() const
 {
 	return m_error;
 }

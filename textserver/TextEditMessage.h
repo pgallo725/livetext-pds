@@ -6,33 +6,53 @@
 #include <QVector>
 
 
-class TextEditMessage : public Message
+class CharInsertMessage : public Message
 {
+	friend MessageFactory;
+
 private:
 
 	Symbol m_symbol;
-	QVector<qint32> m_position;
+
+protected:
+
+	CharInsertMessage();	// empty constructor
+
+	// Constructor for CharInsert messages
+	CharInsertMessage(Symbol symbol);
 
 public:
 
-	// Build an empty TextEditMessage, to be filled later reading data from a socket stream
-	TextEditMessage(MessageType m);
-
-	// Constructor for CharInsert messages
-	TextEditMessage(MessageType charInsert, Symbol symbol);
-
-	// Constructor for CharDelete messages
-	TextEditMessage(MessageType charDelete, QVector<qint32> position);
-
-	~TextEditMessage() {};
-
+	~CharInsertMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) override;
+	void sendTo(QTcpSocket* socket) const override;
 
-
-	/* getters */
 	Symbol& getSymbol();
-	QVector<qint32> getPosition();
+};
 
+
+class CharDeleteMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QVector<qint32> m_fPos;
+
+protected:
+
+	CharDeleteMessage();	// empty constructor
+
+	// Constructor for CharDelete messages
+	CharDeleteMessage(QVector<qint32> position);
+
+public:
+
+	~CharDeleteMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	QVector<qint32> getPosition() const;
 };

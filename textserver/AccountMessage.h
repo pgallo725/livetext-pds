@@ -4,39 +4,108 @@
 #include "User.h"
 
 
-class AccountMessage :
-	public Message
+class AccountCreateMessage : public Message
 {
+	friend MessageFactory;
+
 private:
 
 	User m_user;
-	QString m_reason;
-	int m_userId;
+
+protected:
+
+	AccountCreateMessage();		// empty constructor
+
+	// Create an AccountCreate message, with the new account information
+	AccountCreateMessage(User newUser);
 
 public:
 
-	// Build an empty AccountMessage, to be filled later by reading data from a socket stream
-	AccountMessage(MessageType m);
-
-	// Create an AccountCreate or AccountUpdate message, with the new/updated account information
-	AccountMessage(MessageType accountCreateOrUpdate, User account);
-
-	// Construct the AccountConfirmed message, with the id chosen by the server for the User
-	AccountMessage(MessageType accountConfirmed, int userId);
-
-	// Create the AccountDenied message, with a string describing the error
-	AccountMessage(MessageType accountDenied, QString reason);
-
-	~AccountMessage() {};
-
+	~AccountCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) override;
+	void sendTo(QTcpSocket* socket) const override;
 
-
-	/* getters */
 	User& getUserObj();
-	int getUserId();
-	QString getErrorMessage();
 };
 
+
+
+class AccountUpdateMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	User m_user;
+
+protected:
+
+	AccountUpdateMessage();		// empty constructor
+
+	// Create an AccountUpdate message, with the new account information
+	AccountUpdateMessage(User updatedUser);
+
+public:
+
+	~AccountUpdateMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	User& getUserObj();
+};
+
+
+
+class AccountConfirmedMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	qint32 m_userId;
+
+protected:
+
+	AccountConfirmedMessage();		// empty constructor
+
+	// Construct the AccountConfirmed message, with the id chosen by the server for the User
+	AccountConfirmedMessage(qint32 userId);
+
+public:
+
+	~AccountConfirmedMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	qint32 getUserId() const;
+};
+
+
+
+class AccountErrorMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QString m_error;
+
+protected:
+
+	AccountErrorMessage();		// empty constructor
+
+	// Create the AccountError message, with a string describing the error
+	AccountErrorMessage(QString reason);
+
+public:
+
+	~AccountErrorMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QTcpSocket* socket) const override;
+
+	QString getErrorMessage() const;
+};

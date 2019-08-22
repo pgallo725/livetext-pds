@@ -57,7 +57,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case LoginRequest:
 	{
-		LoginMessage* loginRqst = dynamic_cast<LoginMessage*>(message.get());
+		LoginRequestMessage* loginRqst = dynamic_cast<LoginRequestMessage*>(message.get());
 		MessageCapsule response = emit loginRequest(socket, loginRqst->getUsername());
 		response->sendTo(socket);
 		break;
@@ -65,7 +65,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case LoginUnlock:
 	{
-		LoginMessage* loginUnlck = dynamic_cast<LoginMessage*>(message.get());
+		LoginUnlockMessage* loginUnlck = dynamic_cast<LoginUnlockMessage*>(message.get());
 		MessageCapsule response = emit loginUnlock(socket, loginUnlck->getToken());
 		response->sendTo(socket);
 		break;
@@ -75,7 +75,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case AccountCreate:
 	{
-		AccountMessage* accntCreate = dynamic_cast<AccountMessage*>(message.get());
+		AccountCreateMessage* accntCreate = dynamic_cast<AccountCreateMessage*>(message.get());
 		MessageCapsule response = emit accountCreate(socket, accntCreate->getUserObj());
 		response->sendTo(socket);
 		break;
@@ -83,7 +83,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case AccountUpdate:
 	{
-		AccountMessage* accntUpdate = dynamic_cast<AccountMessage*>(message.get());
+		AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
 		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getUserObj());
 		response->sendTo(socket);
 		break;
@@ -91,25 +91,25 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 		/* DOCUMENT MESSAGES */
 
-	case NewDocument:
+	case DocumentCreate:
 	{
-		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		DocumentCreateMessage* docMsg = dynamic_cast<DocumentCreateMessage*>(message.get());
 		MessageCapsule response = emit documentCreate(socket, docMsg->getDocumentName());
 		response->sendTo(socket);
 		break;
 	}
 
-	case OpenDocument:
+	case DocumentOpen:
 	{
-		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		DocumentOpenMessage* docMsg = dynamic_cast<DocumentOpenMessage*>(message.get());
 		MessageCapsule response = emit documentOpen(socket, docMsg->getDocumentURI());
 		response->sendTo(socket);
 		break;
 	}
 
-	case RemoveDocument:
+	case DocumentRemove:
 	{
-		DocumentMessage* docMsg = dynamic_cast<DocumentMessage*>(message.get());
+		DocumentRemoveMessage* docMsg = dynamic_cast<DocumentRemoveMessage*>(message.get());
 		MessageCapsule response = emit documentRemove(socket, docMsg->getDocumentURI());
 		response->sendTo(socket);
 		break;
@@ -119,7 +119,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case CharInsert:
 	{
-		TextEditMessage* insertMsg = dynamic_cast<TextEditMessage*>(message.get());
+		CharInsertMessage* insertMsg = dynamic_cast<CharInsertMessage*>(message.get());
 		emit charInsert(insertMsg->getSymbol());
 		emit messageDispatch(message, socket);
 		break;
@@ -127,7 +127,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 	case CharDelete:
 	{
-		TextEditMessage* deleteMsg = dynamic_cast<TextEditMessage*>(message.get());
+		CharDeleteMessage* deleteMsg = dynamic_cast<CharDeleteMessage*>(message.get());
 		emit charDelete(deleteMsg->getPosition());
 		emit messageDispatch(message, socket);
 		break;
@@ -135,7 +135,7 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 
 		/* PRESENCE MESSAGES */
 
-	case MoveCursor:
+	case CursorMove:
 		emit messageDispatch(message, socket);
 		break;
 

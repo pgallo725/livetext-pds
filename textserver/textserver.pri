@@ -20,7 +20,8 @@ HEADERS += ./TcpServer.h \
 	./DocumentMessage.h \
 	./TextEditMessage.h \
 	./PresenceMessage.h \
-	./ErrorMessage.h \
+	./FailureMessage.h \
+	./MessageFactory.h \
 	./MessageHandler.h
 	
 
@@ -40,6 +41,7 @@ SOURCES += ./main.cpp \
 	./DocumentMessage.cpp \
 	./TextEditMessage.cpp \
 	./PresenceMessage.cpp \
-	./ErrorMessage.cpp \
+	./FailureMessage.cpp \
+	./MessageFactory.cpp \
 	./MessageHandler.cpp
 	
