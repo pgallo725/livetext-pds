@@ -31,6 +31,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Document.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)DocumentMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FailureMessage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LoginMessage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)LogoutMessage.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Message.cpp" />
