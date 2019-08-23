@@ -21,6 +21,7 @@ private:
 
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
+	QSharedPointer<QThread> workThread;
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
 

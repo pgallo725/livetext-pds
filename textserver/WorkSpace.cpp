@@ -12,6 +12,12 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(SAVE_TIMEOUT);
+
+	QThread* t = new QThread();
+	connect(t, &QThread::finished, t, &QThread::deleteLater);
+	this->moveToThread(t);
+	t->start();
+	workThread = QSharedPointer<QThread>(t);
 }
 
 
@@ -19,6 +25,8 @@ WorkSpace::~WorkSpace()
 {
 	timer.stop();
 	doc->save();	// Saving changes to the document before closing the workspace
+	workThread->quit();
+	workThread->wait();
 }
 
 

@@ -38,7 +38,7 @@ private:
 	QMap<QString, User> users;
 	QMap<QString, QSharedPointer<Document>> documents;
 	QMap<QString, QSharedPointer<WorkSpace>> workspaces;	// TODO(?): can workspaces and workThreads be unified ?
-	QMap<QString, QSharedPointer<QThread>> workThreads;
+	//QMap<QString, QSharedPointer<QThread>> workThreads;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
 	qint32 _userIdCounter;
 

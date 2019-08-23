@@ -357,15 +357,15 @@ WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QShared
 {
 	WorkSpace* w = new WorkSpace(document, QSharedPointer<TcpServer>(this));
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
-	QThread* t = new QThread();
+	//QThread* t = new QThread();
 
 	documents.insert(document->getURI(), document);
 	workspaces.insert(document->getURI(), QSharedPointer<WorkSpace>(w));
-	workThreads.insert(document->getURI(), QSharedPointer<QThread>(t));
+	//workThreads.insert(document->getURI(), QSharedPointer<QThread>(t));
 
 	/* change affinity of this workspace with a new thread */
-	w->moveToThread(t);
-	t->start();
+	//w->moveToThread(t);
+	//t->start();
 
 	/* workspace will notify when theres no one using it for delete */
 	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
@@ -473,7 +473,7 @@ MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, QString docUr
 void TcpServer::deleteWorkspace(QString document)
 {
 	WorkSpace* w = workspaces.find(document).value().get();
-	QThread* t = workThreads.find(document).value().get();
+	//QThread* t = workThreads.find(document).value().get();
 
 	/* they throw an exception ??? why??? */
 	//disconnect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
@@ -483,9 +483,9 @@ void TcpServer::deleteWorkspace(QString document)
 	workspaces.remove(document);	
 
 	/* stop the thread, wait for exit, delete thread and remove it from the map */
-	workThreads.find(document).value()->quit();
-	workThreads.find(document).value()->wait();
-	workThreads.remove(document);
+	//workThreads.find(document).value()->quit();
+	//workThreads.find(document).value()->wait();
+	//workThreads.remove(document);
 
 	qDebug() << "workspace cancellato";
 }
