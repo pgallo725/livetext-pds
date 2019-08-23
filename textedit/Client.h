@@ -18,18 +18,17 @@
 #include <sstream>
 
 // File to handle Message with the server
-#include "../textserver/AccountMessage.h"
-#include "../textserver/Message.h"
-#include "../textserver/LoginMessage.h"
-#include "../textserver/LogoutMessage.h"
-#include "../textserver/PresenceMessage.h"
-#include "../textserver/DocumentMessage.h"
+#include <AccountMessage.h>
+#include <Message.h>
+#include <LoginMessage.h>
+#include <LogoutMessage.h>
+#include <PresenceMessage.h>
+#include <DocumentMessage.h>
 
 
 //File for DataStructure
-#include "../textserver/User.h"
-#include "../textserver/Symbol.h"
-
+#include <User.h>
+#include <Symbol.h>
 
 class Client : public QObject
 {

@@ -1,5 +1,6 @@
 #include "Client.h"
 
+
 Client::Client(QObject* parent) : QObject(parent)
 {
 	socket = new QTcpSocket(this);
@@ -53,13 +54,13 @@ void Client::readBuffer() {
 	in >> typeOfMessage;
 
 	switch (typeOfMessage) {
-	case MoveCursor:
+	case CursorMove:
 		reciveCursor(in);
 		break;
-	case UserAccountUpdate:
+	case AccountUpdate:
 		accountUpdate(in);
 		break;
-	case AddUserPresence:
+	case PresenceAdd:
 		newUserPresence(in);
 			break;
 	default:
