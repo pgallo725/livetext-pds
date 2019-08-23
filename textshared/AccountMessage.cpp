@@ -1,7 +1,5 @@
 #include "AccountMessage.h"
 
-#include "ServerException.h"
-
 
 /*************** ACCOUNT CREATE MESSAGE ***************/
 

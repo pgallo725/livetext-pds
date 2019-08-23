@@ -1,6 +1,5 @@
 #include "User.h"
 
-#include <QString>
 #include <QDataStream>
 
 

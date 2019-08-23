@@ -11,7 +11,7 @@
 #include <QDateTime>
 #include <QCryptographicHash>
 
-#include "MessageFactory.h"
+#include <MessageFactory.h>
 #include "ServerException.h"
 
 

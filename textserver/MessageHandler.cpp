@@ -3,13 +3,13 @@
 #include "TcpServer.h"
 #include "WorkSpace.h"
 
-#include "LoginMessage.h"
-#include "LogoutMessage.h"
-#include "AccountMessage.h"
-#include "DocumentMessage.h"
-#include "TextEditMessage.h"
-#include "PresenceMessage.h"
-#include "ErrorMessage.h"
+#include <LoginMessage.h>
+#include <LogoutMessage.h>
+#include <AccountMessage.h>
+#include <DocumentMessage.h>
+#include <TextEditMessage.h>
+#include <PresenceMessage.h>
+#include <FailureMessage.h>
 
 #include <QDataStream>
 

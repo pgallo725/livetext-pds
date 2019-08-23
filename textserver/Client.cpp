@@ -1,5 +1,6 @@
 #include "Client.h"
-#include "Message.h"
+
+#include <QCryptographicHash>
 
 
 // Set of characters that will be used to generate random sequences as nonce

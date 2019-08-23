@@ -3,8 +3,8 @@
 #include <QObject>
 #include <QTcpSocket>
 
-#include "Message.h"
-#include "User.h"
+#include <Message.h>
+#include <User.h>
 #include "Document.h"
 
 

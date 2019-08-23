@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Message.h"
-
 #include "Symbol.h"
-#include <QVector>
 
 
 class CharInsertMessage : public Message

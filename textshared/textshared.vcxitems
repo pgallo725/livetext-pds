@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{47ca151a-7805-4297-ac58-aeb80d407e62}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)AccountMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Document.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)DocumentMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)FailureMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)LoginMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)LogoutMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Message.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)MessageFactory.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)PresenceMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Symbol.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextEditMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)User.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Document.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)DocumentMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)FailureMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)LoginMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)LogoutMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Message.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)MessageFactory.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PresenceMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Symbol.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextEditMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)User.cpp" />
+  </ItemGroup>
+</Project>
