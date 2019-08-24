@@ -13,7 +13,6 @@ Client::Client(QObject* parent) : QObject(parent)
 	emit impossibleToConnect();
 	socket->abort(); });
 
-	//socket->connectToHost("127.0.0.1", 1500);
 }
 
 
@@ -61,7 +60,16 @@ void Client::readBuffer() {
 		break;
 	case AddUserPresence:
 		newUserPresence(in);
-			break;
+		break;
+	case RemoveUserPresence:
+		deleteUserPresence(in);
+		break;
+	case CharInsert:
+		reciveChar(in);
+		break;
+	case CharDelete:
+		deleteChar(in);
+		break;
 	default:
 		//thorw exception
 		break;
@@ -423,7 +431,12 @@ void Client::sendChar(Symbol character) {
 
 }
 
-void Client::reciveChar() {
+void Client::reciveChar(QDataStream& in) {
+
+	//TODO message implementation
+}
+
+void Client::deleteChar(QDataStream& in) {
 
 	//TODO message implementation
 }
@@ -451,4 +464,12 @@ void Client::newUserPresence(QDataStream& in) {
 	PresenceMessage* newaccountpresence = dynamic_cast<PresenceMessage*>(newAccountPresence.get());
 	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
 
+}
+
+void Client::deleteUserPresence(QDataStream& in) {
+
+	MessageCapsule userPresence = new PresenceMessage(RemoveUserPresence);
+	userPresence->readFrom(in);
+	PresenceMessage* userpresence = dynamic_cast<PresenceMessage*>(userPresence.get());
+	emit cancelUserPresence(userpresence->getUserId());
 }

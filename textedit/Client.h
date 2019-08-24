@@ -56,6 +56,7 @@ signals:
 	void recivedSymbol(Symbol character);
 	void accountModified(qint32 userId,QString username,QImage image);
 	void userPresence(qint32 userId, QString username, QImage image);
+	void cancelUserPresence(qint32 userId);
 
 public:
 	Client(QObject* parent = 0);
@@ -76,7 +77,8 @@ public slots:
 	void sendCursor(qint32 position);
 	void reciveCursor(QDataStream& in);
 	void sendChar(Symbol character);
-	void reciveChar();
+	void reciveChar(QDataStream& in);
+	void deleteChar(QDataStream& in);
 	void openDocument(QString URI);
 	void createDocument(QString name);
 	void requestURI();
@@ -94,5 +96,6 @@ public slots:
 	void newUserPresence(QDataStream& in);
 	void accountUpdate(QDataStream& in);
 	void sendAccountUpdate(qint32 userId, QString name, QImage image);
+	void deleteUserPresence(QDataStream& in);
 };
 
