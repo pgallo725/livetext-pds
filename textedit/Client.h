@@ -17,6 +17,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <vector>
+
 // File to handle Message with the server
 #include <AccountMessage.h>
 #include <Message.h>
@@ -24,6 +26,8 @@
 #include <LogoutMessage.h>
 #include <PresenceMessage.h>
 #include <DocumentMessage.h>
+#include <MessageFactory.h>
+#include <TextEditMessage.h>
 
 
 //File for DataStructure
@@ -43,20 +47,30 @@ private:
 signals:
 	void connectionEstablished();
 	void impossibleToConnect();
-	void cursorMoved(qint32 position, qint32 user);
-	void loginSuccess();
+
+	// Login, Logout & Register
+	void loginSuccess(User user);
 	void loginFailed(QString errorType);
-	void registrationCompleted();
+	void registrationCompleted(User user);
 	void registrationFailed(QString errorType);
 	void logoutCompleted();
 	void logoutFailed(QString errorType);
-	void openFileCompleted(Document document);
-	void openFileFailed(QString error);
-	void recivedSymbol(Symbol character);
+
+	// Presence Signals
+	void cursorMoved(qint32 position, qint32 user);
 	void accountModified(qint32 userId,QString username,QImage image);
 	void userPresence(qint32 userId, QString username, QImage image);
 	void cancelUserPresence(qint32 userId);
-
+	
+	//Document Signals
+	void removeFileFailed(QString errorType);
+	void openFileCompleted(Document document);
+	void openFileFailed(QString error);
+	void documentDismissed();
+	
+	// Symbol Signals
+	void recivedSymbol(Symbol character);
+	void removeSymbol(QVector<int> position);
 public:
 	Client(QObject* parent = 0);
 	~Client();
@@ -73,14 +87,15 @@ public slots:
 	void Register();
 	void Logout();
 	//Data Exchange
-	void sendCursor(qint32 position);
+	void sendCursor(qint32 userId, qint32 position);
 	void reciveCursor(QDataStream& in);
 	void sendChar(Symbol character);
 	void reciveChar(QDataStream& in);
 	void deleteChar(QDataStream& in);
+	//Document handler
 	void openDocument(QString URI);
 	void createDocument(QString name);
-	void requestURI();
+	void deleteDocument(QString URI);
 	//Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();

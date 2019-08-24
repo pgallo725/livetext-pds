@@ -62,7 +62,7 @@ void Client::readBuffer() {
 	case PresenceAdd:
 		newUserPresence(in);
 		break;
-	case RemoveUserPresence:
+	case PresenceRemove:
 		deleteUserPresence(in);
 		break;
 	case CharInsert:
@@ -118,16 +118,13 @@ bool Client::getLogin() {
 
 void Client::Login() {
 
-	QString error;
-	MessageCapsule loginRequest = new LoginMessage(LoginRequest,username);
+	MessageCapsule incomingMessage;
+	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
 
 	loginRequest->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
-		//throw ServerNotRespondException();
-		error = "recived no byte";
-		emit loginFailed(error);
+		emit loginFailed("server not responding");
 		return;
 	}
 
@@ -135,7 +132,10 @@ void Client::Login() {
 	qint16 typeOfMessage;
 
 	in.setDevice(socket);
-	in >> typeOfMessage;
+	in >>  typeOfMessage;
+
+	incomingMessage = MessageFactory::Empty((MessageType) typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	// switch to check the correctness of the type of Message
 	switch (typeOfMessage) {
@@ -144,68 +144,54 @@ void Client::Login() {
 	case LoginError:
 	{
 		// user not exist
-		MessageCapsule loginError = new LoginMessage(LoginError);
-		loginError->readFrom(in);
-		LoginMessage* loginerror = dynamic_cast<LoginMessage*>(loginError.get());
-		emit loginFailed(loginerror->getErrorMessage());
+		LoginErrorMessage* loginError = dynamic_cast<LoginErrorMessage*>(incomingMessage.get());
+		emit loginFailed(loginError->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
 		return;
-		break;
 	}
 
-	MessageCapsule loginChallenge = new LoginMessage(LoginChallenge);
-
-	loginChallenge->readFrom(in);
-
-	LoginMessage *docMsg = dynamic_cast<LoginMessage*>(loginChallenge.get());
-	QString nonce = docMsg->getNonce();
+	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
+	QString nonce = loginChallenge->getNonce();
 
 	qDebug() << "cripting salt " << nonce;
 	QString result = password + nonce;
-	/*hash.addData(password.toStdString().c_str(), password.length());
+	
+	QCryptographicHash hash(QCryptographicHash::Md5);
+	hash.addData(password.toStdString().c_str(), password.length());
 
-	out << typeOfMessage << QString::fromStdString(hash.result().toStdString());
-	*/
-	LoginMessage* loginUnlock = new LoginMessage(LoginUnlock, result);
+	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash.result().toStdString()));
+
 	loginUnlock->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
-		//throw ServerNotRespondException();
-		error = "recived no byte";
-		emit loginFailed(error);
+		emit loginFailed("server not responding");
 		return;
 	}
 
 	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	switch (typeOfMessage) {
-	case LoginAccessGranted: {
-		LoginMessage* loginAccess = new LoginMessage(LoginAccessGranted);
-		loginAccess->readFrom(in);
-		emit loginSuccess();
+	case LoginGranted: {
+		LoginGrantedMessage* loginGranted = dynamic_cast<LoginGrantedMessage*>(incomingMessage.get());
+		emit loginSuccess(loginGranted->getLoggedUser());
 		return;
-		break;
 	}
 	case LoginError: {
 		// user not exist
-		MessageCapsule loginError = new LoginMessage(LoginError);
-		loginError->readFrom(in);
-		LoginMessage* loginerror = dynamic_cast<LoginMessage*>(loginError.get());
+		LoginErrorMessage* loginerror = dynamic_cast<LoginErrorMessage*>(incomingMessage.get());
 		emit loginFailed(loginerror->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
 		return;
-		break;
 	}
 }
 
@@ -213,264 +199,279 @@ void Client::Register() {
 
 	quint16 typeOfMessage;
 	QDataStream in(socket);
-	QString error;
+	MessageCapsule incomingMessage;
 	// Link the stream to the socke and send the byte
 
 	User* user = new User(username,-1,nickname,password,image);
 
-	MessageCapsule accountCreate = new AccountMessage(AccountCreate, *user);
-
+	MessageCapsule accountCreate = MessageFactory::AccountCreate(*user);
 	accountCreate->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
-		//throw ServerNotRespondException();
-		error = "recived no byte";
-		emit registrationFailed(error);
+		emit registrationFailed("server not responding");
 		return ;
 	}
 
 	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	switch (typeOfMessage) {
 	case AccountConfirmed: {
-		MessageCapsule accountConfirmed = new AccountMessage(AccountConfirmed);
-		accountConfirmed->readFrom(in);
-		AccountMessage* accConf = dynamic_cast<AccountMessage*>(accountConfirmed.get());
-		user->setId(accConf->getUserId());
-		emit registrationCompleted();
+		AccountConfirmedMessage* accountConfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
+		user->setId(accountConfirmed->getUserId());
+		emit registrationCompleted(*user);
 		return;
-		break;
 	}
-	case AccountDenied: {
+	case AccountError: {
 		// impossible to create the account
-		MessageCapsule accountDenied = new AccountMessage(AccountDenied);
-		accountDenied->readFrom(in);
-		AccountMessage* accountdenied = dynamic_cast<AccountMessage*>(accountDenied.get());
-		emit registrationFailed(accountdenied->getErrorMessage());
+		AccountErrorMessage *accountDenied = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
+		emit registrationFailed(accountDenied->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		// EMIT?
 		return ;
-		break;
 	}
 }
 
 void Client::Logout() {
 
-	QString error;
 	quint16 typeOfMessage;
 	QDataStream in(socket);
+	MessageCapsule incomingMessage;
 
-	MessageCapsule logoutRequest = new LogoutMessage(LogoutRequest);
+	MessageCapsule logoutRequest = MessageFactory::LogoutRequest();
 	logoutRequest->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		qDebug() << "recived no byte";
-		//throw ServerNotRespondException();
-		error = "recived no byte";
-		emit logoutFailed(error);
+		emit logoutFailed("server not responding");
 		return;
 	}
 
 	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	switch (typeOfMessage) {
 	case LogoutConfirmed: {
-		MessageCapsule logoutConfirmed = new LogoutMessage(LogoutConfirmed);
-		logoutConfirmed->readFrom(in);
 		return;
-		break;
 	}
-	case LogoutDenied: {
+	case LogoutError: {
 		// impossible to create the account
-		MessageCapsule logoutDenied = new AccountMessage(LogoutDenied);
-		logoutDenied->readFrom(in);
-		AccountMessage* logoutdenied = dynamic_cast<AccountMessage*>(logoutDenied.get());
-		emit logoutFailed(logoutdenied->getErrorMessage());
+		LogoutErrorMessage* logoutDenied = dynamic_cast<LogoutErrorMessage*>(incomingMessage.get());
+		emit logoutFailed(logoutDenied->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		// EMIT?
 		return;
-		break;
 	}
 
 }
 
-void Client::requestURI() {
-	
-	QString error;
-	QDataStream in(socket);
-	qint16 typeOfMessage;
-
-	//TODO: add Message to Request URI (function called from LiveText dopo login o register)
-}
-
+/*--------------------------- DOCUMENT HANDLER --------------------------------*/
 void Client::openDocument(QString URI) {
 
-	QString error;
-	quint16 typeOfMessage = OpenDocument;
+	quint16 typeOfMessage;
 	QDataStream in(socket);
+	MessageCapsule incomingMessage;
 
-	MessageCapsule openDocument = new DocumentMessage(OpenDocument,URI);
+	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI);
 	openDocument->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		error = "recived no byte";
-		//throw ServerNotRespondException();
-		emit openFileFailed(error);
+		emit openFileFailed("server not responding");
 		return;
 	}
 
 	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	switch (typeOfMessage) {
-	case DocumentOpened: {
-		// TODO Message
-		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
-		documentOpened->readFrom(in);
-		DocumentMessage* documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
-		emit openFileCompleted(documentopened->getDocument());
+	case DocumentReady: {
+		// Open Succeded
+		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		emit openFileCompleted(documentOpened->getDocument());
 		return;
-		break;
 	}
 	case DocumentError: {
-		// impossible to create the account
-		MessageCapsule documentError = new DocumentMessage(DocumentError);
-		documentError->readFrom(in);
-		DocumentMessage* documenterror = dynamic_cast<DocumentMessage*>(documentError.get());
-		emit openFileFailed(documenterror->getErrorMessage());
+		// impossible to open the Document
+		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
+		emit openFileFailed(documentError->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
 		return;
-		break;
 	}
 }
 
 void Client::createDocument(QString name) {
 
-	QString error;
-	quint16 typeOfMessage = NewDocument;
+	quint16 typeOfMessage;
 	QDataStream in(socket);
+	MessageCapsule incomingMessage;
 
-	MessageCapsule newDocument = new DocumentMessage(NewDocument, name);
+	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->sendTo(socket);
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		error =  "recived no byte";
-		//throw ServerNotRespondException();
+		emit openFileFailed("server not responding");
 		return;
 	}
 
 	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
 
 	switch (typeOfMessage) {
-	case DocumentOpened: {
-		MessageCapsule documentOpened = new DocumentMessage(DocumentOpened);
-		documentOpened->readFrom(in);
-		DocumentMessage* documentopened = dynamic_cast<DocumentMessage*>(documentOpened.get());
-		emit openFileCompleted(documentopened->getDocument());
+	case DocumentReady: {
+		//Document successfully opened
+		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		emit openFileCompleted(documentOpened->getDocument());
 		return;
-		break;
 	}
 	case DocumentError: {
-		// impossible to create the account
-		MessageCapsule documentError = new DocumentMessage(DocumentError);
-		documentError->readFrom(in);
-		DocumentMessage* documenterror = dynamic_cast<DocumentMessage*>(documentError.get());
-		emit openFileFailed(documenterror->getErrorMessage());
+		// impossible to open the document
+		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
+		emit openFileFailed(documentError->getErrorMessage());
 		return;
-		break;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
 		return;
-		break;
 	}
 
 }
 
-void Client::sendCursor(qint32 position) {
+void Client::deleteDocument(QString URI) {
+	
+	quint16 typeOfMessage;
+	QDataStream in(socket);
+	MessageCapsule incomingMessage;
 
-	quint16 typeOfMessage = MoveCursor;
+	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI);
+	removeDocument->sendTo(socket);
+
+	if (!socket->waitForReadyRead(10000)) {
+		emit removeFileFailed("server not responding");
+		return;
+	}
+
+
+	in >> typeOfMessage;
+	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
+	incomingMessage->readFrom(in);
+
+	switch (typeOfMessage) {
+	case DocumentDismissed: {
+		//Document successfully opened
+		emit documentDismissed();
+		return;
+	}
+	case DocumentError: {
+		// impossible to open the document
+		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
+		emit removeFileFailed(documentError->getErrorMessage());
+		return;
+	}
+	default:
+		//throw MessageUnknownTypeException();
+		//EMIT ?
+		return;
+	}
+
+}
+
+/*--------------------------- CURSOR HANDLER --------------------------------*/
+
+void Client::sendCursor(qint32 userId,qint32 position) {
+
+	quint16 typeOfMessage;
 
 	// Link the stream to the socke and send the byte
-	MessageCapsule moveCursor = new PresenceMessage(MoveCursor,position);
+	MessageCapsule moveCursor = MessageFactory::CursorMove(userId,position);
 	moveCursor->sendTo(socket);
 	return;
 }
 
 void Client::reciveCursor(QDataStream& in) {
 	
-	MessageCapsule moveCursor = new PresenceMessage(MoveCursor);
+	MessageCapsule moveCursor = MessageFactory::Empty(CursorMove);
 	moveCursor->readFrom(in);
-	PresenceMessage* movecursor = dynamic_cast<PresenceMessage *>(moveCursor.get());
+	CursorMoveMessage* movecursor = dynamic_cast<CursorMoveMessage*>(moveCursor.get());
 	emit cursorMoved(movecursor->getCursorPosition(), movecursor->getUserId());
 
 }
 
+
+/*--------------------------- CHARACTER HANDLER --------------------------------*/
 void Client::sendChar(Symbol character) {
 
-	//TODO message implementation
+	MessageCapsule sendChar = MessageFactory::CharInsert(character);
+	sendChar->sendTo(socket);
 
 }
 
 void Client::reciveChar(QDataStream& in) {
 
-	//TODO message implementation
+	MessageCapsule reciveChar = MessageFactory::Empty(CharInsert);
+	reciveChar->readFrom(in);
+	CharInsertMessage *recivechar = dynamic_cast<CharInsertMessage*>(reciveChar.get());
+	emit recivedSymbol(recivechar->getSymbol());
 }
 
 void Client::deleteChar(QDataStream& in) {
 
-	//TODO message implementation
+	MessageCapsule deleteChar = MessageFactory::Empty(CharDelete);
+	deleteChar->readFrom(in);
+	CharDeleteMessage* deletechar = dynamic_cast<CharDeleteMessage*>(deleteChar.get());
+	emit removeSymbol(deletechar->getPosition());
 }
 
+
+/*--------------------------- ACCOUNT HANDLER --------------------------------*/
 void Client::accountUpdate(QDataStream& in) {
 
-	MessageCapsule accountUpdate = new PresenceMessage(UserAccountUpdate);
+	MessageCapsule accountUpdate = MessageFactory::Empty(PresenceUpdate);
 	accountUpdate->readFrom(in);
-	PresenceMessage *accountupdate = dynamic_cast<PresenceMessage*>(accountUpdate.get());
+	PresenceUpdateMessage *accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
 	emit accountModified(accountupdate->getUserId(),accountupdate->getNickname(),accountupdate->getIcon());
 
 }
 
 void Client::sendAccountUpdate(qint32 userId,QString name,QImage image) {
 	
-	MessageCapsule accountUpdate = new PresenceMessage(UserAccountUpdate, userId, name, image);
+	MessageCapsule accountUpdate = MessageFactory::PresenceUpdate(userId, name, image);
 	accountUpdate->sendTo(socket);
 
 }
 
 void Client::newUserPresence(QDataStream& in) {
 
-	MessageCapsule newAccountPresence = new PresenceMessage(AddUserPresence);
+	MessageCapsule newAccountPresence = MessageFactory::Empty(PresenceAdd);
 	newAccountPresence->readFrom(in);
-	PresenceMessage* newaccountpresence = dynamic_cast<PresenceMessage*>(newAccountPresence.get());
+	PresenceAddMessage* newaccountpresence = dynamic_cast<PresenceAddMessage*>(newAccountPresence.get());
 	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
 
 }
 
 void Client::deleteUserPresence(QDataStream& in) {
 
-	MessageCapsule userPresence = new PresenceMessage(RemoveUserPresence);
+	MessageCapsule userPresence = MessageFactory::Empty(PresenceRemove);
 	userPresence->readFrom(in);
-	PresenceMessage* userpresence = dynamic_cast<PresenceMessage*>(userPresence.get());
+	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(userPresence.get());
 	emit cancelUserPresence(userpresence->getUserId());
 }
