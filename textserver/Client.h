@@ -1,8 +1,5 @@
 #pragma once
 
-#include <qtcpsocket.h>
-#include <QCryptographicHash>
-
 #include "User.h"
 
 

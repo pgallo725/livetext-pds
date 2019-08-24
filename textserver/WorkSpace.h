@@ -3,13 +3,8 @@
 #include <QObject>
 #include <QTimer>
 
-#include "Document.h"
+#include <Document.h>
 #include "Client.h"
-#include "Message.h"
-#include "AccountMessage.h"
-#include "TextEditMessage.h"
-#include "PresenceMessage.h"
-#include "ErrorMessage.h"
 #include "MessageHandler.h"
 #include "ServerException.h"
 
@@ -26,6 +21,7 @@ private:
 
 	QSharedPointer<Document> doc;
 	QSharedPointer<TcpServer> server;
+	QSharedPointer<QThread> workThread;
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
 

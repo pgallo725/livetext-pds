@@ -3,7 +3,6 @@
 #include <QDataStream>
 #include <QFile>
 #include <QFileInfo>
-#include "ServerException.h"
 
 #include <iostream>
 
@@ -79,7 +78,7 @@ void Document::load()
 	else
 	{
 		QFileInfo info(file);
-		throw FileLoadException(info.absolutePath().toStdString());
+		//throw FileLoadException(info.absolutePath().toStdString());
 	}
 }
 
@@ -107,7 +106,7 @@ void Document::save()
 				// Remove temporary file if overwriting of the old file failed
 				file.remove();
 				QFileInfo info(oldFile);
-				throw FileOverwriteException(info.absoluteFilePath().toStdString());
+				//throw FileOverwriteException(info.absoluteFilePath().toStdString());
 			}
 		}
 
@@ -118,7 +117,7 @@ void Document::save()
 	else
 	{
 		QFileInfo info(file);
-		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+		//throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
 	}
 }
 

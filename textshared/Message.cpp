@@ -17,18 +17,18 @@ int Message::getType()
 
 
 MessageCapsule::MessageCapsule()
-	: m_ptr(nullptr), ref(new int(0))
+	: m_ptr(nullptr), ref(nullptr)
 {
 }
 
 MessageCapsule::MessageCapsule(std::nullptr_t)
-	: m_ptr(nullptr), ref(new int(0))
+	: m_ptr(nullptr), ref(nullptr)
 {
 }
 
 MessageCapsule::MessageCapsule(Message* m)
 try
-	: ref(new int(1)), m_ptr(m)
+	: m_ptr(m), ref(new int(1))
 {
 }
 catch (...)
@@ -40,10 +40,11 @@ catch (...)
 MessageCapsule::MessageCapsule(const MessageCapsule& other)
 	: m_ptr(other.m_ptr), ref(other.ref)
 {
-	++(*ref);
+	if (m_ptr != nullptr)
+		++(*ref);
 }
 
-MessageCapsule::MessageCapsule(MessageCapsule&& other)
+MessageCapsule::MessageCapsule(MessageCapsule&& other) noexcept
 	: m_ptr(other.m_ptr), ref(other.ref)
 {
 	other.m_ptr = nullptr;
@@ -79,13 +80,18 @@ Message* MessageCapsule::get() const
 
 void MessageCapsule::reset()
 {
-	--(*ref);
-	if (*ref == 0)
+	if (m_ptr != nullptr)
 	{
-		if (m_ptr != nullptr)
+		--(*ref);
+		if (*ref == 0)
+		{
 			delete m_ptr;
+			delete ref;
+		}	
 	}
+	
 	m_ptr = nullptr;
+	ref = nullptr;
 }
 
 MessageCapsule::~MessageCapsule()
@@ -96,6 +102,7 @@ MessageCapsule::~MessageCapsule()
 		if (*ref == 0)
 		{
 			delete m_ptr;
+			delete ref;
 		}
 	}
 }

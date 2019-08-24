@@ -39,7 +39,7 @@
     <ClCompile Include="DocumentMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ErrorMessage.cpp">
+    <ClCompile Include="FailureMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LoginMessage.cpp">
@@ -49,6 +49,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessageHandler.cpp">
@@ -92,7 +95,7 @@
     <ClInclude Include="DocumentMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ErrorMessage.h">
+    <ClInclude Include="FailureMessage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LoginMessage.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="MessageHandler.h">

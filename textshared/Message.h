@@ -10,26 +10,26 @@ enum MessageType
 	LoginRequest,
 	LoginChallenge,
 	LoginUnlock,
-	LoginAccessGranted,
+	LoginGranted,
 	LoginError,
 
 	// Account messages
 	AccountCreate,
 	AccountUpdate,
 	AccountConfirmed,
-	AccountDenied,
+	AccountError,
 
 	// Logout messages
 	LogoutRequest,
 	LogoutConfirmed,
-	LogoutDenied,
+	LogoutError,
 
 	// Document messages
-	NewDocument,
-	RemoveDocument,
-	DocumentRemoved,
-	OpenDocument,
-	DocumentOpened,
+	DocumentCreate,
+	DocumentRemove,
+	DocumentDismissed,
+	DocumentOpen,
+	DocumentReady,
 	DocumentError,
 
 	// Text-editing messages
@@ -37,15 +37,17 @@ enum MessageType
 	CharDelete,
 
 	// Presence messages
-	MoveCursor,
-	UserAccountUpdate,
-	AddUserPresence,
-	RemoveUserPresence,
+	CursorMove,
+	PresenceUpdate,
+	PresenceAdd,
+	PresenceRemove,
 
 	// Others
-	MessageTypeError,
-	ServerFailure
+	Failure
 };
+
+
+class MessageFactory;
 
 
 class Message
@@ -58,10 +60,11 @@ protected:
 public:
 
 	Message(MessageType type);
-	~Message() { };
+
+	virtual ~Message() { };
 
 	// Convert the message contents into a byte-stream that will be sent on the socket
-	virtual void sendTo(QTcpSocket* socket) = 0;
+	virtual void sendTo(QTcpSocket* socket) const = 0;
 
 	// Read from the data-stream the bytes needed to fill this message, according to its type
 	virtual void readFrom(QDataStream& stream) = 0;
@@ -85,7 +88,7 @@ public:
 	MessageCapsule(Message* m);
 
 	MessageCapsule(const MessageCapsule& other);
-	MessageCapsule(MessageCapsule&& other);
+	MessageCapsule(MessageCapsule&& other) noexcept;
 
 	MessageCapsule& operator=(MessageCapsule other);
 

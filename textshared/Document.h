@@ -1,13 +1,12 @@
 #pragma once
 
 #include <QString>
-
 #include "Symbol.h"
 
 
 class Document
 {
-	friend class DocumentMessage;
+	friend class DocumentReadyMessage;
 
 	/* Operators for QDataStream serialization and deserialization */
 	friend QDataStream& operator>>(QDataStream& in, Document& user);			// Input

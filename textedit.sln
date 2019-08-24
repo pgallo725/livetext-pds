@@ -7,7 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textedit", "textedit\texted
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textserver", "textserver\textserver.vcxproj", "{6B889879-7442-35A3-BC6E-18244C23B9F0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "textshared", "textshared\textshared.vcxitems", "{47CA151A-7805-4297-AC58-AEB80D407E62}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		textshared\textshared.vcxitems*{47ca151a-7805-4297-ac58-aeb80d407e62}*SharedItemsImports = 9
+		textshared\textshared.vcxitems*{6b889879-7442-35a3-bc6e-18244c23b9f0}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
