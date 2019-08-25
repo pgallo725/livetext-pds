@@ -27,52 +27,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AccountMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Client.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Document.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DocumentMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FailureMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LoginMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LogoutMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Message.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MessageFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MessageHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PresenceMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ServerException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Symbol.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TcpServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextEditMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="User.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WorkSpace.cpp">
@@ -83,62 +47,23 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AccountMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Document.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DocumentMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FailureMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoginMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LogoutMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MessageFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="MessageHandler.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="PresenceMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ServerException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Symbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="TcpServer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="TextEditMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="WorkSpace.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\moc_MessageHandler.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\moc_TcpServer.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

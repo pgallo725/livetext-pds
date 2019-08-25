@@ -10,19 +10,8 @@ HEADERS += ./TcpServer.h \
 	./ServerException.h \
 	./WorkSpace.h \
 	./Client.h \
-    ./User.h \
-    ./Document.h \
-	./Symbol.h \
-	./Message.h \
-	./LoginMessage.h \
-	./LogoutMessage.h \
-	./AccountMessage.h \
-	./DocumentMessage.h \
-	./TextEditMessage.h \
-	./PresenceMessage.h \
-	./FailureMessage.h \
-	./MessageFactory.h \
 	./MessageHandler.h
+	
 	
 
 	
@@ -31,17 +20,5 @@ SOURCES += ./main.cpp \
 	./ServerException.cpp \
 	./WorkSpace.cpp \
 	./Client.cpp \
-	./User.cpp \
-    ./Document.cpp \
-	./Symbol.cpp \
-	./Message.cpp \
-	./LoginMessage.cpp \
-	./LogoutMessage.cpp \
-	./AccountMessage.cpp \
-	./DocumentMessage.cpp \
-	./TextEditMessage.cpp \
-	./PresenceMessage.cpp \
-	./FailureMessage.cpp \
-	./MessageFactory.cpp \
 	./MessageHandler.cpp
 	

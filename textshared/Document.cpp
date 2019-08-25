@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+#define DOCUMENTS_DIRNAME "./Documents/"
 #define URI_FIELD_SEPARATOR '_'
 
 
@@ -54,7 +55,7 @@ void Document::insertNewEditor(QString edit)
 void Document::load()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file(URI);
+	QFile file(DOCUMENTS_DIRNAME + URI);
 	if (file.open(QIODevice::ReadWrite))
 	{
 		QDataStream docFileStream(&file);
@@ -85,7 +86,7 @@ void Document::load()
 void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file("tmp_" + URI);
+	QFile file(DOCUMENTS_DIRNAME + ("tmp_" + URI));
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
@@ -96,7 +97,7 @@ void Document::save()
 		// using built-in Qt Vector and StringList serialization
 		docFileStream << editors << _text;
 
-		QFile oldFile(URI);
+		QFile oldFile(DOCUMENTS_DIRNAME + URI);
 		if (oldFile.exists())
 		{
 			if (oldFile.remove())

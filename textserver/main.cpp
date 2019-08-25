@@ -18,8 +18,9 @@ int main(int argc, char *argv[])
 
 		return a.exec();
 	}
-	catch (ServerStartException& e) {
-		std::cerr << '\n' << e.what() << "\ntextserver anable to start ... please check connection" << std::endl;
+	catch (ServerStartException& e) 
+	{
+		std::cerr << '\n' << e.what() << "\ntextserver unable to start ... please check connection" << std::endl;
 	}
 	catch (FileException &fe)
 	{
