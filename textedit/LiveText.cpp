@@ -40,7 +40,10 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::openFileFailed, this, );
 	//connect(_client, &Client::accountModified, this, );
 	//connect(_client, &Client::userPresence, this, );
-	
+	//connect(_client, &Client::cancelUserPresence, this, );
+
+	//connect(_client, &Client::removeFileFailed, ,);
+	//connect(_client, &Client::documentDismissed,,);
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
