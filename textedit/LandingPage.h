@@ -49,7 +49,7 @@ signals:
 	void removeDocument(QString path); //TODO REMOVE DOCUMENT
 	void connectToServer(QString ipAddress, quint16 port);
 	void serverLogin(QString username, QString password);
-	void serverRegister(QString username, QString password, QString nickname);
+	void serverRegister(QString username, QString password, QString nickname, QImage icon);
 	void serverLogout();
 
 private:

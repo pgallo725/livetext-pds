@@ -462,6 +462,11 @@ void TextEdit::setupTextActions()
 //Il file viene aperto in sola lettura e viene cambiato il nome del file corrente in quello appena aperto
 //copiandoci il contenuto all'interno
 
+void TextEdit::setUser(User user)
+{
+	_user = user;
+}
+
 bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
@@ -641,7 +646,7 @@ void TextEdit::fileShare()
 
 void TextEdit::editProfile()
 {
-	ProfileEditWindow* ew = new ProfileEditWindow();
+	ProfileEditWindow* ew = new ProfileEditWindow(_user);
 
 	//Mostra la finestra di mw formata
 	ew->exec();
@@ -959,7 +964,7 @@ void TextEdit::cursorPositionChanged()
 	int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);
 
-	emit(newCursorPosition(textEdit->textCursor().position()));
+	emit(newCursorPosition(_user.getUserId(), textEdit->textCursor().position()));
 }
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)

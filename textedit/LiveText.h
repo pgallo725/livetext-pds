@@ -21,7 +21,7 @@ private slots:
 	void openEditor(int mode, QString path);
 	void connectToServer(QString ipAddress, quint16 port);
 	void Login(QString username, QString password);
-	void Register(QString username, QString password, QString nickname);
+	void Register(QString username, QString password, QString nickname, QImage icon);
 	void Logout();
 	
 	//CLIENT
@@ -34,6 +34,8 @@ private slots:
 	//LIVETEXT
 	void loginFailed(QString errorType);
 	void registrationFailed(QString errorType);
+	void loginSuccess(User user);
+	void registrationSuccess(User user);
 
 private:
 	LandingPage* _landingPage;

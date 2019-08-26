@@ -159,6 +159,8 @@ void LandingPage::confirmOperation()
 		return;
 	}
 
+	//Function to show loading animation
+	startLoadingAnimation();
 
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
@@ -195,9 +197,6 @@ void LandingPage::Login()
 
 	file.close();
 
-	//Function to show loading animation
-	startLoadingAnimation();
-
 	emit(serverLogin(username, password));
 }
 
@@ -208,7 +207,7 @@ void LandingPage::Register()
 	QString username = ui->lineEdit_regUsr->text();
 	QString password = ui->lineEdit_regPsw->text();
 	QString passwordConf = ui->lineEdit_regPswConf->text();
-	QString iconPath = ui->lineEdit_UsrIconPath->text();
+	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
 	//Controllo se i dati sono stati inseriti correttamente
 	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
@@ -216,22 +215,13 @@ void LandingPage::Register()
 		return;
 	}
 
-	//Controllo se esiste già un username
-	bool userExist = false;
-
-	if (userExist) {
-		ui->label_incorrect_operation->setText(tr("Username already taken"));
-		return;
-	}
-
-
 	//Controllo sulla corrispondenza password
 	if (password != passwordConf) {
 		ui->label_incorrect_operation->setText(tr("Passwords does not match"));
 		return;
 	}
 
-	emit(serverRegister(username, password, nickname));
+	emit(serverRegister(username, password, nickname, userIcon));
 }
 
 

@@ -25,9 +25,6 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
 	
-	connect(_client, &Client::loginSuccess, _landingPage, &LandingPage::openLoggedPage);
-	connect(_client, &Client::registrationCompleted, _landingPage, &LandingPage::openLoggedPage);
-	
 	
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
@@ -35,6 +32,8 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
 	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
+	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
+	connect(_client, &Client::registrationCompleted, this, &LiveText::registrationSuccess);
 	
 	//connect(_client, &Client::openFileCompleted, this, );
 	//connect(_client, &Client::openFileFailed, this, );
@@ -123,11 +122,12 @@ void LiveText::loginFailed(QString errorType)
 
 
 
-void LiveText::Register(QString username, QString password, QString nickname)
+void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
 {
 	_client->setUsername(username);
 	_client->setPassword(password);
 	_client->setNickname(nickname);
+	_client->setImage(icon);
 
 	_client->Register();
 }
@@ -136,6 +136,18 @@ void LiveText::registrationFailed(QString errorType)
 {
 	_landingPage->incorrectOperation(errorType);
 	_client->Disconnect();
+}
+
+void LiveText::loginSuccess(User user)
+{
+	_textEdit->setUser(user);
+	_landingPage->openLoggedPage();
+}
+
+void LiveText::registrationSuccess(User user)
+{
+	_textEdit->setUser(user);
+	_landingPage->openLoggedPage();
 }
 
 void LiveText::Logout()

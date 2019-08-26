@@ -17,7 +17,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
+ProfileEditWindow::ProfileEditWindow(User user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
 	//Costruttore landing page
 	setWindowIcon(QIcon(":/images/logo.png"));
 
@@ -33,9 +33,12 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
 
 	//User icon
-	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
+	//QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
+	QPixmap userPix;
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
+
+	userPix.convertFromImage(user.getIcon());
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
@@ -43,8 +46,8 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 
 
 	//Set username
-	ui->label_username->setText("currentUsername");
-	ui->lineEdit_editNick->setText("currentNickname");
+	ui->label_username->setText(user.getUsername());
+	ui->lineEdit_editNick->setText(user.getNickname());
 }
 
 ProfileEditWindow::~ProfileEditWindow()
