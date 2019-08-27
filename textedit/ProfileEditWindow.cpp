@@ -17,7 +17,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-ProfileEditWindow::ProfileEditWindow(User user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
+ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
 	//Costruttore landing page
 	setWindowIcon(QIcon(":/images/logo.png"));
 
@@ -38,7 +38,7 @@ ProfileEditWindow::ProfileEditWindow(User user, QWidget* parent) : QDialog(paren
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 
-	userPix.convertFromImage(user.getIcon());
+	userPix.convertFromImage(user->getIcon());
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
@@ -46,8 +46,8 @@ ProfileEditWindow::ProfileEditWindow(User user, QWidget* parent) : QDialog(paren
 
 
 	//Set username
-	ui->label_username->setText(user.getUsername());
-	ui->lineEdit_editNick->setText(user.getNickname());
+	ui->label_username->setText(user->getUsername());
+	ui->lineEdit_editNick->setText(user->getNickname());
 }
 
 ProfileEditWindow::~ProfileEditWindow()
@@ -76,6 +76,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 
+	//Controllo che immagine esista e sia un file
 	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
 
@@ -102,30 +103,25 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString oldPassword = ui->lineEdit_password->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
-	QString iconPath = ui->lineEdit_UsrIconPath->text();
+	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
+	/*
 	//Controllo se i dati sono stati inseriti correttamente
 	if (oldPassword.isEmpty() || newPassword.isEmpty() || newPasswordConf.isEmpty()) {
-		//QMessageBox::warning(this, "Registration", "Please fill all the required fields");
 		ui->label_incorrect_edit->setText("Please fill all the required fields");
 		return;
 	}
 
 	
 	//Controllo sulla corrispondenza password
-	if (true) {
-		//QMessageBox::warning(this, "Registration", "Passwords does not match");
+	if (newPassword != newPasswordConf) {
 		ui->label_incorrect_edit->setText("Passwords does not match");
 		return;
 	}
+	*/
 
-	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
-	/*if (!iconPath.isEmpty() && fileExist(iconPath)) {
-		QPixmap userPix(iconPath);
-	}
-	else {
-		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
-	}*/
+	emit(accountUpdate(nick, userIcon));
+	this->close();
 }
 
 

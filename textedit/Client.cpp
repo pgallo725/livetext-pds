@@ -124,7 +124,7 @@ void Client::Login() {
 	loginRequest->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("server not responding");
+		emit loginFailed("Server not responding");
 		return;
 	}
 

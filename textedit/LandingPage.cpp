@@ -167,10 +167,13 @@ void LandingPage::confirmOperation()
 
 void LandingPage::Login()
 {
+	/*
 	//Bypass login
-	/*ui->stackedWidget->setCurrentIndex(1);
+	ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
-	return;*/
+	stopLoadingAnimation();
+	return;
+	*/
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();

@@ -37,21 +37,21 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	
 	//connect(_client, &Client::openFileCompleted, this, );
 	//connect(_client, &Client::openFileFailed, this, );
-	//connect(_client, &Client::accountModified, this, );
-	//connect(_client, &Client::userPresence, this, );
-	//connect(_client, &Client::cancelUserPresence, this, );
-
 	//connect(_client, &Client::removeFileFailed, ,);
 	//connect(_client, &Client::documentDismissed,,);
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
+	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
 
 	//TEXTEDIT - CLIENT
-	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
 
 }
 
@@ -140,13 +140,15 @@ void LiveText::registrationFailed(QString errorType)
 
 void LiveText::loginSuccess(User user)
 {
-	_textEdit->setUser(user);
+	_user = user;
+	_textEdit->setUser(&_user);
 	_landingPage->openLoggedPage();
 }
 
 void LiveText::registrationSuccess(User user)
 {
-	_textEdit->setUser(user);
+	_user = user;
+	_textEdit->setUser(&_user);
 	_landingPage->openLoggedPage();
 }
 
@@ -161,6 +163,16 @@ void LiveText::returnToLanding()
 	_textEdit->close();
 	_landingPage->openLoggedPage();
 	_landingPage->show();
+}
+
+void LiveText::sendCursor(qint32 pos)
+{
+	_client->sendCursor(_user.getUserId(), pos);
+}
+
+void LiveText::sendAccountUpdate(QString name, QImage image)
+{
+	_client->sendAccountUpdate(_user.getUserId(), name, image);
 }
 
 

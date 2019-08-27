@@ -1,6 +1,6 @@
 #include "Presence.h"
 
-Presence::Presence(QString name, QString nickname, QColor color, QPixmap profilePic, QTextEdit* textedit) : _name(name), _nickname(nickname), _profilePicture(profilePic)
+Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _name(name), _nickname(nickname), _profilePicture(profilePic)
 {
 	_color = color;
 	_userCursor = new QTextCursor(textedit->document());
