@@ -13,7 +13,7 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(SAVE_TIMEOUT);
 
-	// TODO IGOR: creare il thread già dentro lo shared pointer ?
+	// TODO IGOR: creare il thread già dentro lo shared pointer ? forse da problemi con la connect/movetothread, appena riesco a testare questa parte provo
 	QThread* t = new QThread();
 	connect(t, &QThread::finished, t, &QThread::deleteLater);
 	this->moveToThread(t);
@@ -26,8 +26,8 @@ WorkSpace::~WorkSpace()
 {
 	timer.stop();
 	doc->save();			// Saving changes to the document before closing the workspace
-	workThread->quit();
-	workThread->wait();
+	workThread->quit();		// Quit the thread
+	workThread->wait();		// Waiting for ending the thread
 }
 
 
@@ -78,7 +78,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 		return;
 	}
 
-	editors.insert(socket, client);
+	
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
@@ -92,13 +92,11 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	for (auto i = editors.begin(); i != editors.end(); ++i)
 	{
 		QTcpSocket* otherSocket = i.key();
-
-		if (otherSocket != socket)		// TODO: l'if nel ciclo sarebbe evitabile se lo si fa prima di editors.insert(socket), fattibile ?
-		{
-			User* editor = i.value()->getUser();
-			MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
-		}
+		User* editor = i.value()->getUser();
+		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
 	}
+
+	editors.insert(socket, client);
 }
 
 
