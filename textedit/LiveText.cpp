@@ -39,6 +39,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::openFileFailed, this, );
 	//connect(_client, &Client::removeFileFailed, ,);
 	//connect(_client, &Client::documentDismissed,,);
+	//conect(_client, &Client::personalAccountModified, , );
+	//connect(_client, &Client::accountModificationFail, , );
+
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
@@ -50,6 +53,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//devi aggiungere se non l'hai già fatto il mandare il cursore quando lo ricevi	//usi 2 volte la stessa funzione è normale?
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
+
 
 	//TEXTEDIT - CLIENT
 
