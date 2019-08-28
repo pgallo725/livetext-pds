@@ -13,7 +13,7 @@ class ProfileEditWindow : public QDialog
 	Q_OBJECT
 
 public:
-	ProfileEditWindow(User user, QWidget* parent = nullptr);
+	ProfileEditWindow(User* user, QWidget* parent = nullptr);
 	~ProfileEditWindow();
 
 private slots:
@@ -21,6 +21,9 @@ private slots:
 	void pushButtonBrowseClicked();
 	void pushButtonCancelClicked();
 	void showUserIcon(QString path);
+
+signals:
+	void accountUpdate(QString nickname, QImage icon);
 
 private:
 	Ui::ProfileEditWindow* ui;

@@ -21,7 +21,7 @@ private:
 	QTextCursor* _userCursor;
 	QList<QTextEdit::ExtraSelection> _userText;
 public:
-	Presence(QString name, QString nickname, QColor color, QPixmap profilePic, QTextEdit* textedit);
+	Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
 
 	QColor color();
 	QString name();

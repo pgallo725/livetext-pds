@@ -4,6 +4,7 @@
 #include "textedit.h"
 #include "LandingPage.h"
 #include "Client.h"
+#include <User.h>
 
 #include <QObject>
 
@@ -30,6 +31,8 @@ private slots:
 
 	//TEXTEDIT
 	void returnToLanding();
+	void sendCursor(qint32 pos);
+	void sendAccountUpdate(QString name, QImage image);
 
 	//LIVETEXT
 	void loginFailed(QString errorType);
@@ -41,6 +44,7 @@ private:
 	LandingPage* _landingPage;
 	Client* _client;
 	TextEdit* _textEdit;
+	User _user;
 };
 
 
