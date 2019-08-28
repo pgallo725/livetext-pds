@@ -233,11 +233,11 @@ void TcpServer::clientDisconnection()
 /* create a new client and send nonce to be solved for authentication */
 MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString username)
 {
-	qDebug() << " -- (socket " << clientSocket << ") si e' collegato: " << username;
+	qDebug() << "si e' collegato: " << username;
 
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
-	if (users.contains(username))
+ 	if (users.contains(username))
 	{
 		if (client->isLogged())
 			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
@@ -273,6 +273,10 @@ MessageCapsule TcpServer::createAccount(QTcpSocket* socket, User& newUser)
 	QSharedPointer<Client> client = clients.find(socket).value();
 	if (client->isLogged())
 		return MessageFactory::AccountError("You cannot create an account while being logged in as another user");
+
+	/* check if username or password are nulls */
+	if (!newUser.getUsername().compare("") || !newUser.getPassword().compare(""))
+		return MessageFactory::AccountError("Username and/or password must be field");
 
 	/* check if this username is already used */
 	if (users.contains(newUser.getUsername()))

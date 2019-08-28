@@ -124,7 +124,7 @@ void Client::Login() {
 	loginRequest->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("server not responding");
+		emit loginFailed("Server not responding");
 		return;
 	}
 
@@ -161,7 +161,7 @@ void Client::Login() {
 	QString result = password + nonce;
 	
 	QCryptographicHash hash(QCryptographicHash::Md5);
-	hash.addData(password.toStdString().c_str(), password.length());
+	hash.addData(result.toStdString().c_str(), result.length());
 
 	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash.result().toStdString()));
 

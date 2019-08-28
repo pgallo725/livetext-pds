@@ -17,7 +17,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
+ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow) {
 	//Costruttore landing page
 	setWindowIcon(QIcon(":/images/logo.png"));
 
@@ -33,18 +33,21 @@ ProfileEditWindow::ProfileEditWindow(QWidget* parent) : QDialog(parent, Qt::Wind
 	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
 
 	//User icon
-	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
+	//QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
+	QPixmap userPix;
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
+
+	userPix.convertFromImage(user->getIcon());
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &ProfileEditWindow::showUserIcon);
 
 
 	//Set username
-	ui->label_username->setText("currentUsername");
-	ui->lineEdit_editNick->setText("currentNickname");
+	ui->label_username->setText(user->getUsername());
+	ui->lineEdit_editNick->setText(user->getNickname());
 }
 
 ProfileEditWindow::~ProfileEditWindow()
@@ -73,11 +76,12 @@ void ProfileEditWindow::showUserIcon(QString path)
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 
+	//Controllo che immagine esista e sia un file
 	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
 
 		if (!userPix.isNull()) {
-			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			ui->label_incorrect_edit->setText("");
 			return;
 		}
@@ -88,7 +92,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 	ui->label_incorrect_edit->setText("Please choose a valid image file");
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -99,30 +103,25 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString oldPassword = ui->lineEdit_password->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
-	QString iconPath = ui->lineEdit_UsrIconPath->text();
+	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
+	/*
 	//Controllo se i dati sono stati inseriti correttamente
 	if (oldPassword.isEmpty() || newPassword.isEmpty() || newPasswordConf.isEmpty()) {
-		//QMessageBox::warning(this, "Registration", "Please fill all the required fields");
 		ui->label_incorrect_edit->setText("Please fill all the required fields");
 		return;
 	}
 
 	
 	//Controllo sulla corrispondenza password
-	if (true) {
-		//QMessageBox::warning(this, "Registration", "Passwords does not match");
+	if (newPassword != newPasswordConf) {
 		ui->label_incorrect_edit->setText("Passwords does not match");
 		return;
 	}
+	*/
 
-	//Se non è stata settata un'icona si salva quella di default, altrimenti si usa quella inserita
-	/*if (!iconPath.isEmpty() && fileExist(iconPath)) {
-		QPixmap userPix(iconPath);
-	}
-	else {
-		QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
-	}*/
+	emit(accountUpdate(nick, userIcon));
+	this->close();
 }
 
 

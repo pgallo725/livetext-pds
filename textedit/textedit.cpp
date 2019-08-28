@@ -77,7 +77,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::handleMultipleSelections);
 
-
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
 
@@ -134,14 +133,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 
 	//Stringa vuota
 	setCurrentFileName(QString());
-
-
-	//TEST
-	onlineUsers.append(Presence("Mario", "Rossi", Qt::red, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
-	onlineUsers.append(Presence("Luca", "Verdi", Qt::green, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
-	onlineUsers.append(Presence("Giorgio", "Blu", Qt::blue, QPixmap(rsrcPath + "/LandingPage/defaultProfile.png"), textEdit));
-	onlineUsers.append(Presence("Gianni", "Gialli", Qt::yellow, QPixmap(rsrcPath + "/filesave.png"), textEdit));
-	setupOnlineUsersActions();
 }
 
 /*
@@ -211,27 +202,27 @@ void TextEdit::setupOnlineUsersActions()
 	QToolBar* tb = new QToolBar(tr("&Online users"));
 	addToolBar(Qt::RightToolBarArea, tb);
 
-	QList<Presence>::iterator it;
+	QMap<qint32, Presence>::iterator it;
 
-	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		Presence p = it.value();
 
 		QPixmap background(32, 32);
 
-		QColor color = it->color();
+		QColor color = p.color();
 		background.fill(color);
 
 		QPainter painter(&background);
-		QPixmap userIcon(it->profilePicture());
+		QPixmap userIcon(p.profilePicture());
 
 		painter.drawPixmap(3, 3, 26, 26, userIcon.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		painter.end();
 
 		const QIcon users(background);
 
-		QAction* onlineAction = new QAction(users, tr(it->nickname().toStdString().c_str()), this);
-		connect(onlineAction, &QAction::triggered, this, [this, it]() { handleUserSelection(*it); });
+		QAction* onlineAction = new QAction(users, p.name().toStdString().c_str(), this);
+		connect(onlineAction, &QAction::triggered, this, [this, p]() { handleUserSelection(p); });
 		tb->addAction(onlineAction);
-
 	}
 }
 
@@ -462,6 +453,11 @@ void TextEdit::setupTextActions()
 //Il file viene aperto in sola lettura e viene cambiato il nome del file corrente in quello appena aperto
 //copiandoci il contenuto all'interno
 
+void TextEdit::setUser(User* user)
+{
+	_user = user;
+}
+
 bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
@@ -519,6 +515,27 @@ void TextEdit::fileNew(QString name)
 	textEdit->clear();
 	//Mette il nuovo file untitled.txt
 	setCurrentFileName(name);
+}
+
+//Slot to add a Presence in the editor
+void TextEdit::newPresence(qint32 userId, QString username, QImage image)
+{
+	//Choose a random color from Qt colors
+	QColor color = (Qt::GlobalColor) (userId%18 + 2);
+	QPixmap userPic;
+	
+	userPic.convertFromImage(image);
+	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
+	setupOnlineUsersActions();
+
+	emit newCursorPosition(textEdit->textCursor().position());
+}
+
+//Remove presence in document
+void TextEdit::removePresence(qint32 userId)
+{
+	onlineUsers.remove(userId);
+	setupOnlineUsersActions();
 }
 
 void TextEdit::fileOpen()
@@ -641,7 +658,9 @@ void TextEdit::fileShare()
 
 void TextEdit::editProfile()
 {
-	ProfileEditWindow* ew = new ProfileEditWindow();
+	ProfileEditWindow* ew = new ProfileEditWindow(_user);
+
+	connect(ew, &ProfileEditWindow::accountUpdate, this, &TextEdit::accountUpdate);
 
 	//Mostra la finestra di mw formata
 	ew->exec();
@@ -965,7 +984,7 @@ void TextEdit::cursorPositionChanged()
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
 	//To change with unique id
-	Presence p = onlineUsers.at(user);
+	Presence p = onlineUsers.find(user).value();
 	QTextCursor* cursor = p.cursor();
 	QLabel* userCursorLabel = p.label();
 
@@ -974,14 +993,14 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 
 	//Change usercursor position
 	cursor->setPosition(position);
-	
+
 	//Draw cursor
 	const QRect qRect = textEdit->cursorRect(*cursor);
 
 	QPixmap pix(qRect.width() * 2.5, qRect.height());
 	pix.fill(p.color());
 	userCursorLabel->setPixmap(pix);
-	
+
 	//Show moved label
 	userCursorLabel->move(qRect.left(), qRect.top());
 	userCursorLabel->show();
@@ -1090,32 +1109,35 @@ Recomputes all positions based on document scroll positions.
 
 void TextEdit::handleUsersCursors() {
 
-	QList<Presence>::iterator it;
+	QMap<qint32, Presence>::iterator it;
 
-	for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
-		QTextCursor* cursor = it->cursor();
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		Presence p = it.value();
+		QTextCursor* cursor = p.cursor();
+		QLabel* cursorLabel = p.label();
 
-		it->label()->close();
+		cursorLabel->close();
 
 		const QRect qRect = textEdit->cursorRect(*cursor);
 
 		QPixmap pix(qRect.width() * 2.5, qRect.height());
-		pix.fill(it->color());
-		it->label()->setPixmap(pix);
+		pix.fill(p.color());
+		cursorLabel->setPixmap(pix);
 
-		it->label()->move(qRect.left(), qRect.top());
-		it->label()->show();
+		cursorLabel->move(qRect.left(), qRect.top());
+		cursorLabel->show();
 	}
 }
 
 
 void TextEdit::handleMultipleSelections()
 {
-	QList<Presence>::iterator it;
+	QMap<qint32, Presence>::iterator it;
 	QList<QTextEdit::ExtraSelection> sellist;
 	if (actionHighlightUsers->isChecked()) {
 		int i = 0;
-		for (it = onlineUsers.begin(); it < onlineUsers.end(); it++) {
+		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+			Presence p = it.value();
 
 			//Change with function to check users selection
 			QTextCursor cursor3(textEdit->document());
@@ -1123,7 +1145,7 @@ void TextEdit::handleMultipleSelections()
 			cursor3.setPosition(i + 10, QTextCursor::KeepAnchor);
 
 			QTextEdit::ExtraSelection selection;
-			QColor color = it->color();
+			QColor color = p.color();
 			color.setAlpha(70);
 			selection.format.setBackground(color);
 			selection.cursor = cursor3;

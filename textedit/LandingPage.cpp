@@ -67,7 +67,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
-	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Tab widget cambiata
 	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &LandingPage::currentTabChanged);
@@ -94,7 +94,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
@@ -159,16 +159,21 @@ void LandingPage::confirmOperation()
 		return;
 	}
 
+	//Function to show loading animation
+	startLoadingAnimation();
 
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
 void LandingPage::Login()
 {
+	/*
 	//Bypass login
-	/*ui->stackedWidget->setCurrentIndex(1);
+	ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
-	return;*/
+	stopLoadingAnimation();
+	return;
+	*/
 
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
@@ -177,6 +182,7 @@ void LandingPage::Login()
 	//Controllo se i dati sono stati inseriti correttamente
 	if (username.isEmpty() || password.isEmpty()) {
 		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
+		stopLoadingAnimation();
 		return;
 	}
 
@@ -195,9 +201,6 @@ void LandingPage::Login()
 
 	file.close();
 
-	//Function to show loading animation
-	startLoadingAnimation();
-
 	emit(serverLogin(username, password));
 }
 
@@ -208,7 +211,7 @@ void LandingPage::Register()
 	QString username = ui->lineEdit_regUsr->text();
 	QString password = ui->lineEdit_regPsw->text();
 	QString passwordConf = ui->lineEdit_regPswConf->text();
-	QString iconPath = ui->lineEdit_UsrIconPath->text();
+	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
 	//Controllo se i dati sono stati inseriti correttamente
 	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
@@ -216,22 +219,13 @@ void LandingPage::Register()
 		return;
 	}
 
-	//Controllo se esiste già un username
-	bool userExist = false;
-
-	if (userExist) {
-		ui->label_incorrect_operation->setText(tr("Username already taken"));
-		return;
-	}
-
-
 	//Controllo sulla corrispondenza password
 	if (password != passwordConf) {
 		ui->label_incorrect_operation->setText(tr("Passwords does not match"));
 		return;
 	}
 
-	emit(serverRegister(username, password, nickname));
+	emit(serverRegister(username, password, nickname, userIcon));
 }
 
 
@@ -400,7 +394,7 @@ void LandingPage::showUserIcon(QString path)
 		QPixmap userPix(path);
 
 		if (!userPix.isNull()) {
-			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			ui->label_incorrect_operation->setText("");
 			return;
 		}
@@ -411,7 +405,7 @@ void LandingPage::showUserIcon(QString path)
 	ui->label_incorrect_operation->setText("Please choose a valid image file");
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 

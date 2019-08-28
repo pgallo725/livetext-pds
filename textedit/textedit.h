@@ -4,7 +4,8 @@
 #include <QMainWindow>
 #include <QMap>
 #include <QPointer>
-#include <QList>
+#include <QMap>
+#include <User.h>
 #include "Presence.h"
 
 //Serve per incapsulare tutti i metodi delle classi
@@ -25,18 +26,21 @@ class TextEdit : public QMainWindow
 
 public:
 	TextEdit(QWidget* parent = 0);
-
+	void setUser(User* user);
 	bool load(const QString& f);
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
 	void fileNew(QString name);
-	
+	void newPresence(qint32 userId, QString username, QImage image);
+	void removePresence(qint32 userId);
 
 
 signals:
 	void logout();
-	void newCursorPosition(int position);
+	void newCursorPosition(qint32 position);
+	void accountUpdate(QString name, QImage image);
+	
 
 private slots:
 	void fileOpen();
@@ -45,7 +49,9 @@ private slots:
 	void filePrintPdf();
 
 	void fileShare();
+	
 	void editProfile();
+
 	void highlightUsersText();
 	void contentsChange(int position, int charsRemoved, int charsAdded);
 
@@ -89,7 +95,9 @@ private:
 	QToolButton* listButton;
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
 
-	QList<Presence> onlineUsers;
+	QMap<qint32, Presence> onlineUsers;
+	//Logged user
+	User* _user;
 
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;
