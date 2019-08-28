@@ -25,14 +25,12 @@ private slots:
 	void Register(QString username, QString password, QString nickname, QImage icon);
 	void Logout();
 	
-	//CLIENT
-
-
-
 	//TEXTEDIT
 	void returnToLanding();
 	void sendCursor(qint32 pos);
 	void sendAccountUpdate(QString name, QImage image);
+	void accountUpdated(User user);
+
 
 	//LIVETEXT
 	void loginFailed(QString errorType);

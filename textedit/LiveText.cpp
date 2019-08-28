@@ -39,8 +39,8 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::openFileFailed, this, );
 	//connect(_client, &Client::removeFileFailed, ,);
 	//connect(_client, &Client::documentDismissed,,);
-	//conect(_client, &Client::personalAccountModified, , );
-	//connect(_client, &Client::accountModificationFail, , );
+	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
+
 
 
 	//TEXTEDIT - LIVETEXT
@@ -53,7 +53,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//devi aggiungere se non l'hai già fatto il mandare il cursore quando lo ricevi	//usi 2 volte la stessa funzione è normale?
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
-
+	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 
 	//TEXTEDIT - CLIENT
 
@@ -176,9 +176,19 @@ void LiveText::sendCursor(qint32 pos)
 
 void LiveText::sendAccountUpdate(QString name, QImage image)
 {
+	//Create a copy of user in case of rollback
+	User p = _user;
+	p.setNickname(name);
+	p.setIcon(image);
 
-	//controllare gestione salvataggio dati locale
-	_client->sendAccountUpdate(_user);
+
+	_client->sendAccountUpdate(p);
+}
+
+void LiveText::accountUpdated(User user)
+{
+	_user = user;
+	_textEdit->accountUpdateSuccessful();
 }
 
 

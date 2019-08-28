@@ -16,6 +16,9 @@ public:
 	ProfileEditWindow(User* user, QWidget* parent = nullptr);
 	~ProfileEditWindow();
 
+	void updateSuccessful();
+	void updateFailed(QString error);
+
 private slots:
 	void pushButtonUpdateClicked();
 	void pushButtonBrowseClicked();

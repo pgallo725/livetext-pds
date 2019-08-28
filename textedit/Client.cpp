@@ -436,7 +436,7 @@ void Client::sendAccountUpdate(User userUpdate) {
 	while (true) {
 
 		if (!socket->waitForReadyRead(10000)) {
-			emit accountModificationFail("server not responding");
+			emit accountModificationFail(tr("Server not responding"));
 			return;
 		}
 
