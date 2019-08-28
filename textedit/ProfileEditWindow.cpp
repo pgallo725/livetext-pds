@@ -39,7 +39,7 @@ ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(pare
 	int h = ui->label_UsrIcon->height();
 
 	userPix.convertFromImage(user->getIcon());
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &ProfileEditWindow::showUserIcon);
@@ -81,7 +81,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 		QPixmap userPix(path);
 
 		if (!userPix.isNull()) {
-			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio));
+			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			ui->label_incorrect_edit->setText("");
 			return;
 		}
@@ -92,7 +92,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 	ui->label_incorrect_edit->setText("Please choose a valid image file");
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio));
+	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 

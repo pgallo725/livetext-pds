@@ -222,7 +222,7 @@ void TextEdit::setupOnlineUsersActions()
 
 		QAction* onlineAction = new QAction(users, p.name().toStdString().c_str(), this);
 		connect(onlineAction, &QAction::triggered, this, [this, p]() { handleUserSelection(p); });
-		tb->addAction(onlineAction)
+		tb->addAction(onlineAction);
 	}
 }
 
@@ -527,6 +527,8 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	userPic.convertFromImage(image);
 	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
+
+	emit newCursorPosition(textEdit->textCursor().position());
 }
 
 //Remove presence in document

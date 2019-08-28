@@ -91,10 +91,10 @@ public:
     QFormLayout *formLayout_7;
     QLabel *label_19;
     QLineEdit *lineEdit_serverIP;
-    QLineEdit *lineEdit_serverPort;
     QLabel *label_20;
-    QPushButton *pushButton_confirmOperation;
+    QLineEdit *lineEdit_serverPort;
     QLabel *label_incorrect_operation;
+    QPushButton *pushButton_confirmOperation;
     QSpacerItem *verticalSpacer_23;
     QWidget *page_open;
     QHBoxLayout *horizontalLayout_3;
@@ -424,7 +424,7 @@ public:
         sizePolicy3.setVerticalStretch(0);
         sizePolicy3.setHeightForWidth(label_logo->sizePolicy().hasHeightForWidth());
         label_logo->setSizePolicy(sizePolicy3);
-        label_logo->setMinimumSize(QSize(150, 150));
+        label_logo->setMinimumSize(QSize(200, 200));
         label_logo->setMaximumSize(QSize(16777215, 16777215));
         label_logo->setAlignment(Qt::AlignCenter);
 
@@ -480,6 +480,11 @@ public:
 
         formLayout_7->setWidget(0, QFormLayout::FieldRole, lineEdit_serverIP);
 
+        label_20 = new QLabel(groupBox_5);
+        label_20->setObjectName(QString::fromUtf8("label_20"));
+
+        formLayout_7->setWidget(1, QFormLayout::LabelRole, label_20);
+
         lineEdit_serverPort = new QLineEdit(groupBox_5);
         lineEdit_serverPort->setObjectName(QString::fromUtf8("lineEdit_serverPort"));
         sizePolicy3.setHeightForWidth(lineEdit_serverPort->sizePolicy().hasHeightForWidth());
@@ -487,24 +492,10 @@ public:
 
         formLayout_7->setWidget(1, QFormLayout::FieldRole, lineEdit_serverPort);
 
-        label_20 = new QLabel(groupBox_5);
-        label_20->setObjectName(QString::fromUtf8("label_20"));
-
-        formLayout_7->setWidget(1, QFormLayout::LabelRole, label_20);
-
 
         verticalLayout_15->addLayout(formLayout_7);
 
-        pushButton_confirmOperation = new QPushButton(groupBox_5);
-        pushButton_confirmOperation->setObjectName(QString::fromUtf8("pushButton_confirmOperation"));
-        pushButton_confirmOperation->setMinimumSize(QSize(0, 30));
-
-        verticalLayout_15->addWidget(pushButton_confirmOperation);
-
-
-        verticalLayout_14->addWidget(groupBox_5);
-
-        label_incorrect_operation = new QLabel(page_2);
+        label_incorrect_operation = new QLabel(groupBox_5);
         label_incorrect_operation->setObjectName(QString::fromUtf8("label_incorrect_operation"));
         label_incorrect_operation->setMinimumSize(QSize(0, 30));
         QPalette palette;
@@ -518,7 +509,16 @@ public:
         label_incorrect_operation->setPalette(palette);
         label_incorrect_operation->setAlignment(Qt::AlignCenter);
 
-        verticalLayout_14->addWidget(label_incorrect_operation);
+        verticalLayout_15->addWidget(label_incorrect_operation);
+
+        pushButton_confirmOperation = new QPushButton(groupBox_5);
+        pushButton_confirmOperation->setObjectName(QString::fromUtf8("pushButton_confirmOperation"));
+        pushButton_confirmOperation->setMinimumSize(QSize(0, 30));
+
+        verticalLayout_15->addWidget(pushButton_confirmOperation);
+
+
+        verticalLayout_14->addWidget(groupBox_5);
 
         verticalSpacer_23 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -674,7 +674,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
         tabWidget->setCurrentIndex(1);
 
 
@@ -710,8 +710,8 @@ public:
         groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
         label_19->setText(QCoreApplication::translate("LandingPage", "Address", nullptr));
         label_20->setText(QCoreApplication::translate("LandingPage", "Port", nullptr));
-        pushButton_confirmOperation->setText(QString());
         label_incorrect_operation->setText(QString());
+        pushButton_confirmOperation->setText(QString());
         groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
         pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
         pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
