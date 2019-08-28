@@ -175,7 +175,7 @@ void Client::Login() {
 	loginUnlock->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("server not responding");
+		emit loginFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -216,7 +216,7 @@ void Client::Register() {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit registrationFailed("server not responding");
+		emit registrationFailed(tr("Server not responding"));
 		return ;
 	}
 
@@ -267,7 +267,7 @@ void Client::openDocument(QString URI) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -307,7 +307,7 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -347,7 +347,7 @@ void Client::deleteDocument(QString URI) {
 	removeDocument->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit removeFileFailed("server not responding");
+		emit removeFileFailed(tr("Server not responding"));
 		return;
 	}
 
