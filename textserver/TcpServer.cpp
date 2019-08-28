@@ -236,7 +236,7 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
-	if (users.contains(username))
+ 	if (users.contains(username))
 	{
 		if (client->isLogged())
 			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
