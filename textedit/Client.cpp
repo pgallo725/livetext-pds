@@ -52,6 +52,12 @@ void Client::readBuffer() {
 
 	in >> typeOfMessage;
 
+	messageHandler(typeOfMessage, in);
+
+}
+
+void Client::messageHandler(qint16 typeOfMessage, QDataStream& in) {
+
 	switch (typeOfMessage) {
 	case CursorMove:
 		reciveCursor(in);
@@ -75,6 +81,7 @@ void Client::readBuffer() {
 		//thorw exception
 		break;
 	}
+
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
@@ -243,34 +250,8 @@ void Client::Logout() {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	MessageCapsule logoutRequest = MessageFactory::LogoutRequest();
+	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->sendTo(socket);
-
-	//wait the response from the server
-	if (!socket->waitForReadyRead(10000)) {
-		emit logoutFailed("server not responding");
-		return;
-	}
-
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
-
-	switch (typeOfMessage) {
-	case LogoutConfirmed: {
-		return;
-	}
-	case LogoutError: {
-		// impossible to create the account
-		LogoutErrorMessage* logoutDenied = dynamic_cast<LogoutErrorMessage*>(incomingMessage.get());
-		emit logoutFailed(logoutDenied->getErrorMessage());
-		return;
-	}
-	default:
-		//throw MessageUnknownTypeException();
-		// EMIT?
-		return;
-	}
 
 }
 
@@ -443,19 +424,58 @@ void Client::deleteChar(QDataStream& in) {
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
+void Client::sendAccountUpdate(User userUpdate) {
+	
+	qint16 typeOfMessage;
+	QDataStream in(socket);
+	
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(userUpdate);
+	accountUpdate->sendTo(socket);
+
+	while (true) {
+
+		if (!socket->waitForReadyRead(10000)) {
+			emit accountModificationFail("server not responding");
+			return;
+		}
+
+		in >> typeOfMessage;
+
+		switch (typeOfMessage) {
+		case AccountConfirmed: {
+			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
+			recivedAccountUpdate->readFrom(in);
+			AccountUpdateMessage* accountupdate = dynamic_cast<AccountUpdateMessage*>(recivedAccountUpdate.get());
+			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			emit personalAccountModified(accountupdate->getUserObj());
+			return;
+		}
+		case AccountError: {
+			MessageCapsule accountError = MessageFactory::Empty(AccountError);
+			accountError->readFrom(in);
+			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(accountError.get());
+			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			emit accountModificationFail(accounterror->getErrorMessage());
+			return;
+		}
+			break;
+		default:
+			messageHandler(typeOfMessage, in);
+			break;
+		}
+	}
+}
+
+
+/*--------------------------- PRESENCE HANDLER --------------------------------*/
+
 void Client::accountUpdate(QDataStream& in) {
 
 	MessageCapsule accountUpdate = MessageFactory::Empty(PresenceUpdate);
 	accountUpdate->readFrom(in);
-	PresenceUpdateMessage *accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
-	emit accountModified(accountupdate->getUserId(),accountupdate->getNickname(),accountupdate->getIcon());
-
-}
-
-void Client::sendAccountUpdate(qint32 userId,QString name,QImage image) {
-	
-	MessageCapsule accountUpdate = MessageFactory::PresenceUpdate(userId, name, image);
-	accountUpdate->sendTo(socket);
+	PresenceUpdateMessage* accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
+	emit accountModified(accountupdate->getUserId(), accountupdate->getNickname(), accountupdate->getIcon());
 
 }
 
@@ -474,4 +494,11 @@ void Client::deleteUserPresence(QDataStream& in) {
 	userPresence->readFrom(in);
 	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(userPresence.get());
 	emit cancelUserPresence(userpresence->getUserId());
+}
+
+void Client::removeFromFile(qint32 myId) {
+
+	MessageCapsule userPresence = MessageFactory::PresenceRemove(myId);
+	userPresence->sendTo(socket);
+
 }

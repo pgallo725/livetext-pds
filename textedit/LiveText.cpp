@@ -47,7 +47,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//devi aggiungere se non l'hai già fatto il mandare il cursore quando lo ricevi	//usi 2 volte la stessa funzione è normale?
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
 
@@ -172,7 +172,9 @@ void LiveText::sendCursor(qint32 pos)
 
 void LiveText::sendAccountUpdate(QString name, QImage image)
 {
-	_client->sendAccountUpdate(_user.getUserId(), name, image);
+
+	//controllare gestione salvataggio dati locale
+	_client->sendAccountUpdate(_user);
 }
 
 
