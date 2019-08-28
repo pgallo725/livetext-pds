@@ -90,6 +90,7 @@ void TcpServer::initialize()
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
 
+	_userIdCounter = users.size();
 
 	// Read the documents' index file
 	QFile docsFile(INDEX_FILENAME);
@@ -141,14 +142,6 @@ QString TcpServer::generateURI(QString authorName, QString docName) const
 
 	hash.addData(uri.toStdString().c_str(), uri.length());
 	uri += QString(hash.result());
-
-	/*
-	for (int i = 0; i < 10; ++i)	// add a 10-character long random sequence to the document URI to make it unique
-	{
-		int index = qrand() % possibleCharacters.length();
-		QChar nextChar = possibleCharacters.at(index);
-		uri.append(nextChar);
-	}*/
 
 	return uri;
 }
