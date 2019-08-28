@@ -23,9 +23,7 @@ public:
 	static MessageCapsule AccountConfirmed(qint32 userId);
 	static MessageCapsule AccountError(QString error);
 
-	static MessageCapsule LogoutRequest();
-	static MessageCapsule LogoutConfirmed();
-	static MessageCapsule LogoutError(QString error);
+	static MessageCapsule Logout();
 
 	static MessageCapsule DocumentCreate(QString docName);
 	static MessageCapsule DocumentRemove(QString docURI);

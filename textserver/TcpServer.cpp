@@ -108,7 +108,7 @@ void TcpServer::initialize()
 
 			if (docIndexStream.status() != QTextStream::Status::Ok)
 			{
-				// TODO: handle error, throw FileFormatException ?
+				// THROW: handle error or FileFormatException ?
 			}
 
 			// Create the actual Document object and store it in the server document map
@@ -199,9 +199,9 @@ void TcpServer::newClientConnection()
 	QTcpSocket* socket = this->nextPendingConnection();
 
 	/* check if there's a new connection or it was a windows signal */
-	if (socket == 0) {
+	if (socket == nullptr) {
 		qDebug() << "ERROR: no pending connections!\n";
-		throw SocketNullException("::newClientConnection - no pending connections");		// could be ignored
+		throw SocketNullException("::newClientConnection - no pending connections");		// TODO: could be ignored
 	}
 
 	qDebug() << " - new connection from a client";
@@ -214,7 +214,7 @@ void TcpServer::newClientConnection()
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 }
 
-/* handle client disconnection and releas resources */
+/* handle client disconnection and release resources */
 void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
@@ -222,7 +222,8 @@ void TcpServer::clientDisconnection()
 	qDebug() << " - client '" << clients.find(socket).value()->getUsername() << "' disconnected";
 
 	clients.remove(socket);					/* remove this client from the map */
-	socket->close();						/* close the socket */
+	socket->close();						/* close and destroy the socket */
+	socket->deleteLater();
 }
 
 
@@ -314,17 +315,34 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, User& updatedU
 }
 
 
-/* release resources own by a client and delete it */
-MessageCapsule TcpServer::logoutClient(QTcpSocket* clientSocket)
+/* Release resources owned by a client and delete it */
+/*MessageCapsule TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
 	Client* client = clients.find(clientSocket).value().get();
 
-	if (!client->isLogged())
-		return MessageFactory::LogoutError("You cannot logout if you're not logged in");
+	if (client->isLogged())
+	{
+		client->logout();
+	}
 
-	client->logout();
+	clientSocket->disconnectFromHost();		// close the socket connection (clientDisconnection will handle the rest)
+}*/
 
-	return MessageFactory::LogoutConfirmed();
+/* Move a client from the workspace that he has exited back to the server */
+void TcpServer::receiveClient(QSharedPointer<Client> client)
+{
+	QTcpSocket* socket = new QTcpSocket;
+
+	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
+		qDebug() << socket->error();
+		return;
+	}
+
+	clients.insert(socket, client);
+
+	/* reconnect socket signals to slots in order to read and handle messages */
+	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
+	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 }
 
 
@@ -343,7 +361,7 @@ void addToIndex(QSharedPointer<Document> doc)
 
 		if (indexFileStream.status() == QTextStream::Status::WriteFailed)
 		{
-			// TODO: handle error, throw FileWriteException ?
+			// THROW: handle error or FileWriteException ?
 		}
 
 		file.close();
@@ -371,8 +389,9 @@ WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QShared
 	//w->moveToThread(t);
 	//t->start();
 
-	/* workspace will notify when theres no one using it for delete */
-	connect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
+	/* workspace will notify when clients quit editing the document and when it becomes empty */
+	connect(w, &WorkSpace::returnClient, this, &TcpServer::receiveClient);
+	connect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
 
 	return w;
 }
@@ -406,15 +425,23 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not receives more messages from client */
-	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
-	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	/*disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
+	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);*/
 
 	/* make the new thead connect the socket in the workspace */
-	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
+	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	
-	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
+	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);*/
 
-	return MessageFactory::DocumentReady(*doc);
+	clients.remove(author);		// remove the Client from the server map
+
+	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	emit clientToWorkspace(std::move(client));
+	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+
+	//author->deleteLater();		// TODO: delete socket ??
+
+	return MessageCapsule();
 }
 
 /* Open an existing Document */
@@ -446,15 +473,23 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, QString docUri)
 	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not recives more messages from client */
-	disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	/*disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);*/
 
 	/* make the new thead connect the socket in the workspace */
-	connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
-	emit newSocket(static_cast<qint64>(clientSocket->socketDescriptor()));
-	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
+	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
+	emit newSocket(static_cast<qint64>(author->socketDescriptor()));
+	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);*/
 
-	return MessageFactory::DocumentReady(*doc);
+	clients.remove(clientSocket);		// remove the Client from the server map
+
+	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	emit clientToWorkspace(client);
+	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+
+	//clientSocket.deleteLater();		// TODO: delete socket ??
+
+	return MessageCapsule();
 }
 
 /* Delete a document from the client's list */
@@ -480,7 +515,7 @@ void TcpServer::deleteWorkspace(QString document)
 	//QThread* t = workThreads.find(document).value().get();
 
 	/* they throw an exception ??? why??? */
-	//disconnect(w, &WorkSpace::notWorking, this, &TcpServer::deleteWorkspace);
+	//disconnect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
 	//disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
 
 	/* delete workspace and remove it from the map */
@@ -491,7 +526,7 @@ void TcpServer::deleteWorkspace(QString document)
 	//workThreads.find(document).value()->wait();
 	//workThreads.remove(document);
 
-	qDebug() << "workspace cancellato";
+	qDebug() << "workspace (" << document << ") closed";
 }
 
 
@@ -512,7 +547,7 @@ void TcpServer::readMessage()
 	message->readFrom(streamIn);
 
 	if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
-		mType == LogoutRequest || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+		mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
 	{
 		messageHandler.process(message, socket);
 	}
@@ -529,7 +564,7 @@ void TcpServer::readMessage()
 
 
 /* allow to a secondary thread to steal a QSharedPointer from the server */
-QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)
+/*QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)
 {
 	QSharedPointer<Client> c;
 
@@ -537,10 +572,9 @@ QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)
 		if (clients.find(it).value()->getSocketDescriptor() == socketDescriptor) {
 			c = std::move(clients.find(it).value());
 			clients.remove(it);
-			//TODO: need to move thread affinity and make Client a QObject?
 			return c;
 		}
 	}
 
 	return QSharedPointer<Client>();
-}
+}*/

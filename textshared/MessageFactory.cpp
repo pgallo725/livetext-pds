@@ -23,9 +23,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::AccountUpdate:		return new AccountUpdateMessage();
 		case MessageType::AccountConfirmed:		return new AccountConfirmedMessage();
 		case MessageType::AccountError:			return new AccountErrorMessage();
-		case MessageType::LogoutRequest:		return new LogoutRequestMessage();
-		case MessageType::LogoutConfirmed:		return new LogoutConfirmedMessage();
-		case MessageType::LogoutError:			return new LogoutErrorMessage();
+		case MessageType::Logout:				return new LogoutMessage();
 		case MessageType::DocumentCreate:		return new DocumentCreateMessage();
 		case MessageType::DocumentRemove:		return new DocumentRemoveMessage();
 		case MessageType::DocumentDismissed:	return new DocumentDismissedMessage();
@@ -92,19 +90,9 @@ MessageCapsule MessageFactory::AccountError(QString error)
 	return new AccountErrorMessage(error);
 }
 
-MessageCapsule MessageFactory::LogoutRequest()
+MessageCapsule MessageFactory::Logout()
 {
-	return new LogoutRequestMessage();
-}
-
-MessageCapsule MessageFactory::LogoutConfirmed()
-{
-	return new LogoutConfirmedMessage();
-}
-
-MessageCapsule MessageFactory::LogoutError(QString error)
-{
-	return new LogoutErrorMessage(error);
+	return new LogoutMessage();
 }
 
 MessageCapsule MessageFactory::DocumentCreate(QString docName)

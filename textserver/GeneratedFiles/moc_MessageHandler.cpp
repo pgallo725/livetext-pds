@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
-    QByteArrayData data[30];
-    char stringdata0[314];
+    QByteArrayData data[31];
+    char stringdata0[329];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -61,7 +61,8 @@ QT_MOC_LITERAL(25, 268, 3), // "pos"
 QT_MOC_LITERAL(26, 272, 15), // "messageDispatch"
 QT_MOC_LITERAL(27, 288, 7), // "message"
 QT_MOC_LITERAL(28, 296, 6), // "sender"
-QT_MOC_LITERAL(29, 303, 10) // "userLogout"
+QT_MOC_LITERAL(29, 303, 14), // "removePresence"
+QT_MOC_LITERAL(30, 318, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -72,7 +73,7 @@ QT_MOC_LITERAL(29, 303, 10) // "userLogout"
     "documentOpen\0docUri\0documentRemove\0"
     "charInsert\0Symbol&\0s\0charDelete\0"
     "QVector<qint32>\0pos\0messageDispatch\0"
-    "message\0sender\0userLogout"
+    "message\0sender\0removePresence\0userLogout"
 };
 #undef QT_MOC_LITERAL
 
@@ -82,25 +83,26 @@ static const uint qt_meta_data_MessageHandler[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-      11,       // signalCount
+      12,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   69,    3, 0x06 /* Public */,
-       7,    2,   74,    3, 0x06 /* Public */,
-       9,    2,   79,    3, 0x06 /* Public */,
-      13,    2,   84,    3, 0x06 /* Public */,
-      15,    2,   89,    3, 0x06 /* Public */,
-      17,    2,   94,    3, 0x06 /* Public */,
-      19,    2,   99,    3, 0x06 /* Public */,
-      20,    1,  104,    3, 0x06 /* Public */,
-      23,    1,  107,    3, 0x06 /* Public */,
-      26,    2,  110,    3, 0x06 /* Public */,
-      29,    1,  115,    3, 0x06 /* Public */,
+       1,    2,   74,    3, 0x06 /* Public */,
+       7,    2,   79,    3, 0x06 /* Public */,
+       9,    2,   84,    3, 0x06 /* Public */,
+      13,    2,   89,    3, 0x06 /* Public */,
+      15,    2,   94,    3, 0x06 /* Public */,
+      17,    2,   99,    3, 0x06 /* Public */,
+      19,    2,  104,    3, 0x06 /* Public */,
+      20,    1,  109,    3, 0x06 /* Public */,
+      23,    1,  112,    3, 0x06 /* Public */,
+      26,    2,  115,    3, 0x06 /* Public */,
+      29,    1,  120,    3, 0x06 /* Public */,
+      30,    1,  123,    3, 0x06 /* Public */,
 
  // signals: parameters
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
@@ -113,7 +115,8 @@ static const uint qt_meta_data_MessageHandler[] = {
     QMetaType::Void, 0x80000000 | 21,   22,
     QMetaType::Void, 0x80000000 | 24,   25,
     QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   27,   28,
-    0x80000000 | 2, 0x80000000 | 4,    5,
+    QMetaType::Void, 0x80000000 | 4,    5,
+    QMetaType::Void, 0x80000000 | 4,    5,
 
        0        // eod
 };
@@ -141,8 +144,8 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 7: _t->charInsert((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 8: _t->charDelete((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
         case 9: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QTcpSocket*(*)>(_a[2]))); break;
-        case 10: { MessageCapsule _r = _t->userLogout((*reinterpret_cast< QTcpSocket*(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
+        case 10: _t->removePresence((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
+        case 11: _t->userLogout((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -212,6 +215,13 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
             break;
         case 10:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+            }
+            break;
+        case 11:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -292,9 +302,16 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::userLogout)) {
+            using _t = void (MessageHandler::*)(QTcpSocket * );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::removePresence)) {
                 *result = 10;
+                return;
+            }
+        }
+        {
+            using _t = void (MessageHandler::*)(QTcpSocket * );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::userLogout)) {
+                *result = 11;
                 return;
             }
         }
@@ -330,13 +347,13 @@ int MessageHandler::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 11)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 12;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 11)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 11;
+        _id -= 12;
     }
     return _id;
 }
@@ -426,12 +443,17 @@ void MessageHandler::messageDispatch(MessageCapsule _t1, QTcpSocket * _t2)
 }
 
 // SIGNAL 10
-MessageCapsule MessageHandler::userLogout(QTcpSocket * _t1)
+void MessageHandler::removePresence(QTcpSocket * _t1)
 {
-    MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 10, _a);
-    return _t0;
+}
+
+// SIGNAL 11
+void MessageHandler::userLogout(QTcpSocket * _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 11, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

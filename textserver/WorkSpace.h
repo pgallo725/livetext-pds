@@ -34,7 +34,8 @@ public:
 
 public slots:
 
-	void newSocket(qint64 handle);
+	//void newSocket(qint64 handle);
+	void newClient(QSharedPointer<Client> client);
 	void clientDisconnection();
 	void readMessage();
 	
@@ -45,10 +46,10 @@ public slots:
 	void dispatchMessage(MessageCapsule message, QTcpSocket* sender);
 
 	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
-	MessageCapsule logoutClient(QTcpSocket* clientSocket);
+	void clientQuit(QTcpSocket* clientSocket);
 
-signals: void notWorking(QString document);
-signals: void deleteClient(qint64 handle);
+signals: void noEditors(QString document);
+signals: void returnClient(QSharedPointer<Client> client);
 
 };
 

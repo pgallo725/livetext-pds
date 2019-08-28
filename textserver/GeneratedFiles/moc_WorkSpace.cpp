@@ -9,6 +9,7 @@
 #include "../WorkSpace.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
+#include <QtCore/QSharedPointer>
 #include <QtCore/QVector>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'WorkSpace.h' doesn't include <QObject>."
@@ -22,8 +23,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[26];
-    char stringdata0[304];
+    QByteArrayData data[27];
+    char stringdata0[324];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,42 +34,43 @@ struct qt_meta_stringdata_WorkSpace_t {
 static const qt_meta_stringdata_WorkSpace_t qt_meta_stringdata_WorkSpace = {
     {
 QT_MOC_LITERAL(0, 0, 9), // "WorkSpace"
-QT_MOC_LITERAL(1, 10, 10), // "notWorking"
-QT_MOC_LITERAL(2, 21, 0), // ""
-QT_MOC_LITERAL(3, 22, 8), // "document"
-QT_MOC_LITERAL(4, 31, 12), // "deleteClient"
-QT_MOC_LITERAL(5, 44, 6), // "handle"
-QT_MOC_LITERAL(6, 51, 9), // "newSocket"
-QT_MOC_LITERAL(7, 61, 19), // "clientDisconnection"
-QT_MOC_LITERAL(8, 81, 11), // "readMessage"
-QT_MOC_LITERAL(9, 93, 12), // "documentSave"
-QT_MOC_LITERAL(10, 106, 20), // "documentInsertSymbol"
-QT_MOC_LITERAL(11, 127, 7), // "Symbol&"
-QT_MOC_LITERAL(12, 135, 6), // "symbol"
-QT_MOC_LITERAL(13, 142, 20), // "documentDeleteSymbol"
-QT_MOC_LITERAL(14, 163, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(15, 179, 8), // "position"
-QT_MOC_LITERAL(16, 188, 15), // "dispatchMessage"
-QT_MOC_LITERAL(17, 204, 14), // "MessageCapsule"
-QT_MOC_LITERAL(18, 219, 7), // "message"
-QT_MOC_LITERAL(19, 227, 11), // "QTcpSocket*"
-QT_MOC_LITERAL(20, 239, 6), // "sender"
-QT_MOC_LITERAL(21, 246, 13), // "updateAccount"
-QT_MOC_LITERAL(22, 260, 12), // "clientSocket"
-QT_MOC_LITERAL(23, 273, 5), // "User&"
-QT_MOC_LITERAL(24, 279, 11), // "updatedUser"
-QT_MOC_LITERAL(25, 291, 12) // "logoutClient"
+QT_MOC_LITERAL(1, 10, 9), // "noEditors"
+QT_MOC_LITERAL(2, 20, 0), // ""
+QT_MOC_LITERAL(3, 21, 8), // "document"
+QT_MOC_LITERAL(4, 30, 12), // "returnClient"
+QT_MOC_LITERAL(5, 43, 22), // "QSharedPointer<Client>"
+QT_MOC_LITERAL(6, 66, 6), // "client"
+QT_MOC_LITERAL(7, 73, 9), // "newClient"
+QT_MOC_LITERAL(8, 83, 19), // "clientDisconnection"
+QT_MOC_LITERAL(9, 103, 11), // "readMessage"
+QT_MOC_LITERAL(10, 115, 12), // "documentSave"
+QT_MOC_LITERAL(11, 128, 20), // "documentInsertSymbol"
+QT_MOC_LITERAL(12, 149, 7), // "Symbol&"
+QT_MOC_LITERAL(13, 157, 6), // "symbol"
+QT_MOC_LITERAL(14, 164, 20), // "documentDeleteSymbol"
+QT_MOC_LITERAL(15, 185, 15), // "QVector<qint32>"
+QT_MOC_LITERAL(16, 201, 8), // "position"
+QT_MOC_LITERAL(17, 210, 15), // "dispatchMessage"
+QT_MOC_LITERAL(18, 226, 14), // "MessageCapsule"
+QT_MOC_LITERAL(19, 241, 7), // "message"
+QT_MOC_LITERAL(20, 249, 11), // "QTcpSocket*"
+QT_MOC_LITERAL(21, 261, 6), // "sender"
+QT_MOC_LITERAL(22, 268, 13), // "updateAccount"
+QT_MOC_LITERAL(23, 282, 12), // "clientSocket"
+QT_MOC_LITERAL(24, 295, 5), // "User&"
+QT_MOC_LITERAL(25, 301, 11), // "updatedUser"
+QT_MOC_LITERAL(26, 313, 10) // "clientQuit"
 
     },
-    "WorkSpace\0notWorking\0\0document\0"
-    "deleteClient\0handle\0newSocket\0"
-    "clientDisconnection\0readMessage\0"
-    "documentSave\0documentInsertSymbol\0"
+    "WorkSpace\0noEditors\0\0document\0"
+    "returnClient\0QSharedPointer<Client>\0"
+    "client\0newClient\0clientDisconnection\0"
+    "readMessage\0documentSave\0documentInsertSymbol\0"
     "Symbol&\0symbol\0documentDeleteSymbol\0"
     "QVector<qint32>\0position\0dispatchMessage\0"
     "MessageCapsule\0message\0QTcpSocket*\0"
     "sender\0updateAccount\0clientSocket\0"
-    "User&\0updatedUser\0logoutClient"
+    "User&\0updatedUser\0clientQuit"
 };
 #undef QT_MOC_LITERAL
 
@@ -90,30 +92,30 @@ static const uint qt_meta_data_WorkSpace[] = {
        4,    1,   72,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       6,    1,   75,    2, 0x0a /* Public */,
-       7,    0,   78,    2, 0x0a /* Public */,
-       8,    0,   79,    2, 0x0a /* Public */,
-       9,    0,   80,    2, 0x0a /* Public */,
-      10,    1,   81,    2, 0x0a /* Public */,
-      13,    1,   84,    2, 0x0a /* Public */,
-      16,    2,   87,    2, 0x0a /* Public */,
-      21,    2,   92,    2, 0x0a /* Public */,
-      25,    1,   97,    2, 0x0a /* Public */,
+       7,    1,   75,    2, 0x0a /* Public */,
+       8,    0,   78,    2, 0x0a /* Public */,
+       9,    0,   79,    2, 0x0a /* Public */,
+      10,    0,   80,    2, 0x0a /* Public */,
+      11,    1,   81,    2, 0x0a /* Public */,
+      14,    1,   84,    2, 0x0a /* Public */,
+      17,    2,   87,    2, 0x0a /* Public */,
+      22,    2,   92,    2, 0x0a /* Public */,
+      26,    1,   97,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::QString,    3,
-    QMetaType::Void, QMetaType::LongLong,    5,
+    QMetaType::Void, 0x80000000 | 5,    6,
 
  // slots: parameters
-    QMetaType::Void, QMetaType::LongLong,    5,
+    QMetaType::Void, 0x80000000 | 5,    6,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 11,   12,
-    QMetaType::Void, 0x80000000 | 14,   15,
-    QMetaType::Void, 0x80000000 | 17, 0x80000000 | 19,   18,   20,
-    0x80000000 | 17, 0x80000000 | 19, 0x80000000 | 23,   22,   24,
-    0x80000000 | 17, 0x80000000 | 19,   22,
+    QMetaType::Void, 0x80000000 | 12,   13,
+    QMetaType::Void, 0x80000000 | 15,   16,
+    QMetaType::Void, 0x80000000 | 18, 0x80000000 | 20,   19,   21,
+    0x80000000 | 18, 0x80000000 | 20, 0x80000000 | 24,   23,   25,
+    QMetaType::Void, 0x80000000 | 20,   23,
 
        0        // eod
 };
@@ -124,9 +126,9 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         auto *_t = static_cast<WorkSpace *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->notWorking((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 1: _t->deleteClient((*reinterpret_cast< qint64(*)>(_a[1]))); break;
-        case 2: _t->newSocket((*reinterpret_cast< qint64(*)>(_a[1]))); break;
+        case 0: _t->noEditors((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 1: _t->returnClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
+        case 2: _t->newClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
         case 3: _t->clientDisconnection(); break;
         case 4: _t->readMessage(); break;
         case 5: _t->documentSave(); break;
@@ -135,8 +137,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 8: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QTcpSocket*(*)>(_a[2]))); break;
         case 9: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< User(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 10: { MessageCapsule _r = _t->logoutClient((*reinterpret_cast< QTcpSocket*(*)>(_a[1])));
-            if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
+        case 10: _t->clientQuit((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -175,14 +176,14 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         int *result = reinterpret_cast<int *>(_a[0]);
         {
             using _t = void (WorkSpace::*)(QString );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&WorkSpace::notWorking)) {
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&WorkSpace::noEditors)) {
                 *result = 0;
                 return;
             }
         }
         {
-            using _t = void (WorkSpace::*)(qint64 );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&WorkSpace::deleteClient)) {
+            using _t = void (WorkSpace::*)(QSharedPointer<Client> );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&WorkSpace::returnClient)) {
                 *result = 1;
                 return;
             }
@@ -231,14 +232,14 @@ int WorkSpace::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void WorkSpace::notWorking(QString _t1)
+void WorkSpace::noEditors(QString _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 
 // SIGNAL 1
-void WorkSpace::deleteClient(qint64 _t1)
+void WorkSpace::returnClient(QSharedPointer<Client> _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);

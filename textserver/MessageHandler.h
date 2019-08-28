@@ -51,6 +51,7 @@ signals: void charInsert(Symbol& s);
 signals: void charDelete(QVector<qint32> pos);
 signals: void messageDispatch(MessageCapsule message, QTcpSocket* sender);
 
-signals: MessageCapsule userLogout(QTcpSocket* clientSocket);
+signals: void removePresence(QTcpSocket* clientSocket);
+signals: void userLogout(QTcpSocket* clientSocket);
 
 };
