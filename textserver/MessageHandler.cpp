@@ -25,7 +25,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 
-	connect(this, &MessageHandler::userLogout, w, &WorkSpace::logoutClient, Qt::DirectConnection);
+	connect(this, &MessageHandler::removePresence, w, &WorkSpace::clientQuit, Qt::DirectConnection);
 }
 
 MessageHandler::MessageHandler(TcpServer* s)
@@ -43,7 +43,7 @@ MessageHandler::MessageHandler(TcpServer* s)
 	connect(this, &MessageHandler::documentOpen, s, &TcpServer::openDocument, Qt::DirectConnection);
 	connect(this, &MessageHandler::documentRemove, s, &TcpServer::removeDocument, Qt::DirectConnection);
 
-	connect(this, &MessageHandler::userLogout, s, &TcpServer::logoutClient, Qt::DirectConnection);
+	connect(this, &MessageHandler::userLogout, s, &TcpServer::clientDisconnection, Qt::DirectConnection);
 }
 
 
@@ -94,16 +94,18 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 	case DocumentCreate:
 	{
 		DocumentCreateMessage* docMsg = dynamic_cast<DocumentCreateMessage*>(message.get());
-		MessageCapsule response = emit documentCreate(socket, docMsg->getDocumentName());
-		response->sendTo(socket);
+		MessageCapsule errorMsg = emit documentCreate(socket, docMsg->getDocumentName());
+		if (errorMsg)
+			errorMsg->sendTo(socket);
 		break;
 	}
 
 	case DocumentOpen:
 	{
 		DocumentOpenMessage* docMsg = dynamic_cast<DocumentOpenMessage*>(message.get());
-		MessageCapsule response = emit documentOpen(socket, docMsg->getDocumentURI());
-		response->sendTo(socket);
+		MessageCapsule errorMsg = emit documentOpen(socket, docMsg->getDocumentURI());
+		if (errorMsg) 
+			errorMsg->sendTo(socket);
 		break;
 	}
 
@@ -136,15 +138,23 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 		/* PRESENCE MESSAGES */
 
 	case CursorMove:
+	{
 		emit messageDispatch(message, socket);
 		break;
+	}
+		
+	case PresenceRemove:
+	{
+		emit removePresence(socket);
+		emit messageDispatch(message, socket);
+		break;
+	}
 
 		/* LOGOUT MESSAGE */
 
-	case LogoutRequest:
+	case Logout:
 	{
-		MessageCapsule response = emit userLogout(socket);
-		response->sendTo(socket);
+		emit userLogout(socket);
 		break;
 	}
 

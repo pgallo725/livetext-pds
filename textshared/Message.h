@@ -19,10 +19,8 @@ enum MessageType
 	AccountConfirmed,
 	AccountError,
 
-	// Logout messages
-	LogoutRequest,
-	LogoutConfirmed,
-	LogoutError,
+	// Logout message
+	Logout,
 
 	// Document messages
 	DocumentCreate,

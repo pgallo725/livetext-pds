@@ -13,6 +13,7 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(SAVE_TIMEOUT);
 
+	// TODO IGOR: creare il thread già dentro lo shared pointer ?
 	QThread* t = new QThread();
 	connect(t, &QThread::finished, t, &QThread::deleteLater);
 	this->moveToThread(t);
@@ -24,13 +25,13 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 WorkSpace::~WorkSpace()
 {
 	timer.stop();
-	doc->save();	// Saving changes to the document before closing the workspace
+	doc->save();			// Saving changes to the document before closing the workspace
 	workThread->quit();
 	workThread->wait();
 }
 
 
-void WorkSpace::newSocket(qint64 handle)
+/*void WorkSpace::newSocket(qint64 handle)
 {
 	QTcpSocket* socket = new QTcpSocket;
 	QSharedPointer<Client> c;
@@ -46,12 +47,58 @@ void WorkSpace::newSocket(qint64 handle)
 		return;
 	}
 
+	// TODO IGOR: controllare l'ordine delle operazioni, la connect va fatta prima ?
+	// inoltre l'if nel ciclo sarebbe evitabile se lo si fa prima di editors.insert(socket), fattibile ?
 	editors.insert(socket, c);
-	dispatchMessage(MessageFactory::PresenceAdd(c->getUserId(),		// Send to other clients this new presence
+	dispatchMessage(MessageFactory::PresenceAdd(c->getUserId(),			// Send to other clients this new presence
 		c->getUser()->getNickname(), c->getUser()->getIcon()), socket);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+
+	// Send to the new user all the Presence messages of other editors in the workspace
+	for (auto i = editors.begin(); i != editors.end(); ++i)
+	{
+		QTcpSocket* otherSocket = i.key();
+
+		if (otherSocket != socket)
+		{
+			User* editor = i.value()->getUser();
+			MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
+		}
+	}
+}*/
+
+void WorkSpace::newClient(QSharedPointer<Client> client)
+{
+	QTcpSocket* socket = new QTcpSocket;
+
+	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
+		qDebug() << socket->error();
+		return;
+	}
+
+	editors.insert(socket, client);
+
+	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
+	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+
+	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
+
+	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
+		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
+
+	// Send to the new user all the Presence messages of other editors in the workspace
+	for (auto i = editors.begin(); i != editors.end(); ++i)
+	{
+		QTcpSocket* otherSocket = i.key();
+
+		if (otherSocket != socket)		// TODO: l'if nel ciclo sarebbe evitabile se lo si fa prima di editors.insert(socket), fattibile ?
+		{
+			User* editor = i.value()->getUser();
+			MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
+		}
+	}
 }
 
 
@@ -68,7 +115,7 @@ void WorkSpace::readMessage()
 	message->readFrom(streamIn);
 
 	if (mType == CursorMove || mType == CharInsert || mType == CharDelete ||
-		mType == AccountUpdate || mType == LogoutRequest)
+		mType == PresenceRemove || mType == AccountUpdate)
 	{
 		messageHandler.process(message, socket);
 	}
@@ -100,14 +147,16 @@ void WorkSpace::clientDisconnection()
 
 	QSharedPointer<Client> c = editors.find(socket).value();
 	editors.remove(socket);
-	qDebug() << "client removed";
-
+	socket->close();
+	socket->deleteLater();
+	qDebug() << " - client '" << c->getUsername() << "' disconnected";
+	
 	// Send to other clients that this client is disconnected
-	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), socket);
+	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
 
-	// If there are no more clients using this workspace, emit notWorking signal
-	if (!editors.size())
-		emit notWorking(doc->getURI());		// TODO: consider adding a timer before closing the workspace
+	// If there are no more clients using this workspace, emit noEditors signal
+	if (editors.isEmpty())
+		emit noEditors(doc->getURI());
 }
 
 
@@ -154,14 +203,22 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedU
 }
 
 
-MessageCapsule WorkSpace::logoutClient(QTcpSocket* clientSocket)
+void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 {
-	if (!editors.remove(clientSocket))
-		return MessageFactory::LogoutError("You cannot logout if you're not logged in");
+	QSharedPointer<Client> client = editors.find(clientSocket).value();
+
+	editors.remove(clientSocket);			// Remove the client from the WorkSpace
+
+	emit returnClient(std::move(client));		// Move the client back to the TcpServer
+
+	// Delete the client's socket in the current thread
+	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
+	clientSocket->deleteLater();
+	qDebug() << " - client '" << client->getUsername() << "' closed the document";
+
+	// Notify everyone else that this client exited the workspace
+	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
 	if (editors.size() == 0)
-		emit notWorking(doc->getURI());		// TODO: should probably be the last thing to do
-
-	// TODO: need to give client to main thread
-	return MessageFactory::LogoutConfirmed();
+		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
 }

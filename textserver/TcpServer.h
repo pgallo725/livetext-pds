@@ -38,7 +38,7 @@ private:
 
 	QMap<QString, User> users;
 	QMap<QString, QSharedPointer<Document>> documents;
-	QMap<QString, QSharedPointer<WorkSpace>> workspaces;	// TODO(?): can workspaces and workThreads be unified ?
+	QMap<QString, QSharedPointer<WorkSpace>> workspaces;	// TODO IGOR: can workspaces and workThreads be unified ? (remove commented code if done)
 	//QMap<QString, QSharedPointer<QThread>> workThreads;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
 	qint32 _userIdCounter;
@@ -55,7 +55,7 @@ public:
 	~TcpServer();
 
 	void initialize();
-	QSharedPointer<Client> moveClient(qintptr socketDescriptor);
+	//QSharedPointer<Client> moveClient(qintptr socketDescriptor);
 
 public slots:
 
@@ -76,9 +76,10 @@ public slots:
 	MessageCapsule createDocument(QTcpSocket* author, QString docName);
 	MessageCapsule openDocument(QTcpSocket* clientSocket, QString docUri);
 
-	MessageCapsule logoutClient(QTcpSocket* clientSocket);
+	//MessageCapsule logoutClient(QTcpSocket* clientSocket);
+	void receiveClient(QSharedPointer<Client> client);
 	
-signals:
+signals: void newSocket(qint64 handle);
+signals: void clientToWorkspace(QSharedPointer<Client> client);
 
-	void newSocket(qint64 handle);
 };
