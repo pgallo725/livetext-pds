@@ -25,6 +25,7 @@ public:
 
 	void openLoggedPage();
 	void incorrectOperation(QString msg);
+	void documentDismissed();
 
 private slots:
 	void pushButtonNewClicked();
@@ -43,6 +44,8 @@ private slots:
 public slots:
 	void connectionEstabilished();
 	void impossibleToConnect();
+	void incorrectFileOperation(QString error);
+
 
 signals:
 	void openEditor(int mode, QString path = nullptr);

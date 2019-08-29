@@ -24,8 +24,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
-	
-	
+	connect(_client, &Client::openFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
+	connect(_client, &Client::removeFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
+
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
 
@@ -34,12 +35,12 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::registrationSuccess);
-	
-	//connect(_client, &Client::openFileCompleted, this, );
-	//connect(_client, &Client::openFileFailed, this, );
-	//connect(_client, &Client::removeFileFailed, ,);
-	//connect(_client, &Client::documentDismissed,,);
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
+
+	//CLIENT - DOCUMENTEDITOR
+	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
+	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
+	
 
 
 
@@ -64,6 +65,7 @@ LiveText::~LiveText()
 	delete _landingPage;
 	delete _textEdit;
 	delete _client;
+	delete _docEditor;
 }
 
 
@@ -156,11 +158,21 @@ void LiveText::registrationSuccess(User user)
 	_landingPage->openLoggedPage();
 }
 
+void LiveText::openDocumentCompleted(Document doc)
+{
+	_docEditor = new DocumentEditor(doc);
+}
+
+void LiveText::dismissDocumentCompleted()
+{
+	delete _docEditor;
+	_landingPage->documentDismissed();
+}
+
 void LiveText::Logout()
 {
 	_client->Disconnect();
 }
-
 
 void LiveText::returnToLanding()
 {

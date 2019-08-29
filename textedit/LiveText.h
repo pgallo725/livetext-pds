@@ -4,6 +4,7 @@
 #include "textedit.h"
 #include "LandingPage.h"
 #include "Client.h"
+#include "DocumentEditor.h"
 #include <User.h>
 
 #include <QObject>
@@ -38,10 +39,16 @@ private slots:
 	void loginSuccess(User user);
 	void registrationSuccess(User user);
 
+
+	//DOCUMENTEDITOR
+	void openDocumentCompleted(Document doc);
+	void dismissDocumentCompleted();
+
 private:
 	LandingPage* _landingPage;
 	Client* _client;
 	TextEdit* _textEdit;
+	DocumentEditor* _docEditor;
 	User _user;
 };
 
