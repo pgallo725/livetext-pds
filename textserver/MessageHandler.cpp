@@ -43,7 +43,7 @@ MessageHandler::MessageHandler(TcpServer* s)
 	connect(this, &MessageHandler::documentOpen, s, &TcpServer::openDocument, Qt::DirectConnection);
 	connect(this, &MessageHandler::documentRemove, s, &TcpServer::removeDocument, Qt::DirectConnection);
 
-	connect(this, &MessageHandler::userLogout, s, &TcpServer::clientDisconnection, Qt::DirectConnection);
+	connect(this, &MessageHandler::userLogout, s, &TcpServer::logoutClient, Qt::DirectConnection);
 }
 
 

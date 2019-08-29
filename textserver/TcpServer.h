@@ -76,7 +76,7 @@ public slots:
 	MessageCapsule createDocument(QTcpSocket* author, QString docName);
 	MessageCapsule openDocument(QTcpSocket* clientSocket, QString docUri);
 
-	//MessageCapsule logoutClient(QTcpSocket* clientSocket);
+	void logoutClient(QTcpSocket* clientSocket);
 	void receiveClient(QSharedPointer<Client> client);
 	
 signals: void newSocket(qint64 handle);
