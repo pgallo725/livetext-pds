@@ -45,7 +45,7 @@ public slots:
 
 
 signals:
-	void logout();
+	void closeDocument();
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString name, QImage image);
 	
@@ -123,7 +123,7 @@ private:
 	QAction* actionShare;
 	QAction* actionUser;
 	QAction* actionHighlightUsers;
-	QAction* actionLogout;
+	QAction* actioncloseDocument;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;

@@ -190,9 +190,9 @@ void TextEdit::setupUserActions()
 	tb->addAction(actionUser);
 
 
-	const QIcon logoutIcon(rsrcPath + "/logout.png");
-	actionLogout = menu->addAction(logoutIcon, tr("&Logout"), this, &TextEdit::logout);
-	tb->addAction(actionLogout);
+	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
+	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::closeDocument);
+	tb->addAction(actioncloseDocument);
 
 }
 
