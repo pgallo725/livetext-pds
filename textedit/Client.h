@@ -64,7 +64,7 @@ signals:
 
 
 	//Account signals
-	void personalAccountModified(User userUpdate);
+	void personalAccountModified(qint32 userId);
 	void accountModificationFail(QString error);
 	
 	//Document Signals

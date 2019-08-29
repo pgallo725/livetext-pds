@@ -28,24 +28,24 @@ void Client::writeOnServer()
 }
 
 void Client::serverConnection() {
-	qDebug() << "Client connesso al server ";
+	qDebug() << "Connection established";
 	emit connectionEstablished();
 }
 
 void Client::serverDisconnection() {
-	qDebug() << "Client disconnesso dal server ";
+	qDebug() << "Server closed the connection";
 }
 
 void Client::errorHandler() {
 
-	qDebug() << "error raised";
+	qDebug() << "Error raised";
 	socket->close();
 
 }
 
 void Client::readBuffer() {
 
-	qDebug() << "reading socket";
+	qDebug() << "Reading socket";
 	
 	quint16 typeOfMessage;
 	QDataStream in;
@@ -91,7 +91,7 @@ void Client::Connect(QString ipAddress, quint16 port) {
 
 void Client::Disconnect() {
 	socket->close();
-	qDebug() << "connection closed by client";
+	qDebug() << "Connection closed by client";
 }
 
 void Client::setUsername(QString username) {
@@ -164,7 +164,7 @@ void Client::Login() {
 	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
 	QString nonce = loginChallenge->getNonce();
 
-	qDebug() << "cripting salt " << nonce;
+	qDebug() << "Cripting salt " << nonce;
 	QString result = password + nonce;
 	
 	QCryptographicHash hash(QCryptographicHash::Md5);
@@ -175,7 +175,7 @@ void Client::Login() {
 	loginUnlock->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("server not responding");
+		emit loginFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -216,7 +216,7 @@ void Client::Register() {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit registrationFailed("server not responding");
+		emit registrationFailed(tr("Server not responding"));
 		return ;
 	}
 
@@ -267,7 +267,7 @@ void Client::openDocument(QString URI) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -307,7 +307,7 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -347,7 +347,7 @@ void Client::deleteDocument(QString URI) {
 	removeDocument->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit removeFileFailed("server not responding");
+		emit removeFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -436,7 +436,7 @@ void Client::sendAccountUpdate(User userUpdate) {
 	while (true) {
 
 		if (!socket->waitForReadyRead(10000)) {
-			emit accountModificationFail("server not responding");
+			emit accountModificationFail(tr("Server not responding"));
 			return;
 		}
 
@@ -446,9 +446,9 @@ void Client::sendAccountUpdate(User userUpdate) {
 		case AccountConfirmed: {
 			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
 			recivedAccountUpdate->readFrom(in);
-			AccountUpdateMessage* accountupdate = dynamic_cast<AccountUpdateMessage*>(recivedAccountUpdate.get());
+			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-			emit personalAccountModified(accountupdate->getUserObj());
+			emit personalAccountModified(accountconfirmed->getUserId());
 			return;
 		}
 		case AccountError: {
