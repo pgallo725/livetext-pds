@@ -197,9 +197,9 @@ void LiveText::sendAccountUpdate(QString name, QImage image)
 	_client->sendAccountUpdate(p);
 }
 
-void LiveText::accountUpdated(User user)
+void LiveText::accountUpdated(qint32 userId)
 {
-	_user = user;
+	_user.setId(userId);
 	_textEdit->accountUpdateSuccessful();
 }
 
