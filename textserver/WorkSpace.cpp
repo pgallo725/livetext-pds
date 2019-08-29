@@ -174,29 +174,23 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, User& updatedUser)
+MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
-	User* oldUser = client->getUser();
+	User* user = client->getUser();
 
-	if (oldUser->getUserId() == updatedUser.getUserId() &&
-		oldUser->getUsername() == updatedUser.getUsername())
-	{
-		oldUser->setNickname(updatedUser.getNickname());
-		oldUser->setIcon(updatedUser.getIcon());
-		oldUser->changePassword(updatedUser.getPassword());
+	user->setNickname(nickname);
+	user->setIcon(icon);
+	user->changePassword(password);
 
-		// Notify all other clients of the changes in this user's account
-		dispatchMessage(MessageFactory::PresenceUpdate(oldUser->getUserId(),
-			oldUser->getNickname(), oldUser->getIcon()), clientSocket);
+	// Notify all other clients of the changes in this user's account
+	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(), nickname, icon), clientSocket);
 
-		return MessageFactory::AccountConfirmed(oldUser->getUserId());
-	}
-	else return MessageFactory::AccountError("Cannot modify a different user's account");
+	return MessageFactory::AccountConfirmed(*user);
 }
 
 

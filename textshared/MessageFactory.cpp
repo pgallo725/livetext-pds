@@ -70,19 +70,19 @@ MessageCapsule MessageFactory::LoginError(QString error)
 	return new LoginErrorMessage(error);
 }
 
-MessageCapsule MessageFactory::AccountCreate(User newUser)
+MessageCapsule MessageFactory::AccountCreate(QString username, QString nickname, QImage icon, QString password)
 {
-	return new AccountCreateMessage(newUser);
+	return new AccountCreateMessage(username, nickname, icon, password);
 }
 
-MessageCapsule MessageFactory::AccountUpdate(User updatedUser)
+MessageCapsule MessageFactory::AccountUpdate(QString nickname, QImage icon, QString password)
 {
-	return new AccountUpdateMessage(updatedUser);
+	return new AccountUpdateMessage(nickname, icon, password);
 }
 
-MessageCapsule MessageFactory::AccountConfirmed(qint32 userId)
+MessageCapsule MessageFactory::AccountConfirmed(User user)
 {
-	return new AccountConfirmedMessage(userId);
+	return new AccountConfirmedMessage(user);
 }
 
 MessageCapsule MessageFactory::AccountError(QString error)

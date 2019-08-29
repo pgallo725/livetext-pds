@@ -70,8 +70,8 @@ public slots:
 	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);
 	MessageCapsule authenticateUser(QTcpSocket* clientSocket, QString token);
 
-	MessageCapsule createAccount(QTcpSocket* clientSocket, User& newUser);
-	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
+	MessageCapsule createAccount(QTcpSocket* clientSocket, QString username, QString nickname, QImage icon, QString password);
+	MessageCapsule updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password);
 
 	MessageCapsule removeDocument(QTcpSocket* client, URI docUri);
 	MessageCapsule createDocument(QTcpSocket* author, QString docName);

@@ -8,26 +8,43 @@ AccountCreateMessage::AccountCreateMessage()
 {
 }
 
-AccountCreateMessage::AccountCreateMessage(User newUser)
-	: Message(AccountCreate), m_user(newUser)
+AccountCreateMessage::AccountCreateMessage(QString username, QString nickname, QImage icon, QString password)
+	: Message(AccountCreate), m_username(username), m_nickname(nickname),
+	m_icon(icon), m_password(password)
 {
 }
 
 void AccountCreateMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_user;
+	stream >> m_username >> m_nickname >> m_icon >> m_password;
 }
 
 void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)AccountCreate << m_user;
+	streamOut << (quint16)AccountCreate << m_username 
+		<< m_nickname << m_icon << m_password;;
 }
 
-User& AccountCreateMessage::getUserObj()
+QString AccountCreateMessage::getUsername() const
 {
-	return m_user;
+	return m_username;
+}
+
+QString AccountCreateMessage::getNickname() const
+{
+	return m_nickname;
+}
+
+QImage AccountCreateMessage::getIcon() const
+{
+	return m_icon;
+}
+
+QString AccountCreateMessage::getPassword() const
+{
+	return m_password;
 }
 
 
@@ -38,56 +55,66 @@ AccountUpdateMessage::AccountUpdateMessage()
 {
 }
 
-AccountUpdateMessage::AccountUpdateMessage(User updatedUser)
-	: Message(AccountUpdate), m_user(updatedUser)
+AccountUpdateMessage::AccountUpdateMessage(QString nickname, QImage icon, QString password)
+	: Message(AccountUpdate), m_nickname(nickname), m_icon(icon), m_password(password)
 {
 }
 
 void AccountUpdateMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_user;
+	stream >> m_nickname >> m_icon >> m_password;
 }
 
 void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)AccountUpdate << m_user;
+	streamOut << (quint16)AccountUpdate << m_nickname << m_icon << m_password;
 }
 
-User& AccountUpdateMessage::getUserObj()
+QString AccountUpdateMessage::getNickname() const
 {
-	return m_user;
+	return m_nickname;
+}
+
+QImage AccountUpdateMessage::getIcon() const
+{
+	return m_icon;
+}
+
+QString AccountUpdateMessage::getPassword() const
+{
+	return m_password;
 }
 
 
 /*************** ACCOUNT CONFIRMED MESSAGE ***************/
 
 AccountConfirmedMessage::AccountConfirmedMessage()
-	: Message(AccountConfirmed), m_userId(-1)
+	: Message(AccountConfirmed)
 {
 }
 
-AccountConfirmedMessage::AccountConfirmedMessage(qint32 userId)
-	: Message(AccountConfirmed), m_userId(userId)
+AccountConfirmedMessage::AccountConfirmedMessage(User user)
+	: Message(AccountConfirmed), m_user(user)
 {
 }
 
 void AccountConfirmedMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_userId;
+	stream >> m_user;
 }
 
 void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)AccountConfirmed << m_userId;
+	streamOut << (quint16)AccountConfirmed << m_user;
 }
 
-qint32 AccountConfirmedMessage::getUserId() const
+User& AccountConfirmedMessage::getUserObj()
 {
-	return m_userId;
+	return m_user;
 }
 
 

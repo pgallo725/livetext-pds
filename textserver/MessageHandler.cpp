@@ -76,7 +76,8 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 	case AccountCreate:
 	{
 		AccountCreateMessage* accntCreate = dynamic_cast<AccountCreateMessage*>(message.get());
-		MessageCapsule response = emit accountCreate(socket, accntCreate->getUserObj());
+		MessageCapsule response = emit accountCreate(socket, accntCreate->getUsername(),
+			accntCreate->getNickname(), accntCreate->getIcon(), accntCreate->getPassword());
 		response->sendTo(socket);
 		break;
 	}
@@ -84,7 +85,8 @@ void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
 	case AccountUpdate:
 	{
 		AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
-		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getUserObj());
+		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
+			accntUpdate->getIcon(), accntUpdate->getPassword());
 		response->sendTo(socket);
 		break;
 	}

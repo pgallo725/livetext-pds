@@ -268,50 +268,44 @@ MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QString tok
 }
 
 /* Create a new User */
-MessageCapsule TcpServer::createAccount(QTcpSocket* socket, User& newUser)
+MessageCapsule TcpServer::createAccount(QTcpSocket* socket, QString username, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = clients.find(socket).value();
 	if (client->isLogged())
 		return MessageFactory::AccountError("You cannot create an account while being logged in as another user");
 
 	/* check if username or password are nulls */
-	if (!newUser.getUsername().compare("") || !newUser.getPassword().compare(""))
-		return MessageFactory::AccountError("Username and/or password must be field");
+	if (!username.compare("") || !password.compare(""))
+		return MessageFactory::AccountError("Username and/or password cannot be empty");
 
 	/* check if this username is already used */
-	if (users.contains(newUser.getUsername()))
+	if (users.contains(username))
 		return MessageFactory::AccountError("That username is already taken");
 	
-	User user(newUser.getUsername(), _userIdCounter++,
-		newUser.getNickname(), newUser.getPassword(), newUser.getIcon());			/* create a new user		*/
-	QMap<QString, User>::iterator i = users.insert(newUser.getUsername(), user);	/* insert new user in map	*/
+	User user(username, _userIdCounter++, nickname, password, icon);		/* create a new user		*/
+	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
 
 	client->login(&(*i));		// client is automatically logged
 
-	return MessageFactory::AccountConfirmed(user.getUserId());
+	return MessageFactory::AccountConfirmed(user);
 }
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, User& updatedUser)
+MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
 
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
-	User* oldUser = client->getUser();
+	User* user = client->getUser();
 
-	if (oldUser->getUserId() == updatedUser.getUserId() &&
-		oldUser->getUsername() == updatedUser.getUsername())
-	{
-		oldUser->setNickname(updatedUser.getNickname());
-		oldUser->setIcon(updatedUser.getIcon());
-		oldUser->changePassword(updatedUser.getPassword());
+	user->setNickname(nickname);
+	user->setIcon(icon);
+	user->changePassword(password);
 
-		return MessageFactory::AccountConfirmed(oldUser->getUserId());
-	}
-	else return MessageFactory::AccountError("Cannot modify a different user's account");
+	return MessageFactory::AccountConfirmed(*user);
 }
 
 
@@ -319,7 +313,7 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, User& updatedU
 void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
 	clients.remove(clientSocket);					// remove this client from the map 
-	clientSocket->close();						// close and destroy the socket 
+	clientSocket->close();							// close and destroy the socket 
 }
 
 /* Move a client from the workspace that he has exited back to the server */

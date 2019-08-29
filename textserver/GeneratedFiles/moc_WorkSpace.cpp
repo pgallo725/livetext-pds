@@ -23,8 +23,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[28];
-    char stringdata0[331];
+    QByteArrayData data[29];
+    char stringdata0[336];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -58,9 +58,10 @@ QT_MOC_LITERAL(21, 256, 11), // "QTcpSocket*"
 QT_MOC_LITERAL(22, 268, 6), // "sender"
 QT_MOC_LITERAL(23, 275, 13), // "updateAccount"
 QT_MOC_LITERAL(24, 289, 12), // "clientSocket"
-QT_MOC_LITERAL(25, 302, 5), // "User&"
-QT_MOC_LITERAL(26, 308, 11), // "updatedUser"
-QT_MOC_LITERAL(27, 320, 10) // "clientQuit"
+QT_MOC_LITERAL(25, 302, 8), // "nickname"
+QT_MOC_LITERAL(26, 311, 4), // "icon"
+QT_MOC_LITERAL(27, 316, 8), // "password"
+QT_MOC_LITERAL(28, 325, 10) // "clientQuit"
 
     },
     "WorkSpace\0noEditors\0\0URI\0documentURI\0"
@@ -71,7 +72,7 @@ QT_MOC_LITERAL(27, 320, 10) // "clientQuit"
     "QVector<qint32>\0position\0dispatchMessage\0"
     "MessageCapsule\0message\0QTcpSocket*\0"
     "sender\0updateAccount\0clientSocket\0"
-    "User&\0updatedUser\0clientQuit"
+    "nickname\0icon\0password\0clientQuit"
 };
 #undef QT_MOC_LITERAL
 
@@ -100,8 +101,8 @@ static const uint qt_meta_data_WorkSpace[] = {
       12,    1,   81,    2, 0x0a /* Public */,
       15,    1,   84,    2, 0x0a /* Public */,
       18,    2,   87,    2, 0x0a /* Public */,
-      23,    2,   92,    2, 0x0a /* Public */,
-      27,    1,   97,    2, 0x0a /* Public */,
+      23,    4,   92,    2, 0x0a /* Public */,
+      28,    1,  101,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -115,7 +116,7 @@ static const uint qt_meta_data_WorkSpace[] = {
     QMetaType::Void, 0x80000000 | 13,   14,
     QMetaType::Void, 0x80000000 | 16,   17,
     QMetaType::Void, 0x80000000 | 19, 0x80000000 | 21,   20,   22,
-    0x80000000 | 19, 0x80000000 | 21, 0x80000000 | 25,   24,   26,
+    0x80000000 | 19, 0x80000000 | 21, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   24,   25,   26,   27,
     QMetaType::Void, 0x80000000 | 21,   24,
 
        0        // eod
@@ -136,7 +137,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 6: _t->documentInsertSymbol((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 7: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
         case 8: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QTcpSocket*(*)>(_a[2]))); break;
-        case 9: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< User(*)>(_a[2])));
+        case 9: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 10: _t->clientQuit((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
         default: ;

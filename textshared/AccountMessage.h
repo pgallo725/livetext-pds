@@ -10,14 +10,17 @@ class AccountCreateMessage : public Message
 
 private:
 
-	User m_user;
+	QString m_username;
+	QString m_nickname;
+	QImage m_icon;
+	QString m_password;
 
 protected:
 
 	AccountCreateMessage();		// empty constructor
 
-	// Create an AccountCreate message, with the new account information
-	AccountCreateMessage(User newUser);
+	// Create an AccountCreate message, with the account information
+	AccountCreateMessage(QString username, QString nickname, QImage icon, QString password);
 
 public:
 
@@ -26,7 +29,10 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	User& getUserObj();
+	QString getUsername() const;
+	QString getNickname() const;
+	QImage getIcon() const;
+	QString getPassword() const;
 };
 
 
@@ -37,14 +43,16 @@ class AccountUpdateMessage : public Message
 
 private:
 
-	User m_user;
+	QString m_nickname;
+	QImage m_icon;
+	QString m_password;
 
 protected:
 
 	AccountUpdateMessage();		// empty constructor
 
 	// Create an AccountUpdate message, with the new account information
-	AccountUpdateMessage(User updatedUser);
+	AccountUpdateMessage(QString nickname, QImage icon, QString password);
 
 public:
 
@@ -53,7 +61,9 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	User& getUserObj();
+	QString getNickname() const;
+	QImage getIcon() const;
+	QString getPassword() const;
 };
 
 
@@ -64,14 +74,14 @@ class AccountConfirmedMessage : public Message
 
 private:
 
-	qint32 m_userId;
+	User m_user;
 
 protected:
 
 	AccountConfirmedMessage();		// empty constructor
 
-	// Construct the AccountConfirmed message, with the id chosen by the server for the User
-	AccountConfirmedMessage(qint32 userId);
+	// Construct the AccountConfirmed message, with the User object just created or updated by the server
+	AccountConfirmedMessage(User user);
 
 public:
 
@@ -80,7 +90,7 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	qint32 getUserId() const;
+	User& getUserObj();
 };
 
 

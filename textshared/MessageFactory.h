@@ -18,9 +18,9 @@ public:
 	static MessageCapsule LoginGranted(User user);
 	static MessageCapsule LoginError(QString error);
 
-	static MessageCapsule AccountCreate(User newUser);
-	static MessageCapsule AccountUpdate(User updatedUser);
-	static MessageCapsule AccountConfirmed(qint32 userId);
+	static MessageCapsule AccountCreate(QString username, QString nickname, QImage icon, QString password);
+	static MessageCapsule AccountUpdate(QString nickname, QImage icon, QString password);
+	static MessageCapsule AccountConfirmed(User user);
 	static MessageCapsule AccountError(QString error);
 
 	static MessageCapsule Logout();

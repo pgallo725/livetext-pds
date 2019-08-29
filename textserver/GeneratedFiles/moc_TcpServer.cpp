@@ -23,7 +23,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TcpServer_t {
     QByteArrayData data[38];
-    char stringdata0[462];
+    char stringdata0[459];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -58,18 +58,18 @@ QT_MOC_LITERAL(22, 280, 16), // "authenticateUser"
 QT_MOC_LITERAL(23, 297, 12), // "clientSocket"
 QT_MOC_LITERAL(24, 310, 5), // "token"
 QT_MOC_LITERAL(25, 316, 13), // "createAccount"
-QT_MOC_LITERAL(26, 330, 5), // "User&"
-QT_MOC_LITERAL(27, 336, 7), // "newUser"
-QT_MOC_LITERAL(28, 344, 13), // "updateAccount"
-QT_MOC_LITERAL(29, 358, 11), // "updatedUser"
-QT_MOC_LITERAL(30, 370, 14), // "removeDocument"
-QT_MOC_LITERAL(31, 385, 6), // "docUri"
-QT_MOC_LITERAL(32, 392, 14), // "createDocument"
-QT_MOC_LITERAL(33, 407, 6), // "author"
-QT_MOC_LITERAL(34, 414, 7), // "docName"
-QT_MOC_LITERAL(35, 422, 12), // "openDocument"
-QT_MOC_LITERAL(36, 435, 12), // "logoutClient"
-QT_MOC_LITERAL(37, 448, 13) // "receiveClient"
+QT_MOC_LITERAL(26, 330, 8), // "nickname"
+QT_MOC_LITERAL(27, 339, 4), // "icon"
+QT_MOC_LITERAL(28, 344, 8), // "password"
+QT_MOC_LITERAL(29, 353, 13), // "updateAccount"
+QT_MOC_LITERAL(30, 367, 14), // "removeDocument"
+QT_MOC_LITERAL(31, 382, 6), // "docUri"
+QT_MOC_LITERAL(32, 389, 14), // "createDocument"
+QT_MOC_LITERAL(33, 404, 6), // "author"
+QT_MOC_LITERAL(34, 411, 7), // "docName"
+QT_MOC_LITERAL(35, 419, 12), // "openDocument"
+QT_MOC_LITERAL(36, 432, 12), // "logoutClient"
+QT_MOC_LITERAL(37, 445, 13) // "receiveClient"
 
     },
     "TcpServer\0newSocket\0\0handle\0"
@@ -81,8 +81,8 @@ QT_MOC_LITERAL(37, 448, 13) // "receiveClient"
     "deleteWorkspace\0URI\0serveLoginRequest\0"
     "MessageCapsule\0QTcpSocket*\0socket\0"
     "username\0authenticateUser\0clientSocket\0"
-    "token\0createAccount\0User&\0newUser\0"
-    "updateAccount\0updatedUser\0removeDocument\0"
+    "token\0createAccount\0nickname\0icon\0"
+    "password\0updateAccount\0removeDocument\0"
     "docUri\0createDocument\0author\0docName\0"
     "openDocument\0logoutClient\0receiveClient"
 };
@@ -114,13 +114,13 @@ static const uint qt_meta_data_TcpServer[] = {
       15,    1,  114,    2, 0x0a /* Public */,
       17,    2,  117,    2, 0x0a /* Public */,
       22,    2,  122,    2, 0x0a /* Public */,
-      25,    2,  127,    2, 0x0a /* Public */,
-      28,    2,  132,    2, 0x0a /* Public */,
-      30,    2,  137,    2, 0x0a /* Public */,
-      32,    2,  142,    2, 0x0a /* Public */,
-      35,    2,  147,    2, 0x0a /* Public */,
-      36,    1,  152,    2, 0x0a /* Public */,
-      37,    1,  155,    2, 0x0a /* Public */,
+      25,    5,  127,    2, 0x0a /* Public */,
+      29,    4,  138,    2, 0x0a /* Public */,
+      30,    2,  147,    2, 0x0a /* Public */,
+      32,    2,  152,    2, 0x0a /* Public */,
+      35,    2,  157,    2, 0x0a /* Public */,
+      36,    1,  162,    2, 0x0a /* Public */,
+      37,    1,  165,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::LongLong,    3,
@@ -135,8 +135,8 @@ static const uint qt_meta_data_TcpServer[] = {
     QMetaType::Void, 0x80000000 | 16,   14,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   20,   21,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   23,   24,
-    0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 26,   23,   27,
-    0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 26,   23,   29,
+    0x80000000 | 18, 0x80000000 | 19, QMetaType::QString, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   23,   21,   26,   27,   28,
+    0x80000000 | 18, 0x80000000 | 19, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   23,   26,   27,   28,
     0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 16,    6,   31,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   33,   34,
     0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 16,   23,   31,
@@ -165,9 +165,9 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 9: { MessageCapsule _r = _t->authenticateUser((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 10: { MessageCapsule _r = _t->createAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< User(*)>(_a[2])));
+        case 10: { MessageCapsule _r = _t->createAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 11: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< User(*)>(_a[2])));
+        case 11: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 12: { MessageCapsule _r = _t->removeDocument((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;

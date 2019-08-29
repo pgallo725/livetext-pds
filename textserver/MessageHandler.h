@@ -40,8 +40,8 @@ public:
 signals: MessageCapsule loginRequest(QTcpSocket* clientSocket, QString username);
 signals: MessageCapsule loginUnlock(QTcpSocket* clientSocket, QString token);
 
-signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, User& newUser);
-signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, User& updatedUser);
+signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
+signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, QString nickname, QImage icon, QString password);
 
 signals: MessageCapsule documentCreate(QTcpSocket* çlientSocket, QString docName);
 signals: MessageCapsule documentOpen(QTcpSocket* çlientSocket, URI docUri);
