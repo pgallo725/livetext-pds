@@ -404,7 +404,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 
 	QSharedPointer<Document> doc(new Document(docURI));
 	WorkSpace* w = createWorkspace(doc, client);
-	QFile docFile(docURI.toString());
+	QFile docFile("./Documents/" + docURI.toString());
 	
 	/* add the document to the index, create the document file and update internal data structures */
 	addToIndex(doc);
