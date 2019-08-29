@@ -3,20 +3,13 @@
 #include <QDataStream>
 
 
-/*
-User::User(QString username, int userId, QString nickname, QString passwd)
-	: m_username(username), m_userId(userId), m_nickname(nickname),
-	m_passwd(passwd), m_icon(QPixmap()), m_documents(QStringList())
-{
-}*/
-
 User::User() : m_userId(-1)
 {
 }
 
 User::User(QString username, int userId, QString nickname, QString passwd, QImage icon)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
-	m_passwd(passwd), m_icon(icon), m_documents(QStringList())
+	m_passwd(passwd), m_icon(icon)
 {
 }
 
@@ -50,13 +43,13 @@ QImage User::getIcon()
 	return m_icon;
 }
 
-QStringList User::getDocuments()
+QList<URI> User::getDocuments()
 {
 	return m_documents;
 }
 
 
-void User::addDocument(QString docUri)
+void User::addDocument(URI docUri)
 {
 	if (!m_documents.contains(docUri))
 		m_documents << docUri;
@@ -94,7 +87,7 @@ void User::changePassword(QString newPassword)
 	m_passwd = newPassword;
 }
 
-void User::removeDocument(QString uri)
+void User::removeDocument(URI uri)
 {
 	m_documents.removeOne(uri);
 }

@@ -1,11 +1,9 @@
 #pragma once
 
-#include <QObject>
 #include <QImage>
-#include <QSet>
-#include <QStringList>
-//#include <QMutex>
-//#include <QMutexLocker>
+#include <Document.h>
+#include <QList>
+
 
 class User
 {
@@ -20,9 +18,9 @@ private:
 	int m_userId;
 	QString m_nickname;
 	QString m_passwd;		// hashed
-	QImage m_icon;		// nullable, check with QPixmap::isNull()
-	QStringList m_documents;
-	//QMutex m;
+	QImage m_icon;			// nullable, check with QImage::isNull()
+	QList<URI> m_documents;
+
 public:
 
 	User();	 // Use this to construct an empty user and populate the fields later
@@ -37,10 +35,10 @@ public:
 	QString getNickname();
 	QString getPassword();
 	QImage getIcon();
-	QStringList getDocuments();
+	QList<URI> getDocuments();
 
 	/* setter methods */
-	void addDocument(QString docUri);
+	void addDocument(URI docUri);
 	void setNickname(QString newNickname);
 	void deleteNickname();
 	void setIcon(QImage newIcon);
@@ -48,11 +46,10 @@ public:
 	void deleteIcon();
 	void changePassword(QString newPassword);
 
-	void removeDocument(QString uri);
+	void removeDocument(URI uri);
 };
 
 
 QDataStream& operator>>(QDataStream& in, User& user);			// Input deserialization
 QDataStream& operator<<(QDataStream& out, const User& user);	// Output serialization
-
 

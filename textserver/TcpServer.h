@@ -37,8 +37,8 @@ class TcpServer : public QTcpServer
 private:
 
 	QMap<QString, User> users;
-	QMap<QString, QSharedPointer<Document>> documents;
-	QMap<QString, QSharedPointer<WorkSpace>> workspaces;	// TODO IGOR: can workspaces and workThreads be unified ? (remove commented code if done)
+	QMap<URI, QSharedPointer<Document>> documents;
+	QMap<URI, QSharedPointer<WorkSpace>> workspaces;	// TODO IGOR: can workspaces and workThreads be unified ? (remove commented code if done)
 	//QMap<QString, QSharedPointer<QThread>> workThreads;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
 	qint32 _userIdCounter;
@@ -47,7 +47,7 @@ private:
 
 	MessageHandler messageHandler;
 
-	QString generateURI(QString authorName, QString docName) const;
+	URI generateURI(QString authorName, QString docName) const;
 
 public:
 
@@ -64,7 +64,7 @@ public slots:
 	void clientDisconnection();
 	void readMessage();
 	WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
-	void deleteWorkspace(QString document);
+	void deleteWorkspace(URI document);
 
 	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);
 	MessageCapsule authenticateUser(QTcpSocket* clientSocket, QString token);
@@ -72,9 +72,9 @@ public slots:
 	MessageCapsule createAccount(QTcpSocket* clientSocket, User& newUser);
 	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
 
-	MessageCapsule removeDocument(QTcpSocket* client, QString docUri);
+	MessageCapsule removeDocument(QTcpSocket* client, URI docUri);
 	MessageCapsule createDocument(QTcpSocket* author, QString docName);
-	MessageCapsule openDocument(QTcpSocket* clientSocket, QString docUri);
+	MessageCapsule openDocument(QTcpSocket* clientSocket, URI docUri);
 
 	//MessageCapsule logoutClient(QTcpSocket* clientSocket);
 	void receiveClient(QSharedPointer<Client> client);

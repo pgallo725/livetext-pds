@@ -10,12 +10,78 @@
 #define URI_FIELD_SEPARATOR '_'
 
 
+URI::URI()
+{
+}
+
+URI::URI(QString uri)
+	: str(uri)
+{
+}
+
+QString URI::toString()
+{
+	return str;
+}
+
+std::string URI::toStdString()
+{
+	return str.toStdString();
+}
+
+QString URI::getAuthorName()
+{
+	// The first field of the generated URI (fields separated by '_') 
+	// is the name of the user which created the document
+	return str.section(URI_FIELD_SEPARATOR, 0, 0);
+}
+
+QString URI::getDocumentName()
+{
+	// The second field of the generated URI (fields separated by '_') 
+	// is the name of the document (including .extension)
+	return str.section(URI_FIELD_SEPARATOR, 1, 1);
+}
+
+bool URI::operator<(const URI& other) const noexcept
+{
+	return this->str < other.str;
+}
+
+bool URI::operator>(const URI& other) const noexcept
+{
+	return this->str > other.str;
+}
+
+bool URI::operator==(const URI& other) const noexcept
+{
+	return this->str == other.str;
+}
+
+QDataStream& operator>>(QDataStream& in, URI& uri)
+{
+	in >> uri.str;
+
+	return in;
+}
+
+QDataStream& operator<<(QDataStream& out, const URI& uri)
+{
+	out << uri.str;
+
+	return out;
+}
+
+
+/*************** DOCUMENT METHODS ***************/
+
+
 Document::Document()
 {
 }
 
-Document::Document(QString uri) :
-	URI(uri)
+Document::Document(URI docURI) :
+	uri(docURI)
 {
 	editors << getAuthor();
 }
@@ -26,23 +92,24 @@ Document::~Document()
 }
 
 
-QString Document::getName()
+URI Document::getURI()
 {
-	// The second field of the generated URI (fields separated by '_') 
-	// is the name of the document (including .extension)
-	return URI.section(URI_FIELD_SEPARATOR, 1, 1);
+	return uri;
 }
 
-QString Document::getURI()
+QString Document::getName()
 {
-	return URI;
+	return uri.getDocumentName();
 }
 
 QString Document::getAuthor()
 {
-	// The first field of the generated URI (fields separated by '_') 
-	// is the name of the user which created the document
-	return URI.section(URI_FIELD_SEPARATOR, 0, 0);
+	return uri.getAuthorName();
+}
+
+QVector<Symbol> Document::getContent()
+{
+	return _text;
 }
 
 void Document::insertNewEditor(QString edit)
@@ -55,12 +122,12 @@ void Document::insertNewEditor(QString edit)
 void Document::load()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file(DOCUMENTS_DIRNAME + URI);
+	QFile file(DOCUMENTS_DIRNAME + uri.toString());
 	if (file.open(QIODevice::ReadWrite))
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nLoading document \"" << URI.toStdString() << "\"... ";
+		std::cout << "\nLoading document \"" << uri.toStdString() << "\"... ";
 
 		// Load the document content (_text vector<Symbol>) from file
 		// using built-in Qt Vector and StringList deserialization
@@ -83,25 +150,33 @@ void Document::load()
 	}
 }
 
+void Document::unload()
+{
+	// Unload the Document object contents from memory
+	editors.clear();
+	_text.clear();
+	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
+}
+
 void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file(DOCUMENTS_DIRNAME + ("tmp_" + URI));
+	QFile file(DOCUMENTS_DIRNAME + ("tmp_" + uri.toString()));
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nSaving document \"" << URI.toStdString() << "\"... ";
+		std::cout << "\nSaving document \"" << uri.toStdString() << "\"... ";
 
 		// Write the the current document content to file
 		// using built-in Qt Vector and StringList serialization
 		docFileStream << editors << _text;
 
-		QFile oldFile(DOCUMENTS_DIRNAME + URI);
+		QFile oldFile(DOCUMENTS_DIRNAME + uri.toString());
 		if (oldFile.exists())
 		{
 			if (oldFile.remove())
-				file.rename(URI);
+				file.rename(uri.toString());
 			else
 			{
 				// Remove temporary file if overwriting of the old file failed
@@ -268,7 +343,7 @@ QVector<qint32> Document::fractionalPosEnd()
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.URI >> doc.editors >> doc._text;
+	in >> doc.uri >> doc.editors >> doc._text;
 
 	return in;
 }
@@ -276,7 +351,7 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.URI << doc.editors << doc._text;
+	out << doc.uri << doc.editors << doc._text;
 
 	return out;
 }

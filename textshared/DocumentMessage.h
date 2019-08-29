@@ -37,14 +37,14 @@ class DocumentRemoveMessage : public Message
 
 private:
 
-	QString m_docURI;
+	URI m_docURI;
 
 protected:
 
 	DocumentRemoveMessage();	 // empty constructor
 
 	// Costruct DocumentRemove message with the URI of the document to be removed
-	DocumentRemoveMessage(QString documentURI);
+	DocumentRemoveMessage(URI documentURI);
 
 public:
 
@@ -53,7 +53,7 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	QString getDocumentURI() const;
+	URI getDocumentURI() const;
 };
 
 
@@ -64,14 +64,14 @@ class DocumentOpenMessage : public Message
 
 private:
 
-	QString m_docURI;
+	URI m_docURI;
 
 protected:
 
 	DocumentOpenMessage();		// empty constructor
 
 	// Costruct DocumentOpen message specifying the document's URI
-	DocumentOpenMessage(QString documentURI);
+	DocumentOpenMessage(URI documentURI);
 
 public:
 
@@ -80,7 +80,7 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	QString getDocumentURI() const;
+	URI getDocumentURI() const;
 };
 
 

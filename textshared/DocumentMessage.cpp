@@ -38,7 +38,7 @@ DocumentRemoveMessage::DocumentRemoveMessage()
 {
 }
 
-DocumentRemoveMessage::DocumentRemoveMessage(QString documentURI)
+DocumentRemoveMessage::DocumentRemoveMessage(URI documentURI)
 	: Message(DocumentRemove), m_docURI(documentURI)
 {
 }
@@ -55,7 +55,7 @@ void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
 	streamOut << (quint16)DocumentRemove << m_docURI;
 }
 
-QString DocumentRemoveMessage::getDocumentURI() const
+URI DocumentRemoveMessage::getDocumentURI() const
 {
 	return m_docURI;
 }
@@ -68,7 +68,7 @@ DocumentOpenMessage::DocumentOpenMessage()
 {
 }
 
-DocumentOpenMessage::DocumentOpenMessage(QString documentURI)
+DocumentOpenMessage::DocumentOpenMessage(URI documentURI)
 	: Message(DocumentOpen), m_docURI(documentURI)
 {
 }
@@ -85,7 +85,7 @@ void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
 	streamOut << (quint16)DocumentRemove << m_docURI;
 }
 
-QString DocumentOpenMessage::getDocumentURI() const
+URI DocumentOpenMessage::getDocumentURI() const
 {
 	return m_docURI;
 }

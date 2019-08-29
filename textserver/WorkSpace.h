@@ -48,7 +48,7 @@ public slots:
 	MessageCapsule updateAccount(QTcpSocket* clientSocket, User& updatedUser);
 	void clientQuit(QTcpSocket* clientSocket);
 
-signals: void noEditors(QString document);
+signals: void noEditors(URI documentURI);
 signals: void returnClient(QSharedPointer<Client> client);
 
 };

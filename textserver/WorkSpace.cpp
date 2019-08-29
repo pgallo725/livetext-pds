@@ -26,6 +26,7 @@ WorkSpace::~WorkSpace()
 {
 	timer.stop();
 	doc->save();			// Saving changes to the document before closing the workspace
+	doc->unload();			// Unload the document contents from memory until it gets re-opened
 	workThread->quit();
 	workThread->wait();
 }
@@ -209,15 +210,16 @@ void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
+	qDebug() << " - client '" << client->getUsername() << "' closed the document";
+
+	// Notify everyone else that this client exited the workspace
+	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
+
 	emit returnClient(std::move(client));		// Move the client back to the TcpServer
 
 	// Delete the client's socket in the current thread
 	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
 	clientSocket->deleteLater();
-	qDebug() << " - client '" << client->getUsername() << "' closed the document";
-
-	// Notify everyone else that this client exited the workspace
-	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document

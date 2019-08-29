@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
-    QByteArrayData data[31];
-    char stringdata0[329];
+    QByteArrayData data[32];
+    char stringdata0[333];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -50,19 +50,20 @@ QT_MOC_LITERAL(14, 150, 11), // "updatedUser"
 QT_MOC_LITERAL(15, 162, 14), // "documentCreate"
 QT_MOC_LITERAL(16, 177, 7), // "docName"
 QT_MOC_LITERAL(17, 185, 12), // "documentOpen"
-QT_MOC_LITERAL(18, 198, 6), // "docUri"
-QT_MOC_LITERAL(19, 205, 14), // "documentRemove"
-QT_MOC_LITERAL(20, 220, 10), // "charInsert"
-QT_MOC_LITERAL(21, 231, 7), // "Symbol&"
-QT_MOC_LITERAL(22, 239, 1), // "s"
-QT_MOC_LITERAL(23, 241, 10), // "charDelete"
-QT_MOC_LITERAL(24, 252, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(25, 268, 3), // "pos"
-QT_MOC_LITERAL(26, 272, 15), // "messageDispatch"
-QT_MOC_LITERAL(27, 288, 7), // "message"
-QT_MOC_LITERAL(28, 296, 6), // "sender"
-QT_MOC_LITERAL(29, 303, 14), // "removePresence"
-QT_MOC_LITERAL(30, 318, 10) // "userLogout"
+QT_MOC_LITERAL(18, 198, 3), // "URI"
+QT_MOC_LITERAL(19, 202, 6), // "docUri"
+QT_MOC_LITERAL(20, 209, 14), // "documentRemove"
+QT_MOC_LITERAL(21, 224, 10), // "charInsert"
+QT_MOC_LITERAL(22, 235, 7), // "Symbol&"
+QT_MOC_LITERAL(23, 243, 1), // "s"
+QT_MOC_LITERAL(24, 245, 10), // "charDelete"
+QT_MOC_LITERAL(25, 256, 15), // "QVector<qint32>"
+QT_MOC_LITERAL(26, 272, 3), // "pos"
+QT_MOC_LITERAL(27, 276, 15), // "messageDispatch"
+QT_MOC_LITERAL(28, 292, 7), // "message"
+QT_MOC_LITERAL(29, 300, 6), // "sender"
+QT_MOC_LITERAL(30, 307, 14), // "removePresence"
+QT_MOC_LITERAL(31, 322, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -70,7 +71,7 @@ QT_MOC_LITERAL(30, 318, 10) // "userLogout"
     "loginUnlock\0token\0accountCreate\0"
     "lientSocket\0User&\0newUser\0accountUpdate\0"
     "updatedUser\0documentCreate\0docName\0"
-    "documentOpen\0docUri\0documentRemove\0"
+    "documentOpen\0URI\0docUri\0documentRemove\0"
     "charInsert\0Symbol&\0s\0charDelete\0"
     "QVector<qint32>\0pos\0messageDispatch\0"
     "message\0sender\0removePresence\0userLogout"
@@ -97,12 +98,12 @@ static const uint qt_meta_data_MessageHandler[] = {
       13,    2,   89,    3, 0x06 /* Public */,
       15,    2,   94,    3, 0x06 /* Public */,
       17,    2,   99,    3, 0x06 /* Public */,
-      19,    2,  104,    3, 0x06 /* Public */,
-      20,    1,  109,    3, 0x06 /* Public */,
-      23,    1,  112,    3, 0x06 /* Public */,
-      26,    2,  115,    3, 0x06 /* Public */,
-      29,    1,  120,    3, 0x06 /* Public */,
-      30,    1,  123,    3, 0x06 /* Public */,
+      20,    2,  104,    3, 0x06 /* Public */,
+      21,    1,  109,    3, 0x06 /* Public */,
+      24,    1,  112,    3, 0x06 /* Public */,
+      27,    2,  115,    3, 0x06 /* Public */,
+      30,    1,  120,    3, 0x06 /* Public */,
+      31,    1,  123,    3, 0x06 /* Public */,
 
  // signals: parameters
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
@@ -110,11 +111,11 @@ static const uint qt_meta_data_MessageHandler[] = {
     0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 11,   10,   12,
     0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 11,   10,   14,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,   10,   16,
-    0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,   10,   18,
-    0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,   10,   18,
-    QMetaType::Void, 0x80000000 | 21,   22,
-    QMetaType::Void, 0x80000000 | 24,   25,
-    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   27,   28,
+    0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 18,   10,   19,
+    0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 18,   10,   19,
+    QMetaType::Void, 0x80000000 | 22,   23,
+    QMetaType::Void, 0x80000000 | 25,   26,
+    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   28,   29,
     QMetaType::Void, 0x80000000 | 4,    5,
     QMetaType::Void, 0x80000000 | 4,    5,
 
@@ -137,9 +138,9 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 4: { MessageCapsule _r = _t->documentCreate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 5: { MessageCapsule _r = _t->documentOpen((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 5: { MessageCapsule _r = _t->documentOpen((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 6: { MessageCapsule _r = _t->documentRemove((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 6: { MessageCapsule _r = _t->documentRemove((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 7: _t->charInsert((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 8: _t->charDelete((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
@@ -267,14 +268,14 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QString );
+            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , URI );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::documentOpen)) {
                 *result = 5;
                 return;
             }
         }
         {
-            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QString );
+            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , URI );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::documentRemove)) {
                 *result = 6;
                 return;
@@ -404,7 +405,7 @@ MessageCapsule MessageHandler::documentCreate(QTcpSocket * _t1, QString _t2)
 }
 
 // SIGNAL 5
-MessageCapsule MessageHandler::documentOpen(QTcpSocket * _t1, QString _t2)
+MessageCapsule MessageHandler::documentOpen(QTcpSocket * _t1, URI _t2)
 {
     MessageCapsule _t0{};
     void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
@@ -413,7 +414,7 @@ MessageCapsule MessageHandler::documentOpen(QTcpSocket * _t1, QString _t2)
 }
 
 // SIGNAL 6
-MessageCapsule MessageHandler::documentRemove(QTcpSocket * _t1, QString _t2)
+MessageCapsule MessageHandler::documentRemove(QTcpSocket * _t1, URI _t2)
 {
     MessageCapsule _t0{};
     void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };

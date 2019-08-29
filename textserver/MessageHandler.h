@@ -44,8 +44,8 @@ signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, User& newUser);
 signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, User& updatedUser);
 
 signals: MessageCapsule documentCreate(QTcpSocket* çlientSocket, QString docName);
-signals: MessageCapsule documentOpen(QTcpSocket* çlientSocket, QString docUri);
-signals: MessageCapsule documentRemove(QTcpSocket* çlientSocket, QString docUri);
+signals: MessageCapsule documentOpen(QTcpSocket* çlientSocket, URI docUri);
+signals: MessageCapsule documentRemove(QTcpSocket* çlientSocket, URI docUri);
 
 signals: void charInsert(Symbol& s);
 signals: void charDelete(QVector<qint32> pos);

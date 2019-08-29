@@ -19,6 +19,8 @@
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
+	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
+
 	/* initialize random number generator with timestamp */
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
@@ -90,6 +92,8 @@ void TcpServer::initialize()
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
 
+	// Initialize the counter to assign user IDs
+	_userIdCounter = users.size();
 
 	// Read the documents' index file
 	QFile docsFile(INDEX_FILENAME);
@@ -133,24 +137,19 @@ void TcpServer::initialize()
 }
 
 /* Generate the URI for a document */
-QString TcpServer::generateURI(QString authorName, QString docName) const
+URI TcpServer::generateURI(QString authorName, QString docName) const
 {
-	//QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-	QCryptographicHash hash(QCryptographicHash::Md5);
-	QString uri = authorName + "_" + docName + "_";
+	QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+	QString str = authorName + "_" + docName + "_";
 
-	hash.addData(uri.toStdString().c_str(), uri.length());
-	uri += QString(hash.result());
-
-	/*
-	for (int i = 0; i < 10; ++i)	// add a 10-character long random sequence to the document URI to make it unique
+	for (int i = 0; i < 12; ++i)	// add a 12-character long random sequence to the document URI to make it unique
 	{
 		int index = qrand() % possibleCharacters.length();
 		QChar nextChar = possibleCharacters.at(index);
-		uri.append(nextChar);
-	}*/
+		str.append(nextChar);
+	}
 
-	return uri;
+	return URI(str);
 }
 
 /* save on users on persistent storage */
@@ -357,7 +356,7 @@ void addToIndex(QSharedPointer<Document> doc)
 	{
 		QTextStream indexFileStream(&file);
 
-		indexFileStream << doc->getURI() << endl;
+		indexFileStream << doc->getURI().toString() << endl;
 
 		if (indexFileStream.status() == QTextStream::Status::WriteFailed)
 		{
@@ -404,7 +403,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
 
-	QString docURI = generateURI(client->getUsername(), docName);
+	URI docURI = generateURI(client->getUsername(), docName);
 
 	/* check if documents is already used */
 	if (documents.contains(docURI))
@@ -412,7 +411,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 
 	QSharedPointer<Document> doc(new Document(docURI));
 	WorkSpace* w = createWorkspace(doc, client);
-	QFile docFile(docURI);
+	QFile docFile(docURI.toString());
 	
 	/* add the document to the index, create the document file and update internal data structures */
 	addToIndex(doc);
@@ -445,7 +444,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 }
 
 /* Open an existing Document */
-MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, QString docUri)
+MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
@@ -493,7 +492,7 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, QString docUri)
 }
 
 /* Delete a document from the client's list */
-MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, QString docUri)
+MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
@@ -509,7 +508,7 @@ MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, QString docUr
 
 
 /* release all resource owned by workspace, delete it and its thread */
-void TcpServer::deleteWorkspace(QString document)
+void TcpServer::deleteWorkspace(URI document)
 {
 	WorkSpace* w = workspaces.find(document).value().get();
 	//QThread* t = workThreads.find(document).value().get();
@@ -526,7 +525,7 @@ void TcpServer::deleteWorkspace(QString document)
 	//workThreads.find(document).value()->wait();
 	//workThreads.remove(document);
 
-	qDebug() << "workspace (" << document << ") closed";
+	qDebug() << "workspace (" << document.toString() << ") closed";
 }
 
 
