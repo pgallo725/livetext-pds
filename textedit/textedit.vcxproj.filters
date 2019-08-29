@@ -50,6 +50,9 @@
     <ClCompile Include="Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DocumentEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="LandingPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,6 +85,9 @@
     <QtMoc Include="Client.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="DocumentEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="LandingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>

@@ -15,9 +15,7 @@ HEADERS += 	textedit.h \
 			Client.h \	
 			Presence.h \
 			LiveText.h \
-
-	
-
+			DocumentEditor.h
 	
 SOURCES += 	textedit.cpp \
 			main.cpp \
@@ -29,6 +27,7 @@ SOURCES += 	textedit.cpp \
 			Client.cpp \
 			Presence.cpp \
 			LiveText.cpp \
+			DocumentEditor.cpp
 
 FORMS 		= landingpage.ui \
 			profileeditwindow.ui \

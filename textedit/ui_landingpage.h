@@ -117,6 +117,8 @@ public:
     QPushButton *pushButton_new;
     QSpacerItem *verticalSpacer_18;
     QPushButton *pushButton_openuri;
+    QSpacerItem *verticalSpacer_9;
+    QLabel *label_incorrect_file_operation;
     QSpacerItem *verticalSpacer_20;
     QStatusBar *statusBar;
 
@@ -635,7 +637,7 @@ public:
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
         verticalLayout_8->setContentsMargins(20, -1, 40, -1);
-        verticalSpacer_19 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_19 = new QSpacerItem(20, 45, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_8->addItem(verticalSpacer_19);
 
@@ -645,7 +647,7 @@ public:
 
         verticalLayout_8->addWidget(pushButton_new);
 
-        verticalSpacer_18 = new QSpacerItem(20, 80, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_18 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_18);
 
@@ -654,6 +656,41 @@ public:
         pushButton_openuri->setMinimumSize(QSize(228, 100));
 
         verticalLayout_8->addWidget(pushButton_openuri);
+
+        verticalSpacer_9 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+        verticalLayout_8->addItem(verticalSpacer_9);
+
+        label_incorrect_file_operation = new QLabel(page_open);
+        label_incorrect_file_operation->setObjectName(QString::fromUtf8("label_incorrect_file_operation"));
+        label_incorrect_file_operation->setMinimumSize(QSize(0, 30));
+        QPalette palette1;
+        palette1.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        QBrush brush2(QColor(0, 0, 0, 255));
+        brush2.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Active, QPalette::Text, brush2);
+        QBrush brush3(QColor(255, 0, 0, 128));
+        brush3.setStyle(Qt::SolidPattern);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Active, QPalette::PlaceholderText, brush3);
+#endif
+        palette1.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
+        palette1.setBrush(QPalette::Inactive, QPalette::Text, brush2);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Inactive, QPalette::PlaceholderText, brush3);
+#endif
+        palette1.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
+        palette1.setBrush(QPalette::Disabled, QPalette::Text, brush1);
+        QBrush brush4(QColor(0, 0, 0, 128));
+        brush4.setStyle(Qt::SolidPattern);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Disabled, QPalette::PlaceholderText, brush4);
+#endif
+        label_incorrect_file_operation->setPalette(palette1);
+        label_incorrect_file_operation->setTextFormat(Qt::AutoText);
+        label_incorrect_file_operation->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_8->addWidget(label_incorrect_file_operation);
 
         verticalSpacer_20 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -674,7 +711,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(1);
         tabWidget->setCurrentIndex(1);
 
 
@@ -715,9 +752,10 @@ public:
         groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
         pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
         pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
-        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
+        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Logout", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
+        label_incorrect_file_operation->setText(QString());
     } // retranslateUi
 
 };

@@ -44,7 +44,6 @@
 #endif
 
 #include "textedit.h"
-#include "ProfileEditWindow.h"
 #include "ShareUriWindow.h"
 
 const QString rsrcPath = ":/images/win";
@@ -458,6 +457,16 @@ void TextEdit::setUser(User* user)
 	_user = user;
 }
 
+void TextEdit::accountUpdateSuccessful()
+{
+	ew->updateSuccessful();
+}
+
+void TextEdit::accountUpdateFailed(QString error)
+{
+	ew->updateFailed(error);
+}
+
 bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
@@ -658,7 +667,7 @@ void TextEdit::fileShare()
 
 void TextEdit::editProfile()
 {
-	ProfileEditWindow* ew = new ProfileEditWindow(_user);
+	ew = new ProfileEditWindow(_user);
 
 	connect(ew, &ProfileEditWindow::accountUpdate, this, &TextEdit::accountUpdate);
 
