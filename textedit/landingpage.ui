@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>914</width>
-    <height>614</height>
+    <width>1301</width>
+    <height>969</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -54,7 +54,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_2">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1042,7 +1042,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>40</height>
+              <height>30</height>
              </size>
             </property>
            </spacer>

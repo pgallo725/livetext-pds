@@ -48,6 +48,11 @@ QList<URI> User::getDocuments()
 	return m_documents;
 }
 
+URI User::getURIat(int index)
+{
+	return m_documents.at(index);
+}
+
 
 void User::addDocument(URI docUri)
 {

@@ -127,7 +127,7 @@ public:
     {
         if (LandingPage->objectName().isEmpty())
             LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
-        LandingPage->resize(914, 614);
+        LandingPage->resize(1301, 969);
         LandingPage->setMinimumSize(QSize(0, 0));
         LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -673,7 +673,7 @@ public:
 
         verticalLayout_8->addWidget(pushButton_openuri);
 
-        verticalSpacer_9 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_9 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_9);
 
@@ -727,7 +727,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(1);
         tabWidget->setCurrentIndex(1);
 
 

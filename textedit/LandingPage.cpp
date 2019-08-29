@@ -17,9 +17,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-#include "OpenUriWindow.h"
-#include "NewFileWindow.h"
-
 
 const QString rsrcPath = ":/images/win";
 
@@ -32,6 +29,13 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->setupUi(this);
 	//Setup dimensione finestra
 	centerAndResize();
+
+
+	//Crea l'oggetto NewFileWindow
+	newFileWindow = new NewFileWindow(this);
+
+	//Crea l'oggetto OpenUri
+	openURIWindow = new OpenUriWindow(this);
 
 	//Icona "New file"
 	int w = ui->pushButton_new->width();
@@ -111,9 +115,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->tabWidget->setCurrentIndex(0);
 	ui->pushButton_confirmOperation->setText(tr("Login"));
 
-	//Prende file dal server e li mostra nella lista dei files recenti
-	setupFileList();
-
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
@@ -154,11 +155,29 @@ void LandingPage::confirmOperation()
 	QString serverPort = ui->lineEdit_serverPort->text();
 
 	//Controllo se i dati sono stati inseriti correttamente
-	if (serverIP.isEmpty() || serverPort.isEmpty() || ui->lineEdit_usr->text().isEmpty() || ui->lineEdit_psw->text().isEmpty()) {
+	if (serverIP.isEmpty() || serverPort.isEmpty()) {
 		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
 		return;
 	}
 
+	if (ui->tabWidget->currentIndex() == 0) {
+		if (ui->lineEdit_usr->text().isEmpty() || ui->lineEdit_psw->text().isEmpty()) {
+			ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
+			return;
+		}
+	}
+	else {
+		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty() || ui->lineEdit_regPswConf->text().isEmpty()) {
+			ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
+			return;
+		}
+
+		//Controllo sulla corrispondenza password
+		if (ui->lineEdit_regPsw->text() != ui->lineEdit_regPswConf->text()) {
+			ui->label_incorrect_operation->setText(tr("Passwords does not match"));
+			return;
+		}
+	}
 
 	//Function to show loading animation
 	startLoadingAnimation();
@@ -190,7 +209,7 @@ void LandingPage::Login()
 			stream << ui->lineEdit_serverPort->text() << endl;
 		}
 		else {
-			stream << "" << endl; 
+			stream << "" << endl;
 		}
 	}
 
@@ -208,19 +227,7 @@ void LandingPage::Register()
 	QString passwordConf = ui->lineEdit_regPswConf->text();
 	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
-	//Controllo se i dati sono stati inseriti correttamente
-	if (username.isEmpty() || password.isEmpty() || passwordConf.isEmpty()) {
-		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
-		return;
-	}
-
-	//Controllo sulla corrispondenza password
-	if (password != passwordConf) {
-		ui->label_incorrect_operation->setText(tr("Passwords does not match"));
-		return;
-	}
-
-	emit(serverRegister(username, password, nickname, userIcon));
+	emit serverRegister(username, password, nickname, userIcon);
 }
 
 
@@ -255,7 +262,16 @@ void LandingPage::impossibleToConnect()
 void LandingPage::incorrectFileOperation(QString error)
 {
 	stopLoadingAnimation();
-	ui->label_incorrect_file_operation->setText(error);
+	if (openURIWindow->isVisible()) {
+		openURIWindow->incorrectOperation(error);
+	}
+	else if (newFileWindow->isVisible()) {
+		newFileWindow->incorrectOperation(error);
+	}
+	else {
+		ui->label_incorrect_file_operation->setText(error);
+	}
+
 }
 
 void LandingPage::connectionEstabilished()
@@ -287,7 +303,6 @@ void LandingPage::incorrectOperation(QString msg)
 
 void LandingPage::documentDismissed()
 {
-	ui->listWidget->removeItemWidget(ui->listWidget->currentItem());
 	stopLoadingAnimation();
 }
 
@@ -316,30 +331,35 @@ void LandingPage::pushButtonBrowseClicked()
 void LandingPage::pushButtonOpenClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
-	if (fileSelected != "<No files found>")
-		emit(openEditor(uri, fileSelected));
+	if (fileSelected != "<No files found>") {
+		startLoadingAnimation();
+		emit openDocument(ui->listWidget->currentRow());
+	}
 
-	startLoadingAnimation();
 }
 
 void LandingPage::pushButtonRemoveClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
-	if (fileSelected != "<No files found>")
-		emit(removeDocument(fileSelected));
 
-	startLoadingAnimation();
+	if (fileSelected != "<No files found>") {
+		startLoadingAnimation();
+		emit removeDocument(ui->listWidget->currentRow());
+	}
 }
 
 void LandingPage::pushButtonOpenUriClicked()
 {
-	//Crea l'oggetto OpenUri
-	OpenUriWindow* ou = new OpenUriWindow(this);
-
-
 	//Mostra la finestra di mw formata
-	ou->exec();
+	openURIWindow->exec();
 }
+
+void LandingPage::pushButtonNewClicked()
+{
+	//Mostra la finestra di mw formata
+	newFileWindow->exec();
+}
+
 
 void LandingPage::pushButtonBackClicked()
 {
@@ -360,28 +380,29 @@ void LandingPage::pushButtonBackClicked()
 void LandingPage::enablePushButtonOpen()
 {
 	if (ui->listWidget->currentItem()->text() != "<No files found>")
-		if (!ui->pushButton_open->isEnabled()) {
-			ui->pushButton_open->setEnabled(true);
-			ui->pushButton_remove->setEnabled(true);
-		}
+	{
+		ui->pushButton_open->setEnabled(true);
+		ui->pushButton_remove->setEnabled(true);
+	}
+	else {
+		ui->pushButton_open->setEnabled(false);
+		ui->pushButton_remove->setEnabled(false);
+	}
+
 }
 
 
 
-void LandingPage::setupFileList()
+void LandingPage::setupFileList(QList<URI> documents)
 {
-	//Prende i file dal server e li mostra nella lista
-	QListWidgetItem* item = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File1");
-	QListWidgetItem* item2 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File2");
-	QListWidgetItem* item3 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/textfile.png"), "File3");
-	QListWidgetItem* item4 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), "File4");
-	QListWidgetItem* item5 = new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), "File5");
+	ui->listWidget->clear();
 
-	ui->listWidget->addItem(item);
-	ui->listWidget->addItem(item2);
-	ui->listWidget->addItem(item3);
-	ui->listWidget->addItem(item4);
-	ui->listWidget->addItem(item5);
+	QList<URI>::iterator it;
+
+	for (it = documents.begin(); it != documents.end(); it++) {
+		ui->listWidget->addItem(new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), it->getDocumentName() + " (" + it->getAuthorName() + ")"));
+	}
+
 
 	//Se non vengono trovati files viene visualizzato "<No files found>"
 	if (ui->listWidget->count() == 0) {
@@ -390,6 +411,13 @@ void LandingPage::setupFileList()
 	}
 
 
+}
+
+void LandingPage::closeAll()
+{
+	openURIWindow->close();
+	newFileWindow->close();
+	this->close();
 }
 
 
@@ -417,17 +445,6 @@ void LandingPage::showUserIcon(QString path)
 
 	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-}
-
-
-void LandingPage::pushButtonNewClicked()
-{
-	//Crea l'oggetto OpenUri
-	NewFileWindow* ou = new NewFileWindow(this);
-
-
-	//Mostra la finestra di mw formata
-	ou->exec();
 }
 
 

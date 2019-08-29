@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'shareuriwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -73,8 +73,8 @@ public:
 
     void retranslateUi(QDialog *ShareUriWindow)
     {
-        ShareUriWindow->setWindowTitle(QApplication::translate("ShareUriWindow", "Share URI", nullptr));
-        label_2->setText(QApplication::translate("ShareUriWindow", "Share the URI below to guarantee access to this document", nullptr));
+        ShareUriWindow->setWindowTitle(QCoreApplication::translate("ShareUriWindow", "Share URI", nullptr));
+        label_2->setText(QCoreApplication::translate("ShareUriWindow", "Share the URI below to guarantee access to this document", nullptr));
     } // retranslateUi
 
 };

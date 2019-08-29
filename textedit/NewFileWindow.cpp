@@ -1,6 +1,7 @@
 #include "NewFileWindow.h"
 #include "ui_newfilewindow.h"
 
+#include "LandingPage.h"
 
 #include <QWidget>
 #include <QStyle>
@@ -33,26 +34,30 @@ NewFileWindow::~NewFileWindow()
 	delete ui;
 }
 
+void NewFileWindow::incorrectOperation(QString error)
+{
+	ui->label_incorrectFilename->setText(error);
+}
+
 void NewFileWindow::acceptClicked()
 {
 	QString name = ui->lineEdit_fileName->text();
 	QString extension = ui->comboBox_fileType->currentText();
 
-	bool notvalid = false;
-
-	if (name == "" || notvalid) {
-		ui->label_incorrectFilename->setVisible(true);
+	if (name.isEmpty()) {
+		incorrectOperation(tr("Please insert a valid filename"));
 	}
 	else {
 		QString filename = name + "." + extension;
 
-		this->close();
-		landingPage->openEditor(landingPage->newfile, filename);
+		emit landingPage->newDocument(filename);
 	}
 }
 
 void NewFileWindow::rejectClicked()
 {
+	ui->label_incorrectFilename->setText("");
+	ui->lineEdit_fileName->setText("");
 	this->close();
 }
 

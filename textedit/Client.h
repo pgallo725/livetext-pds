@@ -33,6 +33,7 @@
 //File for DataStructure
 #include <User.h>
 #include <Symbol.h>
+#include <Document.h>
 
 class Client : public QObject
 {
@@ -71,7 +72,7 @@ signals:
 	void removeFileFailed(QString errorType);
 	void openFileCompleted(Document document);
 	void openFileFailed(QString error);
-	void documentDismissed();
+	void documentDismissed(URI URI);
 	
 	// Symbol Signals
 	void recivedSymbol(Symbol character);
@@ -101,9 +102,9 @@ public slots:
 	void reciveChar(QDataStream& in);
 	void deleteChar(QDataStream& in);
 	//Document handler
-	void openDocument(QString URI);
+	void openDocument(URI URI);
 	void createDocument(QString name);
-	void deleteDocument(QString URI);
+	void deleteDocument(URI URI);
 	//Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();

@@ -2,7 +2,8 @@
 #define NEWFILEWINDOW_H
 
 #include <QDialog>
-#include "LandingPage.h"
+
+class LandingPage;
 
 namespace Ui {
 	class NewFileWindow;
@@ -13,9 +14,12 @@ class NewFileWindow : public QDialog
 	Q_OBJECT
 
 public:
+	Ui::NewFileWindow* ui;
 	NewFileWindow(LandingPage* lp, QWidget* parent = nullptr);
 	~NewFileWindow();
-	Ui::NewFileWindow* ui;
+
+	void incorrectOperation(QString error);
+	
 private slots:
 	void acceptClicked();
 	void rejectClicked();

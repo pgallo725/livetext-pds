@@ -36,6 +36,7 @@ public:
 	QString getPassword();
 	QImage getIcon();
 	QList<URI> getDocuments();
+	URI getURIat(int index);
 
 	/* setter methods */
 	void addDocument(URI docUri);

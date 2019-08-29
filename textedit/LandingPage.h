@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QDialog>
 #include <QLabel>
+#include <Document.h>
 
+#include "OpenUriWindow.h"
+#include "NewFileWindow.h"
 #include "Client.h"
 
 
@@ -20,12 +23,11 @@ public:
 	LandingPage(QWidget* parent = nullptr);
 	~LandingPage();
 
-
-	enum openMode { uri, newfile };
-
 	void openLoggedPage();
 	void incorrectOperation(QString msg);
-	void documentDismissed();
+	void documentDismissed(); //Remove document
+	void setupFileList(QList<URI> documents); //Document List
+	void closeAll();
 
 private slots:
 	void pushButtonNewClicked();
@@ -48,8 +50,10 @@ public slots:
 
 
 signals:
-	void openEditor(int mode, QString path = nullptr);
-	void removeDocument(QString path); //TODO REMOVE DOCUMENT
+	void newDocument(QString name);
+	void addDocument(QString URI);
+	void openDocument(int index);
+	void removeDocument(int index); //TODO REMOVE DOCUMENT
 	void connectToServer(QString ipAddress, quint16 port);
 	void serverLogin(QString username, QString password);
 	void serverRegister(QString username, QString password, QString nickname, QImage icon);
@@ -61,8 +65,10 @@ private:
 
 	QLabel* loading;
 
+	OpenUriWindow* openURIWindow;
+	NewFileWindow* newFileWindow;
+
 private:
-	void setupFileList();
 	void centerAndResize();
 	void startLoadingAnimation();
 	void stopLoadingAnimation();

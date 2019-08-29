@@ -28,11 +28,12 @@ class TextEdit : public QMainWindow
 public:
 	TextEdit(QWidget* parent = 0);
 	
-	//User
-	void setUser(User* user);
-	void accountUpdateSuccessful();
+	void setUser(User* user); //User logged
+	void accountUpdateSuccessful(); //Account updated
+
 	
 	bool load(const QString& f);
+
 
 
 

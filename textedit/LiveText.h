@@ -20,11 +20,14 @@ public:
 
 private slots:
 	//LANDING PAGE
-	void openEditor(int mode, QString path);
+	void openEditor();
 	void connectToServer(QString ipAddress, quint16 port);
 	void Login(QString username, QString password);
 	void Register(QString username, QString password, QString nickname, QImage icon);
 	void Logout();
+	void removeDocument(int index);
+	void openDocument(int index);
+	void addDocument(QString uri);
 	
 	//TEXTEDIT
 	void returnToLanding();
@@ -42,7 +45,7 @@ private slots:
 
 	//DOCUMENTEDITOR
 	void openDocumentCompleted(Document doc);
-	void dismissDocumentCompleted();
+	void dismissDocumentCompleted(URI URI);
 
 private:
 	LandingPage* _landingPage;

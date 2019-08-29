@@ -147,7 +147,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Inserted URI is not valid</string>
+        <string/>
        </property>
       </widget>
      </item>

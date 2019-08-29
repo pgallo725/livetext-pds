@@ -14,12 +14,16 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 
 	//LANDINGPAGE - LIVETEXT
-	connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor
+	//connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor
 	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
 	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
 	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
+	connect(_landingPage, &LandingPage::removeDocument, this, &LiveText::removeDocument);
+	connect(_landingPage, &LandingPage::addDocument, this, &LiveText::addDocument);
 
+	//LANDINGPAGE - CLIENT
+	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);
 
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
@@ -41,19 +45,16 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	
-
-
-
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 
 	//CLIENT - TEXTEDIT
-	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//devi aggiungere se non l'hai già fatto il mandare il cursore quando lo ricevi	//usi 2 volte la stessa funzione è normale?
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
-	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
+	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
 	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 
 	//TEXTEDIT - CLIENT
@@ -65,52 +66,22 @@ LiveText::~LiveText()
 	delete _landingPage;
 	delete _textEdit;
 	delete _client;
-	delete _docEditor;
 }
 
 
-
+//Show landing page
 void LiveText::start()
 {
 	_landingPage->show();
 }
 
-
-void LiveText::openEditor(int mode, QString path = nullptr)
-{
-
-	//Chiude finestra attuale
-	_landingPage->close();
-
-	//Dimensione finestra
-	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
-
-	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
-	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
-	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
-
-	/*switch (mode) {
-	case newfile:
-		mw->fileNew(path);
-		break;
-
-	case uri:
-		mw->load(path);
-		break;
-
-	default:
-		break;
-	};*/
-
-	//Mostra la finestra di mw formata
-	_textEdit->show();
-}
-
+//Connection
 void LiveText::connectToServer(QString ipAddress, quint16 port)
 {
 	_client->Connect(ipAddress, port);
 }
 
+//Login
 void LiveText::Login(QString username, QString password)
 {
 	_client->setUsername(username);
@@ -119,6 +90,13 @@ void LiveText::Login(QString username, QString password)
 	_client->Login();
 }
 
+void LiveText::loginSuccess(User user)
+{
+	_user = user;
+	_textEdit->setUser(&_user);
+	_landingPage->setupFileList(_user.getDocuments());
+	_landingPage->openLoggedPage();
+}
 
 void LiveText::loginFailed(QString errorType)
 {
@@ -126,8 +104,7 @@ void LiveText::loginFailed(QString errorType)
 	_client->Disconnect();
 }
 
-
-
+//Registration
 void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
 {
 	_client->setUsername(username);
@@ -144,48 +121,91 @@ void LiveText::registrationFailed(QString errorType)
 	_client->Disconnect();
 }
 
-void LiveText::loginSuccess(User user)
-{
-	_user = user;
-	_textEdit->setUser(&_user);
-	_landingPage->openLoggedPage();
-}
-
 void LiveText::registrationSuccess(User user)
 {
 	_user = user;
 	_textEdit->setUser(&_user);
+	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 }
 
-void LiveText::openDocumentCompleted(Document doc)
-{
-	_docEditor = new DocumentEditor(doc);
-}
-
-void LiveText::dismissDocumentCompleted()
-{
-	delete _docEditor;
-	_landingPage->documentDismissed();
-}
-
+//Logout
 void LiveText::Logout()
 {
 	_client->Disconnect();
 }
 
+//Delete document from list
+void LiveText::removeDocument(int index)
+{
+	_client->deleteDocument(_user.getURIat(index));
+}
+
+void LiveText::dismissDocumentCompleted(URI URI)
+{
+	_user.removeDocument(URI);
+	_landingPage->setupFileList(_user.getDocuments());
+	_landingPage->documentDismissed();
+
+}
+
+//Open a new document
+void LiveText::openDocument(int index)
+{
+	_client->openDocument(_user.getURIat(index));
+}
+
+void LiveText::addDocument(QString uri)
+{
+	_client->openDocument(URI(uri));
+}
+
+
+void LiveText::openDocumentCompleted(Document doc)
+{
+	_docEditor = new DocumentEditor(doc, _textEdit);
+	if (!_user.getDocuments().contains(doc.getURI())) {
+		_user.addDocument(doc.getURI());
+	}
+
+	//ADD DOCUMENT LOADING INTO EDITOR
+
+	openEditor();
+}
+
+//Open editor
+void LiveText::openEditor()
+{
+	//Chiude finestra attuale
+	_landingPage->closeAll();
+
+	//Dimensione finestra
+	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
+
+	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
+	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
+	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
+
+	_textEdit->show();
+}
+
+//Close editor
 void LiveText::returnToLanding()
 {
+	delete _docEditor;
 	_textEdit->close();
+	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
 }
 
+//Send cursor
 void LiveText::sendCursor(qint32 pos)
 {
 	_client->sendCursor(_user.getUserId(), pos);
 }
 
+//Account update
 void LiveText::sendAccountUpdate(QString name, QImage image)
 {
 	//Create a copy of user in case of rollback

@@ -256,13 +256,13 @@ void Client::Logout() {
 }
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
-void Client::openDocument(QString URI) {
+void Client::openDocument(URI URI) {
 
 	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI);
+	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->sendTo(socket);
 
 	//wait the response from the server
@@ -337,13 +337,13 @@ void Client::createDocument(QString name) {
 
 }
 
-void Client::deleteDocument(QString URI) {
+void Client::deleteDocument(URI URI) {
 	
 	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI);
+	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
@@ -359,7 +359,7 @@ void Client::deleteDocument(QString URI) {
 	switch (typeOfMessage) {
 	case DocumentDismissed: {
 		//Document successfully opened
-		emit documentDismissed();
+		emit documentDismissed(URI);
 		return;
 	}
 	case DocumentError: {

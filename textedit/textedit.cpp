@@ -462,6 +462,7 @@ void TextEdit::accountUpdateSuccessful()
 	ew->updateSuccessful();
 }
 
+
 void TextEdit::accountUpdateFailed(QString error)
 {
 	ew->updateFailed(error);
@@ -530,9 +531,9 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	//Choose a random color from Qt colors
-	QColor color = (Qt::GlobalColor) (userId%18 + 2);
+	QColor color = (Qt::GlobalColor) (userId % 18 + 2);
 	QPixmap userPic;
-	
+
 	userPic.convertFromImage(image);
 	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
@@ -823,14 +824,7 @@ void TextEdit::listStyle(int styleIndex)
 		listFmt.setStyle(style);
 
 		//Creo la lista indentata correttamente
-		QTextList* list = cursor.createList(listFmt);
-
-		for (int i = 0; i < list->count(); ++i) {
-			QTextBlock blk = list->item(i);
-			int start = blk.position();
-			int len = blk.length();
-		}
-
+		cursor.createList(listFmt);
 	}
 	else {
 		//Altrimenti se non sono in una lista indento di +1
@@ -842,13 +836,7 @@ void TextEdit::listStyle(int styleIndex)
 
 		listFmt.setStyle(style);
 
-		QTextList* list = cursor.createList(listFmt);
-
-		for (int i = 0; i < list->count(); ++i) {
-			QTextBlock blk = list->item(i);
-			int start = blk.position();
-			int len = blk.length();
-		}
+		cursor.createList(listFmt);
 	}
 	cursor.endEditBlock();
 }
@@ -992,6 +980,7 @@ void TextEdit::cursorPositionChanged()
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
+
 	//To change with unique id
 	Presence p = onlineUsers.find(user).value();
 	QTextCursor* cursor = p.cursor();
@@ -1088,6 +1077,20 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	if (charsAdded > 0) {
 		//Gestione inserimento carattere
 		QTextCursor cursor = textEdit->textCursor();
+
+		QTextList* list = cursor.currentList();
+		if (list) {
+			for (int i = 0; i < list->count(); ++i) {
+				QTextBlock blk = list->item(i);
+				int start = blk.position();
+				int len = blk.length();
+			}
+		}
+		else {
+			QTextBlock blk = cursor.block();
+			int start = blk.position();
+			int len = blk.length();
+		}
 
 		for (int i = position; i < position + charsAdded; ++i) {
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere

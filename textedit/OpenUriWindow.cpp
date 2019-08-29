@@ -1,6 +1,7 @@
 #include "OpenUriWindow.h"
 #include "ui_openuriwindow.h"
 
+#include "LandingPage.h"
 
 #include <QWidget>
 #include <QStyle>
@@ -15,9 +16,6 @@ OpenUriWindow::OpenUriWindow(LandingPage* lp, QWidget* parent) : landingPage(lp)
 	ui->setupUi(this);
 	centerAndResize();
 	
-	//Imposto la label "Incorrect URI" non visibile
-	ui->label_incorrectUri->setVisible(false);
-
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &OpenUriWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &OpenUriWindow::rejectClicked);
 }
@@ -27,22 +25,27 @@ OpenUriWindow::~OpenUriWindow()
 	delete ui;
 }
 
+void OpenUriWindow::incorrectOperation(QString error)
+{
+	ui->label_incorrectUri->setText(error);
+}
+
 void OpenUriWindow::acceptClicked()
 {
 	QString uri = ui->lineEdit_uri->text();
-	bool notvalid = false;
 
-	if (uri == "" || notvalid) {
-		ui->label_incorrectUri->setVisible(true);
+	if (uri.isEmpty()) {
+		incorrectOperation(tr("Please insert a valid URI"));
+		return;
 	}
-	else {
-		this->close();
-		landingPage->openEditor(landingPage->uri,uri);	
-	}
+
+	emit landingPage->addDocument(uri);
 }
 
 void OpenUriWindow::rejectClicked()
 {
+	ui->label_incorrectUri->setText("");
+	ui->lineEdit_uri->setText("");
 	this->close();
 }
 

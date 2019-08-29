@@ -2,7 +2,8 @@
 #define OPENURIWINDOW_H
 
 #include <QDialog>
-#include "LandingPage.h"
+
+class LandingPage;
 
 namespace Ui {
 	class OpenUriWindow;
@@ -13,9 +14,13 @@ class OpenUriWindow : public QDialog
 	Q_OBJECT
 
 public:
+	Ui::OpenUriWindow* ui;
+	
 	OpenUriWindow(LandingPage* lp, QWidget* parent = nullptr);
 	~OpenUriWindow();
-	Ui::OpenUriWindow* ui;
+		
+	void incorrectOperation(QString error);
+	
 private slots:
 	void acceptClicked();
 	void rejectClicked();
