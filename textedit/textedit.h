@@ -7,6 +7,7 @@
 #include <QMap>
 #include <User.h>
 #include "Presence.h"
+#include "ProfileEditWindow.h"
 
 //Serve per incapsulare tutti i metodi delle classi
 class QAction;
@@ -26,18 +27,25 @@ class TextEdit : public QMainWindow
 
 public:
 	TextEdit(QWidget* parent = 0);
+	
+	//User
 	void setUser(User* user);
+	void accountUpdateSuccessful();
+	
 	bool load(const QString& f);
+
+
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
 	void fileNew(QString name);
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
+	void accountUpdateFailed(QString error);
 
 
 signals:
-	void logout();
+	void closeDocument();
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString name, QImage image);
 	
@@ -99,6 +107,9 @@ private:
 	//Logged user
 	User* _user;
 
+	//Edit window
+	ProfileEditWindow* ew;
+
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;
 	QAction* actionTextItalic;
@@ -112,7 +123,7 @@ private:
 	QAction* actionShare;
 	QAction* actionUser;
 	QAction* actionHighlightUsers;
-	QAction* actionLogout;
+	QAction* actioncloseDocument;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;
@@ -127,6 +138,7 @@ private:
 	QToolBar* tb;
 	QString fileName;
 	QTextEdit* textEdit;
+
 
 };
 

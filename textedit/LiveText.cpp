@@ -24,8 +24,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
-	
-	
+	connect(_client, &Client::openFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
+	connect(_client, &Client::removeFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
+
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
 
@@ -34,22 +35,26 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::registrationSuccess);
+	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
+
+	//CLIENT - DOCUMENTEDITOR
+	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
+	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	
-	//connect(_client, &Client::openFileCompleted, this, );
-	//connect(_client, &Client::openFileFailed, this, );
-	//connect(_client, &Client::removeFileFailed, ,);
-	//connect(_client, &Client::documentDismissed,,);
+
+
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//devi aggiungere se non l'hai già fatto il mandare il cursore quando lo ricevi	//usi 2 volte la stessa funzione è normale?
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);
+	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 
 	//TEXTEDIT - CLIENT
 
@@ -60,6 +65,7 @@ LiveText::~LiveText()
 	delete _landingPage;
 	delete _textEdit;
 	delete _client;
+	delete _docEditor;
 }
 
 
@@ -152,11 +158,21 @@ void LiveText::registrationSuccess(User user)
 	_landingPage->openLoggedPage();
 }
 
+void LiveText::openDocumentCompleted(Document doc)
+{
+	_docEditor = new DocumentEditor(doc);
+}
+
+void LiveText::dismissDocumentCompleted()
+{
+	delete _docEditor;
+	_landingPage->documentDismissed();
+}
+
 void LiveText::Logout()
 {
 	_client->Disconnect();
 }
-
 
 void LiveText::returnToLanding()
 {
@@ -172,7 +188,19 @@ void LiveText::sendCursor(qint32 pos)
 
 void LiveText::sendAccountUpdate(QString name, QImage image)
 {
-	_client->sendAccountUpdate(_user.getUserId(), name, image);
+	//Create a copy of user in case of rollback
+	User p = _user;
+	p.setNickname(name);
+	p.setIcon(image);
+
+
+	_client->sendAccountUpdate(p);
+}
+
+void LiveText::accountUpdated(User user)
+{
+	_user = user;
+	_textEdit->accountUpdateSuccessful();
 }
 
 

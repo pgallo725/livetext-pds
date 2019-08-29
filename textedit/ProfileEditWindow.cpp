@@ -55,6 +55,16 @@ ProfileEditWindow::~ProfileEditWindow()
 	delete ui;
 }
 
+void ProfileEditWindow::updateSuccessful()
+{
+	this->close();
+}
+
+void ProfileEditWindow::updateFailed(QString error)
+{
+	ui->label_incorrect_edit->setText(error);
+}
+
 void ProfileEditWindow::pushButtonBrowseClicked()
 {
 	//Apre il dialogo per la scelta dell'icona utente
@@ -121,7 +131,6 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	*/
 
 	emit(accountUpdate(nick, userIcon));
-	this->close();
 }
 
 

@@ -58,9 +58,14 @@ signals:
 
 	// Presence Signals
 	void cursorMoved(qint32 position, qint32 user);
-	void accountModified(qint32 userId,QString username,QImage image);
-	void userPresence(qint32 userId, QString username, QImage image);
+	void userPresence(qint32 userId, QString username, QImage image);	
 	void cancelUserPresence(qint32 userId);
+	void accountModified(qint32 userId, QString username, QImage image);
+
+
+	//Account signals
+	void personalAccountModified(User user);
+	void accountModificationFail(QString error);
 	
 	//Document Signals
 	void removeFileFailed(QString errorType);
@@ -74,6 +79,9 @@ signals:
 public:
 	Client(QObject* parent = 0);
 	~Client();
+
+	void messageHandler(qint16 typeOfMeassage, QDataStream& in);
+	void removeFromFile(qint32 myId);
 
 public slots:
 	//signals handler
@@ -109,7 +117,7 @@ public slots:
 	//Account handler
 	void newUserPresence(QDataStream& in);
 	void accountUpdate(QDataStream& in);
-	void sendAccountUpdate(qint32 userId, QString name, QImage image);
+	void sendAccountUpdate(User userUpdate);
 	void deleteUserPresence(QDataStream& in);
 };
 

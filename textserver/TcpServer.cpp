@@ -218,7 +218,7 @@ void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 
-	qDebug() << " - client '" << clients.find(socket).value()->getUsername() << "' disconnected";
+	qDebug() << " - client disconnected";
 
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close and destroy the socket */
@@ -315,17 +315,11 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, User& updatedU
 
 
 /* Release resources owned by a client and delete it */
-/*MessageCapsule TcpServer::logoutClient(QTcpSocket* clientSocket)
+void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
-	Client* client = clients.find(clientSocket).value().get();
-
-	if (client->isLogged())
-	{
-		client->logout();
-	}
-
-	clientSocket->disconnectFromHost();		// close the socket connection (clientDisconnection will handle the rest)
-}*/
+	clients.remove(clientSocket);					// remove this client from the map 
+	clientSocket->close();						// close and destroy the socket 
+}
 
 /* Move a client from the workspace that he has exited back to the server */
 void TcpServer::receiveClient(QSharedPointer<Client> client)

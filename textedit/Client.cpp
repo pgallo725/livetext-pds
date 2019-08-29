@@ -28,29 +28,35 @@ void Client::writeOnServer()
 }
 
 void Client::serverConnection() {
-	qDebug() << "Client connesso al server ";
+	qDebug() << "Connection established";
 	emit connectionEstablished();
 }
 
 void Client::serverDisconnection() {
-	qDebug() << "Client disconnesso dal server ";
+	qDebug() << "Server closed the connection";
 }
 
 void Client::errorHandler() {
 
-	qDebug() << "error raised";
+	qDebug() << "Error raised";
 	socket->close();
 
 }
 
 void Client::readBuffer() {
 
-	qDebug() << "reading socket";
+	qDebug() << "Reading socket";
 	
 	quint16 typeOfMessage;
 	QDataStream in;
 
 	in >> typeOfMessage;
+
+	messageHandler(typeOfMessage, in);
+
+}
+
+void Client::messageHandler(qint16 typeOfMessage, QDataStream& in) {
 
 	switch (typeOfMessage) {
 	case CursorMove:
@@ -75,6 +81,7 @@ void Client::readBuffer() {
 		//thorw exception
 		break;
 	}
+
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
@@ -84,7 +91,7 @@ void Client::Connect(QString ipAddress, quint16 port) {
 
 void Client::Disconnect() {
 	socket->close();
-	qDebug() << "connection closed by client";
+	qDebug() << "Connection closed by client";
 }
 
 void Client::setUsername(QString username) {
@@ -157,7 +164,7 @@ void Client::Login() {
 	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
 	QString nonce = loginChallenge->getNonce();
 
-	qDebug() << "cripting salt " << nonce;
+	qDebug() << "Cripting salt " << nonce;
 	QString result = password + nonce;
 	
 	QCryptographicHash hash(QCryptographicHash::Md5);
@@ -168,7 +175,7 @@ void Client::Login() {
 	loginUnlock->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("server not responding");
+		emit loginFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -209,7 +216,7 @@ void Client::Register() {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit registrationFailed("server not responding");
+		emit registrationFailed(tr("Server not responding"));
 		return ;
 	}
 
@@ -243,34 +250,8 @@ void Client::Logout() {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	MessageCapsule logoutRequest = MessageFactory::LogoutRequest();
+	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->sendTo(socket);
-
-	//wait the response from the server
-	if (!socket->waitForReadyRead(10000)) {
-		emit logoutFailed("server not responding");
-		return;
-	}
-
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
-
-	switch (typeOfMessage) {
-	case LogoutConfirmed: {
-		return;
-	}
-	case LogoutError: {
-		// impossible to create the account
-		LogoutErrorMessage* logoutDenied = dynamic_cast<LogoutErrorMessage*>(incomingMessage.get());
-		emit logoutFailed(logoutDenied->getErrorMessage());
-		return;
-	}
-	default:
-		//throw MessageUnknownTypeException();
-		// EMIT?
-		return;
-	}
 
 }
 
@@ -286,7 +267,7 @@ void Client::openDocument(QString URI) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -326,7 +307,7 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed("server not responding");
+		emit openFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -366,7 +347,7 @@ void Client::deleteDocument(QString URI) {
 	removeDocument->sendTo(socket);
 
 	if (!socket->waitForReadyRead(10000)) {
-		emit removeFileFailed("server not responding");
+		emit removeFileFailed(tr("Server not responding"));
 		return;
 	}
 
@@ -443,19 +424,59 @@ void Client::deleteChar(QDataStream& in) {
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
+void Client::sendAccountUpdate(User userUpdate) {
+	
+	qint16 typeOfMessage;
+	QDataStream in(socket);
+	
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(userUpdate);
+	accountUpdate->sendTo(socket);
+
+	while (true) {
+
+		if (!socket->waitForReadyRead(10000)) {
+			emit accountModificationFail(tr("Server not responding"));
+			return;
+		}
+
+		in >> typeOfMessage;
+
+		switch (typeOfMessage) {
+		case AccountConfirmed: {
+			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
+			recivedAccountUpdate->readFrom(in);
+			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
+			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			userUpdate.setId(accountconfirmed->getUserId());
+			emit personalAccountModified(userUpdate);
+			return;
+		}
+		case AccountError: {
+			MessageCapsule accountError = MessageFactory::Empty(AccountError);
+			accountError->readFrom(in);
+			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(accountError.get());
+			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			emit accountModificationFail(accounterror->getErrorMessage());
+			return;
+		}
+			break;
+		default:
+			messageHandler(typeOfMessage, in);
+			break;
+		}
+	}
+}
+
+
+/*--------------------------- PRESENCE HANDLER --------------------------------*/
+
 void Client::accountUpdate(QDataStream& in) {
 
 	MessageCapsule accountUpdate = MessageFactory::Empty(PresenceUpdate);
 	accountUpdate->readFrom(in);
-	PresenceUpdateMessage *accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
-	emit accountModified(accountupdate->getUserId(),accountupdate->getNickname(),accountupdate->getIcon());
-
-}
-
-void Client::sendAccountUpdate(qint32 userId,QString name,QImage image) {
-	
-	MessageCapsule accountUpdate = MessageFactory::PresenceUpdate(userId, name, image);
-	accountUpdate->sendTo(socket);
+	PresenceUpdateMessage* accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
+	emit accountModified(accountupdate->getUserId(), accountupdate->getNickname(), accountupdate->getIcon());
 
 }
 
@@ -474,4 +495,11 @@ void Client::deleteUserPresence(QDataStream& in) {
 	userPresence->readFrom(in);
 	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(userPresence.get());
 	emit cancelUserPresence(userpresence->getUserId());
+}
+
+void Client::removeFromFile(qint32 myId) {
+
+	MessageCapsule userPresence = MessageFactory::PresenceRemove(myId);
+	userPresence->sendTo(socket);
+
 }

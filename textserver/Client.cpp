@@ -34,7 +34,7 @@ User* Client::getUser()
 
 QString Client::getUsername()
 {
-	if (!activeUser)
+	if (activeUser == nullptr)
 		return QString::null;
 	else return activeUser->getUsername();
 }

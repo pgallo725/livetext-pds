@@ -54,7 +54,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
 
 	//Icona back
-	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/backarrow.png"));
+	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/logout.png"));
 
 	//Icona open
 	ui->pushButton_open->setIcon(QIcon::QIcon(rsrcPath + "/filenew.png"));
@@ -154,10 +154,11 @@ void LandingPage::confirmOperation()
 	QString serverPort = ui->lineEdit_serverPort->text();
 
 	//Controllo se i dati sono stati inseriti correttamente
-	if (serverIP.isEmpty() || serverPort.isEmpty()) {
-		ui->label_incorrect_operation->setText(tr("Invalid server/port"));
+	if (serverIP.isEmpty() || serverPort.isEmpty() || ui->lineEdit_usr->text().isEmpty() || ui->lineEdit_psw->text().isEmpty()) {
+		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
 		return;
 	}
+
 
 	//Function to show loading animation
 	startLoadingAnimation();
@@ -179,12 +180,6 @@ void LandingPage::Login()
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
 
-	//Controllo se i dati sono stati inseriti correttamente
-	if (username.isEmpty() || password.isEmpty()) {
-		ui->label_incorrect_operation->setText(tr("Please fill all the required fields"));
-		stopLoadingAnimation();
-		return;
-	}
 
 	QFile file("userLogin.dat");
 	if (file.open(QIODevice::WriteOnly)) {
@@ -257,6 +252,12 @@ void LandingPage::impossibleToConnect()
 	ui->label_incorrect_operation->setText(tr("Invalid server/port"));
 }
 
+void LandingPage::incorrectFileOperation(QString error)
+{
+	stopLoadingAnimation();
+	ui->label_incorrect_file_operation->setText(error);
+}
+
 void LandingPage::connectionEstabilished()
 {
 	switch (ui->tabWidget->currentIndex()) {
@@ -282,6 +283,12 @@ void LandingPage::incorrectOperation(QString msg)
 {
 	stopLoadingAnimation();
 	ui->label_incorrect_operation->setText(msg);
+}
+
+void LandingPage::documentDismissed()
+{
+	ui->listWidget->removeItemWidget(ui->listWidget->currentItem());
+	stopLoadingAnimation();
 }
 
 void LandingPage::pushButtonRegisterClicked()
@@ -311,6 +318,8 @@ void LandingPage::pushButtonOpenClicked()
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
 		emit(openEditor(uri, fileSelected));
+
+	startLoadingAnimation();
 }
 
 void LandingPage::pushButtonRemoveClicked()
@@ -318,6 +327,8 @@ void LandingPage::pushButtonRemoveClicked()
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>")
 		emit(removeDocument(fileSelected));
+
+	startLoadingAnimation();
 }
 
 void LandingPage::pushButtonOpenUriClicked()

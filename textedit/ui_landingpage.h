@@ -84,6 +84,7 @@ public:
     QHBoxLayout *horizontalLayout_5;
     QLabel *label_logo;
     QSpacerItem *verticalSpacer_5;
+    QLabel *label_8;
     QLabel *label_7;
     QSpacerItem *verticalSpacer_21;
     QGroupBox *groupBox_5;
@@ -117,6 +118,8 @@ public:
     QPushButton *pushButton_new;
     QSpacerItem *verticalSpacer_18;
     QPushButton *pushButton_openuri;
+    QSpacerItem *verticalSpacer_9;
+    QLabel *label_incorrect_file_operation;
     QSpacerItem *verticalSpacer_20;
     QStatusBar *statusBar;
 
@@ -437,8 +440,23 @@ public:
 
         verticalLayout_14->addItem(verticalSpacer_5);
 
+        label_8 = new QLabel(page_2);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+        QFont font5;
+        font5.setPointSize(18);
+        font5.setBold(true);
+        font5.setWeight(75);
+        label_8->setFont(font5);
+        label_8->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_14->addWidget(label_8);
+
         label_7 = new QLabel(page_2);
         label_7->setObjectName(QString::fromUtf8("label_7"));
+        QFont font6;
+        font6.setBold(false);
+        font6.setWeight(50);
+        label_7->setFont(font6);
         label_7->setAlignment(Qt::AlignCenter);
 
         verticalLayout_14->addWidget(label_7);
@@ -544,12 +562,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font5;
-        font5.setFamily(QString::fromUtf8("Calibri"));
-        font5.setPointSize(14);
-        font5.setBold(false);
-        font5.setWeight(50);
-        groupBox_2->setFont(font5);
+        QFont font7;
+        font7.setFamily(QString::fromUtf8("Calibri"));
+        font7.setPointSize(14);
+        font7.setBold(false);
+        font7.setWeight(50);
+        groupBox_2->setFont(font7);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -571,10 +589,10 @@ public:
         pushButton_remove->setObjectName(QString::fromUtf8("pushButton_remove"));
         pushButton_remove->setEnabled(false);
         pushButton_remove->setMinimumSize(QSize(0, 30));
-        QFont font6;
-        font6.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font6.setPointSize(10);
-        pushButton_remove->setFont(font6);
+        QFont font8;
+        font8.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font8.setPointSize(10);
+        pushButton_remove->setFont(font8);
 
         horizontalLayout_4->addWidget(pushButton_remove);
 
@@ -588,12 +606,12 @@ public:
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font7;
-        font7.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font7.setPointSize(10);
-        font7.setBold(false);
-        font7.setWeight(50);
-        pushButton_open->setFont(font7);
+        QFont font9;
+        font9.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font9.setPointSize(10);
+        font9.setBold(false);
+        font9.setWeight(50);
+        pushButton_open->setFont(font9);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -635,7 +653,7 @@ public:
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
         verticalLayout_8->setContentsMargins(20, -1, 40, -1);
-        verticalSpacer_19 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_19 = new QSpacerItem(20, 45, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_8->addItem(verticalSpacer_19);
 
@@ -645,7 +663,7 @@ public:
 
         verticalLayout_8->addWidget(pushButton_new);
 
-        verticalSpacer_18 = new QSpacerItem(20, 80, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_18 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_18);
 
@@ -654,6 +672,41 @@ public:
         pushButton_openuri->setMinimumSize(QSize(228, 100));
 
         verticalLayout_8->addWidget(pushButton_openuri);
+
+        verticalSpacer_9 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+        verticalLayout_8->addItem(verticalSpacer_9);
+
+        label_incorrect_file_operation = new QLabel(page_open);
+        label_incorrect_file_operation->setObjectName(QString::fromUtf8("label_incorrect_file_operation"));
+        label_incorrect_file_operation->setMinimumSize(QSize(0, 30));
+        QPalette palette1;
+        palette1.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        QBrush brush2(QColor(0, 0, 0, 255));
+        brush2.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Active, QPalette::Text, brush2);
+        QBrush brush3(QColor(255, 0, 0, 128));
+        brush3.setStyle(Qt::SolidPattern);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Active, QPalette::PlaceholderText, brush3);
+#endif
+        palette1.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
+        palette1.setBrush(QPalette::Inactive, QPalette::Text, brush2);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Inactive, QPalette::PlaceholderText, brush3);
+#endif
+        palette1.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
+        palette1.setBrush(QPalette::Disabled, QPalette::Text, brush1);
+        QBrush brush4(QColor(0, 0, 0, 128));
+        brush4.setStyle(Qt::SolidPattern);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette1.setBrush(QPalette::Disabled, QPalette::PlaceholderText, brush4);
+#endif
+        label_incorrect_file_operation->setPalette(palette1);
+        label_incorrect_file_operation->setTextFormat(Qt::AutoText);
+        label_incorrect_file_operation->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_8->addWidget(label_incorrect_file_operation);
 
         verticalSpacer_20 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -705,6 +758,7 @@ public:
         pushButton_browse->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QString());
         label_logo->setText(QString());
+        label_8->setText(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
         label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
         groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
@@ -715,9 +769,10 @@ public:
         groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
         pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
         pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
-        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Back", nullptr));
+        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Logout", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
+        label_incorrect_file_operation->setText(QString());
     } // retranslateUi
 
 };

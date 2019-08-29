@@ -82,7 +82,7 @@ void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentRemove << m_docURI;
+	streamOut << (quint16)DocumentOpen << m_docURI;
 }
 
 URI DocumentOpenMessage::getDocumentURI() const
