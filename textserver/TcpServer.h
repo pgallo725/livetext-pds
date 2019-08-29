@@ -41,6 +41,7 @@ private:
 	QMap<URI, QSharedPointer<WorkSpace>> workspaces;	// TODO IGOR: can workspaces and workThreads be unified ? (remove commented code if done)
 	//QMap<QString, QSharedPointer<QThread>> workThreads;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
+	QMap<qintptr, QTcpSocket*> socketDismissed;
 	qint32 _userIdCounter;
 
 	QTimer time;
