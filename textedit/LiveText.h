@@ -30,7 +30,7 @@ private slots:
 	void returnToLanding();
 	void sendCursor(qint32 pos);
 	void sendAccountUpdate(QString name, QImage image);
-	void accountUpdated(qint32 userId);
+	void accountUpdated(User user);
 
 
 	//LIVETEXT

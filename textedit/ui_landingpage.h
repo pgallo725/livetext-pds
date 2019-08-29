@@ -84,6 +84,7 @@ public:
     QHBoxLayout *horizontalLayout_5;
     QLabel *label_logo;
     QSpacerItem *verticalSpacer_5;
+    QLabel *label_8;
     QLabel *label_7;
     QSpacerItem *verticalSpacer_21;
     QGroupBox *groupBox_5;
@@ -439,8 +440,23 @@ public:
 
         verticalLayout_14->addItem(verticalSpacer_5);
 
+        label_8 = new QLabel(page_2);
+        label_8->setObjectName(QString::fromUtf8("label_8"));
+        QFont font5;
+        font5.setPointSize(18);
+        font5.setBold(true);
+        font5.setWeight(75);
+        label_8->setFont(font5);
+        label_8->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_14->addWidget(label_8);
+
         label_7 = new QLabel(page_2);
         label_7->setObjectName(QString::fromUtf8("label_7"));
+        QFont font6;
+        font6.setBold(false);
+        font6.setWeight(50);
+        label_7->setFont(font6);
         label_7->setAlignment(Qt::AlignCenter);
 
         verticalLayout_14->addWidget(label_7);
@@ -546,12 +562,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font5;
-        font5.setFamily(QString::fromUtf8("Calibri"));
-        font5.setPointSize(14);
-        font5.setBold(false);
-        font5.setWeight(50);
-        groupBox_2->setFont(font5);
+        QFont font7;
+        font7.setFamily(QString::fromUtf8("Calibri"));
+        font7.setPointSize(14);
+        font7.setBold(false);
+        font7.setWeight(50);
+        groupBox_2->setFont(font7);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -573,10 +589,10 @@ public:
         pushButton_remove->setObjectName(QString::fromUtf8("pushButton_remove"));
         pushButton_remove->setEnabled(false);
         pushButton_remove->setMinimumSize(QSize(0, 30));
-        QFont font6;
-        font6.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font6.setPointSize(10);
-        pushButton_remove->setFont(font6);
+        QFont font8;
+        font8.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font8.setPointSize(10);
+        pushButton_remove->setFont(font8);
 
         horizontalLayout_4->addWidget(pushButton_remove);
 
@@ -590,12 +606,12 @@ public:
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font7;
-        font7.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font7.setPointSize(10);
-        font7.setBold(false);
-        font7.setWeight(50);
-        pushButton_open->setFont(font7);
+        QFont font9;
+        font9.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font9.setPointSize(10);
+        font9.setBold(false);
+        font9.setWeight(50);
+        pushButton_open->setFont(font9);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -711,7 +727,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
         tabWidget->setCurrentIndex(1);
 
 
@@ -742,6 +758,7 @@ public:
         pushButton_browse->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QString());
         label_logo->setText(QString());
+        label_8->setText(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
         label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
         groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));

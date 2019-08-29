@@ -45,7 +45,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::logout, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 
@@ -197,9 +197,9 @@ void LiveText::sendAccountUpdate(QString name, QImage image)
 	_client->sendAccountUpdate(p);
 }
 
-void LiveText::accountUpdated(qint32 userId)
+void LiveText::accountUpdated(User user)
 {
-	_user.setId(userId);
+	_user = user;
 	_textEdit->accountUpdateSuccessful();
 }
 

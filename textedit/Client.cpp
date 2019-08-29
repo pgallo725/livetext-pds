@@ -448,7 +448,8 @@ void Client::sendAccountUpdate(User userUpdate) {
 			recivedAccountUpdate->readFrom(in);
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-			emit personalAccountModified(accountconfirmed->getUserId());
+			userUpdate.setId(accountconfirmed->getUserId());
+			emit personalAccountModified(userUpdate);
 			return;
 		}
 		case AccountError: {
