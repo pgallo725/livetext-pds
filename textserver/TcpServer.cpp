@@ -20,6 +20,7 @@ TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
+	qRegisterMetaType<URI>("URI");
 
 	/* initialize random number generator with timestamp */
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -324,12 +325,16 @@ void TcpServer::logoutClient(QTcpSocket* clientSocket)
 /* Move a client from the workspace that he has exited back to the server */
 void TcpServer::receiveClient(QSharedPointer<Client> client)
 {
-	QTcpSocket* socket = new QTcpSocket;
+	QTcpSocket* socket = nullptr;
+	/*
 
 	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
 		qDebug() << socket->error();
 		return;
-	}
+	}*/
+
+	socket = socketDismissed.find(client->getSocketDescriptor()).value();
+	socketDismissed.remove(client->getSocketDescriptor());
 
 	clients.insert(socket, client);
 
@@ -370,7 +375,7 @@ void addToIndex(QSharedPointer<Document> doc)
 /* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
 WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	WorkSpace* w = new WorkSpace(document, QSharedPointer<TcpServer>(this));
+	WorkSpace* w = new WorkSpace(document);
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
 	//QThread* t = new QThread();
 
@@ -421,12 +426,9 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	/*disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
 	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);*/
 
-	/* make the new thead connect the socket in the workspace */
-	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);		
-	emit newSocket(static_cast<qint64>(author->socketDescriptor()));	
-	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);*/
-
 	clients.remove(author);		// remove the Client from the server map
+
+	socketDismissed.insert(client->getSocketDescriptor(), author);
 
 	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));

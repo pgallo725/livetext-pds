@@ -5,8 +5,8 @@
 #include "ServerException.h"
 
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server) 
-	: doc(d), server(server), messageHandler(this)
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
+	: doc(d), messageHandler(this)
 {
 	doc->load();	// Load the document contents
 
@@ -14,7 +14,7 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> serve
 	timer.start(SAVE_TIMEOUT);
 
 	// TODO IGOR: creare il thread già dentro lo shared pointer ? forse da problemi con la connect/movetothread, appena riesco a testare questa parte provo
-	QThread* t = new QThread();
+	QThread* t = new QThread(parent);
 	connect(t, &QThread::finished, t, &QThread::deleteLater);
 	this->moveToThread(t);
 	t->start();
@@ -78,8 +78,6 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 		qDebug() << socket->error();
 		return;
 	}
-
-	
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
@@ -213,11 +211,12 @@ void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
-	emit returnClient(std::move(client));		// Move the client back to the TcpServer
-
 	// Delete the client's socket in the current thread
+	disconnect(clientSocket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
-	clientSocket->deleteLater();
+	//clientSocket->deleteLater();
+
+	emit returnClient(std::move(client));		// Move the client back to the TcpServer
 
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
