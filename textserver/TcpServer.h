@@ -26,7 +26,7 @@
 #define TMP_USERS_FILENAME "users.tmp"
 
 Q_DECLARE_METATYPE(qintptr);
-
+Q_DECLARE_METATYPE(URI);
 
 class TcpServer : public QTcpServer
 {

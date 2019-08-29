@@ -20,7 +20,6 @@ class WorkSpace : public QObject
 private:
 
 	QSharedPointer<Document> doc;
-	QSharedPointer<TcpServer> server;
 	QSharedPointer<QThread> workThread;
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
@@ -29,7 +28,7 @@ private:
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, QSharedPointer<TcpServer> server);
+	WorkSpace(QSharedPointer<Document> d, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:

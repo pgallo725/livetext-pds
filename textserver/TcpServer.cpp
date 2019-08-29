@@ -20,6 +20,7 @@ TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
+	qRegisterMetaType<URI>("URI");
 
 	/* initialize random number generator with timestamp */
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -370,7 +371,7 @@ void addToIndex(QSharedPointer<Document> doc)
 /* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
 WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	WorkSpace* w = new WorkSpace(document, QSharedPointer<TcpServer>(this));
+	WorkSpace* w = new WorkSpace(document);
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
 	//QThread* t = new QThread();
 

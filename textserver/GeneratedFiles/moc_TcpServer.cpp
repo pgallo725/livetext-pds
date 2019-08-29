@@ -1,12 +1,11 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'TcpServer.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.13.0)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.12.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../TcpServer.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
@@ -14,7 +13,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'TcpServer.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.13.0. It"
+#error "This file was generated using the moc from 5.12.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -23,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TcpServer_t {
-    QByteArrayData data[37];
-    char stringdata0[449];
+    QByteArrayData data[38];
+    char stringdata0[462];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -69,7 +68,8 @@ QT_MOC_LITERAL(32, 392, 14), // "createDocument"
 QT_MOC_LITERAL(33, 407, 6), // "author"
 QT_MOC_LITERAL(34, 414, 7), // "docName"
 QT_MOC_LITERAL(35, 422, 12), // "openDocument"
-QT_MOC_LITERAL(36, 435, 13) // "receiveClient"
+QT_MOC_LITERAL(36, 435, 12), // "logoutClient"
+QT_MOC_LITERAL(37, 448, 13) // "receiveClient"
 
     },
     "TcpServer\0newSocket\0\0handle\0"
@@ -84,7 +84,7 @@ QT_MOC_LITERAL(36, 435, 13) // "receiveClient"
     "token\0createAccount\0User&\0newUser\0"
     "updateAccount\0updatedUser\0removeDocument\0"
     "docUri\0createDocument\0author\0docName\0"
-    "openDocument\0receiveClient"
+    "openDocument\0logoutClient\0receiveClient"
 };
 #undef QT_MOC_LITERAL
 
@@ -94,7 +94,7 @@ static const uint qt_meta_data_TcpServer[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      16,   14, // methods
+      17,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -102,24 +102,25 @@ static const uint qt_meta_data_TcpServer[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,   94,    2, 0x06 /* Public */,
-       4,    1,   97,    2, 0x06 /* Public */,
+       1,    1,   99,    2, 0x06 /* Public */,
+       4,    1,  102,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       7,    0,  100,    2, 0x0a /* Public */,
-       8,    0,  101,    2, 0x0a /* Public */,
-       9,    0,  102,    2, 0x0a /* Public */,
-      10,    0,  103,    2, 0x0a /* Public */,
-      11,    2,  104,    2, 0x0a /* Public */,
-      15,    1,  109,    2, 0x0a /* Public */,
-      17,    2,  112,    2, 0x0a /* Public */,
-      22,    2,  117,    2, 0x0a /* Public */,
-      25,    2,  122,    2, 0x0a /* Public */,
-      28,    2,  127,    2, 0x0a /* Public */,
-      30,    2,  132,    2, 0x0a /* Public */,
-      32,    2,  137,    2, 0x0a /* Public */,
-      35,    2,  142,    2, 0x0a /* Public */,
-      36,    1,  147,    2, 0x0a /* Public */,
+       7,    0,  105,    2, 0x0a /* Public */,
+       8,    0,  106,    2, 0x0a /* Public */,
+       9,    0,  107,    2, 0x0a /* Public */,
+      10,    0,  108,    2, 0x0a /* Public */,
+      11,    2,  109,    2, 0x0a /* Public */,
+      15,    1,  114,    2, 0x0a /* Public */,
+      17,    2,  117,    2, 0x0a /* Public */,
+      22,    2,  122,    2, 0x0a /* Public */,
+      25,    2,  127,    2, 0x0a /* Public */,
+      28,    2,  132,    2, 0x0a /* Public */,
+      30,    2,  137,    2, 0x0a /* Public */,
+      32,    2,  142,    2, 0x0a /* Public */,
+      35,    2,  147,    2, 0x0a /* Public */,
+      36,    1,  152,    2, 0x0a /* Public */,
+      37,    1,  155,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::LongLong,    3,
@@ -139,6 +140,7 @@ static const uint qt_meta_data_TcpServer[] = {
     0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 16,    6,   31,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   33,   34,
     0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 16,   23,   31,
+    QMetaType::Void, 0x80000000 | 19,   23,
     QMetaType::Void, 0x80000000 | 5,    6,
 
        0        // eod
@@ -173,12 +175,20 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 14: { MessageCapsule _r = _t->openDocument((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 15: _t->receiveClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
+        case 15: _t->logoutClient((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
+        case 16: _t->receiveClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
         switch (_id) {
         default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+        case 7:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
+            }
+            break;
         case 8:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
@@ -212,6 +222,8 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+            case 1:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
             }
             break;
         case 13:
@@ -222,6 +234,15 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             }
             break;
         case 14:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+            case 1:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
+            }
+            break;
+        case 15:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -277,13 +298,13 @@ int TcpServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 17;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 16)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 17;
     }
     return _id;
 }
@@ -291,14 +312,14 @@ int TcpServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 // SIGNAL 0
 void TcpServer::newSocket(qint64 _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 
 // SIGNAL 1
 void TcpServer::clientToWorkspace(QSharedPointer<Client> _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 QT_WARNING_POP
