@@ -6,8 +6,8 @@
 
 #include <QCoreApplication>
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
-	: doc(d), messageHandler(this)
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
+	: doc(d), messageHandler(this), users_mutex(m)
 {
 	doc->load();	// Load the document contents
 
@@ -190,10 +190,11 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 		return MessageFactory::AccountError("You are not logged in");
 
 	User* user = client->getUser();
+	QMutexLocker locker(&users_mutex);
 
 	user->setNickname(nickname);
 	user->setIcon(icon);
-	user->changePassword(password);
+	user->setPassword(password);
 
 	// Notify all other clients of the changes in this user's account
 	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(), nickname, icon), clientSocket);

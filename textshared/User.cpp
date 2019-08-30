@@ -89,7 +89,7 @@ void User::deleteIcon()
 	m_icon = QImage();
 }
 
-void User::changePassword(QString newPassword)
+void User::setPassword(QString newPassword)
 {
 	//TODO: decrypt
 	m_passwd = newPassword;

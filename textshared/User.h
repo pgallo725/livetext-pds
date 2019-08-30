@@ -4,7 +4,6 @@
 #include <Document.h>
 #include <QList>
 
-
 class User
 {
 	/* Operators for QDataStream serialization and deserialization */
@@ -20,7 +19,6 @@ private:
 	QString m_passwd;		// hashed
 	QImage m_icon;			// nullable, check with QImage::isNull()
 	QList<URI> m_documents;
-
 public:
 
 	User();	 // Use this to construct an empty user and populate the fields later
@@ -46,7 +44,7 @@ public:
 	void deleteNickname();
 	void setIcon(QImage newIcon);
 	void deleteIcon();	
-	void changePassword(QString newPassword);
+	void setPassword(QString newPassword);
 
 };
 

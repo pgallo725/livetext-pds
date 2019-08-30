@@ -172,6 +172,7 @@ void TcpServer::saveUsers()
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream usersDb(&file);
+		QMutexLocker locker(&users_mutex);
 
 		std::cout << "\nSaving users database... ";
 
@@ -317,7 +318,7 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 
 	user->setNickname(nickname);
 	user->setIcon(icon);
-	user->changePassword(password);
+	user->setPassword(password);
 
 	return MessageFactory::AccountConfirmed(*user);
 }
@@ -390,7 +391,7 @@ void addToIndex(QSharedPointer<Document> doc)
 /* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
 WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	WorkSpace* w = new WorkSpace(document);
+	WorkSpace* w = new WorkSpace(document, users_mutex);
 	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
 	//QThread* t = new QThread();
 
