@@ -6,6 +6,7 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
+#include <QMutexLocker>
 
 #include "User.h"
 #include "Client.h"
@@ -44,6 +45,8 @@ private:
 	QTimer time;
 
 	MessageHandler messageHandler;
+
+	QMutex users_mutex;
 
 	URI generateURI(QString authorName, QString docName) const;
 

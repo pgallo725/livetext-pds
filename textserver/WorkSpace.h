@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QMutexLocker>
 
 #include <Document.h>
 #include "Client.h"
@@ -24,10 +25,11 @@ private:
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
 	MessageHandler messageHandler;
+	QMutex& users_mutex;
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:
