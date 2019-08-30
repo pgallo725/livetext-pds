@@ -64,6 +64,9 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GeneratedFiles\moc_MessageHandler.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\moc_TcpServer.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

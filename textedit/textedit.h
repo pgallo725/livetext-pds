@@ -48,7 +48,7 @@ public slots:
 signals:
 	void closeDocument();
 	void newCursorPosition(qint32 position);
-	void accountUpdate(QString name, QImage image);
+	void accountUpdate(QString nickname, QImage image, QString password);
 	
 
 private slots:

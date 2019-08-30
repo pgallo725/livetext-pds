@@ -32,7 +32,7 @@ private slots:
 	//TEXTEDIT
 	void returnToLanding();
 	void sendCursor(qint32 pos);
-	void sendAccountUpdate(QString name, QImage image);
+	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void accountUpdated(User user);
 
 

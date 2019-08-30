@@ -206,15 +206,9 @@ void LiveText::sendCursor(qint32 pos)
 }
 
 //Account update
-void LiveText::sendAccountUpdate(QString name, QImage image)
+void LiveText::sendAccountUpdate(QString nickname, QImage image, QString password)
 {
-	//Create a copy of user in case of rollback
-	User p = _user;
-	p.setNickname(name);
-	p.setIcon(image);
-
-
-	_client->sendAccountUpdate(p);
+	_client->sendAccountUpdate(nickname, image, password);
 }
 
 void LiveText::accountUpdated(User user)

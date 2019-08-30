@@ -303,6 +303,7 @@ void LandingPage::incorrectOperation(QString msg)
 
 void LandingPage::documentDismissed()
 {
+
 	stopLoadingAnimation();
 }
 
@@ -379,7 +380,7 @@ void LandingPage::pushButtonBackClicked()
 
 void LandingPage::enablePushButtonOpen()
 {
-	if (ui->listWidget->currentItem()->text() != "<No files found>")
+	if (ui->listWidget->item(0)->text() != "<No files found>")
 	{
 		ui->pushButton_open->setEnabled(true);
 		ui->pushButton_remove->setEnabled(true);
@@ -410,7 +411,7 @@ void LandingPage::setupFileList(QList<URI> documents)
 		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
 
-
+	enablePushButtonOpen();
 }
 
 void LandingPage::closeAll()
