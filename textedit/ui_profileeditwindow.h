@@ -36,21 +36,19 @@ public:
     QSpacerItem *verticalSpacer_12;
     QHBoxLayout *horizontalLayout_11;
     QVBoxLayout *verticalLayout_10;
-    QSpacerItem *verticalSpacer_2;
+    QSpacerItem *verticalSpacer;
     QFormLayout *formLayout_2;
     QLabel *label_2;
     QLabel *label_username;
     QLabel *label_5;
     QLineEdit *lineEdit_editNick;
-    QLabel *label_6;
-    QLineEdit *lineEdit_password;
     QLabel *label_11;
     QLineEdit *lineEdit_editPsw;
     QLabel *label_4;
     QLineEdit *lineEdit_editPswConf;
     QSpacerItem *verticalSpacer_14;
     QVBoxLayout *verticalLayout;
-    QSpacerItem *verticalSpacer;
+    QSpacerItem *verticalSpacer_2;
     QHBoxLayout *horizontalLayout;
     QLabel *label_UsrIcon;
     QSpacerItem *verticalSpacer_3;
@@ -70,7 +68,7 @@ public:
     {
         if (ProfileEditWindow->objectName().isEmpty())
             ProfileEditWindow->setObjectName(QString::fromUtf8("ProfileEditWindow"));
-        ProfileEditWindow->resize(807, 460);
+        ProfileEditWindow->resize(1057, 633);
         gridLayout_2 = new QGridLayout(ProfileEditWindow);
         gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
         groupBox = new QGroupBox(ProfileEditWindow);
@@ -98,7 +96,7 @@ public:
 
         verticalLayout_6->addLayout(horizontalLayout_10);
 
-        verticalSpacer_12 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_12 = new QSpacerItem(20, 50, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_6->addItem(verticalSpacer_12);
 
@@ -108,9 +106,9 @@ public:
         horizontalLayout_11->setContentsMargins(40, -1, 40, -1);
         verticalLayout_10 = new QVBoxLayout();
         verticalLayout_10->setObjectName(QString::fromUtf8("verticalLayout_10"));
-        verticalSpacer_2 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer = new QSpacerItem(20, 60, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-        verticalLayout_10->addItem(verticalSpacer_2);
+        verticalLayout_10->addItem(verticalSpacer);
 
         formLayout_2 = new QFormLayout();
         formLayout_2->setObjectName(QString::fromUtf8("formLayout_2"));
@@ -153,24 +151,10 @@ public:
 
         formLayout_2->setWidget(1, QFormLayout::FieldRole, lineEdit_editNick);
 
-        label_6 = new QLabel(groupBox);
-        label_6->setObjectName(QString::fromUtf8("label_6"));
-
-        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_6);
-
-        lineEdit_password = new QLineEdit(groupBox);
-        lineEdit_password->setObjectName(QString::fromUtf8("lineEdit_password"));
-        sizePolicy.setHeightForWidth(lineEdit_password->sizePolicy().hasHeightForWidth());
-        lineEdit_password->setSizePolicy(sizePolicy);
-        lineEdit_password->setMaximumSize(QSize(320, 16777215));
-        lineEdit_password->setEchoMode(QLineEdit::Password);
-
-        formLayout_2->setWidget(2, QFormLayout::FieldRole, lineEdit_password);
-
         label_11 = new QLabel(groupBox);
         label_11->setObjectName(QString::fromUtf8("label_11"));
 
-        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_11);
+        formLayout_2->setWidget(2, QFormLayout::LabelRole, label_11);
 
         lineEdit_editPsw = new QLineEdit(groupBox);
         lineEdit_editPsw->setObjectName(QString::fromUtf8("lineEdit_editPsw"));
@@ -179,24 +163,24 @@ public:
         lineEdit_editPsw->setMaximumSize(QSize(320, 16777215));
         lineEdit_editPsw->setEchoMode(QLineEdit::Password);
 
-        formLayout_2->setWidget(3, QFormLayout::FieldRole, lineEdit_editPsw);
+        formLayout_2->setWidget(2, QFormLayout::FieldRole, lineEdit_editPsw);
 
         label_4 = new QLabel(groupBox);
         label_4->setObjectName(QString::fromUtf8("label_4"));
 
-        formLayout_2->setWidget(4, QFormLayout::LabelRole, label_4);
+        formLayout_2->setWidget(3, QFormLayout::LabelRole, label_4);
 
         lineEdit_editPswConf = new QLineEdit(groupBox);
         lineEdit_editPswConf->setObjectName(QString::fromUtf8("lineEdit_editPswConf"));
         lineEdit_editPswConf->setMaximumSize(QSize(320, 16777215));
         lineEdit_editPswConf->setEchoMode(QLineEdit::Password);
 
-        formLayout_2->setWidget(4, QFormLayout::FieldRole, lineEdit_editPswConf);
+        formLayout_2->setWidget(3, QFormLayout::FieldRole, lineEdit_editPswConf);
 
 
         verticalLayout_10->addLayout(formLayout_2);
 
-        verticalSpacer_14 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_14 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_10->addItem(verticalSpacer_14);
 
@@ -207,9 +191,9 @@ public:
         verticalLayout->setSpacing(6);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(0, -1, -1, -1);
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_2 = new QSpacerItem(20, 50, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-        verticalLayout->addItem(verticalSpacer);
+        verticalLayout->addItem(verticalSpacer_2);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
@@ -327,8 +311,6 @@ public:
         label_username->setText(QString());
         label_5->setText(QCoreApplication::translate("ProfileEditWindow", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QCoreApplication::translate("ProfileEditWindow", "Current\n"
-"password", nullptr));
         label_11->setText(QCoreApplication::translate("ProfileEditWindow", "New\n"
 "password", nullptr));
         label_4->setText(QCoreApplication::translate("ProfileEditWindow", "Confirm\n"

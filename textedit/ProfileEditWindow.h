@@ -26,7 +26,7 @@ private slots:
 	void showUserIcon(QString path);
 
 signals:
-	void accountUpdate(QString nickname, QImage icon);
+	void accountUpdate(QString name, QImage image, QString password);
 
 private:
 	Ui::ProfileEditWindow* ui;

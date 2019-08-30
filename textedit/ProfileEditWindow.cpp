@@ -110,27 +110,21 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 {
 
 	QString nick = ui->lineEdit_editNick->text();
-	QString oldPassword = ui->lineEdit_password->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
 	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
-	/*
-	//Controllo se i dati sono stati inseriti correttamente
-	if (oldPassword.isEmpty() || newPassword.isEmpty() || newPasswordConf.isEmpty()) {
-		ui->label_incorrect_edit->setText("Please fill all the required fields");
-		return;
-	}
 
-	
 	//Controllo sulla corrispondenza password
-	if (newPassword != newPasswordConf) {
-		ui->label_incorrect_edit->setText("Passwords does not match");
-		return;
+	if (!newPassword.isEmpty() || !newPasswordConf.isEmpty()) {
+		if (newPassword != newPasswordConf) {
+			ui->label_incorrect_edit->setText("Passwords does not match");
+			return;
+		}
 	}
-	*/
 
-	emit(accountUpdate(nick, userIcon));
+
+	emit(accountUpdate(nick, userIcon, newPassword));
 }
 
 
@@ -142,8 +136,8 @@ void ProfileEditWindow::centerAndResize() {
 	int height = availableSize.height();
 
 	//Proporzionamento
-	width *= 0.5;
-	height *= 0.6;
+	width *= 0.4;
+	height *= 0.5;
 
 	//Le dimensioni vengono fissate per rendere la finestra non resizable
 	setMaximumHeight(height);
