@@ -32,6 +32,8 @@ public:
 	void accountUpdateSuccessful(); //Account updated
 
 	
+	//Document
+	void setDocumentURI(QString uri);
 	bool load(const QString& f);
 
 
@@ -49,7 +51,7 @@ signals:
 	void closeDocument();
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString nickname, QImage image, QString password);
-	
+	void deleteChar(int position);
 
 private slots:
 	void fileOpen();
@@ -110,6 +112,9 @@ private:
 
 	//Edit window
 	ProfileEditWindow* ew;
+
+	//Document
+	QString URI;
 
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;

@@ -468,6 +468,11 @@ void TextEdit::accountUpdateFailed(QString error)
 	ew->updateFailed(error);
 }
 
+void TextEdit::setDocumentURI(QString uri)
+{
+	URI = uri;
+}
+
 bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
@@ -531,7 +536,7 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	//Choose a random color from Qt colors
-	QColor color = (Qt::GlobalColor) (userId % 18 + 2);
+	QColor color = (Qt::GlobalColor) (userId % 18 + 5);
 	QPixmap userPic;
 
 	userPic.convertFromImage(image);
@@ -653,13 +658,12 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	statusBar()->showMessage(tr("URI copied into clipboards"));
-
 	QClipboard* clipboard = QApplication::clipboard();
 
-	QString uri = "URI DI PROVA";
+	QString uri = URI;
 
 	clipboard->setText(uri);
+	statusBar()->showMessage(tr("URI copied into clipboards"));
 
 	ShareUriWindow* su = new ShareUriWindow(uri);
 	//Mostra la finestra di mw formata

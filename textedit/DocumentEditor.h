@@ -15,6 +15,8 @@ private:
 	Document _document;
 	TextEdit* _textedit;
 
+private slots:
+	void deleteChar(int position);
 };
 
 

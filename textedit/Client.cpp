@@ -400,7 +400,12 @@ void Client::sendChar(Symbol character) {
 
 	MessageCapsule sendChar = MessageFactory::CharInsert(character);
 	sendChar->sendTo(socket);
+}
 
+void Client::removeChar(QVector<int> position)
+{
+	MessageCapsule removeChar = MessageFactory::CharDelete(position);
+	removeChar->sendTo(socket);
 }
 
 void Client::reciveChar(QDataStream& in) {
