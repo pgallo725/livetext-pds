@@ -56,7 +56,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
 	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 
-	//TEXTEDIT - CLIENT
+
+	//DOCUMENTEDITOR - CLIENT
+	//connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 
 }
 
@@ -166,6 +168,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	if (!_user.getDocuments().contains(doc.getURI())) {
 		_user.addDocument(doc.getURI());
 	}
+
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();

@@ -1074,7 +1074,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
-			//TODO: Remove characters
+			emit deleteChar(position);
 		}
 	}
 

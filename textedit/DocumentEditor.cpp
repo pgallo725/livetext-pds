@@ -5,16 +5,17 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, QObject* parent) 
 	_textedit->setDocumentURI(doc.getURI().toString());
 
 	//CONNECT
-	connect(_textedit, &TextEdit::deleteChar, this, &DocumentEditor::deleteChar);
+	connect(_textedit, &TextEdit::deleteChar, this, &DocumentEditor::deleteCharAtIndex);
 
 }
 
 void DocumentEditor::openDocument()
 {
-
 }
 
-void DocumentEditor::deleteChar(int position)
-{
 
+void DocumentEditor::deleteCharAtIndex(int position)
+{
+	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
+	emit deleteChar(fractionalPosition);
 }

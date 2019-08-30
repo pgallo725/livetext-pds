@@ -7,6 +7,8 @@
 
 class DocumentEditor : public QObject
 {
+Q_OBJECT
+
 public:
 	DocumentEditor(Document doc, TextEdit* editor, QObject* parent = nullptr);
 	void openDocument();
@@ -16,7 +18,10 @@ private:
 	TextEdit* _textedit;
 
 private slots:
-	void deleteChar(int position);
+	void deleteCharAtIndex(int position);
+
+signals:
+	void deleteChar(QVector<qint32> fPos);
 };
 
 
