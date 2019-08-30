@@ -23,7 +23,6 @@ private:
 	QSharedPointer<QThread> workThread;
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
 	QTimer timer;
-
 	MessageHandler messageHandler;
 
 public:

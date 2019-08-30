@@ -176,7 +176,7 @@ void Document::save()
 		if (oldFile.exists())
 		{
 			if (oldFile.remove())
-				file.rename(uri.toString());
+				file.rename(DOCUMENTS_DIRNAME + uri.toString());
 			else
 			{
 				// Remove temporary file if overwriting of the old file failed
@@ -185,7 +185,7 @@ void Document::save()
 				//throw FileOverwriteException(info.absoluteFilePath().toStdString());
 			}
 		}
-		else file.rename(uri.toString());
+		else file.rename(DOCUMENTS_DIRNAME + uri.toString());
 
 		file.close();
 

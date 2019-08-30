@@ -224,6 +224,8 @@ void TcpServer::newClientConnection()
 	/* connect slots to be able to read messages */
 	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+
+	client->setSocketPtr(socket);
 }
 
 /* handle client disconnection and release resources */
@@ -324,8 +326,9 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 /* Release resources owned by a client and delete it */
 void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
-	clients.remove(clientSocket);					// remove this client from the map 
-	clientSocket->close();							// close and destroy the socket 
+	clients.find(clientSocket).value()->logout();
+	//clients.remove(clientSocket);					// remove this client from the map 
+	//clientSocket->close();							// close and destroy the socket 
 }
 
 /* Move a client from the workspace that he has exited back to the server */
@@ -339,14 +342,20 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 		return;
 	}*/
 
-	socket = socketDismissed.find(client->getSocketDescriptor()).value();
-	socketDismissed.remove(client->getSocketDescriptor());
+	socket = client->getSocketPtr();
+	//socket->moveToThread(this->thread());
+	socket->setParent(this);
+
+	//socket = socketDismissed.find(client->getSocketDescriptor()).value();
+	//socketDismissed.remove(client->getSocketDescriptor());
 
 	clients.insert(socket, client);
 
 	/* reconnect socket signals to slots in order to read and handle messages */
 	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+
+	socket->readAll();
 }
 
 
@@ -428,12 +437,16 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not receives more messages from client */
-	/*disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
-	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);*/
+	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
+	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+
+	QTcpSocket* s = client->getSocketPtr();
+	s->setParent(nullptr);
+	s->moveToThread(w->thread());
 
 	clients.remove(author);		// remove the Client from the server map
 
-	socketDismissed.insert(client->getSocketDescriptor(), author);
+	//socketDismissed.insert(client->getSocketDescriptor(), author);
 
 	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));
@@ -479,6 +492,10 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
 	emit newSocket(static_cast<qint64>(author->socketDescriptor()));
 	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);*/
+
+	QTcpSocket* s = client->getSocketPtr();
+	s->setParent(nullptr);
+	s->moveToThread(w->thread());
 
 	clients.remove(clientSocket);		// remove the Client from the server map
 

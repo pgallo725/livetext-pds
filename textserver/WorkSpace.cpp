@@ -4,6 +4,7 @@
 #include <MessageFactory.h>
 #include "ServerException.h"
 
+#include <QCoreApplication>
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this)
@@ -72,15 +73,22 @@ WorkSpace::~WorkSpace()
 
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
-	QTcpSocket* socket = new QTcpSocket;
+	//QTcpSocket* socket = new QTcpSocket;
 
+	/*
 	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
 		qDebug() << socket->error();
 		return;
-	}
+	}*/
+
+	QTcpSocket* socket = client->getSocketPtr();
+
+	socket->setParent(this);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+
+	socket->readAll();
 
 	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
 
@@ -209,6 +217,10 @@ void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 	disconnect(clientSocket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
 	//clientSocket->deleteLater();
+
+	QTcpSocket* s = client->getSocketPtr();
+	s->setParent(nullptr);
+	s->moveToThread(QCoreApplication::instance()->thread());
 
 	emit returnClient(std::move(client));		// Move the client back to the TcpServer
 

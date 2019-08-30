@@ -8,7 +8,7 @@ const QString Client::nonceCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWX
 
 
 Client::Client(qintptr s):
-	socket(s), activeUser(nullptr), logged(false)
+	socket(s), activeUser(nullptr), logged(false), socketPtr(nullptr)
 {
 }
 
@@ -25,6 +25,16 @@ int Client::getUserId()
 qintptr Client::getSocketDescriptor()
 {
 	return socket;
+}
+
+void Client::setSocketPtr(QTcpSocket* s)
+{
+	socketPtr = s;
+}
+
+QTcpSocket* Client::getSocketPtr()
+{
+	return socketPtr;
 }
 
 User* Client::getUser()

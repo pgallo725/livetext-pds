@@ -1,7 +1,7 @@
 #pragma once
 
 #include "User.h"
-
+#include <QTcpSocket>	
 
 class WorkSpace;	// forward declaration
 
@@ -11,6 +11,7 @@ class Client
 private:
 
 	qintptr socket;
+	QTcpSocket* socketPtr;
 	User* activeUser;
 	bool logged;
 
@@ -34,5 +35,9 @@ public:
 	int getUserId();
 	QString getUsername();
 	qintptr getSocketDescriptor();
+	QTcpSocket* getSocketPtr();
+
+	/* setters */
+	void setSocketPtr(QTcpSocket* s);
 };
 
