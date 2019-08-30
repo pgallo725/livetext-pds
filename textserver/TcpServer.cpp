@@ -3,14 +3,13 @@
 #include <iostream>
 
 #include <QFile>
-#include <QDataStream>
 #include <QFileInfo>
+#include <QDataStream>
 #include <QtNetwork>
 #include <QHostAddress>
-#include <QImage>
 #include <QDateTime>
-#include <QCryptographicHash>
 #include <QRandomGenerator>
+#include <QMutexLocker>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
@@ -20,7 +19,7 @@
 #define TMP_USERS_FILENAME "users.tmp"
 
 
-/* Costructor */
+/* Server costructor */
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
@@ -73,7 +72,7 @@ TcpServer::~TcpServer()
 	qDebug() << "Server down";
 }
 
-/* load clients and documents */
+/* Load users and documents */
 void TcpServer::initialize()
 {
 	// Open the file and read the users database
@@ -137,7 +136,7 @@ void TcpServer::initialize()
 
 	// Setup timer for autosave
 	time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
-	time.start(SAVE_TIMEOUT);
+	time.start(USERS_SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
 }
@@ -151,7 +150,7 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 	// Initialize the random number generator with a sequence of characters composed by
 	// author username + document name, so that any user is required to have documents with unique names
 	std::string seedStr = str.toStdString();
-	std::seed_seq seed = std::seed_seq(seedStr.begin(), seedStr.end());
+	std::seed_seq seed(seedStr.begin(), seedStr.end());
 	QRandomGenerator randomizer(seed);
 
 	for (int i = 0; i < 12; ++i)	// add a 12-character long random sequence to the document URI to make it unique
@@ -164,7 +163,7 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 	return URI(str);
 }
 
-/* save on users on persistent storage */
+/* Save users list on persistent storage */
 void TcpServer::saveUsers()
 {
 	// Create the new users database file and write the data to it
@@ -172,7 +171,10 @@ void TcpServer::saveUsers()
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream usersDb(&file);
-		QMutexLocker locker(&users_mutex);
+
+		/* Serialization of users database must be done in mutual exclusion with
+		any other AccountUpdate operations that workspace threads might be performing */
+		QMutexLocker locker(&users_mutex);		
 
 		std::cout << "\nSaving users database... ";
 
@@ -205,7 +207,7 @@ void TcpServer::saveUsers()
 }
 
 
-/* handle a new connection from a client */
+/* Handle a new connection from a client */
 void TcpServer::newClientConnection()
 {
 	/* need to grab the socket - socket is created as a child of server */
@@ -219,17 +221,15 @@ void TcpServer::newClientConnection()
 
 	qDebug() << " - new connection from a client";
 
-	QSharedPointer<Client> client(new Client(socket->socketDescriptor()));
+	QSharedPointer<Client> client(new Client(socket));
 	clients.insert(socket, client);
 
 	/* connect slots to be able to read messages */
 	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
-
-	client->setSocketPtr(socket);
 }
 
-/* handle client disconnection and release resources */
+/* Handle client disconnection and release resources */
 void TcpServer::clientDisconnection()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
@@ -282,7 +282,7 @@ MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QString tok
 	}
 }
 
-/* Create a new User */
+/* Create a new User and register it on the server */
 MessageCapsule TcpServer::createAccount(QTcpSocket* socket, QString username, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = clients.find(socket).value();
@@ -324,31 +324,18 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 }
 
 
-/* Release resources owned by a client and delete it */
+/* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
 	clients.find(clientSocket).value()->logout();
-	//clients.remove(clientSocket);					// remove this client from the map 
-	//clientSocket->close();							// close and destroy the socket 
 }
 
 /* Move a client from the workspace that he has exited back to the server */
 void TcpServer::receiveClient(QSharedPointer<Client> client)
 {
-	QTcpSocket* socket = nullptr;
-	/*
-
-	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
-		qDebug() << socket->error();
-		return;
-	}*/
-
-	socket = client->getSocketPtr();
-	//socket->moveToThread(this->thread());
+	/* get the client's socket and bring it back to the server thread */
+	QTcpSocket* socket = client->getSocket();
 	socket->setParent(this);
-
-	//socket = socketDismissed.find(client->getSocketDescriptor()).value();
-	//socketDismissed.remove(client->getSocketDescriptor());
 
 	clients.insert(socket, client);
 
@@ -388,20 +375,14 @@ void addToIndex(QSharedPointer<Document> doc)
 }
 
 
-/* create a new worskpace, a new thread and bind the workspace's affinity the the thread*/
+/* Create a new worskpace for a document */
 WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
+	// TODO IGOR: creare il workspace direttamente dentro uno QSharedPointer ?
 	WorkSpace* w = new WorkSpace(document, users_mutex);
-	//QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, QSharedPointer<TcpServer>(this)));
-	//QThread* t = new QThread();
 
 	documents.insert(document->getURI(), document);
 	workspaces.insert(document->getURI(), QSharedPointer<WorkSpace>(w));
-	//workThreads.insert(document->getURI(), QSharedPointer<QThread>(t));
-
-	/* change affinity of this workspace with a new thread */
-	//w->moveToThread(t);
-	//t->start();
 
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
 	connect(w, &WorkSpace::returnClient, this, &TcpServer::receiveClient);
@@ -420,7 +401,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 
 	URI docURI = generateURI(client->getUsername(), docName);
 
-	/* check if documents is already used */
+	/* check if the document URI is unique */
 	if (documents.contains(docURI))
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
@@ -441,14 +422,14 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
 	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
-	QTcpSocket* s = client->getSocketPtr();
+	/* move the socket's affinity to the workspace thread */
+	QTcpSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(w->thread());
 
 	clients.remove(author);		// remove the Client from the server map
 
-	//socketDismissed.insert(client->getSocketDescriptor(), author);
-
+	/* move the client object from the server to the workspace thread */
 	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));
 	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
@@ -489,22 +470,17 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 	disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
-	/* make the new thead connect the socket in the workspace */
-	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);
-	emit newSocket(static_cast<qint64>(author->socketDescriptor()));
-	disconnect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);*/
-
-	QTcpSocket* s = client->getSocketPtr();
+	/* move the socket's affinity to the workspace thread */
+	QTcpSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(w->thread());
 
 	clients.remove(clientSocket);		// remove the Client from the server map
 
+	/* move the client object from the server to the workspace thread */
 	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
 	emit clientToWorkspace(client);
 	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
-
-	//clientSocket.deleteLater();		// TODO: delete socket ??
 
 	return MessageCapsule();
 }
@@ -525,24 +501,13 @@ MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, URI docUri)
 }
 
 
-/* release all resource owned by workspace, delete it and its thread */
+/* Release all resources owned by workspace and delete it */
 void TcpServer::deleteWorkspace(URI document)
 {
 	WorkSpace* w = workspaces.find(document).value().get();
-	//QThread* t = workThreads.find(document).value().get();
-
-	/* they throw an exception ??? why??? */
-	//disconnect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
-	//disconnect(w, &WorkSpace::deleteClient, this, &TcpServer::deleteClient);
 
 	/* delete workspace and remove it from the map */
 	workspaces.remove(document);	
-
-	/* stop the thread, wait for exit, delete thread and remove it from the map */
-	//workThreads.find(document).value()->quit();
-	//workThreads.find(document).value()->wait();
-	//workThreads.remove(document);
-
 	qDebug() << "workspace (" << document.toString() << ") closed";
 }
 
@@ -550,7 +515,7 @@ void TcpServer::deleteWorkspace(URI document)
 /****************************** MESSAGES METHODS ******************************/
 
 
-/* read the message from the socket and create the correct type message for the server */
+/* Read the message from the socket and create the correct type message for the handler */
 void TcpServer::readMessage()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
@@ -575,23 +540,3 @@ void TcpServer::readMessage()
 	}
 }
 
-
-
-/****************************** SERVER METHODS ******************************/
-
-
-/* allow to a secondary thread to steal a QSharedPointer from the server */
-/*QSharedPointer<Client> TcpServer::moveClient(qintptr socketDescriptor)
-{
-	QSharedPointer<Client> c;
-
-	for (QTcpSocket* it : clients.keys()) {
-		if (clients.find(it).value()->getSocketDescriptor() == socketDescriptor) {
-			c = std::move(clients.find(it).value());
-			clients.remove(it);
-			return c;
-		}
-	}
-
-	return QSharedPointer<Client>();
-}*/

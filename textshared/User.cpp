@@ -15,7 +15,7 @@ User::User(QString username, int userId, QString nickname, QString passwd, QImag
 
 User::~User()
 {
-	//NOTHIG TO DO
+	// NOTHING
 }
 
 QString User::getUsername()
@@ -91,7 +91,6 @@ void User::deleteIcon()
 
 void User::setPassword(QString newPassword)
 {
-	//TODO: decrypt
 	m_passwd = newPassword;
 }
 

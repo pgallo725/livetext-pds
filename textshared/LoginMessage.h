@@ -4,7 +4,6 @@
 #include "User.h"
 
 
-
 class LoginRequestMessage : public Message
 {
 	friend MessageFactory;
@@ -38,6 +37,7 @@ class LoginChallengeMessage : public Message
 
 private:
 
+	// TODO IGOR: add m_salt member to enable password hashing
 	QString m_nonce;
 
 protected:

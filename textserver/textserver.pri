@@ -6,19 +6,16 @@
 # Remove it when you are finished editing this file.
 
 
-HEADERS += ./TcpServer.h \
-	./ServerException.h \
-	./WorkSpace.h \
-	./Client.h \
+HEADERS += ./TcpServer.h 	\
+	./ServerException.h 	\
+	./WorkSpace.h 			\
+	./Client.h 				\
 	./MessageHandler.h
 	
 	
-
-	
-SOURCES += ./main.cpp \
-	./TcpServer.cpp \
-	./ServerException.cpp \
-	./WorkSpace.cpp \
-	./Client.cpp \
+SOURCES += ./main.cpp 		\
+	./TcpServer.cpp 		\
+	./ServerException.cpp 	\
+	./WorkSpace.cpp 		\
+	./Client.cpp 			\
 	./MessageHandler.cpp
-	

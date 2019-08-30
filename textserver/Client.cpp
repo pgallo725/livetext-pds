@@ -7,14 +7,14 @@
 const QString Client::nonceCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 
 
-Client::Client(qintptr s):
-	socket(s), activeUser(nullptr), logged(false), socketPtr(nullptr)
+Client::Client(QTcpSocket* s):
+	socket(s), activeUser(nullptr), logged(false)
 {
 }
 
 Client::~Client()
 {
-	// NOTHING TO DO, activeUser is owned by TcpServer and therefore it does NOT need to be destroyed
+	// NOTHING, activeUser is owned by TcpServer and therefore it does NOT need to be destroyed
 }
 
 int Client::getUserId()
@@ -24,17 +24,12 @@ int Client::getUserId()
 
 qintptr Client::getSocketDescriptor()
 {
+	return socket->socketDescriptor();
+}
+
+QTcpSocket* Client::getSocket()
+{
 	return socket;
-}
-
-void Client::setSocketPtr(QTcpSocket* s)
-{
-	socketPtr = s;
-}
-
-QTcpSocket* Client::getSocketPtr()
-{
-	return socketPtr;
 }
 
 User* Client::getUser()

@@ -4,7 +4,6 @@
 #include "Symbol.h"
 
 
-
 class URI
 {
 	/* Operators for QDataStream serialization and deserialization */

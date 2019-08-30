@@ -1,10 +1,10 @@
 #include "WorkSpace.h"
 
-#include "TcpServer.h"
+#include <QCoreApplication>
+
 #include <MessageFactory.h>
 #include "ServerException.h"
 
-#include <QCoreApplication>
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
 	: doc(d), messageHandler(this), users_mutex(m)
@@ -12,9 +12,10 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
 	doc->load();	// Load the document contents
 
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
-	timer.start(SAVE_TIMEOUT);
+	timer.start(DOCUMENT_SAVE_TIMEOUT);
 
-	// TODO IGOR: creare il thread già dentro lo shared pointer ? forse da problemi con la connect/movetothread, appena riesco a testare questa parte provo
+	// TODO IGOR: creare il thread già dentro lo shared pointer ? 
+	// forse da problemi con la connect/movetothread, appena riesco a testare questa parte provo
 	QThread* t = new QThread(parent);
 	connect(t, &QThread::finished, t, &QThread::deleteLater);
 	this->moveToThread(t);
@@ -33,56 +34,10 @@ WorkSpace::~WorkSpace()
 }
 
 
-/*void WorkSpace::newSocket(qint64 handle)
-{
-	QTcpSocket* socket = new QTcpSocket;
-	QSharedPointer<Client> c;
-
-	if (!socket->setSocketDescriptor(handle)) {
-		qDebug() << socket->error();
-		return;
-	}
-	
-	if (!(c = server->moveClient(handle))) {
-		qDebug() << "Client not found";
-		//TODO: how to handle? throw ClientNotFoundException in moveClient
-		return;
-	}
-
-	// TODO IGOR: controllare l'ordine delle operazioni, la connect va fatta prima ?
-	// inoltre l'if nel ciclo sarebbe evitabile se lo si fa prima di editors.insert(socket), fattibile ?
-	editors.insert(socket, c);
-	dispatchMessage(MessageFactory::PresenceAdd(c->getUserId(),			// Send to other clients this new presence
-		c->getUser()->getNickname(), c->getUser()->getIcon()), socket);
-
-	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
-	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
-
-	// Send to the new user all the Presence messages of other editors in the workspace
-	for (auto i = editors.begin(); i != editors.end(); ++i)
-	{
-		QTcpSocket* otherSocket = i.key();
-
-		if (otherSocket != socket)
-		{
-			User* editor = i.value()->getUser();
-			MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
-		}
-	}
-}*/
-
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
-	//QTcpSocket* socket = new QTcpSocket;
-
-	/*
-	if (!socket->setSocketDescriptor(client->getSocketDescriptor())) {
-		qDebug() << socket->error();
-		return;
-	}*/
-
-	QTcpSocket* socket = client->getSocketPtr();
-
+	/* get the active socket from the Client object */
+	QTcpSocket* socket = client->getSocket();
 	socket->setParent(this);
 
 	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
@@ -190,7 +145,7 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 		return MessageFactory::AccountError("You are not logged in");
 
 	User* user = client->getUser();
-	QMutexLocker locker(&users_mutex);
+	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
 
 	user->setNickname(nickname);
 	user->setIcon(icon);
@@ -217,9 +172,9 @@ void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 	// Delete the client's socket in the current thread
 	disconnect(clientSocket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
-	//clientSocket->deleteLater();
 
-	QTcpSocket* s = client->getSocketPtr();
+	// Move the socket object back to the main server thread
+	QTcpSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(QCoreApplication::instance()->thread());
 

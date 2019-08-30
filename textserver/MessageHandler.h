@@ -5,7 +5,7 @@
 
 #include <Message.h>
 #include <User.h>
-#include "Document.h"
+#include <Document.h>
 
 
 class WorkSpace;

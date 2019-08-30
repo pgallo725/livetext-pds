@@ -3,15 +3,13 @@
 #include "User.h"
 #include <QTcpSocket>	
 
-class WorkSpace;	// forward declaration
 
 class Client 
 {
 
 private:
 
-	qintptr socket;
-	QTcpSocket* socketPtr;
+	QTcpSocket* socket;
 	User* activeUser;
 	bool logged;
 
@@ -20,7 +18,7 @@ private:
 
 public:
 
-	Client(qintptr s);
+	Client(QTcpSocket* s);
 	~Client();
 
 	void login(User* user);
@@ -35,9 +33,7 @@ public:
 	int getUserId();
 	QString getUsername();
 	qintptr getSocketDescriptor();
-	QTcpSocket* getSocketPtr();
+	QTcpSocket* getSocket();
 
-	/* setters */
-	void setSocketPtr(QTcpSocket* s);
 };
 
