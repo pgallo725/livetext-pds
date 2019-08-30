@@ -29,6 +29,7 @@
 #include <QRectF>
 #include <QAbstractTextDocumentLayout>
 #include <QToolButton>
+#include <QDateTime>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -535,8 +536,13 @@ void TextEdit::fileNew(QString name)
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
+	// Initialize random sequence
+	qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
+
+	int randomNumber = 7 + (qrand() % 11);
+
 	//Choose a random color from Qt colors
-	QColor color = (Qt::GlobalColor) (userId % 18 + 5);
+	QColor color = (Qt::GlobalColor) (randomNumber);
 	QPixmap userPic;
 
 	userPic.convertFromImage(image);
