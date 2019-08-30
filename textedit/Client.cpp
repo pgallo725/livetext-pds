@@ -209,9 +209,7 @@ void Client::Register() {
 	MessageCapsule incomingMessage;
 	// Link the stream to the socke and send the byte
 
-	User* user = new User(username,-1,nickname,password,image);
-
-	MessageCapsule accountCreate = MessageFactory::AccountCreate(*user);
+	MessageCapsule accountCreate = MessageFactory::AccountCreate(username, nickname, image, password);
 	accountCreate->sendTo(socket);
 
 	//wait the response from the server
@@ -227,8 +225,7 @@ void Client::Register() {
 	switch (typeOfMessage) {
 	case AccountConfirmed: {
 		AccountConfirmedMessage* accountConfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
-		user->setId(accountConfirmed->getUserId());
-		emit registrationCompleted(*user);
+		emit registrationCompleted(accountConfirmed->getUserObj());
 		return;
 	}
 	case AccountError: {
@@ -338,7 +335,7 @@ void Client::createDocument(QString name) {
 }
 
 void Client::deleteDocument(URI URI) {
-	
+
 	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
@@ -424,13 +421,13 @@ void Client::deleteChar(QDataStream& in) {
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
-void Client::sendAccountUpdate(User userUpdate) {
+void Client::sendAccountUpdate(QString nickname, QImage image, QString password) {
 	
 	qint16 typeOfMessage;
 	QDataStream in(socket);
 	
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(userUpdate);
+	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, password);
 	accountUpdate->sendTo(socket);
 
 	while (true) {
@@ -448,8 +445,7 @@ void Client::sendAccountUpdate(User userUpdate) {
 			recivedAccountUpdate->readFrom(in);
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-			userUpdate.setId(accountconfirmed->getUserId());
-			emit personalAccountModified(userUpdate);
+			emit personalAccountModified(accountconfirmed->getUserObj());
 			return;
 		}
 		case AccountError: {

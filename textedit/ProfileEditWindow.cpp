@@ -48,6 +48,8 @@ ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(pare
 	//Set username
 	ui->label_username->setText(user->getUsername());
 	ui->lineEdit_editNick->setText(user->getNickname());
+	ui->lineEdit_editPswConf->setText(user->getPassword());
+	ui->lineEdit_editPsw->setText(user->getPassword());
 }
 
 ProfileEditWindow::~ProfileEditWindow()

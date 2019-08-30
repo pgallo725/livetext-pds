@@ -157,7 +157,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Please choose another filename</string>
+        <string/>
        </property>
       </widget>
      </item>

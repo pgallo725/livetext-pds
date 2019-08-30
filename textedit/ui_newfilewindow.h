@@ -130,7 +130,7 @@ public:
         NewFileWindow->setWindowTitle(QCoreApplication::translate("NewFileWindow", "New File", nullptr));
         label_2->setText(QCoreApplication::translate("NewFileWindow", "Choose filename to create a new document", nullptr));
         label->setText(QCoreApplication::translate("NewFileWindow", "Filename", nullptr));
-        label_incorrectFilename->setText(QCoreApplication::translate("NewFileWindow", "Please choose another filename", nullptr));
+        label_incorrectFilename->setText(QString());
     } // retranslateUi
 
 };

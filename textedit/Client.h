@@ -118,7 +118,7 @@ public slots:
 	//Account handler
 	void newUserPresence(QDataStream& in);
 	void accountUpdate(QDataStream& in);
-	void sendAccountUpdate(User userUpdate);
+	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void deleteUserPresence(QDataStream& in);
 };
 

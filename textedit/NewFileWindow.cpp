@@ -17,9 +17,6 @@ NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp)
 	ui->setupUi(this);
 	centerAndResize();
 	
-	//Imposto la label "Incorrect Filename" non visibile
-	ui->label_incorrectFilename->setVisible(false);
-
 	//Connect con i bottoni del dialog box
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewFileWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewFileWindow::rejectClicked);
