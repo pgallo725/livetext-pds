@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QImage>
-#include <Document.h>
 #include <QList>
+#include "Document.h"
 
 class User
 {
@@ -10,15 +10,16 @@ class User
 	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
 	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
 	
-	
 private:
 
 	QString m_username;
 	int m_userId;
 	QString m_nickname;
 	QString m_passwd;		// hashed
+	// TODO IGOR: add m_salt as a QByteArray field, generated randomly with Qt methods, for password secure storage
 	QImage m_icon;			// nullable, check with QImage::isNull()
 	QList<URI> m_documents;
+
 public:
 
 	User();	 // Use this to construct an empty user and populate the fields later
@@ -27,7 +28,7 @@ public:
 
 	~User();
 
-	/* getter methods */
+	/* getters */
 	QString getUsername();
 	int getUserId();
 	QString getNickname();
@@ -37,7 +38,7 @@ public:
 	bool hasDocument(URI uri);
 	URI getURIat(int index);
 
-	/* setter methods */
+	/* setters */
 	void addDocument(URI docUri);
 	void removeDocument(URI uri);
 	void setNickname(QString newNickname);

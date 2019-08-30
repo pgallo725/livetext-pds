@@ -4,23 +4,17 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QString>
-#include <QThread>
 #include <QTimer>
-#include <QMutexLocker>
 
-#include "User.h"
+#include <User.h>
 #include "Client.h"
-#include "Document.h"
+#include <Document.h>
 #include "WorkSpace.h"
-#include "Message.h"
-#include "LoginMessage.h"
-#include "AccountMessage.h"
-#include "LogoutMessage.h"
-#include "DocumentMessage.h"
-#include "Messagehandler.h"
+#include <Message.h>
+#include "MessageHandler.h"
 
-#define CONNECT_TIMEOUT 15000	/* ms */
-#define SAVE_TIMEOUT 10000		/* ms */
+#define CONNECT_TIMEOUT 15000		/* ms */
+#define USERS_SAVE_TIMEOUT 10000	/* ms */
 
 Q_DECLARE_METATYPE(qintptr);
 Q_DECLARE_METATYPE(URI);
@@ -36,10 +30,8 @@ private:
 
 	QMap<QString, User> users;
 	QMap<URI, QSharedPointer<Document>> documents;
-	QMap<URI, QSharedPointer<WorkSpace>> workspaces;	// TODO IGOR: can workspaces and workThreads be unified ? (remove commented code if done)
-	//QMap<QString, QSharedPointer<QThread>> workThreads;
+	QMap<URI, QSharedPointer<WorkSpace>> workspaces;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
-	QMap<qintptr, QTcpSocket*> socketDismissed;
 	qint32 _userIdCounter;
 
 	QTimer time;
@@ -56,7 +48,6 @@ public:
 	~TcpServer();
 
 	void initialize();
-	//QSharedPointer<Client> moveClient(qintptr socketDescriptor);
 
 public slots:
 

@@ -11,8 +11,6 @@
 #include <PresenceMessage.h>
 #include <FailureMessage.h>
 
-#include <QDataStream>
-
 
 MessageHandler::MessageHandler(WorkSpace* w)
 	: _usecase(OwnerType::Workspace)

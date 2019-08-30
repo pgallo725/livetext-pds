@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QThread>
 #include <QTimer>
 #include <QMutexLocker>
 
@@ -8,6 +9,8 @@
 #include "Client.h"
 #include "MessageHandler.h"
 #include "ServerException.h"
+
+#define DOCUMENT_SAVE_TIMEOUT 5000	/* ms */
 
 
 class TcpServer;
@@ -23,8 +26,11 @@ private:
 	QSharedPointer<Document> doc;
 	QSharedPointer<QThread> workThread;
 	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
+
 	QTimer timer;
+
 	MessageHandler messageHandler;
+
 	QMutex& users_mutex;
 
 public:
@@ -34,7 +40,6 @@ public:
 
 public slots:
 
-	//void newSocket(qint64 handle);
 	void newClient(QSharedPointer<Client> client);
 	void clientDisconnection();
 	void readMessage();
