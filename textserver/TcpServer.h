@@ -21,12 +21,9 @@
 #define CONNECT_TIMEOUT 15000	/* ms */
 #define SAVE_TIMEOUT 10000		/* ms */
 
-#define INDEX_FILENAME "./Documents/documents.dat"
-#define USERS_FILENAME "users.dat"
-#define TMP_USERS_FILENAME "users.tmp"
-
 Q_DECLARE_METATYPE(qintptr);
 Q_DECLARE_METATYPE(URI);
+
 
 class TcpServer : public QTcpServer
 {

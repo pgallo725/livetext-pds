@@ -43,6 +43,11 @@ QImage User::getIcon()
 	return m_icon;
 }
 
+bool User::hasDocument(URI uri)
+{
+	return m_documents.contains(uri);
+}
+
 QList<URI> User::getDocuments()
 {
 	return m_documents;
@@ -56,8 +61,12 @@ URI User::getURIat(int index)
 
 void User::addDocument(URI docUri)
 {
-	if (!m_documents.contains(docUri))
-		m_documents << docUri;
+	m_documents << docUri;
+}
+
+void User::removeDocument(URI uri)
+{
+	m_documents.removeOne(uri);
 }
 
 void User::setNickname(QString newNickname)
@@ -80,21 +89,10 @@ void User::deleteIcon()
 	m_icon = QImage();
 }
 
-void User::setId(int id) {
-
-	m_userId = id;
-
-}
-
 void User::changePassword(QString newPassword)
 {
 	//TODO: decrypt
 	m_passwd = newPassword;
-}
-
-void User::removeDocument(URI uri)
-{
-	m_documents.removeOne(uri);
 }
 
 

@@ -10,9 +10,14 @@
 #include <QImage>
 #include <QDateTime>
 #include <QCryptographicHash>
+#include <QRandomGenerator>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
+
+#define INDEX_FILENAME "./Documents/documents.dat"
+#define USERS_FILENAME "users.dat"
+#define TMP_USERS_FILENAME "users.tmp"
 
 
 /* Costructor */
@@ -143,9 +148,15 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 	QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 	QString str = authorName + "_" + docName + "_";
 
+	// Initialize the random number generator with a sequence of characters composed by
+	// author username + document name, so that any user is required to have documents with unique names
+	std::string seedStr = str.toStdString();
+	std::seed_seq seed = std::seed_seq(seedStr.begin(), seedStr.end());
+	QRandomGenerator randomizer(seed);
+
 	for (int i = 0; i < 12; ++i)	// add a 12-character long random sequence to the document URI to make it unique
 	{
-		int index = qrand() % possibleCharacters.length();
+		quint32 index = randomizer.bounded(possibleCharacters.length());
 		QChar nextChar = possibleCharacters.at(index);
 		str.append(nextChar);
 	}
@@ -179,6 +190,7 @@ void TcpServer::saveUsers()
 				throw FileOverwriteException(info.absoluteFilePath().toStdString());
 			}
 		}
+		else file.rename(USERS_FILENAME);
 
 		file.close();
 
@@ -403,17 +415,16 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
 	QSharedPointer<Document> doc(new Document(docURI));
-	WorkSpace* w = createWorkspace(doc, client);
-	QFile docFile("./Documents/" + docURI.toString());
-	
-	/* add the document to the index, create the document file and update internal data structures */
+
+	/* add the document to the index and save the file */
 	addToIndex(doc);
-	docFile.open(QIODevice::NewOnly);
-	docFile.close();
+	doc->save();
+
+	WorkSpace* w = createWorkspace(doc, client);
 	
-	/* add to client list the newDocument */
+	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
-	/* add to document list the new editor */
+	/* add this user to the list of document editors */
 	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not receives more messages from client */
@@ -446,24 +457,23 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 		return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
-	WorkSpace* w = nullptr;
 
-	/* check if this documents is already opened in a Workspace or not */
-	if (!workspaces.contains(docUri)) {
-		w = createWorkspace(doc, client);
-	}
-	else {
-		w = workspaces.find(docUri).value().get();
-	}
+	/* create a new workspace if needed, otherwise get the already existing one */
+	WorkSpace* w = workspaces.contains(docUri) ? 
+		workspaces.find(docUri).value().get() :
+		createWorkspace(doc, client);
 
-	/* add to client list the newDocument*/
-	client->getUser()->addDocument(docUri);
-	/* add to document list the new editor */
-	doc->insertNewEditor(client->getUsername());
+	User* user = client->getUser();
+
+	/* if it's the first time opening this document, add it to the user's list of documents */	
+	if (!user->hasDocument(docUri))
+		user->addDocument(docUri);
+	/* and add the new editor to the document's list of editors */
+	doc->insertNewEditor(user->getUsername());
 
 	/* this thread will not recives more messages from client */
-	/*disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);*/
+	disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	/* make the new thead connect the socket in the workspace */
 	/*connect(this, &TcpServer::newSocket, w, &WorkSpace::newSocket);

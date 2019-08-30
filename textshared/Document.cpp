@@ -185,6 +185,7 @@ void Document::save()
 				//throw FileOverwriteException(info.absoluteFilePath().toStdString());
 			}
 		}
+		else file.rename(uri.toString());
 
 		file.close();
 

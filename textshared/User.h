@@ -36,18 +36,18 @@ public:
 	QString getPassword();
 	QImage getIcon();
 	QList<URI> getDocuments();
+	bool hasDocument(URI uri);
 	URI getURIat(int index);
 
 	/* setter methods */
 	void addDocument(URI docUri);
+	void removeDocument(URI uri);
 	void setNickname(QString newNickname);
 	void deleteNickname();
 	void setIcon(QImage newIcon);
-	void setId(int id);
-	void deleteIcon();
+	void deleteIcon();	
 	void changePassword(QString newPassword);
 
-	void removeDocument(URI uri);
 };
 
 

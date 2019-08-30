@@ -65,7 +65,7 @@ QString Client::challenge(User* user)
 {
 	activeUser = user;		// store the user which is trying to login on this client
 
-	for (int i = 0; i < 24; ++i)	// create a 24-character randomly generated nonce
+	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
 	{
 		int index = qrand() % nonceCharacters.length();
 		QChar nextChar = nonceCharacters.at(index);
