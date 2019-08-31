@@ -50,9 +50,9 @@ MessageCapsule MessageFactory::LoginRequest(QString username)
 	return new LoginRequestMessage(username);
 }
 
-MessageCapsule MessageFactory::LoginChallenge(QString nonce)
+MessageCapsule MessageFactory::LoginChallenge(QString salt, QString nonce)
 {
-	return new LoginChallengeMessage(nonce);
+	return new LoginChallengeMessage(salt, nonce);
 }
 
 MessageCapsule MessageFactory::LoginUnlock(QString token)

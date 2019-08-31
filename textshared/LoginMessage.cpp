@@ -45,14 +45,14 @@ LoginChallengeMessage::LoginChallengeMessage()
 {
 }
 
-LoginChallengeMessage::LoginChallengeMessage(QString nonce)
-	: Message(LoginChallenge), m_nonce(nonce)
+LoginChallengeMessage::LoginChallengeMessage(QString salt, QString nonce)
+	: Message(LoginChallenge), m_salt(salt), m_nonce(nonce)
 {
 }
 
 void LoginChallengeMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_nonce;
+	stream >> m_salt >> m_nonce;
 }
 
 void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
@@ -61,11 +61,16 @@ void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
 	QBuffer bufferData;
 	QDataStream streamBuffer(&bufferData);
 
-	streamBuffer << m_nonce;
+	streamBuffer << m_salt << m_nonce;
 
 	streamOut << (quint16)LoginChallenge << bufferData.size() << bufferData.data();
 
 	//streamOut << (quint16)LoginChallenge << m_nonce;
+}
+
+QString LoginChallengeMessage::getSalt() const
+{
+	return m_salt;
 }
 
 QString LoginChallengeMessage::getNonce() const

@@ -1,6 +1,11 @@
 #include "User.h"
 
 #include <QDataStream>
+#include <QRandomGenerator>
+#include <QCryptographicHash>
+
+// Set of characters that will be used to generate random sequences as nonce
+const QString User::saltCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
 
 
 User::User() : m_userId(-1)
@@ -9,8 +14,21 @@ User::User() : m_userId(-1)
 
 User::User(QString username, int userId, QString nickname, QString passwd, QImage icon)
 	: m_username(username), m_userId(userId), m_nickname(nickname),
-	m_passwd(passwd), m_icon(icon)
+	/*m_passwd(passwd),*/ m_icon(icon), m_salt("")
 {
+	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
+	{
+		int index = qrand() % saltCharacters.length();
+		QChar nextChar = saltCharacters.at(index);
+		m_salt.append(nextChar);
+	}
+
+	QCryptographicHash hash(QCryptographicHash::Md5);
+
+	hash.addData(passwd.toStdString().c_str(), passwd.length());
+	hash.addData(m_salt.toStdString().c_str(), m_salt.length());
+
+	m_passwd = hash.result();
 }
 
 User::~User()
@@ -33,7 +51,7 @@ QString User::getNickname()
 	return m_nickname;
 }
 
-QString User::getPassword()
+QByteArray User::getPassword()
 {
 	return m_passwd;
 }
@@ -41,6 +59,11 @@ QString User::getPassword()
 QImage User::getIcon()
 {
 	return m_icon;
+}
+
+QString User::getSalt()
+{
+	return m_salt;
 }
 
 bool User::hasDocument(URI uri)
@@ -91,7 +114,21 @@ void User::deleteIcon()
 
 void User::setPassword(QString newPassword)
 {
-	m_passwd = newPassword;
+	m_salt = "";
+
+	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
+	{
+		int index = qrand() % saltCharacters.length();
+		QChar nextChar = saltCharacters.at(index);
+		m_salt.append(nextChar);
+	}
+
+	QCryptographicHash hash(QCryptographicHash::Md5);
+
+	hash.addData(newPassword.toStdString().c_str(), newPassword.length());
+	hash.addData(m_salt.toStdString().c_str(), m_salt.length());
+
+	m_passwd = hash.result();
 }
 
 

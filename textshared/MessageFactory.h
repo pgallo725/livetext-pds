@@ -13,7 +13,7 @@ public:
 	static MessageCapsule Empty(MessageType type);
 
 	static MessageCapsule LoginRequest(QString username);
-	static MessageCapsule LoginChallenge(QString nonce);
+	static MessageCapsule LoginChallenge(QString salt, QString nonce);
 	static MessageCapsule LoginUnlock(QString token);
 	static MessageCapsule LoginGranted(User user);
 	static MessageCapsule LoginError(QString error);

@@ -38,6 +38,7 @@ class LoginChallengeMessage : public Message
 private:
 
 	// TODO IGOR: add m_salt member to enable password hashing
+	QString m_salt;
 	QString m_nonce;
 
 protected:
@@ -45,7 +46,7 @@ protected:
 	LoginChallengeMessage();		// empty constructor
 
 	// Costruct LoginChallenge message with the cryptographic nonce
-	LoginChallengeMessage(QString nonce);
+	LoginChallengeMessage(QString salt, QString nonce);
 
 public:
 
@@ -54,6 +55,7 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
+	QString getSalt() const;
 	QString getNonce() const;
 };
 

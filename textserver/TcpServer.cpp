@@ -257,7 +257,8 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 		if (client->isLogged())
 			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
 
-		return MessageFactory::LoginChallenge(client->challenge(&(users.find(username).value())));
+		return MessageFactory::LoginChallenge(users.find(username).value().getSalt(),
+			client->challenge(&(users.find(username).value())));
 	}
 	else return MessageFactory::LoginError("The specified username is not registered on the server");
 }

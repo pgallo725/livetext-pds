@@ -2,6 +2,7 @@
 
 #include <QImage>
 #include <QList>
+#include <QByteArray>
 #include "Document.h"
 
 class User
@@ -15,10 +16,13 @@ private:
 	QString m_username;
 	int m_userId;
 	QString m_nickname;
-	QString m_passwd;		// hashed
+	QByteArray m_passwd;		// hashed
+	QString m_salt;
 	// TODO IGOR: add m_salt as a QByteArray field, generated randomly with Qt methods, for password secure storage
 	QImage m_icon;			// nullable, check with QImage::isNull()
 	QList<URI> m_documents;
+
+	static const QString saltCharacters;
 
 public:
 
@@ -32,8 +36,9 @@ public:
 	QString getUsername();
 	int getUserId();
 	QString getNickname();
-	QString getPassword();
+	QByteArray getPassword();
 	QImage getIcon();
+	QString getSalt();
 	QList<URI> getDocuments();
 	bool hasDocument(URI uri);
 	URI getURIat(int index);
