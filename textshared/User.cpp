@@ -102,8 +102,8 @@ QDataStream& operator>>(QDataStream& in, User& user)
 
 	in >> user.m_username >> user.m_userId >> user.m_nickname
 		>> user.m_passwd
-		>> user.m_icon
-		>> user.m_documents;
+		>> user.m_documents
+		>> user.m_icon;		
 
 	return in;
 }
@@ -114,8 +114,8 @@ QDataStream& operator<<(QDataStream& out, const User& user)
 
 	out << user.m_username << user.m_userId << user.m_nickname
 		<< user.m_passwd
-		<< user.m_icon
-		<< user.m_documents;
+		<< user.m_documents
+		<< user.m_icon;		
 
 	return out;
 }
