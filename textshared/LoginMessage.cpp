@@ -22,7 +22,14 @@ void LoginRequestMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)LoginRequest << m_username;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_username;
+
+	streamOut << (quint16)LoginRequest << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)LoginRequest << m_username;
 }
 
 QString LoginRequestMessage::getUsername() const
@@ -51,8 +58,14 @@ void LoginChallengeMessage::readFrom(QDataStream& stream)
 void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)LoginChallenge << m_nonce;
+	streamBuffer << m_nonce;
+
+	streamOut << (quint16)LoginChallenge << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)LoginChallenge << m_nonce;
 }
 
 QString LoginChallengeMessage::getNonce() const
@@ -81,8 +94,14 @@ void LoginUnlockMessage::readFrom(QDataStream& stream)
 void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)LoginUnlock << m_token;
+	streamBuffer << m_token;
+
+	streamOut << (quint16)LoginUnlock << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)LoginUnlock << m_token;
 }
 
 QString LoginUnlockMessage::getToken() const
@@ -111,8 +130,14 @@ void LoginGrantedMessage::readFrom(QDataStream& stream)
 void LoginGrantedMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)LoginGranted << m_user;
+	streamBuffer << m_user;
+
+	streamOut << (quint16)LoginGranted << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)LoginGranted << m_user;
 }
 
 User& LoginGrantedMessage::getLoggedUser()
@@ -141,8 +166,13 @@ void LoginErrorMessage::readFrom(QDataStream& stream)
 void LoginErrorMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)LoginError << m_error;
+	streamBuffer << m_error;
+
+	streamOut << (quint16)LoginError << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)LoginError << m_error;
 }
 
 QString LoginErrorMessage::getErrorMessage() const

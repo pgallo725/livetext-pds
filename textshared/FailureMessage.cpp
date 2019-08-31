@@ -20,7 +20,14 @@ void FailureMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)m_type << m_error;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_error;
+
+	streamOut << (quint16)m_type << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)m_type << m_error;
 }
 
 QString FailureMessage::getDescription()

@@ -22,7 +22,14 @@ void DocumentCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentCreate << m_docName;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_docName;
+
+	streamOut << (quint16)DocumentCreate << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)DocumentCreate << m_docName;
 }
 
 QString DocumentCreateMessage::getDocumentName() const
@@ -52,7 +59,14 @@ void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentRemove << m_docURI;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_docURI;
+
+	streamOut << (quint16)DocumentRemove << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)DocumentRemove << m_docURI;
 }
 
 URI DocumentRemoveMessage::getDocumentURI() const
@@ -82,7 +96,14 @@ void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentOpen << m_docURI;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_docURI;
+
+	streamOut << (quint16)DocumentOpen << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)DocumentOpen << m_docURI;
 }
 
 URI DocumentOpenMessage::getDocumentURI() const
@@ -107,7 +128,7 @@ void DocumentDismissedMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentDismissed;
+	streamOut << (quint16)DocumentDismissed << (quint64)0;
 }
 
 
@@ -132,7 +153,14 @@ void DocumentReadyMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentReady << m_document;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_document;
+
+	streamOut << (quint16)DocumentReady << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)DocumentReady << m_document;
 }
 
 Document DocumentReadyMessage::getDocument() const
@@ -162,7 +190,14 @@ void DocumentErrorMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentError << m_error;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_error;
+
+	streamOut << (quint16)DocumentError << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)DocumentError << m_error;
 }
 
 QString DocumentErrorMessage::getErrorMessage() const

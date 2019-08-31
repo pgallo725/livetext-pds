@@ -21,8 +21,14 @@ void CursorMoveMessage::readFrom(QDataStream& stream)
 void CursorMoveMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)CursorMove << m_userId << m_cursorPos;
+	streamBuffer << m_userId << m_cursorPos;
+
+	streamOut << (quint16)CursorMove << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)CursorMove << m_userId << m_cursorPos;
 }
 
 qint32 CursorMoveMessage::getUserId() const
@@ -56,8 +62,13 @@ void PresenceUpdateMessage::readFrom(QDataStream& stream)
 void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)PresenceUpdate << m_userId << m_userName << m_userIcon;
+	streamBuffer << m_userId << m_userName << m_userIcon;
+
+	streamOut << (quint16)PresenceUpdate << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)PresenceUpdate << m_userId << m_userName << m_userIcon;
 }
 
 qint32 PresenceUpdateMessage::getUserId() const
@@ -96,8 +107,13 @@ void PresenceAddMessage::readFrom(QDataStream& stream)
 void PresenceAddMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)PresenceAdd << m_userId << m_userName << m_userIcon;
+	streamBuffer << m_userId << m_userName << m_userIcon;
+
+	streamOut << (quint16)PresenceAdd << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)PresenceAdd << m_userId << m_userName << m_userIcon;
 }
 
 qint32 PresenceAddMessage::getUserId() const
@@ -136,8 +152,13 @@ void PresenceRemoveMessage::readFrom(QDataStream& stream)
 void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)PresenceRemove << m_userId;
+	streamBuffer << m_userId;
+
+	streamOut << (quint16)PresenceRemove << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)PresenceRemove << m_userId;
 }
 
 qint32 PresenceRemoveMessage::getUserId() const

@@ -71,8 +71,20 @@ void WorkSpace::readMessage()
 	quint16 mType;
 	streamIn >> mType;		 /* take the type of incoming message */
 
+	qint64 dataSize, dataRead = 0;
+
+	streamIn >> dataSize;
+
+	QByteArray dataBuffer;
+	QDataStream dataStream(dataBuffer);
+
+	while (dataSize < dataRead) {
+		dataBuffer.append(socket->readAll());
+		dataSize = dataBuffer.size();
+	}
+
 	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-	message->readFrom(streamIn);
+	message->readFrom(dataStream);
 
 	if (mType == CursorMove || mType == CharInsert || mType == CharDelete ||
 		mType == PresenceRemove || mType == AccountUpdate)

@@ -17,6 +17,6 @@ void LogoutMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)Logout;
+	streamOut << (quint16)Logout << (quint64)0;
 }
 

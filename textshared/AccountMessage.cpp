@@ -1,6 +1,5 @@
 #include "AccountMessage.h"
 
-
 /*************** ACCOUNT CREATE MESSAGE ***************/
 
 AccountCreateMessage::AccountCreateMessage()
@@ -16,15 +15,26 @@ AccountCreateMessage::AccountCreateMessage(QString username, QString nickname, Q
 
 void AccountCreateMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_username >> m_nickname >> m_icon >> m_password;
+	stream >> m_username >> m_nickname >> m_password >> m_icon;
 }
 
 void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
+	streamBuffer << m_username
+		<< m_nickname
+		<< m_password
+		<< m_icon;
+
+	streamOut << (quint16)AccountCreate << bufferData.size() << bufferData.data();
+
+	/*
 	streamOut << (quint16)AccountCreate << m_username 
-		<< m_nickname << m_icon << m_password;;
+		<< m_nickname << m_icon << m_password;
+	*/
 }
 
 QString AccountCreateMessage::getUsername() const
@@ -62,14 +72,22 @@ AccountUpdateMessage::AccountUpdateMessage(QString nickname, QImage icon, QStrin
 
 void AccountUpdateMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_nickname >> m_icon >> m_password;
+	stream >> m_nickname >> m_password >> m_icon;
 }
 
 void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)AccountUpdate << m_nickname << m_icon << m_password;
+	streamBuffer << m_nickname
+		<< m_password
+		<< m_icon;
+
+	streamOut << (quint16)AccountUpdate << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)AccountUpdate << m_nickname << m_icon << m_password;
 }
 
 QString AccountUpdateMessage::getNickname() const
@@ -108,8 +126,14 @@ void AccountConfirmedMessage::readFrom(QDataStream& stream)
 void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)AccountConfirmed << m_user;
+	streamBuffer << m_user;
+
+	streamOut << (quint16)AccountConfirmed << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)AccountConfirmed << m_user;
 }
 
 User& AccountConfirmedMessage::getUserObj()
@@ -139,7 +163,14 @@ void AccountErrorMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)AccountError << m_error;
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
+
+	streamBuffer << m_error;
+
+	streamOut << (quint16)AccountError << bufferData.size() << bufferData.data();
+
+	//streamOut << (quint16)AccountError << m_error;
 }
 
 QString AccountErrorMessage::getErrorMessage() const

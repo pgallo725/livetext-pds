@@ -21,8 +21,13 @@ void CharInsertMessage::readFrom(QDataStream& stream)
 void CharInsertMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)CharInsert << m_symbol;
+	streamBuffer << m_symbol;
+
+	streamOut << (quint16)CharInsert << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)CharInsert << m_symbol;
 }
 
 Symbol& CharInsertMessage::getSymbol()
@@ -51,8 +56,13 @@ void CharDeleteMessage::readFrom(QDataStream& stream)
 void CharDeleteMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
+	QBuffer bufferData;
+	QDataStream streamBuffer(&bufferData);
 
-	streamOut << (quint16)CharDelete << m_fPos;
+	streamBuffer << m_fPos;
+
+	streamOut << (quint16)CharDelete << bufferData.size() << bufferData.data();
+	//streamOut << (quint16)CharDelete << m_fPos;
 }
 
 QVector<qint32> CharDeleteMessage::getPosition() const
