@@ -1,4 +1,4 @@
-QT += widgets
+QT += widgets network
 requires(qtConfig(filedialog))
 qtHaveModule(printsupport): QT += printsupport
 

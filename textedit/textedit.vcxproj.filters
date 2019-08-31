@@ -85,6 +85,9 @@
     <QtMoc Include="Client.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="DocumentEditor.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
     <QtMoc Include="LandingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -109,17 +112,32 @@
     <QtMoc Include="textedit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="DocumentEditor.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+    
+    
+    
+    
     <ClInclude Include="ui_landingpage.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
