@@ -15,7 +15,7 @@ CursorMoveMessage::CursorMoveMessage(qint32 userId, qint32 newPosition)
 
 void CursorMoveMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_cursorPos;
+	stream >> m_userId >> m_cursorPos;
 }
 
 void CursorMoveMessage::sendTo(QTcpSocket* socket) const
