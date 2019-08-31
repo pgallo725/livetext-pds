@@ -21,6 +21,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
 	connect(_landingPage, &LandingPage::removeDocument, this, &LiveText::removeDocument);
 	connect(_landingPage, &LandingPage::addDocument, this, &LiveText::addDocument);
+	connect(_landingPage, &LandingPage::openDocument, this, &LiveText::openDocument);
 
 	//LANDINGPAGE - CLIENT
 	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);
@@ -40,8 +41,6 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::registrationSuccess);
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
-
-	//CLIENT - DOCUMENTEDITOR
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	
@@ -57,7 +56,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
 	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 
-	//TEXTEDIT - CLIENT
+
+	//DOCUMENTEDITOR - CLIENT
+	//connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 
 }
 
@@ -168,8 +169,8 @@ void LiveText::openDocumentCompleted(Document doc)
 		_user.addDocument(doc.getURI());
 	}
 
-	//ADD DOCUMENT LOADING INTO EDITOR
 
+	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();
 }
 
@@ -194,6 +195,7 @@ void LiveText::returnToLanding()
 {
 	delete _docEditor;
 	_textEdit->close();
+	_client->removeFromFile(_user.getUserId());
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
@@ -208,6 +210,9 @@ void LiveText::sendCursor(qint32 pos)
 //Account update
 void LiveText::sendAccountUpdate(QString nickname, QImage image, QString password)
 {
+	if (password.isEmpty()) {
+		password = _user.getPassword();
+	}
 	_client->sendAccountUpdate(nickname, image, password);
 }
 

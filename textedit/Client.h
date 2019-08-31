@@ -63,7 +63,6 @@ signals:
 	void cancelUserPresence(qint32 userId);
 	void accountModified(qint32 userId, QString username, QImage image);
 
-
 	//Account signals
 	void personalAccountModified(User user);
 	void accountModificationFail(QString error);
@@ -82,7 +81,7 @@ public:
 	~Client();
 
 	void messageHandler(qint16 typeOfMeassage, QDataStream& in);
-	void removeFromFile(qint32 myId);
+
 
 public slots:
 	//signals handler
@@ -99,6 +98,7 @@ public slots:
 	void sendCursor(qint32 userId, qint32 position);
 	void reciveCursor(QDataStream& in);
 	void sendChar(Symbol character);
+	void removeChar(QVector<int> position);
 	void reciveChar(QDataStream& in);
 	void deleteChar(QDataStream& in);
 	//Document handler
@@ -120,5 +120,6 @@ public slots:
 	void accountUpdate(QDataStream& in);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void deleteUserPresence(QDataStream& in);
+	void removeFromFile(qint32 myId);
 };
 

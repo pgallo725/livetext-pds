@@ -216,11 +216,18 @@ void Document::remove(const Symbol& s)
 	this->removeAt(s._fPos);
 }
 
-void Document::removeAt(QVector<qint32> fPos)
+QVector<qint32> Document::removeAt(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
 		_text.removeAt(pos);	// and removes it
+
+	return fPos;
+}
+
+QVector<qint32> Document::removeAtIndex(int index)
+{
+	return removeAt(fractionalPosBetween(index, index + 1));
 }
 
 

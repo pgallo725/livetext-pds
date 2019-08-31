@@ -65,7 +65,8 @@ public:
 
 	void insert(Symbol s);
 	void remove(const Symbol& s);
-	void removeAt(QVector<qint32> fPos);
+	QVector<qint32> removeAt(QVector<qint32> fPos);
+	QVector<qint32> removeAtIndex(int index);
 
 	QVector<qint32> fractionalPosBegin();
 	QVector<qint32> fractionalPosEnd();

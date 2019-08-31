@@ -29,6 +29,7 @@
 #include <QRectF>
 #include <QAbstractTextDocumentLayout>
 #include <QToolButton>
+#include <QDateTime>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -468,6 +469,11 @@ void TextEdit::accountUpdateFailed(QString error)
 	ew->updateFailed(error);
 }
 
+void TextEdit::setDocumentURI(QString uri)
+{
+	URI = uri;
+}
+
 bool TextEdit::load(const QString& f)
 {
 	//Se file non esiste torna false
@@ -530,8 +536,13 @@ void TextEdit::fileNew(QString name)
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
+	// Initialize random sequence
+	qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
+
+	int randomNumber = 7 + (qrand() % 11);
+
 	//Choose a random color from Qt colors
-	QColor color = (Qt::GlobalColor) (userId % 18 + 2);
+	QColor color = (Qt::GlobalColor) (randomNumber);
 	QPixmap userPic;
 
 	userPic.convertFromImage(image);
@@ -653,13 +664,12 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	statusBar()->showMessage(tr("URI copied into clipboards"));
-
 	QClipboard* clipboard = QApplication::clipboard();
 
-	QString uri = "URI DI PROVA";
+	QString uri = URI;
 
 	clipboard->setText(uri);
+	statusBar()->showMessage(tr("URI copied into clipboards"));
 
 	ShareUriWindow* su = new ShareUriWindow(uri);
 	//Mostra la finestra di mw formata
@@ -1070,7 +1080,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
-			//TODO: Remove characters
+			emit deleteChar(position);
 		}
 	}
 
