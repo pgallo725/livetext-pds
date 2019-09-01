@@ -21,13 +21,12 @@ void DocumentCreateMessage::readFrom(QDataStream& stream)
 void DocumentCreateMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_docName;
 
-	streamOut << (quint16)DocumentCreate << bufferData.size() << bufferData.data();
+	streamOut << (quint16)DocumentCreate << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)DocumentCreate << m_docName;
 }
@@ -58,13 +57,12 @@ void DocumentRemoveMessage::readFrom(QDataStream& stream)
 void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_docURI;
 
-	streamOut << (quint16)DocumentRemove << bufferData.size() << bufferData.data();
+	streamOut << (quint16)DocumentRemove << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)DocumentRemove << m_docURI;
 }
@@ -95,13 +93,12 @@ void DocumentOpenMessage::readFrom(QDataStream& stream)
 void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_docURI;
 
-	streamOut << (quint16)DocumentOpen << bufferData.size() << bufferData.data();
+	streamOut << (quint16)DocumentOpen << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)DocumentOpen << m_docURI;
 }
@@ -128,7 +125,7 @@ void DocumentDismissedMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
 
-	streamOut << (quint16)DocumentDismissed << (quint64)0;
+	streamOut << (quint16)DocumentDismissed << (int)0;
 }
 
 
@@ -152,13 +149,12 @@ void DocumentReadyMessage::readFrom(QDataStream& stream)
 void DocumentReadyMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_document;
 
-	streamOut << (quint16)DocumentReady << bufferData.size() << bufferData.data();
+	streamOut << (quint16)DocumentReady << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)DocumentReady << m_document;
 }
@@ -189,13 +185,12 @@ void DocumentErrorMessage::readFrom(QDataStream& stream)
 void DocumentErrorMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_error;
 
-	streamOut << (quint16)DocumentError << bufferData.size() << bufferData.data();
+	streamOut << (quint16)DocumentError << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)DocumentError << m_error;
 }

@@ -526,16 +526,16 @@ void TcpServer::readMessage()
 	quint16 mType;
 	streamIn >> mType;		 /* take the type of incoming message */
 
-	qint64 dataSize, dataRead = 0;
+	int dataSize, dataRead = 0;
 
 	streamIn >> dataSize;
 
 	QByteArray dataBuffer;
-	QDataStream dataStream(dataBuffer);
+	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	while (dataSize < dataRead) {
-		dataBuffer.append(socket->readAll());
-		dataSize = dataBuffer.size();
+	while (dataRead < dataSize) {
+		streamIn >> dataBuffer;
+		dataRead = dataBuffer.size();
 	}
 	
 	MessageCapsule message = MessageFactory::Empty((MessageType)mType);

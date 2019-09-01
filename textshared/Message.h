@@ -2,6 +2,7 @@
 
 #include <QTcpSocket>
 #include <QDataStream>
+#include <QByteArray>
 #include <QBuffer>
 
 enum MessageType

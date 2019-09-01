@@ -19,13 +19,12 @@ void FailureMessage::readFrom(QDataStream& stream)
 void FailureMessage::sendTo(QTcpSocket* socket) const
 {
 	QDataStream streamOut(socket);
-
-	QBuffer bufferData;
-	QDataStream streamBuffer(&bufferData);
+	QByteArray bufferData;
+	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
 
 	streamBuffer << m_error;
 
-	streamOut << (quint16)m_type << bufferData.size() << bufferData.data();
+	streamOut << (quint16)m_type << bufferData.size() << bufferData;
 
 	//streamOut << (quint16)m_type << m_error;
 }
