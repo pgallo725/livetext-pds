@@ -116,7 +116,7 @@ static const uint qt_meta_data_WorkSpace[] = {
     QMetaType::Void, 0x80000000 | 13,   14,
     QMetaType::Void, 0x80000000 | 16,   17,
     QMetaType::Void, 0x80000000 | 19, 0x80000000 | 21,   20,   22,
-    0x80000000 | 19, 0x80000000 | 21, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   24,   25,   26,   27,
+    0x80000000 | 19, 0x80000000 | 21, QMetaType::QString, QMetaType::QImage, QMetaType::QByteArray,   24,   25,   26,   27,
     QMetaType::Void, 0x80000000 | 21,   24,
 
        0        // eod
@@ -137,7 +137,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 6: _t->documentInsertSymbol((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 7: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
         case 8: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QTcpSocket*(*)>(_a[2]))); break;
-        case 9: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
+        case 9: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QByteArray(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 10: _t->clientQuit((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
         default: ;

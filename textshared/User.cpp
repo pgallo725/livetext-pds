@@ -112,7 +112,7 @@ void User::deleteIcon()
 	m_icon = QImage();
 }
 
-void User::setPassword(QString newPassword)
+void User::setPassword(QByteArray newPassword)
 {
 	m_salt = "";
 
@@ -139,6 +139,7 @@ QDataStream& operator>>(QDataStream& in, User& user)
 
 	in >> user.m_username >> user.m_userId >> user.m_nickname
 		>> user.m_passwd
+		>> user.m_salt
 		>> user.m_documents
 		>> user.m_icon;		
 
@@ -151,6 +152,7 @@ QDataStream& operator<<(QDataStream& out, const User& user)
 
 	out << user.m_username << user.m_userId << user.m_nickname
 		<< user.m_passwd
+		<< user.m_salt
 		<< user.m_documents
 		<< user.m_icon;		
 

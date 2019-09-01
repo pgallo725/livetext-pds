@@ -65,7 +65,7 @@ AccountUpdateMessage::AccountUpdateMessage()
 {
 }
 
-AccountUpdateMessage::AccountUpdateMessage(QString nickname, QImage icon, QString password)
+AccountUpdateMessage::AccountUpdateMessage(QString nickname, QImage icon, QByteArray password)
 	: Message(AccountUpdate), m_nickname(nickname), m_icon(icon), m_password(password)
 {
 }
@@ -100,7 +100,7 @@ QImage AccountUpdateMessage::getIcon() const
 	return m_icon;
 }
 
-QString AccountUpdateMessage::getPassword() const
+QByteArray AccountUpdateMessage::getPassword() const
 {
 	return m_password;
 }

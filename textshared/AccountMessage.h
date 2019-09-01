@@ -45,14 +45,14 @@ private:
 
 	QString m_nickname;
 	QImage m_icon;
-	QString m_password;
+	QByteArray m_password;
 
 protected:
 
 	AccountUpdateMessage();		// empty constructor
 
 	// Create an AccountUpdate message, with the new account information
-	AccountUpdateMessage(QString nickname, QImage icon, QString password);
+	AccountUpdateMessage(QString nickname, QImage icon, QByteArray password);
 
 public:
 
@@ -63,7 +63,7 @@ public:
 
 	QString getNickname() const;
 	QImage getIcon() const;
-	QString getPassword() const;
+	QByteArray getPassword() const;
 };
 
 

@@ -442,7 +442,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 	QDataStream in(socket);
 	
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, password);
+	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
 	accountUpdate->sendTo(socket);
 
 	while (true) {
