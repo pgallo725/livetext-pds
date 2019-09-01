@@ -141,6 +141,10 @@ void Client::Login() {
 	in.setDevice(socket);
 	in >>  typeOfMessage;
 
+	//TODO: aggiungi qua il while di lettura
+	//		alla readFrom passa poi lo stream che crei qua (quello collegato al QByteArray e 
+	//		non "in"
+
 	incomingMessage = MessageFactory::Empty((MessageType) typeOfMessage);
 	incomingMessage->readFrom(in);
 
@@ -163,9 +167,10 @@ void Client::Login() {
 
 	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
 	QString nonce = loginChallenge->getNonce();
+	QString salt = loginChallenge->getSalt();
 
 	qDebug() << "Cripting salt " << nonce;
-	QString result = password + nonce;
+	QString result = password + salt + nonce;
 	
 	QCryptographicHash hash(QCryptographicHash::Md5);
 	hash.addData(result.toStdString().c_str(), result.length());
@@ -180,6 +185,11 @@ void Client::Login() {
 	}
 
 	in >> typeOfMessage;
+
+	//TODO: aggiungi qua il while di lettura
+	//		alla readFrom passa poi lo stream che crei qua (quello collegato al QByteArray e 
+	//		non "in"
+
 	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
 	incomingMessage->readFrom(in);
 
