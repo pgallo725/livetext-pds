@@ -507,6 +507,11 @@ bool TextEdit::load(const QString& f)
 	return true;
 }
 
+void TextEdit::loadDocument(QString text)
+{
+	textEdit->setHtml(text);
+}
+
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
@@ -1113,10 +1118,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			//Ricavo formato carattere inserio
 			QTextCharFormat fmt = cursor.charFormat();
 
-			//Controllo generico sulla proprietà del formato
-			if (fmt.hasProperty(QTextFormat::FontItalic)) {
-				return;
-			}
+			emit insertChar(ch, fmt, i);
 		}
 	}
 }
