@@ -50,7 +50,7 @@ public:
 	void deleteNickname();
 	void setIcon(QImage newIcon);
 	void deleteIcon();	
-	void setPassword(QString newPassword);
+	void setPassword(QByteArray newPassword);
 
 };
 

@@ -112,23 +112,25 @@ void User::deleteIcon()
 	m_icon = QImage();
 }
 
-void User::setPassword(QString newPassword)
+void User::setPassword(QByteArray newPassword)
 {
-	m_salt = "";
+	if (m_passwd.compare(newPassword)) {
+		m_salt = "";
 
-	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
-	{
-		int index = qrand() % saltCharacters.length();
-		QChar nextChar = saltCharacters.at(index);
-		m_salt.append(nextChar);
+		for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
+		{
+			int index = qrand() % saltCharacters.length();
+			QChar nextChar = saltCharacters.at(index);
+			m_salt.append(nextChar);
+		}
+
+		QCryptographicHash hash(QCryptographicHash::Md5);
+
+		hash.addData(newPassword.toStdString().c_str(), newPassword.length());
+		hash.addData(m_salt.toStdString().c_str(), m_salt.length());
+
+		m_passwd = hash.result();
 	}
-
-	QCryptographicHash hash(QCryptographicHash::Md5);
-
-	hash.addData(newPassword.toStdString().c_str(), newPassword.length());
-	hash.addData(m_salt.toStdString().c_str(), m_salt.length());
-
-	m_passwd = hash.result();
 }
 
 
@@ -139,6 +141,7 @@ QDataStream& operator>>(QDataStream& in, User& user)
 
 	in >> user.m_username >> user.m_userId >> user.m_nickname
 		>> user.m_passwd
+		>> user.m_salt
 		>> user.m_documents
 		>> user.m_icon;		
 
@@ -151,6 +154,7 @@ QDataStream& operator<<(QDataStream& out, const User& user)
 
 	out << user.m_username << user.m_userId << user.m_nickname
 		<< user.m_passwd
+		<< user.m_salt
 		<< user.m_documents
 		<< user.m_icon;		
 
