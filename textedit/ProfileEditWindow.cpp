@@ -123,7 +123,6 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 		}
 	}
 
-
 	emit(accountUpdate(nick, userIcon, newPassword));
 }
 

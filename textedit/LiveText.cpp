@@ -210,9 +210,15 @@ void LiveText::sendCursor(qint32 pos)
 //Account update
 void LiveText::sendAccountUpdate(QString nickname, QImage image, QString password)
 {
-	if (password.isEmpty()) {
-		password = _user.getPassword();
+	if (nickname == _user.getNickname()) {
+		nickname = QString();
 	}
+
+	if (image == _user.getIcon()) {
+		image = QImage();
+	}
+
+
 	_client->sendAccountUpdate(nickname, image, password);
 }
 
