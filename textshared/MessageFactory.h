@@ -19,7 +19,7 @@ public:
 	static MessageCapsule LoginError(QString error);
 
 	static MessageCapsule AccountCreate(QString username, QString nickname, QImage icon, QString password);
-	static MessageCapsule AccountUpdate(QString nickname, QImage icon, QByteArray password);
+	static MessageCapsule AccountUpdate(QString nickname, QImage icon, QString password);
 	static MessageCapsule AccountConfirmed(User user);
 	static MessageCapsule AccountError(QString error);
 

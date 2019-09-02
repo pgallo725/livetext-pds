@@ -50,7 +50,7 @@ public slots:
 
 	void dispatchMessage(MessageCapsule message, QTcpSocket* sender);
 
-	MessageCapsule updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QByteArray password);
+	MessageCapsule updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password);
 	void clientQuit(QTcpSocket* clientSocket);
 
 signals: void noEditors(URI documentURI);

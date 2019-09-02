@@ -109,7 +109,7 @@ static const uint qt_meta_data_MessageHandler[] = {
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    8,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   10,    6,   11,   12,   13,
-    0x80000000 | 2, 0x80000000 | 4, QMetaType::QString, QMetaType::QImage, QMetaType::QByteArray,   10,   11,   12,   13,
+    0x80000000 | 2, 0x80000000 | 4, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   10,   11,   12,   13,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,   10,   16,
     0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 18,   10,   19,
     0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 18,   10,   19,
@@ -134,7 +134,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 2: { MessageCapsule _r = _t->accountCreate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 3: { MessageCapsule _r = _t->accountUpdate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QByteArray(*)>(_a[4])));
+        case 3: { MessageCapsule _r = _t->accountUpdate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 4: { MessageCapsule _r = _t->documentCreate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
@@ -254,7 +254,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QString , QImage , QByteArray );
+            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QString , QImage , QString );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::accountUpdate)) {
                 *result = 3;
                 return;
@@ -387,7 +387,7 @@ MessageCapsule MessageHandler::accountCreate(QTcpSocket * _t1, QString _t2, QStr
 }
 
 // SIGNAL 3
-MessageCapsule MessageHandler::accountUpdate(QTcpSocket * _t1, QString _t2, QImage _t3, QByteArray _t4)
+MessageCapsule MessageHandler::accountUpdate(QTcpSocket * _t1, QString _t2, QImage _t3, QString _t4)
 {
     MessageCapsule _t0{};
     void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)) };

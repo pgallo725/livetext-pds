@@ -75,7 +75,7 @@ MessageCapsule MessageFactory::AccountCreate(QString username, QString nickname,
 	return new AccountCreateMessage(username, nickname, icon, password);
 }
 
-MessageCapsule MessageFactory::AccountUpdate(QString nickname, QImage icon, QByteArray password)
+MessageCapsule MessageFactory::AccountUpdate(QString nickname, QImage icon, QString password)
 {
 	return new AccountUpdateMessage(nickname, icon, password);
 }

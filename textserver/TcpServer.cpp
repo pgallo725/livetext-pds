@@ -308,7 +308,7 @@ MessageCapsule TcpServer::createAccount(QTcpSocket* socket, QString username, QS
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QByteArray password)
+MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
 

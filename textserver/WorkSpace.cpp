@@ -149,7 +149,7 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QByteArray password)
+MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
