@@ -159,12 +159,16 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 	User* user = client->getUser();
 	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
 
-	user->setNickname(nickname);
-	user->setIcon(icon);
-	user->setPassword(password);
+	if (!nickname.isNull())
+		user->setNickname(nickname);
+	if (!icon.isNull())
+		user->setIcon(icon);
+	if (!password.isNull())
+		user->setPassword(password);
 
 	// Notify all other clients of the changes in this user's account
-	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(), nickname, icon), clientSocket);
+	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
+		user->getNickname(), user->getIcon()), clientSocket);
 
 	return MessageFactory::AccountConfirmed(*user);
 }

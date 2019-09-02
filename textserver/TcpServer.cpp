@@ -317,9 +317,12 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 
 	User* user = client->getUser();
 
-	user->setNickname(nickname);
-	user->setIcon(icon);
-	user->setPassword(password);
+	if (!nickname.isNull())
+		user->setNickname(nickname);
+	if (!icon.isNull())
+		user->setIcon(icon);
+	if (!password.isNull())
+		user->setPassword(password);
 
 	return MessageFactory::AccountConfirmed(*user);
 }
@@ -434,8 +437,6 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));
 	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
-
-	//author->deleteLater();		// TODO: delete socket ??
 
 	return MessageCapsule();
 }
