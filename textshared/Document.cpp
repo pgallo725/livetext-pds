@@ -114,7 +114,7 @@ QVector<Symbol> Document::getContent()
 
 void Document::insertNewEditor(QString edit)
 {
-	if(!editors.contains(edit))
+	if (!editors.contains(edit))
 		editors << edit;
 }
 
@@ -253,7 +253,7 @@ QString Document::toString()
 			text.push_back(l->getType() == SymbolType::ListBegin ? "<list>" : "</list>");
 		}
 	}
-	
+
 	return text;
 }
 
@@ -305,7 +305,7 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 
 				// the gap between the fPos values is increased in deeper levels to avoid making the vector
 				// become too long with subsequent insertions in between elements
-				result.push_back(next_a + i*fPosGapSize);
+				result.push_back(next_a + i * fPosGapSize);
 			}
 			else result.push_back((a + b) / 2);		// if the gap is wide enough, choose the middle value between the two
 
@@ -315,6 +315,11 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 	}
 
 	return result;
+}
+
+QVector<qint32> Document::fractionalPosAtIndex(int index)
+{
+	return fractionalPosBetween(index, index + 1);
 }
 
 QVector<qint32> Document::fractionalPosBegin()

@@ -35,7 +35,7 @@ public:
 	//Document
 	void setDocumentURI(QString uri);
 	bool load(const QString& f);
-
+	void loadDocument(QString text); //TEST
 
 
 
@@ -52,6 +52,7 @@ signals:
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString nickname, QImage image, QString password);
 	void deleteChar(int position);
+	void insertChar(QChar ch, QTextCharFormat format, int position);
 
 private slots:
 	void fileOpen();
