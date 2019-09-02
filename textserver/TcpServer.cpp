@@ -521,22 +521,21 @@ void TcpServer::deleteWorkspace(URI document)
 void TcpServer::readMessage()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-
 	QDataStream streamIn(socket);	/* connect stream with socket */
-
 	quint16 mType;
-	streamIn >> mType;		 /* take the type of incoming message */
-
-	int dataSize, dataRead = 0;
-
-	streamIn >> dataSize;
-
+	int dataSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	while (dataRead < dataSize) {
-		streamIn >> dataBuffer;
-		dataRead = dataBuffer.size();
+	streamIn >> mType;		 /* take the type of incoming message */
+
+	streamIn >> dataSize;	/* take the size of the message */
+
+	dataBuffer = socket->read(dataSize);
+
+	while (dataBuffer.size() < dataSize) {
+		socket->waitForReadyRead();
+		dataBuffer.append(socket->read((quint64)dataSize - dataBuffer.size()));
 	}
 	
 	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
