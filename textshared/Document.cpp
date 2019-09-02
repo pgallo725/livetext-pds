@@ -289,7 +289,7 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 	QVector<qint32> result;
 	Symbol prev = _text[prev_i];
 	Symbol next = _text[next_i];
-	int maxlen = std::max<size_t>(prev._fPos.size(), next._fPos.size());
+	int maxlen = std::max<int>(prev._fPos.size(), next._fPos.size());
 
 	for (int i = 0; i < maxlen; i++)
 	{

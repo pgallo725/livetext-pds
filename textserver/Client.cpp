@@ -60,7 +60,7 @@ bool Client::authentication(QString token)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
-	hash.addData(activeUser->getPassword().toStdString().c_str(), activeUser->getPassword().length());
+	hash.addData(activeUser->getPassword());
 	hash.addData(this->nonce.toStdString().c_str(), this->nonce.length());
 
 	return !QString::fromStdString(hash.result().toStdString()).compare(token);

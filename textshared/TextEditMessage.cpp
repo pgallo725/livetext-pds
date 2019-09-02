@@ -20,14 +20,15 @@ void CharInsertMessage::readFrom(QDataStream& stream)
 
 void CharInsertMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_symbol;
+	stream << CharInsert << qint32(0) << m_symbol;
 
-	streamOut << (quint16)CharInsert << bufferData.size() << bufferData;
-	//streamOut << (quint16)CharInsert << m_symbol;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 Symbol& CharInsertMessage::getSymbol()
@@ -55,14 +56,15 @@ void CharDeleteMessage::readFrom(QDataStream& stream)
 
 void CharDeleteMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_fPos;
+	stream << CharDelete << qint32(0) << m_fPos;
 
-	streamOut << (quint16)CharDelete << bufferData.size() << bufferData;
-	//streamOut << (quint16)CharDelete << m_fPos;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 QVector<qint32> CharDeleteMessage::getPosition() const

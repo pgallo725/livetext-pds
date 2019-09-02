@@ -53,9 +53,9 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	// Send to the new user all the Presence messages of other editors in the workspace
 	for (auto i = editors.begin(); i != editors.end(); ++i)
 	{
-		QTcpSocket* otherSocket = i.key();
 		User* editor = i.value()->getUser();
-		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(), editor->getIcon())->sendTo(socket);
+		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(),
+			editor->getIcon())->sendTo(socket);
 	}
 
 	editors.insert(socket, client);
@@ -65,22 +65,24 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 void WorkSpace::readMessage()
 {
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
-
 	QDataStream streamIn(socket);	/* connect stream with socket */
-
 	quint16 mType;
-	streamIn >> mType;		 /* take the type of incoming message */
-
-	int dataSize, dataRead = 0;
-
-	streamIn >> dataSize;
-
+	qint32 mSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	while (dataRead < dataSize) {
-		streamIn >> dataBuffer;
-		dataRead = dataBuffer.size();
+	streamIn >> mType;		/* take the type of incoming message */
+
+	streamIn >> mSize;		/* read the size of the message */
+
+	dataBuffer = socket->read(mSize);	// Read all the available message data from the socket
+
+	/* If not all bytes were received with the first chunk, wait for the next chunks
+	to arrive on the socket and append their content to the read buffer */
+	while (dataBuffer.size() < mSize)
+	{
+		socket->waitForReadyRead();
+		dataBuffer.append(socket->read((qint64)mSize - dataBuffer.size()));
 	}
 
 	MessageCapsule message = MessageFactory::Empty((MessageType)mType);

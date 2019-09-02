@@ -45,22 +45,38 @@ void Client::errorHandler() {
 
 void Client::readBuffer() {
 
+	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	qDebug() << "Reading socket";
 	
 	quint16 typeOfMessage;
-	QDataStream in;
+	qint32 messageSize;
+	QByteArray dataBuffer;
+	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	in >> typeOfMessage;
+	QDataStream in(socket);
 
-	messageHandler(typeOfMessage, in);
+	in >> typeOfMessage;		/* take the type of incoming message */
 
+	in >> messageSize;			/* read the size of the message */
+
+	dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
+
+	/* If not all bytes were received with the first chunk, wait for the next chunks
+	to arrive on the socket and append their content to the read buffer */
+	while (dataBuffer.size() < messageSize)
+	{
+		socket->waitForReadyRead();
+		dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
+	}
+
+	messageHandler((MessageType)typeOfMessage, dataStream);
 }
 
-void Client::messageHandler(qint16 typeOfMessage, QDataStream& in) {
+void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 
 	switch (typeOfMessage) {
 	case CursorMove:
-		reciveCursor(in);
+		receiveCursor(in);
 		break;
 	case AccountUpdate:
 		accountUpdate(in);
@@ -72,7 +88,7 @@ void Client::messageHandler(qint16 typeOfMessage, QDataStream& in) {
 		deleteUserPresence(in);
 		break;
 	case CharInsert:
-		reciveChar(in);
+		receiveChar(in);
 		break;
 	case CharDelete:
 		deleteChar(in);
@@ -82,6 +98,33 @@ void Client::messageHandler(qint16 typeOfMessage, QDataStream& in) {
 		break;
 	}
 
+}
+
+MessageCapsule Client::readMessage(QDataStream& stream)
+{
+	quint16 typeOfMessage;
+	qint32 messageSize;
+	QByteArray dataBuffer;
+	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
+
+	stream >> typeOfMessage;		/* take the type of incoming message */
+
+	stream >> messageSize;			/* read the size of the message */
+
+	dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
+
+	/* If not all bytes were received with the first chunk, wait for the next chunks
+	to arrive on the socket and append their content to the read buffer */
+	while (dataBuffer.size() < messageSize)
+	{
+		socket->waitForReadyRead();
+		dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
+	}
+
+	MessageCapsule message = MessageFactory::Empty((MessageType)typeOfMessage);
+	message->readFrom(dataStream);
+
+	return message;
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
@@ -135,21 +178,11 @@ void Client::Login() {
 		return;
 	}
 
-	QDataStream in;
-	qint16 typeOfMessage;
-
-	in.setDevice(socket);
-	in >>  typeOfMessage;
-
-	//TODO: aggiungi qua il while di lettura
-	//		alla readFrom passa poi lo stream che crei qua (quello collegato al QByteArray e 
-	//		non "in"
-
-	incomingMessage = MessageFactory::Empty((MessageType) typeOfMessage);
-	incomingMessage->readFrom(in);
+	QDataStream in(socket);
+	incomingMessage = readMessage(in);
 
 	// switch to check the correctness of the type of Message
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case LoginChallenge:
 		break; 
 	case LoginError:
@@ -184,16 +217,9 @@ void Client::Login() {
 		return;
 	}
 
-	in >> typeOfMessage;
+	incomingMessage = readMessage(in);
 
-	//TODO: aggiungi qua il while di lettura
-	//		alla readFrom passa poi lo stream che crei qua (quello collegato al QByteArray e 
-	//		non "in"
-
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
-
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case LoginGranted: {
 		LoginGrantedMessage* loginGranted = dynamic_cast<LoginGrantedMessage*>(incomingMessage.get());
 		emit loginSuccess(loginGranted->getLoggedUser());
@@ -214,7 +240,6 @@ void Client::Login() {
 
 void Client::Register() {
 
-	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 	// Link the stream to the socke and send the byte
@@ -228,11 +253,9 @@ void Client::Register() {
 		return ;
 	}
 
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
+	incomingMessage = readMessage(in);
 
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case AccountConfirmed: {
 		AccountConfirmedMessage* accountConfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 		emit registrationCompleted(accountConfirmed->getUserObj());
@@ -253,19 +276,18 @@ void Client::Register() {
 
 void Client::Logout() {
 
-	quint16 typeOfMessage;
+	/*quint16 typeOfMessage;
 	QDataStream in(socket);
-	MessageCapsule incomingMessage;
+	MessageCapsule incomingMessage;*/
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->sendTo(socket);
-
 }
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
+
 void Client::openDocument(URI URI) {
 
-	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
@@ -278,11 +300,9 @@ void Client::openDocument(URI URI) {
 		return;
 	}
 
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
+	incomingMessage = readMessage(in);
 
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case DocumentReady: {
 		// Open Succeded
 		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
@@ -305,7 +325,6 @@ void Client::openDocument(URI URI) {
 
 void Client::createDocument(QString name) {
 
-	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
@@ -318,11 +337,9 @@ void Client::createDocument(QString name) {
 		return;
 	}
 
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
+	incomingMessage = readMessage(in);
 
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case DocumentReady: {
 		//Document successfully opened
 		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
@@ -346,7 +363,6 @@ void Client::createDocument(QString name) {
 
 void Client::deleteDocument(URI URI) {
 
-	quint16 typeOfMessage;
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
@@ -358,12 +374,9 @@ void Client::deleteDocument(URI URI) {
 		return;
 	}
 
+	incomingMessage = readMessage(in);
 
-	in >> typeOfMessage;
-	incomingMessage = MessageFactory::Empty((MessageType)typeOfMessage);
-	incomingMessage->readFrom(in);
-
-	switch (typeOfMessage) {
+	switch (incomingMessage->getType()) {
 	case DocumentDismissed: {
 		//Document successfully opened
 		emit documentDismissed(URI);
@@ -385,17 +398,15 @@ void Client::deleteDocument(URI URI) {
 
 /*--------------------------- CURSOR HANDLER --------------------------------*/
 
-void Client::sendCursor(qint32 userId,qint32 position) {
+void Client::sendCursor(qint32 userId, qint32 position) {
 
-	quint16 typeOfMessage;
-
-	// Link the stream to the socke and send the byte
-	MessageCapsule moveCursor = MessageFactory::CursorMove(userId,position);
+	// Link the stream to the socket and send the byte
+	MessageCapsule moveCursor = MessageFactory::CursorMove(userId, position);
 	moveCursor->sendTo(socket);
 	return;
 }
 
-void Client::reciveCursor(QDataStream& in) {
+void Client::receiveCursor(QDataStream& in) {
 	
 	MessageCapsule moveCursor = MessageFactory::Empty(CursorMove);
 	moveCursor->readFrom(in);
@@ -406,6 +417,7 @@ void Client::reciveCursor(QDataStream& in) {
 
 
 /*--------------------------- CHARACTER HANDLER --------------------------------*/
+
 void Client::sendChar(Symbol character) {
 
 	MessageCapsule sendChar = MessageFactory::CharInsert(character);
@@ -418,7 +430,7 @@ void Client::removeChar(QVector<int> position)
 	removeChar->sendTo(socket);
 }
 
-void Client::reciveChar(QDataStream& in) {
+void Client::receiveChar(QDataStream& in) {
 
 	MessageCapsule reciveChar = MessageFactory::Empty(CharInsert);
 	reciveChar->readFrom(in);
@@ -436,14 +448,19 @@ void Client::deleteChar(QDataStream& in) {
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
-void Client::sendAccountUpdate(QString nickname, QImage image, QString password) {
-	
-	qint16 typeOfMessage;
+
+void Client::sendAccountUpdate(QString nickname, QImage image, QString password) 
+{
 	QDataStream in(socket);
-	
+	quint16 typeOfMessage;
+	qint32 messageSize;
+	QByteArray dataBuffer;
+	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
+
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
 	accountUpdate->sendTo(socket);
+
 
 	while (true) {
 
@@ -452,12 +469,23 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 			return;
 		}
 
-		in >> typeOfMessage;
+		in >> typeOfMessage;		/* take the type of incoming message */
+		in >> messageSize;			/* read the size of the message */
+
+		dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
+
+		/* If not all bytes were received with the first chunk, wait for the next chunks
+		to arrive on the socket and append their content to the read buffer */
+		while (dataBuffer.size() < messageSize)
+		{
+			socket->waitForReadyRead();
+			dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
+		}
 
 		switch (typeOfMessage) {
 		case AccountConfirmed: {
 			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
-			recivedAccountUpdate->readFrom(in);
+			recivedAccountUpdate->readFrom(dataStream);
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			emit personalAccountModified(accountconfirmed->getUserObj());
@@ -465,7 +493,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		}
 		case AccountError: {
 			MessageCapsule accountError = MessageFactory::Empty(AccountError);
-			accountError->readFrom(in);
+			accountError->readFrom(dataStream);
 			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(accountError.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			emit accountModificationFail(accounterror->getErrorMessage());
@@ -473,7 +501,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		}
 			break;
 		default:
-			messageHandler(typeOfMessage, in);
+			messageHandler((MessageType)typeOfMessage, dataStream);
 			break;
 		}
 	}

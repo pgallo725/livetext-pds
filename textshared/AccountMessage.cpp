@@ -1,5 +1,6 @@
 #include "AccountMessage.h"
 
+
 /*************** ACCOUNT CREATE MESSAGE ***************/
 
 AccountCreateMessage::AccountCreateMessage()
@@ -20,28 +21,19 @@ void AccountCreateMessage::readFrom(QDataStream& stream)
 
 void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 {
-	//QDataStream streamOut(socket);
-	QByteArray dataBuffer;
-	QDataStream streamBuffer(&dataBuffer, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << quint16(0) << qint32(0)
+	stream << AccountCreate << qint32(0)
 		<< m_username
 		<< m_nickname
 		<< m_password
 		<< m_icon;
 
-	streamBuffer.device()->seek(0);
-	streamBuffer << (quint16)AccountCreate
-				 << (qint32)dataBuffer.size() - sizeof(qint32);
-	socket->write(dataBuffer);
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
 	socket->flush();
-
-	//streamOut << (quint16)AccountCreate << bufferData.size() << bufferData;
-
-	/*
-	streamOut << (quint16)AccountCreate << m_username 
-		<< m_nickname << m_icon << m_password;
-	*/
 }
 
 QString AccountCreateMessage::getUsername() const
@@ -84,23 +76,18 @@ void AccountUpdateMessage::readFrom(QDataStream& stream)
 
 void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
 {
-	QByteArray dataBuffer;
-	QDataStream streamBuffer(&dataBuffer, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << quint16(0) << qint32(0)
+	stream << AccountUpdate << qint32(0)
 		<< m_nickname
 		<< m_password
 		<< m_icon;
 
-	streamBuffer.device()->seek(0);
-	streamBuffer << (quint16)AccountUpdate
-		<< (qint32)dataBuffer.size() - sizeof(qint32);
-	socket->write(dataBuffer);
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
 	socket->flush();
-	
-	//streamOut << (quint16)AccountUpdate << bufferData.size() << bufferData;
-
-	//streamOut << (quint16)AccountUpdate << m_nickname << m_icon << m_password;
 }
 
 QString AccountUpdateMessage::getNickname() const
@@ -138,20 +125,15 @@ void AccountConfirmedMessage::readFrom(QDataStream& stream)
 
 void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
 {
-	QByteArray dataBuffer;
-	QDataStream streamBuffer(&dataBuffer, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << quint16(0) << qint32(0) << m_user;
+	stream << AccountConfirmed << qint32(0) << m_user;
 
-	streamBuffer.device()->seek(0);
-	streamBuffer << (quint16)AccountConfirmed
-		<< (qint32)dataBuffer.size() - sizeof(qint32);
-	socket->write(dataBuffer);
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
 	socket->flush();
-
-	//streamOut << (quint16)AccountConfirmed << bufferData.size() << bufferData;
-
-	//streamOut << (quint16)AccountConfirmed << m_user;
 }
 
 User& AccountConfirmedMessage::getUserObj()
@@ -179,20 +161,15 @@ void AccountErrorMessage::readFrom(QDataStream& stream)
 
 void AccountErrorMessage::sendTo(QTcpSocket* socket) const
 {
-	QByteArray dataBuffer;
-	QDataStream streamBuffer(&dataBuffer, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << quint16(0) << qint32(0) << m_error;
+	stream << AccountError << qint32(0) << m_error;
 
-	streamBuffer.device()->seek(0);
-	streamBuffer << (quint16)AccountError
-		<< (qint32)dataBuffer.size() - sizeof(qint32);
-	socket->write(dataBuffer);
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
 	socket->flush();
-
-	//streamOut << (quint16)AccountError << bufferData.size() << bufferData;
-
-	//streamOut << (quint16)AccountError << m_error;
 }
 
 QString AccountErrorMessage::getErrorMessage() const

@@ -38,14 +38,18 @@
 class Client : public QObject
 {
 	Q_OBJECT
+
 private:
+
 	QTcpSocket* socket;
 	QString username;
 	QString nickname;
 	QString password;
 	QImage image;
 	bool login;
+
 signals:
+
 	void connectionEstablished();
 	void impossibleToConnect();
 
@@ -76,15 +80,18 @@ signals:
 	// Symbol Signals
 	void recivedSymbol(Symbol character);
 	void removeSymbol(QVector<int> position);
+
 public:
+
 	Client(QObject* parent = 0);
 	~Client();
 
-	void messageHandler(qint16 typeOfMeassage, QDataStream& in);
-
+	void messageHandler(MessageType typeOfMeassage, QDataStream& in);
+	MessageCapsule readMessage(QDataStream& stream);
 
 public slots:
-	//signals handler
+
+	// signals handler
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
@@ -94,18 +101,18 @@ public slots:
 	void Login();
 	void Register();
 	void Logout();
-	//Data Exchange
+	// Data Exchange
 	void sendCursor(qint32 userId, qint32 position);
-	void reciveCursor(QDataStream& in);
+	void receiveCursor(QDataStream& in);
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
-	void reciveChar(QDataStream& in);
+	void receiveChar(QDataStream& in);
 	void deleteChar(QDataStream& in);
-	//Document handler
+	// Document handler
 	void openDocument(URI URI);
 	void createDocument(QString name);
 	void deleteDocument(URI URI);
-	//Server connection
+	// Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
 	// Setter & Getter
@@ -115,7 +122,7 @@ public slots:
 	void setNickname(QString nickname);
 	void setImage(QImage image);
 	bool getLogin();
-	//Account handler
+	// Account handler
 	void newUserPresence(QDataStream& in);
 	void accountUpdate(QDataStream& in);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);

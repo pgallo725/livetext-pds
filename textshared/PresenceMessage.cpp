@@ -4,7 +4,7 @@
 /*************** CURSOR MOVEMENT MESSAGE ***************/
 
 CursorMoveMessage::CursorMoveMessage()
-	: Message(CursorMove), m_userId(-1)
+	: Message(CursorMove), m_userId(-1), m_cursorPos(0)
 {
 }
 
@@ -20,15 +20,15 @@ void CursorMoveMessage::readFrom(QDataStream& stream)
 
 void CursorMoveMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_userId << m_cursorPos;
+	stream << CursorMove << qint32(0) << m_userId << m_cursorPos;
 
-	streamOut << (quint16)CursorMove << bufferData.size() << bufferData;
-
-	//streamOut << (quint16)CursorMove << m_userId << m_cursorPos;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 qint32 CursorMoveMessage::getUserId() const
@@ -61,14 +61,16 @@ void PresenceUpdateMessage::readFrom(QDataStream& stream)
 
 void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_userId << m_userName << m_userIcon;
+	stream << PresenceUpdate << qint32(0) << m_userId
+		<< m_userName << m_userIcon;
 
-	streamOut << (quint16)PresenceUpdate << bufferData.size() << bufferData;
-	//streamOut << (quint16)PresenceUpdate << m_userId << m_userName << m_userIcon;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 qint32 PresenceUpdateMessage::getUserId() const
@@ -106,14 +108,16 @@ void PresenceAddMessage::readFrom(QDataStream& stream)
 
 void PresenceAddMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_userId << m_userName << m_userIcon;
+	stream << PresenceAdd << qint32(0) << m_userId
+		<< m_userName << m_userIcon;
 
-	streamOut << (quint16)PresenceAdd << bufferData.size() << bufferData;
-	//streamOut << (quint16)PresenceAdd << m_userId << m_userName << m_userIcon;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 qint32 PresenceAddMessage::getUserId() const
@@ -151,14 +155,15 @@ void PresenceRemoveMessage::readFrom(QDataStream& stream)
 
 void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
 {
-	QDataStream streamOut(socket);
-	QByteArray bufferData;
-	QDataStream streamBuffer(&bufferData, QIODevice::WriteOnly);
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	streamBuffer << m_userId;
+	stream << PresenceRemove << qint32(0) << m_userId;
 
-	streamOut << (quint16)PresenceRemove << bufferData.size() << bufferData;
-	//streamOut << (quint16)PresenceRemove << m_userId;
+	stream.device()->seek(sizeof(MessageType));
+	stream << (qint32)buffer.size() - sizeof(qint32);
+	socket->write(buffer);
+	socket->flush();
 }
 
 qint32 PresenceRemoveMessage::getUserId() const

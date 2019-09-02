@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QBuffer>
 
-enum MessageType
+enum MessageType : quint16
 {
 	// Login messages
 	LoginRequest,

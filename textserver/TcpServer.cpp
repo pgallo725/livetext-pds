@@ -523,19 +523,22 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	quint16 mType;
-	int dataSize;
+	qint32 mSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	streamIn >> mType;		 /* take the type of incoming message */
+	streamIn >> mType;		/* take the type of incoming message */
 
-	streamIn >> dataSize;	/* take the size of the message */
+	streamIn >> mSize;		/* read the size of the message */
 
-	dataBuffer = socket->read(dataSize);
+	dataBuffer = socket->read(mSize);	// Read all the available message data from the socket
 
-	while (dataBuffer.size() < dataSize) {
+	/* If not all bytes were received with the first chunk, wait for the next chunks
+	to arrive on the socket and append their content to the read buffer */
+	while (dataBuffer.size() < mSize) 
+	{
 		socket->waitForReadyRead();
-		dataBuffer.append(socket->read((quint64)dataSize - dataBuffer.size()));
+		dataBuffer.append(socket->read((qint64)mSize - dataBuffer.size()));
 	}
 	
 	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
