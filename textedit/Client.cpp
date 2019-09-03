@@ -49,7 +49,7 @@ void Client::readBuffer() {
 	qDebug() << "Reading socket";
 	
 	quint16 typeOfMessage;
-	qint32 messageSize;
+	quint32 messageSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
@@ -103,7 +103,7 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 MessageCapsule Client::readMessage(QDataStream& stream)
 {
 	quint16 typeOfMessage;
-	qint32 messageSize;
+	quint32 messageSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
@@ -203,12 +203,23 @@ void Client::Login() {
 	QString salt = loginChallenge->getSalt();
 
 	qDebug() << "Cripting salt " << nonce;
-	QString result = password + salt + nonce;
+	//QString result = password + salt + nonce;
 	
-	QCryptographicHash hash(QCryptographicHash::Md5);
-	hash.addData(result.toStdString().c_str(), result.length());
+	//QCryptographicHash hash(QCryptographicHash::Md5);
+	//hash.addData(result.toStdString().c_str(), result.length());
 
-	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash.result().toStdString()));
+	//MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash.result().toStdString()));
+
+	QCryptographicHash hash1(QCryptographicHash::Md5);
+	QCryptographicHash hash2(QCryptographicHash::Md5);
+
+	hash1.addData(password.toStdString().c_str(), password.length());
+	hash1.addData(salt.toStdString().c_str(), salt.length());
+
+	hash2.addData(hash1.result().data(), hash1.result().length());
+	hash2.addData(nonce.toStdString().c_str(), nonce.length());
+
+	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash2.result().toStdString()));
 
 	loginUnlock->sendTo(socket);
 
