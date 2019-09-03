@@ -18,7 +18,7 @@ void LogoutMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << Logout << (qint32)0;
+	stream << Logout << (quint32)0;
 
 	socket->write(buffer);
 	socket->flush();

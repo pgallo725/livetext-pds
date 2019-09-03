@@ -24,14 +24,14 @@ void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << AccountCreate << qint32(0)
+	stream << AccountCreate << quint32(0)
 		<< m_username
 		<< m_nickname
 		<< m_password
 		<< m_icon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -79,13 +79,13 @@ void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << AccountUpdate << qint32(0)
+	stream << AccountUpdate << quint32(0)
 		<< m_nickname
 		<< m_password
 		<< m_icon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -128,10 +128,10 @@ void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << AccountConfirmed << qint32(0) << m_user;
+	stream << AccountConfirmed << quint32(0) << m_user;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -164,10 +164,10 @@ void AccountErrorMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << AccountError << qint32(0) << m_error;
+	stream << AccountError << quint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }

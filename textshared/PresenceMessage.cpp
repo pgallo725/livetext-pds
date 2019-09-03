@@ -23,10 +23,10 @@ void CursorMoveMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << CursorMove << qint32(0) << m_userId << m_cursorPos;
+	stream << CursorMove << quint32(0) << m_userId << m_cursorPos;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -64,11 +64,11 @@ void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << PresenceUpdate << qint32(0) << m_userId
+	stream << PresenceUpdate << quint32(0) << m_userId
 		<< m_userName << m_userIcon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -111,11 +111,11 @@ void PresenceAddMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << PresenceAdd << qint32(0) << m_userId
+	stream << PresenceAdd << quint32(0) << m_userId
 		<< m_userName << m_userIcon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -158,10 +158,10 @@ void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << PresenceRemove << qint32(0) << m_userId;
+	stream << PresenceRemove << quint32(0) << m_userId;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }

@@ -523,7 +523,7 @@ void TcpServer::readMessage()
 	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	quint16 mType;
-	qint32 mSize;
+	quint32 mSize;
 	QByteArray dataBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 

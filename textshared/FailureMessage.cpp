@@ -21,10 +21,10 @@ void FailureMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << Failure << qint32(0) << m_error;
+	stream << Failure << quint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }

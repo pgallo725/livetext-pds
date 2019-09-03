@@ -23,10 +23,10 @@ void LoginRequestMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << LoginRequest << qint32(0)	<< m_username;
+	stream << LoginRequest << quint32(0) << m_username;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -59,10 +59,10 @@ void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << LoginChallenge << qint32(0) << m_salt << m_nonce;
+	stream << LoginChallenge << quint32(0) << m_salt << m_nonce;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -100,10 +100,10 @@ void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << LoginUnlock << qint32(0) << m_token;
+	stream << LoginUnlock << quint32(0) << m_token;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -136,10 +136,10 @@ void LoginGrantedMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << LoginGranted << qint32(0) << m_user;
+	stream << LoginGranted << quint32(0) << m_user;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -172,10 +172,10 @@ void LoginErrorMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << LoginError << qint32(0) << m_error;
+	stream << LoginError << quint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }

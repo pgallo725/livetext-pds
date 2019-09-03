@@ -23,10 +23,10 @@ void CharInsertMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << CharInsert << qint32(0) << m_symbol;
+	stream << CharInsert << quint32(0) << m_symbol;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
@@ -59,10 +59,10 @@ void CharDeleteMessage::sendTo(QTcpSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
-	stream << CharDelete << qint32(0) << m_fPos;
+	stream << CharDelete << quint32(0) << m_fPos;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 	socket->write(buffer);
 	socket->flush();
 }
