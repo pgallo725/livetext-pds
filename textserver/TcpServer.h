@@ -59,7 +59,7 @@ public slots:
 	void deleteWorkspace(URI document);
 
 	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);
-	MessageCapsule authenticateUser(QTcpSocket* clientSocket, QString token);
+	MessageCapsule authenticateUser(QTcpSocket* clientSocket, QByteArray token);
 
 	MessageCapsule createAccount(QTcpSocket* clientSocket, QString username, QString nickname, QImage icon, QString password);
 	MessageCapsule updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password);

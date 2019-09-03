@@ -134,7 +134,7 @@ static const uint qt_meta_data_TcpServer[] = {
     0x80000000 | 12, 0x80000000 | 13, 0x80000000 | 5,   14,    6,
     QMetaType::Void, 0x80000000 | 16,   14,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   20,   21,
-    0x80000000 | 18, 0x80000000 | 19, QMetaType::QString,   23,   24,
+    0x80000000 | 18, 0x80000000 | 19, QMetaType::QByteArray,   23,   24,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   23,   21,   26,   27,   28,
     0x80000000 | 18, 0x80000000 | 19, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   23,   26,   27,   28,
     0x80000000 | 18, 0x80000000 | 19, 0x80000000 | 16,    6,   31,
@@ -163,7 +163,7 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 7: _t->deleteWorkspace((*reinterpret_cast< URI(*)>(_a[1]))); break;
         case 8: { MessageCapsule _r = _t->serveLoginRequest((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 9: { MessageCapsule _r = _t->authenticateUser((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 9: { MessageCapsule _r = _t->authenticateUser((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QByteArray(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 10: { MessageCapsule _r = _t->createAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;

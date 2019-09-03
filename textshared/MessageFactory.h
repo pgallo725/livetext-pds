@@ -13,8 +13,8 @@ public:
 	static MessageCapsule Empty(MessageType type);
 
 	static MessageCapsule LoginRequest(QString username);
-	static MessageCapsule LoginChallenge(QString salt, QString nonce);
-	static MessageCapsule LoginUnlock(QString token);
+	static MessageCapsule LoginChallenge(QByteArray salt, QByteArray nonce);
+	static MessageCapsule LoginUnlock(QByteArray token);
 	static MessageCapsule LoginGranted(User user);
 	static MessageCapsule LoginError(QString error);
 

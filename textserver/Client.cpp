@@ -56,17 +56,17 @@ void Client::logout()
 	activeUser = nullptr;
 }
 
-bool Client::authentication(QString token)
+bool Client::authentication(QByteArray token)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
-	hash.addData(activeUser->getPassword());
-	hash.addData(this->nonce.toStdString().c_str(), this->nonce.length());
+	hash.addData(activeUser->getPasswordHash());
+	hash.addData(this->nonce);
 
-	return !QString::fromStdString(hash.result().toStdString()).compare(token);
+	return !hash.result().compare(token);
 }
 
-QString Client::challenge(User* user)
+QByteArray Client::challenge(User* user)
 {
 	activeUser = user;		// store the user which is trying to login on this client
 

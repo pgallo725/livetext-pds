@@ -13,10 +13,9 @@ User::User() : m_userId(-1)
 }
 
 User::User(QString username, int userId, QString nickname, QString passwd, QImage icon)
-	: m_username(username), m_userId(userId), m_nickname(nickname),
-	/*m_passwd(passwd),*/ m_icon(icon), m_salt("")
+	: m_username(username), m_userId(userId), m_nickname(nickname), m_icon(icon)
 {
-	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
+	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated salt sequence
 	{
 		int index = qrand() % saltCharacters.length();
 		QChar nextChar = saltCharacters.at(index);
@@ -25,8 +24,8 @@ User::User(QString username, int userId, QString nickname, QString passwd, QImag
 
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
-	hash.addData(passwd.toStdString().c_str(), passwd.length());
-	hash.addData(m_salt.toStdString().c_str(), m_salt.length());
+	hash.addData(passwd.toUtf8());
+	hash.addData(m_salt);
 
 	m_passwd = hash.result();
 }
@@ -51,7 +50,7 @@ QString User::getNickname()
 	return m_nickname;
 }
 
-QByteArray User::getPassword()
+QByteArray User::getPasswordHash()
 {
 	return m_passwd;
 }
@@ -61,7 +60,7 @@ QImage User::getIcon()
 	return m_icon;
 }
 
-QString User::getSalt()
+QByteArray User::getSalt()
 {
 	return m_salt;
 }
@@ -114,9 +113,9 @@ void User::deleteIcon()
 
 void User::setPassword(QString newPassword)
 {
-	m_salt = "";
+	m_salt.clear();
 
-	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
+	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated salt sequence
 	{
 		int index = qrand() % saltCharacters.length();
 		QChar nextChar = saltCharacters.at(index);
@@ -125,8 +124,8 @@ void User::setPassword(QString newPassword)
 
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
-	hash.addData(newPassword.toStdString().c_str(), newPassword.length());
-	hash.addData(m_salt.toStdString().c_str(), m_salt.length());
+	hash.addData(newPassword.toUtf8());
+	hash.addData(m_salt);
 
 	m_passwd = hash.result();
 }
@@ -140,8 +139,8 @@ QDataStream& operator>>(QDataStream& in, User& user)
 	in >> user.m_username >> user.m_userId >> user.m_nickname
 		>> user.m_passwd
 		>> user.m_salt
-		>> user.m_documents
-		>> user.m_icon;		
+		>> user.m_icon
+		>> user.m_documents;		
 
 	return in;
 }
@@ -153,8 +152,8 @@ QDataStream& operator<<(QDataStream& out, const User& user)
 	out << user.m_username << user.m_userId << user.m_nickname
 		<< user.m_passwd
 		<< user.m_salt
-		<< user.m_documents
-		<< user.m_icon;		
+		<< user.m_icon
+		<< user.m_documents;
 
 	return out;
 }

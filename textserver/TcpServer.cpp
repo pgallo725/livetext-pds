@@ -264,7 +264,7 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 }
 
 /* Authenticate the client's User and apply the login */
-MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QString token)
+MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QByteArray token)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 

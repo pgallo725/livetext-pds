@@ -38,15 +38,15 @@ class LoginChallengeMessage : public Message
 private:
 
 	// TODO IGOR: add m_salt member to enable password hashing
-	QString m_salt;
-	QString m_nonce;
+	QByteArray m_salt;
+	QByteArray m_nonce;
 
 protected:
 
 	LoginChallengeMessage();		// empty constructor
 
 	// Costruct LoginChallenge message with the cryptographic nonce
-	LoginChallengeMessage(QString salt, QString nonce);
+	LoginChallengeMessage(QByteArray salt, QByteArray nonce);
 
 public:
 
@@ -55,8 +55,8 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	QString getSalt() const;
-	QString getNonce() const;
+	QByteArray getSalt() const;
+	QByteArray getNonce() const;
 };
 
 
@@ -67,14 +67,14 @@ class LoginUnlockMessage : public Message
 
 private:
 
-	QString m_token;
+	QByteArray m_token;
 
 protected:
 
 	LoginUnlockMessage();		// empty constructor
 
 	// Costruct LoginUnlock message with the solved cryptographic challenge
-	LoginUnlockMessage(QString token);
+	LoginUnlockMessage(QByteArray token);
 
 public:
 
@@ -83,7 +83,7 @@ public:
 	void readFrom(QDataStream& stream) override;
 	void sendTo(QTcpSocket* socket) const override;
 
-	QString getToken() const;
+	QByteArray getToken() const;
 };
 
 

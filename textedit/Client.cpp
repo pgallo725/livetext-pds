@@ -199,8 +199,8 @@ void Client::Login() {
 	}
 
 	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
-	QString nonce = loginChallenge->getNonce();
-	QString salt = loginChallenge->getSalt();
+	QByteArray nonce = loginChallenge->getNonce();
+	QByteArray salt = loginChallenge->getSalt();
 
 	qDebug() << "Cripting salt " << nonce;
 	//QString result = password + salt + nonce;
@@ -213,13 +213,13 @@ void Client::Login() {
 	QCryptographicHash hash1(QCryptographicHash::Md5);
 	QCryptographicHash hash2(QCryptographicHash::Md5);
 
-	hash1.addData(password.toStdString().c_str(), password.length());
-	hash1.addData(salt.toStdString().c_str(), salt.length());
+	hash1.addData(password.toUtf8());
+	hash1.addData(salt);
 
-	hash2.addData(hash1.result().data(), hash1.result().length());
-	hash2.addData(nonce.toStdString().c_str(), nonce.length());
+	hash2.addData(hash1.result());
+	hash2.addData(nonce);
 
-	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(QString::fromStdString(hash2.result().toStdString()));
+	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(hash2.result());
 
 	loginUnlock->sendTo(socket);
 

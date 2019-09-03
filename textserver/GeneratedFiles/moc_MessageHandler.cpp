@@ -107,7 +107,7 @@ static const uint qt_meta_data_MessageHandler[] = {
 
  // signals: parameters
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
-    0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    8,
+    0x80000000 | 2, 0x80000000 | 4, QMetaType::QByteArray,    5,    8,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   10,    6,   11,   12,   13,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   10,   11,   12,   13,
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,   10,   16,
@@ -130,7 +130,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         switch (_id) {
         case 0: { MessageCapsule _r = _t->loginRequest((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 1: { MessageCapsule _r = _t->loginUnlock((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 1: { MessageCapsule _r = _t->loginUnlock((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QByteArray(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 2: { MessageCapsule _r = _t->accountCreate((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
@@ -240,7 +240,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QString );
+            using _t = MessageCapsule (MessageHandler::*)(QTcpSocket * , QByteArray );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::loginUnlock)) {
                 *result = 1;
                 return;
@@ -369,7 +369,7 @@ MessageCapsule MessageHandler::loginRequest(QTcpSocket * _t1, QString _t2)
 }
 
 // SIGNAL 1
-MessageCapsule MessageHandler::loginUnlock(QTcpSocket * _t1, QString _t2)
+MessageCapsule MessageHandler::loginUnlock(QTcpSocket * _t1, QByteArray _t2)
 {
     MessageCapsule _t0{};
     void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };

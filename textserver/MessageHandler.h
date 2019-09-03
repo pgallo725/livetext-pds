@@ -38,7 +38,7 @@ public:
 
 
 signals: MessageCapsule loginRequest(QTcpSocket* clientSocket, QString username);
-signals: MessageCapsule loginUnlock(QTcpSocket* clientSocket, QString token);
+signals: MessageCapsule loginUnlock(QTcpSocket* clientSocket, QByteArray token);
 
 signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
 signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, QString nickname, QImage icon, QString password);

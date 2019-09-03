@@ -17,8 +17,7 @@ private:
 	int m_userId;
 	QString m_nickname;
 	QByteArray m_passwd;		// hashed
-	QString m_salt;
-	// TODO IGOR: add m_salt as a QByteArray field, generated randomly with Qt methods, for password secure storage
+	QByteArray m_salt;			// randomly generated
 	QImage m_icon;			// nullable, check with QImage::isNull()
 	QList<URI> m_documents;
 
@@ -36,9 +35,9 @@ public:
 	QString getUsername();
 	int getUserId();
 	QString getNickname();
-	QByteArray getPassword();
+	QByteArray getPasswordHash();
+	QByteArray getSalt();
 	QImage getIcon();
-	QString getSalt();
 	QList<URI> getDocuments();
 	bool hasDocument(URI uri);
 	URI getURIat(int index);

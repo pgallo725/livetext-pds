@@ -44,7 +44,7 @@ LoginChallengeMessage::LoginChallengeMessage()
 {
 }
 
-LoginChallengeMessage::LoginChallengeMessage(QString salt, QString nonce)
+LoginChallengeMessage::LoginChallengeMessage(QByteArray salt, QByteArray nonce)
 	: Message(LoginChallenge), m_salt(salt), m_nonce(nonce)
 {
 }
@@ -67,12 +67,12 @@ void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
 	socket->flush();
 }
 
-QString LoginChallengeMessage::getSalt() const
+QByteArray LoginChallengeMessage::getSalt() const
 {
 	return m_salt;
 }
 
-QString LoginChallengeMessage::getNonce() const
+QByteArray LoginChallengeMessage::getNonce() const
 {
 	return m_nonce;
 }
@@ -85,7 +85,7 @@ LoginUnlockMessage::LoginUnlockMessage()
 {
 }
 
-LoginUnlockMessage::LoginUnlockMessage(QString token)
+LoginUnlockMessage::LoginUnlockMessage(QByteArray token)
 	: Message(LoginUnlock), m_token(token)
 {
 }
@@ -108,7 +108,7 @@ void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
 	socket->flush();
 }
 
-QString LoginUnlockMessage::getToken() const
+QByteArray LoginUnlockMessage::getToken() const
 {
 	return m_token;
 }

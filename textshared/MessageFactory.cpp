@@ -50,12 +50,12 @@ MessageCapsule MessageFactory::LoginRequest(QString username)
 	return new LoginRequestMessage(username);
 }
 
-MessageCapsule MessageFactory::LoginChallenge(QString salt, QString nonce)
+MessageCapsule MessageFactory::LoginChallenge(QByteArray salt, QByteArray nonce)
 {
 	return new LoginChallengeMessage(salt, nonce);
 }
 
-MessageCapsule MessageFactory::LoginUnlock(QString token)
+MessageCapsule MessageFactory::LoginUnlock(QByteArray token)
 {
 	return new LoginUnlockMessage(token);
 }

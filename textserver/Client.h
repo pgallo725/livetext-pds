@@ -13,7 +13,7 @@ private:
 	User* activeUser;
 	bool logged;
 
-	QString nonce;
+	QByteArray nonce;
 	static const QString nonceCharacters;
 
 public:
@@ -24,8 +24,8 @@ public:
 	void login(User* user);
 	void logout();
 
-	bool authentication(QString token);
-	QString challenge(User* user);
+	bool authentication(QByteArray token);
+	QByteArray challenge(User* user);
 	bool isLogged();
 
 	/* getters */
