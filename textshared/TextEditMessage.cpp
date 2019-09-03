@@ -26,7 +26,7 @@ void CharInsertMessage::sendTo(QTcpSocket* socket) const
 	stream << CharInsert << qint32(0) << m_symbol;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -62,7 +62,7 @@ void CharDeleteMessage::sendTo(QTcpSocket* socket) const
 	stream << CharDelete << qint32(0) << m_fPos;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }

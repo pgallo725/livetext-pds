@@ -24,7 +24,7 @@ void FailureMessage::sendTo(QTcpSocket* socket) const
 	stream << Failure << qint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }

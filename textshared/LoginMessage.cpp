@@ -26,7 +26,7 @@ void LoginRequestMessage::sendTo(QTcpSocket* socket) const
 	stream << LoginRequest << qint32(0)	<< m_username;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -62,7 +62,7 @@ void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
 	stream << LoginChallenge << qint32(0) << m_salt << m_nonce;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -103,7 +103,7 @@ void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
 	stream << LoginUnlock << qint32(0) << m_token;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -139,7 +139,7 @@ void LoginGrantedMessage::sendTo(QTcpSocket* socket) const
 	stream << LoginGranted << qint32(0) << m_user;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -175,7 +175,7 @@ void LoginErrorMessage::sendTo(QTcpSocket* socket) const
 	stream << LoginError << qint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }

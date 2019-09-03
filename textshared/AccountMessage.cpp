@@ -31,7 +31,7 @@ void AccountCreateMessage::sendTo(QTcpSocket* socket) const
 		<< m_icon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -85,7 +85,7 @@ void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
 		<< m_icon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -131,7 +131,7 @@ void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
 	stream << AccountConfirmed << qint32(0) << m_user;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -167,7 +167,7 @@ void AccountErrorMessage::sendTo(QTcpSocket* socket) const
 	stream << AccountError << qint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }

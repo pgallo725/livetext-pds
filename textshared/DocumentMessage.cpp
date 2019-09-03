@@ -26,7 +26,7 @@ void DocumentCreateMessage::sendTo(QTcpSocket* socket) const
 	stream << DocumentCreate << qint32(0) << m_docName;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -62,7 +62,7 @@ void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
 	stream << DocumentRemove << qint32(0) << m_docURI;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -98,7 +98,7 @@ void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
 	stream << DocumentOpen << qint32(0) << m_docURI;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -158,7 +158,7 @@ void DocumentReadyMessage::sendTo(QTcpSocket* socket) const
 	stream << DocumentReady << qint32(0) << m_document;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -194,7 +194,7 @@ void DocumentErrorMessage::sendTo(QTcpSocket* socket) const
 	stream << DocumentError << qint32(0) << m_error;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }

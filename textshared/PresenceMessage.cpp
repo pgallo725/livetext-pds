@@ -26,7 +26,7 @@ void CursorMoveMessage::sendTo(QTcpSocket* socket) const
 	stream << CursorMove << qint32(0) << m_userId << m_cursorPos;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -68,7 +68,7 @@ void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
 		<< m_userName << m_userIcon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -115,7 +115,7 @@ void PresenceAddMessage::sendTo(QTcpSocket* socket) const
 		<< m_userName << m_userIcon;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
@@ -161,7 +161,7 @@ void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
 	stream << PresenceRemove << qint32(0) << m_userId;
 
 	stream.device()->seek(sizeof(MessageType));
-	stream << (qint32)buffer.size() - sizeof(qint32);
+	stream << (qint32)buffer.size() - sizeof(MessageType) - sizeof(qint32);
 	socket->write(buffer);
 	socket->flush();
 }
