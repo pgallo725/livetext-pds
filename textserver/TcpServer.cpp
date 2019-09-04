@@ -236,6 +236,7 @@ void TcpServer::clientDisconnection()
 
 	qDebug() << " - client disconnected";
 
+	restoreUserAvaiable(clients.find(socket).value()->getUsername());
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close and destroy the socket */
 	socket->deleteLater();
@@ -257,6 +258,9 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 		if (client->isLogged())
 			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
 
+		if(usersNotAvaiable.contains(username))
+			return MessageFactory::LoginError("This user is already logged in ");
+
 		return MessageFactory::LoginChallenge(users.find(username).value().getSalt(),
 			client->challenge(&(users.find(username).value())));
 	}
@@ -271,8 +275,12 @@ MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QByteArray 
 	if (client->isLogged())
 		return MessageFactory::LoginError("You are already logged in");
 
+	if (usersNotAvaiable.contains(client->getUsername()))
+		return MessageFactory::LoginError("This user is already logged in ");
+
 	if (client->authentication(token))
 	{
+		usersNotAvaiable << client->getUsername();
 		client->login(client->getUser());
 		return MessageFactory::LoginGranted(*client->getUser());
 	}
@@ -331,7 +339,9 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
-	clients.find(clientSocket).value()->logout();
+	QSharedPointer<Client> c = clients.find(clientSocket).value();
+	c->logout();
+	restoreUserAvaiable(c->getUsername());
 }
 
 /* Move a client from the workspace that he has exited back to the server */
@@ -348,6 +358,11 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	socket->readAll();
+}
+
+void TcpServer::restoreUserAvaiable(QString username)
+{
+	usersNotAvaiable.removeOne(username);
 }
 
 
@@ -391,7 +406,7 @@ WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QShared
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
 	connect(w, &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
-
+	connect(w, &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
 	return w;
 }
 

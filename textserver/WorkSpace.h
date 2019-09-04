@@ -55,6 +55,6 @@ public slots:
 
 signals: void noEditors(URI documentURI);
 signals: void returnClient(QSharedPointer<Client> client);
-
+signals: void restoreUserAvaiable(QString username);
 };
 

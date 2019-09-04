@@ -125,6 +125,9 @@ void WorkSpace::clientDisconnection()
 	socket->deleteLater();
 	qDebug() << " - client '" << c->getUsername() << "' disconnected";
 	
+	// make this user avaiable to be logged again
+	emit restoreUserAvaiable(c->getUsername());
+
 	// Send to other clients that this client is disconnected
 	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
 
