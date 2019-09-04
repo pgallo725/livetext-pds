@@ -56,7 +56,8 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
-	WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
+	//WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
+	QSharedPointer<WorkSpace> createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
 	void deleteWorkspace(URI document);
 
 	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);

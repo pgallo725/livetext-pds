@@ -1118,7 +1118,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			//Ricavo formato carattere inserio
 			QTextCharFormat fmt = cursor.charFormat();
 
-			emit insertChar(ch, fmt, i);
+			//emit insertChar(ch, fmt, i);
 		}
 	}
 }

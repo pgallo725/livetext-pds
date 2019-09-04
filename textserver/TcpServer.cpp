@@ -395,18 +395,17 @@ void addToIndex(QSharedPointer<Document> doc)
 
 
 /* Create a new worskpace for a document */
-WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
+QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	// TODO IGOR: creare il workspace direttamente dentro uno QSharedPointer ?
-	WorkSpace* w = new WorkSpace(document, users_mutex);
-
+	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, users_mutex));
 	documents.insert(document->getURI(), document);
-	workspaces.insert(document->getURI(), QSharedPointer<WorkSpace>(w));
-
+	workspaces.insert(document->getURI(), w);
+	
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
-	connect(w, &WorkSpace::returnClient, this, &TcpServer::receiveClient);
-	connect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
-	connect(w, &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
+	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
+	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
+	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
+
 	return w;
 }
 
@@ -430,7 +429,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	addToIndex(doc);
 	doc->save();
 
-	WorkSpace* w = createWorkspace(doc, client);
+	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
@@ -449,9 +448,9 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	clients.remove(author);		// remove the Client from the server map
 
 	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));
-	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 
 	return MessageCapsule();
 }
@@ -470,9 +469,8 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
 
-	/* create a new workspace if needed, otherwise get the already existing one */
-	WorkSpace* w = workspaces.contains(docUri) ? 
-		workspaces.find(docUri).value().get() :
+	QSharedPointer<WorkSpace> w = workspaces.contains(docUri) ?
+		workspaces.find(docUri).value() :
 		createWorkspace(doc, client);
 
 	User* user = client->getUser();
@@ -495,9 +493,9 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 	clients.remove(clientSocket);		// remove the Client from the server map
 
 	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 	emit clientToWorkspace(client);
-	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 
 	return MessageCapsule();
 }
