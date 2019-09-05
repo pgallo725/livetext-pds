@@ -14,13 +14,10 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(DOCUMENT_SAVE_TIMEOUT);
 
-	// TODO IGOR: creare il thread già dentro lo shared pointer ? 
-	// forse da problemi con la connect/movetothread, appena riesco a testare questa parte provo
-	QThread* t = new QThread(parent);
-	connect(t, &QThread::finished, t, &QThread::deleteLater);
-	this->moveToThread(t);
-	t->start();
-	workThread = QSharedPointer<QThread>(t);
+	workThread = QSharedPointer<QThread>(new QThread(parent));
+	connect(workThread.get(), &QThread::finished, workThread.get(), &QThread::deleteLater);
+	this->moveToThread(workThread.get());
+	workThread->start();
 }
 
 
@@ -125,6 +122,9 @@ void WorkSpace::clientDisconnection()
 	socket->deleteLater();
 	qDebug() << " - client '" << c->getUsername() << "' disconnected";
 	
+	// make this user avaiable to be logged again	
+	emit restoreUserAvaiable(c->getUsername());
+
 	// Send to other clients that this client is disconnected
 	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
 

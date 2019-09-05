@@ -32,6 +32,7 @@ private:
 	QMap<URI, QSharedPointer<Document>> documents;
 	QMap<URI, QSharedPointer<WorkSpace>> workspaces;
 	QMap<QTcpSocket*, QSharedPointer<Client>> clients;
+	QStringList usersNotAvaiable;
 	qint32 _userIdCounter;
 
 	QTimer time;
@@ -55,7 +56,8 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
-	WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
+	//WorkSpace* createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
+	QSharedPointer<WorkSpace> createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
 	void deleteWorkspace(URI document);
 
 	MessageCapsule serveLoginRequest(QTcpSocket* socket, QString username);
@@ -71,6 +73,8 @@ public slots:
 	void logoutClient(QTcpSocket* clientSocket);
 	void receiveClient(QSharedPointer<Client> client);
 	
+	void restoreUserAvaiable(QString username);
+
 signals: void newSocket(qint64 handle);
 signals: void clientToWorkspace(QSharedPointer<Client> client);
 

@@ -215,8 +215,8 @@ void TcpServer::newClientConnection()
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == nullptr) {
-		qDebug() << "ERROR: no pending connections!\n";
-		throw SocketNullException("::newClientConnection - no pending connections");		// TODO: could be ignored
+		qDebug() << "WARNING: received fake connection signal from Windows\n";
+		return;
 	}
 
 	qDebug() << " - new connection from a client";
@@ -236,6 +236,7 @@ void TcpServer::clientDisconnection()
 
 	qDebug() << " - client disconnected";
 
+	restoreUserAvaiable(clients.find(socket).value()->getUsername());
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close and destroy the socket */
 	socket->deleteLater();
@@ -257,6 +258,9 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 		if (client->isLogged())
 			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
 
+		if(usersNotAvaiable.contains(username))
+			return MessageFactory::LoginError("This user is already logged in ");
+
 		return MessageFactory::LoginChallenge(users.find(username).value().getSalt(),
 			client->challenge(&(users.find(username).value())));
 	}
@@ -271,8 +275,12 @@ MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QByteArray 
 	if (client->isLogged())
 		return MessageFactory::LoginError("You are already logged in");
 
+	if (usersNotAvaiable.contains(client->getUsername()))
+		return MessageFactory::LoginError("This user is already logged in ");
+
 	if (client->authentication(token))
 	{
+		usersNotAvaiable << client->getUsername();
 		client->login(client->getUser());
 		return MessageFactory::LoginGranted(*client->getUser());
 	}
@@ -331,7 +339,9 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QTcpSocket* clientSocket)
 {
-	clients.find(clientSocket).value()->logout();
+	QSharedPointer<Client> c = clients.find(clientSocket).value();
+	c->logout();
+	restoreUserAvaiable(c->getUsername());
 }
 
 /* Move a client from the workspace that he has exited back to the server */
@@ -348,6 +358,11 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	socket->readAll();
+}
+
+void TcpServer::restoreUserAvaiable(QString username)
+{
+	usersNotAvaiable.removeOne(username);
 }
 
 
@@ -380,17 +395,16 @@ void addToIndex(QSharedPointer<Document> doc)
 
 
 /* Create a new worskpace for a document */
-WorkSpace* TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
+QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	// TODO IGOR: creare il workspace direttamente dentro uno QSharedPointer ?
-	WorkSpace* w = new WorkSpace(document, users_mutex);
-
+	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, users_mutex));
 	documents.insert(document->getURI(), document);
-	workspaces.insert(document->getURI(), QSharedPointer<WorkSpace>(w));
-
+	workspaces.insert(document->getURI(), w);
+	
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
-	connect(w, &WorkSpace::returnClient, this, &TcpServer::receiveClient);
-	connect(w, &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
+	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
+	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
+	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
 
 	return w;
 }
@@ -415,7 +429,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	addToIndex(doc);
 	doc->save();
 
-	WorkSpace* w = createWorkspace(doc, client);
+	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
@@ -434,9 +448,9 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	clients.remove(author);		// remove the Client from the server map
 
 	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 	emit clientToWorkspace(std::move(client));
-	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 
 	return MessageCapsule();
 }
@@ -455,9 +469,8 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
 
-	/* create a new workspace if needed, otherwise get the already existing one */
-	WorkSpace* w = workspaces.contains(docUri) ? 
-		workspaces.find(docUri).value().get() :
+	QSharedPointer<WorkSpace> w = workspaces.contains(docUri) ?
+		workspaces.find(docUri).value() :
 		createWorkspace(doc, client);
 
 	User* user = client->getUser();
@@ -480,9 +493,9 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 	clients.remove(clientSocket);		// remove the Client from the server map
 
 	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 	emit clientToWorkspace(client);
-	disconnect(this, &TcpServer::clientToWorkspace, w, &WorkSpace::newClient);
+	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
 
 	return MessageCapsule();
 }
