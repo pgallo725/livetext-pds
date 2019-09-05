@@ -37,7 +37,6 @@ class LoginChallengeMessage : public Message
 
 private:
 
-	// TODO IGOR: add m_salt member to enable password hashing
 	QByteArray m_salt;
 	QByteArray m_nonce;
 

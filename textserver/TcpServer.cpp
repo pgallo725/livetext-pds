@@ -215,8 +215,8 @@ void TcpServer::newClientConnection()
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == nullptr) {
-		qDebug() << "ERROR: no pending connections!\n";
-		throw SocketNullException("::newClientConnection - no pending connections");		// TODO: could be ignored
+		qDebug() << "WARNING: received fake connection signal from Windows\n";
+		return;
 	}
 
 	qDebug() << " - new connection from a client";
