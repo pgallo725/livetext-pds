@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QThread>
 #include <QTimer>
-#include <QMutexLocker>
+#include <QMutex>
 
 #include <Document.h>
 #include "Client.h"

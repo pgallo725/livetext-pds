@@ -23,11 +23,11 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
 
 WorkSpace::~WorkSpace()
 {
-	timer.stop();
-	doc->save();			// Saving changes to the document before closing the workspace
-	doc->unload();			// Unload the document contents from memory until it gets re-opened
+	timer.stop();			// Stop timer which is periodically saving the doc
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
+	doc->save();			// Saving changes to the document before closing the workspace
+	doc->unload();			// Unload the document contents from memory until it gets re-opened
 }
 
 
@@ -161,11 +161,11 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 	User* user = client->getUser();
 	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
 
-	if (!nickname.isNull())
+	if (!nickname.isEmpty())
 		user->setNickname(nickname);
 	if (!icon.isNull())
 		user->setIcon(icon);
-	if (!password.isNull())
+	if (!password.isEmpty())
 		user->setPassword(password);
 
 	// Notify all other clients of the changes in this user's account
