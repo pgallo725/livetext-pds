@@ -16,7 +16,7 @@ void FailureMessage::readFrom(QDataStream& stream)
 	stream >> m_error;
 }
 
-void FailureMessage::sendTo(QTcpSocket* socket) const
+void FailureMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

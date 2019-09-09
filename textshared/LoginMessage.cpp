@@ -18,7 +18,7 @@ void LoginRequestMessage::readFrom(QDataStream& stream)
 	stream >> m_username;
 }
 
-void LoginRequestMessage::sendTo(QTcpSocket* socket) const
+void LoginRequestMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -54,7 +54,7 @@ void LoginChallengeMessage::readFrom(QDataStream& stream)
 	stream >> m_salt >> m_nonce;
 }
 
-void LoginChallengeMessage::sendTo(QTcpSocket* socket) const
+void LoginChallengeMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -95,7 +95,7 @@ void LoginUnlockMessage::readFrom(QDataStream& stream)
 	stream >> m_token;
 }
 
-void LoginUnlockMessage::sendTo(QTcpSocket* socket) const
+void LoginUnlockMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -131,7 +131,7 @@ void LoginGrantedMessage::readFrom(QDataStream& stream)
 	stream >> m_user;
 }
 
-void LoginGrantedMessage::sendTo(QTcpSocket* socket) const
+void LoginGrantedMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -167,7 +167,7 @@ void LoginErrorMessage::readFrom(QDataStream& stream)
 	stream >> m_error;
 }
 
-void LoginErrorMessage::sendTo(QTcpSocket* socket) const
+void LoginErrorMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

@@ -18,7 +18,7 @@ void CursorMoveMessage::readFrom(QDataStream& stream)
 	stream >> m_userId >> m_cursorPos;
 }
 
-void CursorMoveMessage::sendTo(QTcpSocket* socket) const
+void CursorMoveMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -59,7 +59,7 @@ void PresenceUpdateMessage::readFrom(QDataStream& stream)
 	stream >> m_userId >> m_userName >> m_userIcon;
 }
 
-void PresenceUpdateMessage::sendTo(QTcpSocket* socket) const
+void PresenceUpdateMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -106,7 +106,7 @@ void PresenceAddMessage::readFrom(QDataStream& stream)
 	stream >> m_userId >> m_userName >> m_userIcon;
 }
 
-void PresenceAddMessage::sendTo(QTcpSocket* socket) const
+void PresenceAddMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -153,7 +153,7 @@ void PresenceRemoveMessage::readFrom(QDataStream& stream)
 	stream >> m_userId;
 }
 
-void PresenceRemoveMessage::sendTo(QTcpSocket* socket) const
+void PresenceRemoveMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

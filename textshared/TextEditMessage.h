@@ -24,7 +24,7 @@ public:
 	~CharInsertMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	Symbol& getSymbol();
 };
@@ -50,7 +50,7 @@ public:
 	~CharDeleteMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QVector<qint32> getPosition() const;
 };

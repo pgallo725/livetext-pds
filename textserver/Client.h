@@ -1,15 +1,14 @@
 #pragma once
 
 #include "User.h"
-#include <QTcpSocket>	
-
+#include <QSslSocket>	
 
 class Client 
 {
 
 private:
 
-	QTcpSocket* socket;
+	QSslSocket* socket;
 	User* activeUser;
 	bool logged;
 
@@ -18,7 +17,7 @@ private:
 
 public:
 
-	Client(QTcpSocket* s);
+	Client(QSslSocket* s);
 	~Client();
 
 	void login(User* user);
@@ -33,7 +32,7 @@ public:
 	int getUserId();
 	QString getUsername();
 	qintptr getSocketDescriptor();
-	QTcpSocket* getSocket();
+	QSslSocket* getSocket();
 
 };
 

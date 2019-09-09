@@ -24,7 +24,7 @@ public:
 	~LoginRequestMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getUsername() const;
 };
@@ -52,7 +52,7 @@ public:
 	~LoginChallengeMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QByteArray getSalt() const;
 	QByteArray getNonce() const;
@@ -80,7 +80,7 @@ public:
 	~LoginUnlockMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QByteArray getToken() const;
 };
@@ -107,7 +107,7 @@ public:
 	~LoginGrantedMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	User& getLoggedUser();
 };
@@ -134,7 +134,7 @@ public:
 	~LoginErrorMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getErrorMessage() const;
 };

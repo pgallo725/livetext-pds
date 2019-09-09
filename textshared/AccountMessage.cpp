@@ -19,7 +19,7 @@ void AccountCreateMessage::readFrom(QDataStream& stream)
 	stream >> m_username >> m_nickname >> m_password >> m_icon;
 }
 
-void AccountCreateMessage::sendTo(QTcpSocket* socket) const
+void AccountCreateMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -74,7 +74,7 @@ void AccountUpdateMessage::readFrom(QDataStream& stream)
 	stream >> m_nickname >> m_password >> m_icon;
 }
 
-void AccountUpdateMessage::sendTo(QTcpSocket* socket) const
+void AccountUpdateMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -123,7 +123,7 @@ void AccountConfirmedMessage::readFrom(QDataStream& stream)
 	stream >> m_user;
 }
 
-void AccountConfirmedMessage::sendTo(QTcpSocket* socket) const
+void AccountConfirmedMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -159,7 +159,7 @@ void AccountErrorMessage::readFrom(QDataStream& stream)
 	stream >> m_error;
 }
 
-void AccountErrorMessage::sendTo(QTcpSocket* socket) const
+void AccountErrorMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

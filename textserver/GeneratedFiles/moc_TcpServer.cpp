@@ -22,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_TcpServer_t {
-    QByteArrayData data[39];
-    char stringdata0[494];
+    QByteArrayData data[45];
+    char stringdata0[578];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -51,7 +51,7 @@ QT_MOC_LITERAL(15, 214, 15), // "deleteWorkspace"
 QT_MOC_LITERAL(16, 230, 3), // "URI"
 QT_MOC_LITERAL(17, 234, 17), // "serveLoginRequest"
 QT_MOC_LITERAL(18, 252, 14), // "MessageCapsule"
-QT_MOC_LITERAL(19, 267, 11), // "QTcpSocket*"
+QT_MOC_LITERAL(19, 267, 11), // "QSslSocket*"
 QT_MOC_LITERAL(20, 279, 6), // "socket"
 QT_MOC_LITERAL(21, 286, 8), // "username"
 QT_MOC_LITERAL(22, 295, 16), // "authenticateUser"
@@ -70,7 +70,13 @@ QT_MOC_LITERAL(34, 426, 7), // "docName"
 QT_MOC_LITERAL(35, 434, 12), // "openDocument"
 QT_MOC_LITERAL(36, 447, 12), // "logoutClient"
 QT_MOC_LITERAL(37, 460, 13), // "receiveClient"
-QT_MOC_LITERAL(38, 474, 19) // "restoreUserAvaiable"
+QT_MOC_LITERAL(38, 474, 19), // "restoreUserAvaiable"
+QT_MOC_LITERAL(39, 494, 18), // "incomingConnection"
+QT_MOC_LITERAL(40, 513, 7), // "qintptr"
+QT_MOC_LITERAL(41, 521, 9), // "socketErr"
+QT_MOC_LITERAL(42, 531, 28), // "QAbstractSocket::SocketError"
+QT_MOC_LITERAL(43, 560, 11), // "socketError"
+QT_MOC_LITERAL(44, 572, 5) // "ready"
 
     },
     "TcpServer\0newSocket\0\0handle\0"
@@ -80,13 +86,15 @@ QT_MOC_LITERAL(38, 474, 19) // "restoreUserAvaiable"
     "createWorkspace\0QSharedPointer<WorkSpace>\0"
     "QSharedPointer<Document>\0document\0"
     "deleteWorkspace\0URI\0serveLoginRequest\0"
-    "MessageCapsule\0QTcpSocket*\0socket\0"
+    "MessageCapsule\0QSslSocket*\0socket\0"
     "username\0authenticateUser\0clientSocket\0"
     "token\0createAccount\0nickname\0icon\0"
     "password\0updateAccount\0removeDocument\0"
     "docUri\0createDocument\0author\0docName\0"
     "openDocument\0logoutClient\0receiveClient\0"
-    "restoreUserAvaiable"
+    "restoreUserAvaiable\0incomingConnection\0"
+    "qintptr\0socketErr\0QAbstractSocket::SocketError\0"
+    "socketError\0ready"
 };
 #undef QT_MOC_LITERAL
 
@@ -96,7 +104,7 @@ static const uint qt_meta_data_TcpServer[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      18,   14, // methods
+      21,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -104,26 +112,29 @@ static const uint qt_meta_data_TcpServer[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    1,  104,    2, 0x06 /* Public */,
-       4,    1,  107,    2, 0x06 /* Public */,
+       1,    1,  119,    2, 0x06 /* Public */,
+       4,    1,  122,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       7,    0,  110,    2, 0x0a /* Public */,
-       8,    0,  111,    2, 0x0a /* Public */,
-       9,    0,  112,    2, 0x0a /* Public */,
-      10,    0,  113,    2, 0x0a /* Public */,
-      11,    2,  114,    2, 0x0a /* Public */,
-      15,    1,  119,    2, 0x0a /* Public */,
-      17,    2,  122,    2, 0x0a /* Public */,
-      22,    2,  127,    2, 0x0a /* Public */,
-      25,    5,  132,    2, 0x0a /* Public */,
-      29,    4,  143,    2, 0x0a /* Public */,
-      30,    2,  152,    2, 0x0a /* Public */,
-      32,    2,  157,    2, 0x0a /* Public */,
-      35,    2,  162,    2, 0x0a /* Public */,
-      36,    1,  167,    2, 0x0a /* Public */,
-      37,    1,  170,    2, 0x0a /* Public */,
-      38,    1,  173,    2, 0x0a /* Public */,
+       7,    0,  125,    2, 0x0a /* Public */,
+       8,    0,  126,    2, 0x0a /* Public */,
+       9,    0,  127,    2, 0x0a /* Public */,
+      10,    0,  128,    2, 0x0a /* Public */,
+      11,    2,  129,    2, 0x0a /* Public */,
+      15,    1,  134,    2, 0x0a /* Public */,
+      17,    2,  137,    2, 0x0a /* Public */,
+      22,    2,  142,    2, 0x0a /* Public */,
+      25,    5,  147,    2, 0x0a /* Public */,
+      29,    4,  158,    2, 0x0a /* Public */,
+      30,    2,  167,    2, 0x0a /* Public */,
+      32,    2,  172,    2, 0x0a /* Public */,
+      35,    2,  177,    2, 0x0a /* Public */,
+      36,    1,  182,    2, 0x0a /* Public */,
+      37,    1,  185,    2, 0x0a /* Public */,
+      38,    1,  188,    2, 0x0a /* Public */,
+      39,    1,  191,    2, 0x0a /* Public */,
+      41,    1,  194,    2, 0x0a /* Public */,
+      44,    0,  197,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::LongLong,    3,
@@ -146,6 +157,9 @@ static const uint qt_meta_data_TcpServer[] = {
     QMetaType::Void, 0x80000000 | 19,   23,
     QMetaType::Void, 0x80000000 | 5,    6,
     QMetaType::Void, QMetaType::QString,   21,
+    QMetaType::Void, 0x80000000 | 40,    3,
+    QMetaType::Void, 0x80000000 | 42,   43,
+    QMetaType::Void,
 
        0        // eod
 };
@@ -165,23 +179,26 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 6: { QSharedPointer<WorkSpace> _r = _t->createWorkspace((*reinterpret_cast< QSharedPointer<Document>(*)>(_a[1])),(*reinterpret_cast< QSharedPointer<Client>(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< QSharedPointer<WorkSpace>*>(_a[0]) = std::move(_r); }  break;
         case 7: _t->deleteWorkspace((*reinterpret_cast< URI(*)>(_a[1]))); break;
-        case 8: { MessageCapsule _r = _t->serveLoginRequest((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 8: { MessageCapsule _r = _t->serveLoginRequest((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 9: { MessageCapsule _r = _t->authenticateUser((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QByteArray(*)>(_a[2])));
+        case 9: { MessageCapsule _r = _t->authenticateUser((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QByteArray(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 10: { MessageCapsule _r = _t->createAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
+        case 10: { MessageCapsule _r = _t->createAccount((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QString(*)>(_a[3])),(*reinterpret_cast< QImage(*)>(_a[4])),(*reinterpret_cast< QString(*)>(_a[5])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 11: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
+        case 11: { MessageCapsule _r = _t->updateAccount((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 12: { MessageCapsule _r = _t->removeDocument((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
+        case 12: { MessageCapsule _r = _t->removeDocument((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 13: { MessageCapsule _r = _t->createDocument((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
+        case 13: { MessageCapsule _r = _t->createDocument((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 14: { MessageCapsule _r = _t->openDocument((*reinterpret_cast< QTcpSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
+        case 14: { MessageCapsule _r = _t->openDocument((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< URI(*)>(_a[2])));
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
-        case 15: _t->logoutClient((*reinterpret_cast< QTcpSocket*(*)>(_a[1]))); break;
+        case 15: _t->logoutClient((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
         case 16: _t->receiveClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
         case 17: _t->restoreUserAvaiable((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 18: _t->incomingConnection((*reinterpret_cast< qintptr(*)>(_a[1]))); break;
+        case 19: _t->socketErr((*reinterpret_cast< QAbstractSocket::SocketError(*)>(_a[1]))); break;
+        case 20: _t->ready(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -198,35 +215,35 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
         case 9:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
         case 10:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
         case 11:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
         case 12:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
             }
@@ -235,14 +252,14 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
         case 14:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
             }
@@ -251,7 +268,21 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QTcpSocket* >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
+            }
+            break;
+        case 18:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< qintptr >(); break;
+            }
+            break;
+        case 19:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QAbstractSocket::SocketError >(); break;
             }
             break;
         }
@@ -303,13 +334,13 @@ int TcpServer::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 18)
+        if (_id < 21)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 18;
+        _id -= 21;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 18)
+        if (_id < 21)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 18;
+        _id -= 21;
     }
     return _id;
 }

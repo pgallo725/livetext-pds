@@ -27,7 +27,7 @@ public:
 	~AccountCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getUsername() const;
 	QString getNickname() const;
@@ -59,7 +59,7 @@ public:
 	~AccountUpdateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getNickname() const;
 	QImage getIcon() const;
@@ -88,7 +88,7 @@ public:
 	~AccountConfirmedMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	User& getUserObj();
 };
@@ -115,7 +115,7 @@ public:
 	~AccountErrorMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getErrorMessage() const;
 };

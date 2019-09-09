@@ -4,16 +4,15 @@
 #include <QThread>
 #include <QTimer>
 #include <QMutex>
+#include <QSslSocket>
 
 #include <Document.h>
 #include "Client.h"
 #include "MessageHandler.h"
 #include "ServerException.h"
+#include "SocketBuffer.h"
 
 #define DOCUMENT_SAVE_TIMEOUT 5000	/* ms */
-
-
-class TcpServer;
 
 class WorkSpace : public QObject
 {
@@ -25,13 +24,15 @@ private:
 
 	QSharedPointer<Document> doc;
 	QSharedPointer<QThread> workThread;
-	QMap<QTcpSocket*, QSharedPointer<Client>> editors;
+	QMap<QSslSocket*, QSharedPointer<Client>> editors;
 
 	QTimer timer;
 
 	MessageHandler messageHandler;
 
 	QMutex& users_mutex;
+
+	SocketBuffer socketBuffer;
 
 public:
 
@@ -48,10 +49,10 @@ public slots:
 	void documentInsertSymbol(Symbol& symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
 
-	void dispatchMessage(MessageCapsule message, QTcpSocket* sender);
+	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 
-	MessageCapsule updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password);
-	void clientQuit(QTcpSocket* clientSocket);
+	MessageCapsule updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
+	void clientQuit(QSslSocket* clientSocket);
 
 signals: void noEditors(URI documentURI);
 signals: void returnClient(QSharedPointer<Client> client);
