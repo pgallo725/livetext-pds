@@ -66,14 +66,7 @@ void WorkSpace::readMessage()
 	QByteArray dataBuffer;
 
 	if (!socketBuffer.getDataSize()) {
-		quint16 mType;
-		quint32 mSize;
-
-		streamIn >> mType;		/* take the type of incoming message */
-		streamIn >> mSize;		/* read the size of the message */
-
-		socketBuffer.setType(mType);
-		socketBuffer.setDataSize(mSize);
+		streamIn >> socketBuffer;
 	}
 
 	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));	// Read all the available message data from the socket
