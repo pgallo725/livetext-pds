@@ -2,14 +2,19 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QDataStream>
 
 class SocketBuffer
 {
 	friend class TcpServer;
 	friend class WorkSpace;
+
+	/* Operators for QDataStream deserialization */
+	friend QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer);			// Input
+
 private:
-	quint16 type;
-	quint32 size;
+	quint16 mType;
+	quint32 mSize;
 	QByteArray buffer;
 
 public:
