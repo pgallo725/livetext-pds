@@ -8,6 +8,7 @@ class SocketBuffer
 {
 	friend class TcpServer;
 	friend class WorkSpace;
+	friend class Client;
 
 	/* Operators for QDataStream deserialization */
 	friend QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer);			// Input

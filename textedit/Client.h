@@ -28,6 +28,7 @@
 #include <DocumentMessage.h>
 #include <MessageFactory.h>
 #include <TextEditMessage.h>
+#include <SocketBuffer.h>
 
 
 //File for DataStructure
@@ -35,16 +36,20 @@
 #include <Symbol.h>
 #include <Document.h>
 
+
+#define READYREAD_TIMEOUT 10000
+
 class Client : public QObject
 {
 	Q_OBJECT
 
 private:
 
-	QTcpSocket* socket;
+	QSslSocket* socket;
 	QString username;
 	QString nickname;
 	QString password;
+	SocketBuffer socketBuffer;
 	QImage image;
 	bool login;
 
