@@ -3,11 +3,14 @@
 
 Client::Client(QObject* parent) : QObject(parent)
 {
-	socket = new QTcpSocket(this);
+	socket = new QSslSocket(this);
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
+	connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
+	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
+	//connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
+	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
 		[&](QAbstractSocket::SocketError socketError) { // Error in connection
@@ -27,8 +30,29 @@ void Client::writeOnServer()
 
 }
 
+void Client::handleSslErrors(const QList<QSslError>& sslErrors)
+{
+	// Ignoring SSL errors for self-signed certificate and hostname mismatch (expected errors)
+	if (sslErrors.size() == 2)
+	{
+		QList<QSslError>::const_iterator i = sslErrors.cbegin();
+		if (i->error() == QSslError::HostNameMismatch && (i + 1)->error() == QSslError::SelfSignedCertificate)
+		{
+			socket->ignoreSslErrors();
+		}
+	}
+	else
+	{
+		qDebug() << "Encountered SSL errors: " << sslErrors << endl;
+	}
+}
+
 void Client::serverConnection() {
 	qDebug() << "Connection established";
+}
+
+void Client::ready() {
+	qDebug() << "Encryption ready";
 	emit connectionEstablished();
 }
 
@@ -102,26 +126,53 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 
 MessageCapsule Client::readMessage(QDataStream& stream)
 {
-	quint16 typeOfMessage;
-	quint32 messageSize;
 	QByteArray dataBuffer;
+	SocketBuffer socketBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	stream >> typeOfMessage;		/* take the type of incoming message */
-
-	stream >> messageSize;			/* read the size of the message */
-
-	dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
+	stream >> socketBuffer;
 
 	/* If not all bytes were received with the first chunk, wait for the next chunks
 	to arrive on the socket and append their content to the read buffer */
-	while (dataBuffer.size() < messageSize)
-	{
-		socket->waitForReadyRead();
-		dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
-	}
+	do {
 
-	MessageCapsule message = MessageFactory::Empty((MessageType)typeOfMessage);
+		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
+
+			switch (socketBuffer.getType())
+			{
+			case LoginChallenge:
+			case LoginError:
+			case LoginGranted:
+				emit loginFailed(tr("Server not responding"));
+				break;
+		
+			case AccountConfirmed:
+			case AccountError:
+				emit registrationFailed(tr("Server not responding"));
+				break;
+			case DocumentReady:
+			case DocumentError:
+				emit openFileFailed(tr("Server not responding"));
+
+			case DocumentDismissed:
+				emit removeFileFailed(tr("Server not responding"));
+			default:
+				break;
+			}
+			
+			return MessageCapsule();
+		}
+
+		dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());	
+
+	} while (socketBuffer.getDataSize() > socketBuffer.getReadDataSize());
+
+
+		// Read all the available message data from the socket
+
+
+
+	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 	message->readFrom(dataStream);
 
 	return message;
@@ -129,7 +180,6 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHost(ipAddress, port);
-	return;
 }
 
 void Client::Disconnect() {
@@ -168,18 +218,19 @@ bool Client::getLogin() {
 
 void Client::Login() {
 
+	SocketBuffer sock;
+
+	sock.buffer;
+
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
 
 	loginRequest->sendTo(socket);
 
-	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed("Server not responding");
-		return;
-	}
-
 	QDataStream in(socket);
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	// switch to check the correctness of the type of Message
 	switch (incomingMessage->getType()) {
@@ -223,12 +274,9 @@ void Client::Login() {
 
 	loginUnlock->sendTo(socket);
 
-	if (!socket->waitForReadyRead(10000)) {
-		emit loginFailed(tr("Server not responding"));
-		return;
-	}
-
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	switch (incomingMessage->getType()) {
 	case LoginGranted: {
@@ -259,12 +307,9 @@ void Client::Register() {
 	accountCreate->sendTo(socket);
 
 	//wait the response from the server
-	if (!socket->waitForReadyRead(10000)) {
-		emit registrationFailed(tr("Server not responding"));
-		return ;
-	}
-
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	switch (incomingMessage->getType()) {
 	case AccountConfirmed: {
@@ -306,12 +351,10 @@ void Client::openDocument(URI URI) {
 	openDocument->sendTo(socket);
 
 	//wait the response from the server
-	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed(tr("Server not responding"));
-		return;
-	}
 
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	switch (incomingMessage->getType()) {
 	case DocumentReady: {
@@ -343,12 +386,10 @@ void Client::createDocument(QString name) {
 	newDocument->sendTo(socket);
 
 	//wait the response from the server
-	if (!socket->waitForReadyRead(10000)) {
-		emit openFileFailed(tr("Server not responding"));
-		return;
-	}
 
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	switch (incomingMessage->getType()) {
 	case DocumentReady: {
@@ -380,12 +421,9 @@ void Client::deleteDocument(URI URI) {
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
 
-	if (!socket->waitForReadyRead(10000)) {
-		emit removeFileFailed(tr("Server not responding"));
-		return;
-	}
-
 	incomingMessage = readMessage(in);
+	if (!incomingMessage)
+		return;
 
 	switch (incomingMessage->getType()) {
 	case DocumentDismissed: {
@@ -475,7 +513,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 	while (true) {
 
-		if (!socket->waitForReadyRead(10000)) {
+		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 			emit accountModificationFail(tr("Server not responding"));
 			return;
 		}

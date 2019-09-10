@@ -48,6 +48,28 @@ TcpServer::TcpServer(QObject* parent)
 	}
 	else
 	{
+		qDebug() << "Qt built with SSL version: " << QSslSocket::sslLibraryBuildVersionString();
+		qDebug() << "SSL version supported on this system: " << QSslSocket::supportsSsl() << endl;
+
+		QSslCipher ECDHE_RSA_cipher;
+		for (QSslCipher cipher : QSslConfiguration::supportedCiphers())
+		{
+			if (cipher.name() == "ECDHE-RSA-AES256-GCM-SHA384")
+			{
+				ECDHE_RSA_cipher = cipher;
+				break;
+			}
+		}
+
+		if (ECDHE_RSA_cipher.isNull())
+		{
+			qDebug() << "Server does not support the requested SSL cipher";
+			return;
+		}
+
+		config.setCiphers(QList<QSslCipher>{ ECDHE_RSA_cipher });
+		qDebug() << "Preferred SSL ciphers: " << config.ciphers() << endl;
+
 		/* Get IP address and port */
 		QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
 		QString ip_address = this->serverAddress().toString();
@@ -211,7 +233,7 @@ void TcpServer::saveUsers()
 void TcpServer::newClientConnection()
 {
 	/* need to grab the socket - socket is created as a child of server */
-	QTcpSocket* socket = this->nextPendingConnection();
+	QSslSocket* socket = dynamic_cast<QSslSocket*>(this->nextPendingConnection());
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == nullptr) {
@@ -225,14 +247,14 @@ void TcpServer::newClientConnection()
 	clients.insert(socket, client);
 
 	/* connect slots to be able to read messages */
-	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	connect(socket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
+	connect(socket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 }
 
 /* Handle client disconnection and release resources */
 void TcpServer::clientDisconnection()
 {
-	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 
 	qDebug() << " - client disconnected";
 
@@ -243,11 +265,48 @@ void TcpServer::clientDisconnection()
 }
 
 
+/****************************** SSL METHODS ******************************/
+
+
+void TcpServer::socketErr(QAbstractSocket::SocketError socketError)
+{
+	qDebug() << "Socket error: " << socketError << endl;
+}
+
+void TcpServer::ready()
+{
+	qDebug() << "Server encryption setup completed" << endl;
+}
+
+void TcpServer::incomingConnection(qintptr socketDescriptor)
+{
+	QSslSocket* serverSocket = new QSslSocket;
+	connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
+
+	if (serverSocket->setSocketDescriptor(socketDescriptor))
+	{
+		serverSocket->setSslConfiguration(config);
+		serverSocket->setPrivateKey("server.key", QSsl::Rsa, QSsl::Pem, "LiveTextKey");
+		serverSocket->setLocalCertificate("server.pem", QSsl::Pem);
+
+		qDebug() << "Created new SSL socket with certificate " << serverSocket->localCertificate() << endl;;
+
+		addPendingConnection(serverSocket);
+		connect(serverSocket, &QSslSocket::encrypted, this, &TcpServer::ready);
+		serverSocket->startServerEncryption();
+	}
+	else
+	{
+		delete serverSocket;
+	}
+}
+
+
 /****************************** ACCOUNT METHODS ******************************/
 
 
 /* create a new client and send nonce to be solved for authentication */
-MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString username)
+MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString username)
 {
 	qDebug() << "si e' collegato: " << username;
 
@@ -268,7 +327,7 @@ MessageCapsule TcpServer::serveLoginRequest(QTcpSocket* clientSocket, QString us
 }
 
 /* Authenticate the client's User and apply the login */
-MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QByteArray token)
+MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray token)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
@@ -292,7 +351,7 @@ MessageCapsule TcpServer::authenticateUser(QTcpSocket* clientSocket, QByteArray 
 }
 
 /* Create a new User and register it on the server */
-MessageCapsule TcpServer::createAccount(QTcpSocket* socket, QString username, QString nickname, QImage icon, QString password)
+MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = clients.find(socket).value();
 	if (client->isLogged())
@@ -316,7 +375,7 @@ MessageCapsule TcpServer::createAccount(QTcpSocket* socket, QString username, QS
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
+MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
 
@@ -337,7 +396,7 @@ MessageCapsule TcpServer::updateAccount(QTcpSocket* clientSocket, QString nickna
 
 
 /* Changes the state of a Client object to "logged out" */
-void TcpServer::logoutClient(QTcpSocket* clientSocket)
+void TcpServer::logoutClient(QSslSocket* clientSocket)
 {
 	QSharedPointer<Client> c = clients.find(clientSocket).value();
 	c->logout();
@@ -348,14 +407,14 @@ void TcpServer::logoutClient(QTcpSocket* clientSocket)
 void TcpServer::receiveClient(QSharedPointer<Client> client)
 {
 	/* get the client's socket and bring it back to the server thread */
-	QTcpSocket* socket = client->getSocket();
+	QSslSocket* socket = client->getSocket();
 	socket->setParent(this);
 
 	clients.insert(socket, client);
 
 	/* reconnect socket signals to slots in order to read and handle messages */
-	connect(socket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	connect(socket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	connect(socket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
+	connect(socket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	socket->readAll();
 }
@@ -410,7 +469,7 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 }
 
 /* Create a new Document */
-MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
+MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 {
 	QSharedPointer<Client> client = clients.find(author).value();
 
@@ -437,11 +496,11 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 	doc->insertNewEditor(client->getUsername());
 
 	/* this thread will not receives more messages from client */
-	disconnect(author, &QTcpSocket::readyRead, this, &TcpServer::readMessage);	
-	disconnect(author, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(author, &QSslSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(author, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	/* move the socket's affinity to the workspace thread */
-	QTcpSocket* s = client->getSocket();
+	QSslSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(w->thread());
 
@@ -456,7 +515,7 @@ MessageCapsule TcpServer::createDocument(QTcpSocket* author, QString docName)
 }
 
 /* Open an existing Document */
-MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
+MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
@@ -482,11 +541,11 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 	doc->insertNewEditor(user->getUsername());
 
 	/* this thread will not recives more messages from client */
-	disconnect(clientSocket, &QTcpSocket::readyRead, this, &TcpServer::readMessage);
-	disconnect(clientSocket, &QTcpSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	/* move the socket's affinity to the workspace thread */
-	QTcpSocket* s = client->getSocket();
+	QSslSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(w->thread());
 
@@ -501,7 +560,7 @@ MessageCapsule TcpServer::openDocument(QTcpSocket* clientSocket, URI docUri)
 }
 
 /* Delete a document from the client's list */
-MessageCapsule TcpServer::removeDocument(QTcpSocket* clientSocket, URI docUri)
+MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
@@ -533,39 +592,37 @@ void TcpServer::deleteWorkspace(URI document)
 /* Read the message from the socket and create the correct type message for the handler */
 void TcpServer::readMessage()
 {
-	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 	QDataStream streamIn(socket);	/* connect stream with socket */
-	quint16 mType;
-	quint32 mSize;
 	QByteArray dataBuffer;
-	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	streamIn >> mType;		/* take the type of incoming message */
-
-	streamIn >> mSize;		/* read the size of the message */
-
-	dataBuffer = socket->read(mSize);	// Read all the available message data from the socket
-
-	/* If not all bytes were received with the first chunk, wait for the next chunks
-	to arrive on the socket and append their content to the read buffer */
-	while (dataBuffer.size() < mSize) 
-	{
-		socket->waitForReadyRead();
-		dataBuffer.append(socket->read((qint64)mSize - dataBuffer.size()));
+	if (!socketBuffer.getDataSize()) {
+		streamIn >> socketBuffer;
 	}
-	
-	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-	message->readFrom(dataStream);
 
-	if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
-		mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
-	{
-		messageHandler.process(message, socket);
-	}
-	else
-	{
-		message = MessageFactory::Failure("Unknown message type : " + mType);
-		message->sendTo(socket);
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));	// Read all the available message data from the socket
+
+	socketBuffer.append(dataBuffer);
+
+	if (socketBuffer.bufferReadyRead()) {
+		
+		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		quint16 mType = socketBuffer.getType();
+		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+		message->readFrom(dataStream);
+
+		socketBuffer.clear();
+
+		if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
+			mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+		{
+			messageHandler.process(message, socket);
+		}
+		else
+		{
+			message = MessageFactory::Failure("Unknown message type : " + mType);
+			message->sendTo(socket);
+		}
 	}
 }
 

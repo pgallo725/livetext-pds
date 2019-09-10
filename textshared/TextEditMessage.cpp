@@ -18,7 +18,7 @@ void CharInsertMessage::readFrom(QDataStream& stream)
 	stream >> m_symbol;
 }
 
-void CharInsertMessage::sendTo(QTcpSocket* socket) const
+void CharInsertMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -54,7 +54,7 @@ void CharDeleteMessage::readFrom(QDataStream& stream)
 	stream >> m_fPos;
 }
 
-void CharDeleteMessage::sendTo(QTcpSocket* socket) const
+void CharDeleteMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

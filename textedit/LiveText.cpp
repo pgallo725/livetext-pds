@@ -170,7 +170,7 @@ void LiveText::openDocumentCompleted(Document doc)
 		_user.addDocument(doc.getURI());
 	}
 
-	_docEditor->openDocument();
+	//_docEditor->openDocument();
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();

@@ -18,7 +18,7 @@ void DocumentCreateMessage::readFrom(QDataStream& stream)
 	stream >> m_docName;
 }
 
-void DocumentCreateMessage::sendTo(QTcpSocket* socket) const
+void DocumentCreateMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -54,7 +54,7 @@ void DocumentRemoveMessage::readFrom(QDataStream& stream)
 	stream >> m_docURI;
 }
 
-void DocumentRemoveMessage::sendTo(QTcpSocket* socket) const
+void DocumentRemoveMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -90,7 +90,7 @@ void DocumentOpenMessage::readFrom(QDataStream& stream)
 	stream >> m_docURI;
 }
 
-void DocumentOpenMessage::sendTo(QTcpSocket* socket) const
+void DocumentOpenMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -121,7 +121,7 @@ void DocumentDismissedMessage::readFrom(QDataStream& stream)
 	// NO CONTENT TO READ
 }
 
-void DocumentDismissedMessage::sendTo(QTcpSocket* socket) const
+void DocumentDismissedMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -150,7 +150,7 @@ void DocumentReadyMessage::readFrom(QDataStream& stream)
 	stream >> m_document;
 }
 
-void DocumentReadyMessage::sendTo(QTcpSocket* socket) const
+void DocumentReadyMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -186,7 +186,7 @@ void DocumentErrorMessage::readFrom(QDataStream& stream)
 	stream >> m_error;
 }
 
-void DocumentErrorMessage::sendTo(QTcpSocket* socket) const
+void DocumentErrorMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

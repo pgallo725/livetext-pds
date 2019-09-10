@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <QTcpSocket>
+#include <QSslSocket>
 
 #include <Message.h>
 #include <User.h>
@@ -32,26 +32,26 @@ public:
 	MessageHandler(WorkSpace* w);
 	MessageHandler(TcpServer* s);
 
-	void process(MessageCapsule message, QTcpSocket* sender);
+	void process(MessageCapsule message, QSslSocket* sender);
 
 	~MessageHandler();
 
 
-signals: MessageCapsule loginRequest(QTcpSocket* clientSocket, QString username);
-signals: MessageCapsule loginUnlock(QTcpSocket* clientSocket, QByteArray token);
+signals: MessageCapsule loginRequest(QSslSocket* clientSocket, QString username);
+signals: MessageCapsule loginUnlock(QSslSocket* clientSocket, QByteArray token);
 
-signals: MessageCapsule accountCreate(QTcpSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
-signals: MessageCapsule accountUpdate(QTcpSocket* çlientSocket, QString nickname, QImage icon, QString password);
+signals: MessageCapsule accountCreate(QSslSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
+signals: MessageCapsule accountUpdate(QSslSocket* çlientSocket, QString nickname, QImage icon, QString password);
 
-signals: MessageCapsule documentCreate(QTcpSocket* çlientSocket, QString docName);
-signals: MessageCapsule documentOpen(QTcpSocket* çlientSocket, URI docUri);
-signals: MessageCapsule documentRemove(QTcpSocket* çlientSocket, URI docUri);
+signals: MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName);
+signals: MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri);
+signals: MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
 signals: void charInsert(Symbol& s);
 signals: void charDelete(QVector<qint32> pos);
-signals: void messageDispatch(MessageCapsule message, QTcpSocket* sender);
+signals: void messageDispatch(MessageCapsule message, QSslSocket* sender);
 
-signals: void removePresence(QTcpSocket* clientSocket);
-signals: void userLogout(QTcpSocket* clientSocket);
+signals: void removePresence(QSslSocket* clientSocket);
+signals: void userLogout(QSslSocket* clientSocket);
 
 };

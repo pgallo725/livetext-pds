@@ -13,7 +13,7 @@ void LogoutMessage::readFrom(QDataStream& stream)
 	// NO MESSAGE CONTENT
 }
 
-void LogoutMessage::sendTo(QTcpSocket* socket) const
+void LogoutMessage::sendTo(QSslSocket* socket) const
 {
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);

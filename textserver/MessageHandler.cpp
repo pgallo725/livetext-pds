@@ -45,7 +45,7 @@ MessageHandler::MessageHandler(TcpServer* s)
 }
 
 
-void MessageHandler::process(MessageCapsule message, QTcpSocket* socket)
+void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 {
 
 	switch (message->getType())

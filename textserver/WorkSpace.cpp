@@ -23,22 +23,22 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
 
 WorkSpace::~WorkSpace()
 {
-	timer.stop();
-	doc->save();			// Saving changes to the document before closing the workspace
-	doc->unload();			// Unload the document contents from memory until it gets re-opened
+	timer.stop();			// Stop timer which is periodically saving the doc
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
+	doc->save();			// Saving changes to the document before closing the workspace
+	doc->unload();			// Unload the document contents from memory until it gets re-opened
 }
 
 
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
 	/* get the active socket from the Client object */
-	QTcpSocket* socket = client->getSocket();
+	QSslSocket* socket = client->getSocket();
 	socket->setParent(this);
 
-	connect(socket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
-	connect(socket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);
+	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
 
 	socket->readAll();
 
@@ -61,45 +61,42 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 void WorkSpace::readMessage()
 {
-	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 	QDataStream streamIn(socket);	/* connect stream with socket */
-	quint16 mType;
-	qint32 mSize;
 	QByteArray dataBuffer;
-	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
-	streamIn >> mType;		/* take the type of incoming message */
-
-	streamIn >> mSize;		/* read the size of the message */
-
-	dataBuffer = socket->read(mSize);	// Read all the available message data from the socket
-
-	/* If not all bytes were received with the first chunk, wait for the next chunks
-	to arrive on the socket and append their content to the read buffer */
-	while (dataBuffer.size() < mSize)
-	{
-		socket->waitForReadyRead();
-		dataBuffer.append(socket->read((qint64)mSize - dataBuffer.size()));
+	if (!socketBuffer.getDataSize()) {
+		streamIn >> socketBuffer;
 	}
 
-	MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-	message->readFrom(dataStream);
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));	// Read all the available message data from the socket
 
-	if (mType == CursorMove || mType == CharInsert || mType == CharDelete ||
-		mType == PresenceRemove || mType == AccountUpdate)
-	{
-		messageHandler.process(message, socket);
-	}
-	else
-	{
-		message = MessageFactory::Failure("Unknown message type " + mType);
-		message->sendTo(socket);
+	socketBuffer.append(dataBuffer);
+
+	if (socketBuffer.bufferReadyRead()) {
+		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		quint16 mType = socketBuffer.getType();
+		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+		message->readFrom(dataStream);
+
+		socketBuffer.clear();
+
+		if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
+			mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+		{
+			messageHandler.process(message, socket);
+		}
+		else
+		{
+			message = MessageFactory::Failure("Unknown message type : " + mType);
+			message->sendTo(socket);
+		}
 	}
 }
 
 
 // Send the specified message to all connected clients except the one from which the message was received
-void WorkSpace::dispatchMessage(MessageCapsule message, QTcpSocket* sender)
+void WorkSpace::dispatchMessage(MessageCapsule message, QSslSocket* sender)
 {
 	for (auto target = editors.keyBegin(); target != editors.keyEnd(); ++target)
 	{
@@ -114,7 +111,7 @@ void WorkSpace::dispatchMessage(MessageCapsule message, QTcpSocket* sender)
 void WorkSpace::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
-	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
+	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 
 	QSharedPointer<Client> c = editors.find(socket).value();
 	editors.remove(socket);
@@ -151,7 +148,7 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickname, QImage icon, QString password)
+MessageCapsule WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
@@ -161,11 +158,11 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 	User* user = client->getUser();
 	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
 
-	if (!nickname.isNull())
+	if (!nickname.isEmpty())
 		user->setNickname(nickname);
 	if (!icon.isNull())
 		user->setIcon(icon);
-	if (!password.isNull())
+	if (!password.isEmpty())
 		user->setPassword(password);
 
 	// Notify all other clients of the changes in this user's account
@@ -176,7 +173,7 @@ MessageCapsule WorkSpace::updateAccount(QTcpSocket* clientSocket, QString nickna
 }
 
 
-void WorkSpace::clientQuit(QTcpSocket* clientSocket)
+void WorkSpace::clientQuit(QSslSocket* clientSocket)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
@@ -188,11 +185,11 @@ void WorkSpace::clientQuit(QTcpSocket* clientSocket)
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
 	// Delete the client's socket in the current thread
-	disconnect(clientSocket, &QTcpSocket::readyRead, this, &WorkSpace::readMessage);
-	disconnect(clientSocket, &QTcpSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
+	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
 
 	// Move the socket object back to the main server thread
-	QTcpSocket* s = client->getSocket();
+	QSslSocket* s = client->getSocket();
 	s->setParent(nullptr);
 	s->moveToThread(QCoreApplication::instance()->thread());
 

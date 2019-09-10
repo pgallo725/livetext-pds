@@ -25,7 +25,7 @@ public:
 	~CursorMoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	qint32 getCursorPosition() const;
@@ -54,7 +54,7 @@ public:
 	~PresenceUpdateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -84,7 +84,7 @@ public:
 	~PresenceAddMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -112,7 +112,7 @@ public:
 	~PresenceRemoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 };

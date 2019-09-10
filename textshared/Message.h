@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <QDataStream>
 #include <QByteArray>
 #include <QBuffer>
@@ -63,7 +63,7 @@ public:
 	virtual ~Message() { };
 
 	// Convert the message contents into a byte-stream that will be sent on the socket
-	virtual void sendTo(QTcpSocket* socket) const = 0;
+	virtual void sendTo(QSslSocket* socket) const = 0;
 
 	// Read from the data-stream the bytes needed to fill this message, according to its type
 	virtual void readFrom(QDataStream& stream) = 0;

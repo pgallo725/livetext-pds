@@ -23,7 +23,7 @@ public:
 	~FailureMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getDescription();
 };

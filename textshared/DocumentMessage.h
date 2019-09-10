@@ -24,7 +24,7 @@ public:
 	~DocumentCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getDocumentName() const;
 };
@@ -51,7 +51,7 @@ public:
 	~DocumentRemoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	URI getDocumentURI() const;
 };
@@ -78,7 +78,7 @@ public:
 	~DocumentOpenMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	URI getDocumentURI() const;
 };
@@ -100,7 +100,7 @@ public:
 	~DocumentDismissedMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 };
 
 
@@ -125,7 +125,7 @@ public:
 	~DocumentReadyMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	Document getDocument() const;
 };
@@ -152,7 +152,7 @@ public:
 	~DocumentErrorMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QTcpSocket* socket) const override;
+	void sendTo(QSslSocket* socket) const override;
 
 	QString getErrorMessage() const;
 };

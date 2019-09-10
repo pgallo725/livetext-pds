@@ -509,7 +509,13 @@ bool TextEdit::load(const QString& f)
 
 void TextEdit::loadDocument(QString text)
 {
-	textEdit->setHtml(text);
+	if (text.isEmpty()) {
+		textEdit->setHtml("");
+	}
+	else {
+		textEdit->setHtml(text);
+	}
+	
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
@@ -1085,7 +1091,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
-			emit deleteChar(position);
+			//emit deleteChar(position);
 		}
 	}
 
