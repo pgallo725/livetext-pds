@@ -9,7 +9,7 @@ Client::Client(QObject* parent) : QObject(parent)
 	connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
+	//connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
 	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
@@ -180,7 +180,6 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHost(ipAddress, port);
-	return;
 }
 
 void Client::Disconnect() {
