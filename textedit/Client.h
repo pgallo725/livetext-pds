@@ -102,6 +102,8 @@ public slots:
 	void serverDisconnection();
 	void errorHandler();
 	void writeOnServer();
+	void ready();
+	void handleSslErrors(const QList<QSslError>& sslErrors);
 	// User connection
 	void Login();
 	void Register();

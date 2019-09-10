@@ -6,8 +6,11 @@ Client::Client(QObject* parent) : QObject(parent)
 	socket = new QSslSocket(this);
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
+	connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
+	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
 	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
+	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
 		[&](QAbstractSocket::SocketError socketError) { // Error in connection
@@ -27,8 +30,29 @@ void Client::writeOnServer()
 
 }
 
+void Client::handleSslErrors(const QList<QSslError>& sslErrors)
+{
+	// Ignoring SSL errors for self-signed certificate and hostname mismatch (expected errors)
+	if (sslErrors.size() == 2)
+	{
+		QList<QSslError>::const_iterator i = sslErrors.cbegin();
+		if (i->error() == QSslError::HostNameMismatch && (i + 1)->error() == QSslError::SelfSignedCertificate)
+		{
+			socket->ignoreSslErrors();
+		}
+	}
+	else
+	{
+		qDebug() << "Encountered SSL errors: " << sslErrors << endl;
+	}
+}
+
 void Client::serverConnection() {
 	qDebug() << "Connection established";
+}
+
+void Client::ready() {
+	qDebug() << "Encryption ready";
 	emit connectionEstablished();
 }
 
