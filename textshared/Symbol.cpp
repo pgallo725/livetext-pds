@@ -5,31 +5,141 @@
 
 
 
-Symbol::Symbol(SymbolType type, qint32 authorId, QVector<qint32> fractionPos)
-	: _type(type), _fPos(fractionPos)
+/*************** TEXTLIST METHODS ***************/
+
+
+TextList::TextList()
+	: _listId(-1), _nBlocks(0)
+{
+}
+
+TextList::TextList(qint32 listId, QTextListFormat fmt)
+	: _listId(listId), _format(fmt), _nBlocks(0)
+{
+}
+
+void TextList::setFormat(QTextListFormat fmt)
+{
+	_format = fmt;
+}
+
+void TextList::incrementBlocks(int amount)
+{
+	_nBlocks += amount;
+}
+
+void TextList::decrementBlocks(int amount)
+{
+	_nBlocks -= amount;
+}
+
+qint32 TextList::getId() const
+{
+	return _listId;
+}
+
+QTextListFormat TextList::getFormat() const
+{
+	return _format;
+}
+
+bool TextList::isEmpty() const
+{
+	return _nBlocks == 0;
+}
+
+
+/*************** TEXTBLOCK METHODS ***************/
+
+
+TextBlock::TextBlock()
+	: _blockId(-1), _nChars(0), _listRef(-1)
+{
+}
+
+TextBlock::TextBlock(qint32 blockId, QTextBlockFormat _fmt, qint32 listRef)
+	: _blockId(blockId), _nChars(0), _listRef(listRef)
+{
+}
+
+void TextBlock::setFormat(QTextBlockFormat fmt)
+{
+	_format = fmt;
+}
+
+void TextBlock::incrementSymbols(int amount)
+{
+	_nChars += amount;
+}
+
+void TextBlock::decrementSymbols(int amount)
+{
+	_nChars -= amount;
+}
+
+void TextBlock::assignToList(TextList& list)
+{
+	_listRef = list.getId();
+	list.incrementBlocks();
+}
+
+void TextBlock::removeFromList(TextList& list)
+{
+	_listRef = -1;
+	list.decrementBlocks();
+}
+
+qint32 TextBlock::getId() const
+{
+	return _blockId;
+}
+
+QTextBlockFormat TextBlock::getFormat() const
+{
+	return _format;
+}
+
+qint32 TextBlock::getListIdentifier() const
+{
+	return _listRef;
+}
+
+bool TextBlock::isEmpty() const
+{
+	return _nChars == 0;
+}
+
+
+/*************** SYMBOL METHODS ***************/
+
+
+Symbol::Symbol()
+	: _blockRef(-1)
+{
+}
+
+Symbol::Symbol(QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
+	: _char(sym), _format(fmt), _fPos(fractionPos), _blockRef(-1)
 {
 	_fPos.push_back(authorId);		// User ID is added as part of the fractional position to ensure uniqueness
 }
 
-Symbol::Symbol(SymbolType type, QChar symbol, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
-	: Symbol(type, authorId, fractionPos)
+
+void Symbol::setFormat(QTextCharFormat fmt)
 {
-	_item = QVariant(symbol);		// Fill the unions with the QChar and its QTextCharFormat attribute
-	_format = QVariant(fmt);
+	_format = fmt;
 }
 
-Symbol::Symbol(SymbolType type, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
-	: Symbol(type, authorId, fractionPos)
+void Symbol::assignToBlock(TextBlock& block)
 {
-	_item = QVariant();				// Fill the unions with the QTextBlockFormat attributes
-	_format = QVariant(fmt);
+	_blockRef = block.getId();
+	block.incrementSymbols();
 }
 
-Symbol::Symbol(SymbolType type, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
-	: Symbol(type, authorId, fractionPos)
+void Symbol::removeFromBlock(TextBlock& block)
 {
-	_item = QVariant();				// Fills the unions with the QTextListFormat attribute
-	_format = QVariant(fmt);
+	_blockRef = -1;
+	block.decrementSymbols();
 }
 
 
@@ -57,26 +167,21 @@ bool Symbol::operator>(const Symbol& other)
 	return !((*this) < other || (*this) == other);
 }
 
-SymbolType Symbol::getType()
+
+QChar Symbol::getChar()
 {
-	return _type;
+	return _char;
 }
 
-bool Symbol::isChar()
+QTextCharFormat Symbol::getFormat()
 {
-	return _type == SymbolType::Char;
+	return _format;
 }
 
-bool Symbol::isBlockDelimiter()
+qint32 Symbol::getBlockIdentifier()
 {
-	return _type == SymbolType::BlockBegin || _type == SymbolType::BlockEnd;
+	return _blockRef;
 }
-
-bool Symbol::isListDelimiter()
-{
-	return _type == SymbolType::ListBegin || _type == SymbolType::ListEnd;
-}
-
 
 qint32 Symbol::getAuthorId()
 {
@@ -85,52 +190,50 @@ qint32 Symbol::getAuthorId()
 }
 
 
-Symbol::~Symbol()
+// TextList deserialization operator
+QDataStream& operator>>(QDataStream& in, TextList& sym)
 {
-}
-
-
-// Deserialization operator
-QDataStream& operator>>(QDataStream& in, Symbol& sym)
-{
-	in >> (qint32&)sym._type >> sym._item >> sym._format >> sym._fPos;
+	in >> sym._listId >> sym._format >> sym._nBlocks;
 
 	return in;
 }
 
-// Serialization operator
-QDataStream& operator<<(QDataStream& out, const Symbol& sym)
+// TextList serialization operator
+QDataStream& operator<<(QDataStream& out, const TextList& sym)
 {
-	out << sym._type << sym._item << sym._format << sym._fPos;
+	out << sym._listId << sym._format << sym._nBlocks;
 
 	return out;
 }
 
-
-
-/********************************************************
-*		Type-specific accessor methods (getters)		*
-********************************************************/
-
-
-QChar CharSymbol::getChar()
+// TextBlock deserialization operator
+QDataStream& operator>>(QDataStream& in, TextBlock& sym)
 {
-	return _item.value<QChar>();
+	in >> sym._blockId >> sym._format >> sym._nChars >> sym._listRef;
+
+	return in;
 }
 
-QTextCharFormat CharSymbol::getCharFormat()
+// TextBlock serialization operator
+QDataStream& operator<<(QDataStream& out, const TextBlock& sym)
 {
-	return _format.value<QTextCharFormat>();
+	out << sym._blockId << sym._format << sym._nChars << sym._listRef;
+
+	return out;
 }
 
-
-QTextBlockFormat BlockDelimiterSymbol::getBlockFormat()
+// Symbol deserialization operator
+QDataStream& operator>>(QDataStream& in, Symbol& sym)
 {
-	return _format.value<QTextBlockFormat>();
+	in >> sym._char >> sym._format >> sym._fPos;
+
+	return in;
 }
 
-
-QTextListFormat ListDelimiterSymbol::getListFormat()
+// Symbol serialization operator
+QDataStream& operator<<(QDataStream& out, const Symbol& sym)
 {
-	return _format.value<QTextListFormat>();
+	out << sym._char << sym._format << sym._fPos;
+
+	return out;
 }

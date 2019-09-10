@@ -1,73 +1,10 @@
 #pragma once
 
 #include <QVector>
-#include <QVariant>
 #include <QChar>
 #include <QTextCharFormat>
 #include <QTextBlockFormat>
 #include <QTextListFormat>
-
-
-enum SymbolType
-{
-	Char,
-	BlockBegin,
-	BlockEnd,
-	ListBegin,
-	ListEnd,
-	None
-};
-
-
-class Symbol
-{
-
-	/* Operators for QDataStream serialization and deserialization */
-	friend QDataStream& operator>>(QDataStream& in, Symbol& sym);				// Input
-	friend QDataStream& operator<<(QDataStream& out, const Symbol& sym);		// Output
-
-protected:
-
-	SymbolType _type;
-	QVariant _item;		// { QChar, DelimiterType }
-	QVariant _format;	// { QTextCharFormat, QTextBlockFormat, QTextListFormat }
-
-public:
-
-	QVector<qint32> _fPos;
-
-protected:
-
-	// Constructor which handles the fields that are in common to all symbol types
-	Symbol(SymbolType type, qint32 authorId, QVector<qint32> fractionPos);
-
-public:
-
-	/* Constructors */
-
-	Symbol() : _type(None) { };		// Use this to construct an empty symbol and populate the fields later
-
-	Symbol(SymbolType type, QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
-	Symbol(SymbolType type, QTextBlockFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
-	Symbol(SymbolType type, QTextListFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
-
-	/* Comparison operators */
-	bool operator==(const Symbol& other);
-	bool operator<(const Symbol& other);
-	bool operator>(const Symbol& other);
-
-	/* Getters */
-	SymbolType getType();
-	bool isChar();
-	bool isBlockDelimiter();
-	bool isListDelimiter();
-	qint32 getAuthorId();
-	
-
-	~Symbol();
-
-};
-
 
 // Needed to make these types available to templates objects such as QVariant
 
@@ -77,36 +14,112 @@ Q_DECLARE_METATYPE(QTextListFormat);
 
 
 
-/************************************************************
-*		Interfaces for handling specific Symbol types		*
-************************************************************/
-
-class CharSymbol : public Symbol
+class TextList
 {
+	/* Operators for QDataStream serialization and deserialization */
+	friend QDataStream& operator>>(QDataStream& in, TextList& sym);				// Input
+	friend QDataStream& operator<<(QDataStream& out, const TextList& sym);		// Output
+
+private:
+
+	qint32 _listId;
+	QTextListFormat _format;
+	qint32 _nBlocks;
 
 public:
 
+	TextList();		// Empty constructor, to use before populating fields with deserialization
+
+	TextList(qint32 listId, QTextListFormat fmt);
+
+	/* setters */
+	void setFormat(QTextListFormat fmt);
+	void incrementBlocks(int amount = 1);
+	void decrementBlocks(int amount = 1);
+
+	/* getters */
+	qint32 getId() const;
+	QTextListFormat getFormat() const;
+	bool isEmpty() const;
+
+};
+
+
+
+class TextBlock
+{
+	/* Operators for QDataStream serialization and deserialization */
+	friend QDataStream& operator>>(QDataStream& in, TextBlock& sym);			// Input
+	friend QDataStream& operator<<(QDataStream& out, const TextBlock& sym);		// Output
+
+private:
+
+	qint32 _blockId;
+	QTextBlockFormat _format;
+	qint32 _nChars;
+	qint32 _listRef;
+
+public:
+
+	TextBlock();		// Empty constructor, to use before populating fields with deserialization
+
+	TextBlock(qint32 blockId, QTextBlockFormat _fmt, qint32 listRef = -1);
+
+	/* setters */
+	void setFormat(QTextBlockFormat fmt);
+	void incrementSymbols(int amount = 1);
+	void decrementSymbols(int amount = 1);
+	void assignToList(TextList& list);
+	void removeFromList(TextList& list);
+
+	/* getters */
+	qint32 getId() const;
+	QTextBlockFormat getFormat() const;
+	qint32 getListIdentifier() const;
+	bool isEmpty() const;
+
+};
+
+
+
+class Symbol
+{
+
+	/* Operators for QDataStream serialization and deserialization */
+	friend QDataStream& operator>>(QDataStream& in, Symbol& sym);				// Input
+	friend QDataStream& operator<<(QDataStream& out, const Symbol& sym);		// Output
+
+private:
+
+	QChar _char;
+	QTextCharFormat _format;
+	qint32 _blockRef;
+
+public:
+
+	QVector<qint32> _fPos;
+
+public:
+
+	Symbol();		// Use this to construct an empty Symbol and populate the fields later
+
+	Symbol(QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos);
+
+
+	/* setters */
+	void setFormat(QTextCharFormat fmt);
+	void assignToBlock(TextBlock& block);
+	void removeFromBlock(TextBlock& block);
+
+	/* comparison operators */
+	bool operator==(const Symbol& other);
+	bool operator<(const Symbol& other);
+	bool operator>(const Symbol& other);
+
+	/* getters */
 	QChar getChar();
-	QTextCharFormat getCharFormat();
-
-};
-
-
-class BlockDelimiterSymbol : public Symbol
-{
-
-public:
-
-	QTextBlockFormat getBlockFormat();
-
-};
-
-
-class ListDelimiterSymbol : public Symbol
-{
-
-public:
-
-	QTextListFormat getListFormat();
+	QTextCharFormat getFormat();
+	qint32 getBlockIdentifier();
+	qint32 getAuthorId();
 
 };

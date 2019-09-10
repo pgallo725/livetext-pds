@@ -136,7 +136,7 @@ void Document::load()
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
 		{
-			// TODO: handle error, throw DocumentLoadException ?
+			// THROW: handle error or throw DocumentLoadException ?
 		}
 
 		file.close();
@@ -237,21 +237,7 @@ QString Document::toString()
 
 	for (Symbol* i = _text.begin(); i != _text.end(); i++)
 	{
-		if (i->getType() == SymbolType::Char)
-		{
-			CharSymbol* c = static_cast<CharSymbol*>(i);
-			text.push_back(c->getChar());
-		}
-		else if (i->isBlockDelimiter())
-		{
-			BlockDelimiterSymbol* b = static_cast<BlockDelimiterSymbol*>(i);
-			text.push_back(b->getType() == SymbolType::BlockBegin ? "<block>" : "</block>");
-		}
-		else if (i->isListDelimiter())
-		{
-			ListDelimiterSymbol* l = static_cast<ListDelimiterSymbol*>(i);
-			text.push_back(l->getType() == SymbolType::ListBegin ? "<list>" : "</list>");
-		}
+		text.append(i->getChar());
 	}
 
 	return text;

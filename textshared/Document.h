@@ -48,6 +48,9 @@ private:
 	QStringList editors;
 	QVector<Symbol> _text;	// Actual document contents
 
+	QMap<qint32, TextBlock> _blocks;
+	QMap<qint32, TextList> _lists;
+
 	static const int fPosGapSize = 4;
 
 protected:
