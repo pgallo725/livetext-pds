@@ -18,7 +18,14 @@ void DocumentEditor::openDocument()
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 {
-	Symbol s(Char, ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
+	Symbol s;
+	if (position == 0) {
+		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosBegin());
+	}
+	else {
+		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
+	}
+	
 	_document.insert(s);
 	emit insertChar(s);
 }
