@@ -53,6 +53,14 @@ private:
 	QImage image;
 	bool login;
 
+	enum qint16{
+		LoginMessage,
+		RegisterMessage,
+		OpenFileMessage,
+		CreateFileMessage,
+		DeleteMessage
+	};
+
 signals:
 
 	void connectionEstablished();
@@ -92,7 +100,7 @@ public:
 	~Client();
 
 	void messageHandler(MessageType typeOfMeassage, QDataStream& in);
-	MessageCapsule readMessage(QDataStream& stream);
+	MessageCapsule readMessage(QDataStream& stream, qint16 typeOfMessage);
 
 public slots:
 

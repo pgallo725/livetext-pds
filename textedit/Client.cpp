@@ -124,37 +124,53 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 
 }
 
-MessageCapsule Client::readMessage(QDataStream& stream)
+MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 {
 	QByteArray dataBuffer;
 	SocketBuffer socketBuffer;
 	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
+	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
+
+		switch (typeOfMessage)
+		{
+		case LoginMessage:
+			emit loginFailed(tr("Server not responding"));
+			break;
+		case RegisterMessage:
+			emit registrationFailed(tr("Server not responding"));
+			break;
+		case OpenFileMessage:
+			emit openFileFailed(tr("Server not responding"));
+		case CreateFileMessage:
+			emit removeFileFailed(tr("Server not responding"));
+		default:
+			break;
+		}
+
+		return MessageCapsule();
+	}
+
 	stream >> socketBuffer;
 
+	dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());
 	/* If not all bytes were received with the first chunk, wait for the next chunks
 	to arrive on the socket and append their content to the read buffer */
-	do {
+	while (socketBuffer.getDataSize() > socketBuffer.getReadDataSize()) {
 
 		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
-			switch (socketBuffer.getType())
+			switch (typeOfMessage)
 			{
-			case LoginChallenge:
-			case LoginError:
-			case LoginGranted:
+			case LoginMessage:
 				emit loginFailed(tr("Server not responding"));
 				break;
-		
-			case AccountConfirmed:
-			case AccountError:
+			case RegisterMessage:
 				emit registrationFailed(tr("Server not responding"));
 				break;
-			case DocumentReady:
-			case DocumentError:
+			case OpenFileMessage:
 				emit openFileFailed(tr("Server not responding"));
-
-			case DocumentDismissed:
+			case CreateFileMessage:
 				emit removeFileFailed(tr("Server not responding"));
 			default:
 				break;
@@ -165,8 +181,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 
 		dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());	
 
-	} while (socketBuffer.getDataSize() > socketBuffer.getReadDataSize());
-
+	}
 
 		// Read all the available message data from the socket
 
@@ -179,7 +194,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
-	socket->connectToHost(ipAddress, port);
+	socket->connectToHostEncrypted(ipAddress, port);
 }
 
 void Client::Disconnect() {
@@ -228,7 +243,7 @@ void Client::Login() {
 	loginRequest->sendTo(socket);
 
 	QDataStream in(socket);
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in,LoginMessage);
 	if (!incomingMessage)
 		return;
 
@@ -274,7 +289,7 @@ void Client::Login() {
 
 	loginUnlock->sendTo(socket);
 
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in,LoginMessage);
 	if (!incomingMessage)
 		return;
 
@@ -307,7 +322,7 @@ void Client::Register() {
 	accountCreate->sendTo(socket);
 
 	//wait the response from the server
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in,RegisterMessage);
 	if (!incomingMessage)
 		return;
 
@@ -352,7 +367,7 @@ void Client::openDocument(URI URI) {
 
 	//wait the response from the server
 
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in, OpenFileMessage);
 	if (!incomingMessage)
 		return;
 
@@ -387,7 +402,7 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in,CreateFileMessage);
 	if (!incomingMessage)
 		return;
 
@@ -421,7 +436,7 @@ void Client::deleteDocument(URI URI) {
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
 
-	incomingMessage = readMessage(in);
+	incomingMessage = readMessage(in,DeleteMessage);
 	if (!incomingMessage)
 		return;
 
