@@ -69,31 +69,32 @@ void Client::errorHandler() {
 
 void Client::readBuffer() {
 
-	QTcpSocket* socket = static_cast<QTcpSocket*>(sender());
 	qDebug() << "Reading socket";
 	
-	quint16 typeOfMessage;
-	quint32 messageSize;
 	QByteArray dataBuffer;
-	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
-
+	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	QDataStream in(socket);
-
-	in >> typeOfMessage;		/* take the type of incoming message */
-
-	in >> messageSize;			/* read the size of the message */
-
-	dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
-
-	/* If not all bytes were received with the first chunk, wait for the next chunks
-	to arrive on the socket and append their content to the read buffer */
-	while (dataBuffer.size() < messageSize)
-	{
-		socket->waitForReadyRead();
-		dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
+	 
+	if (!socketBuffer.getDataSize()) {
+		in >> socketBuffer;
 	}
 
-	messageHandler((MessageType)typeOfMessage, dataStream);
+	in >> socketBuffer;
+
+	dataBuffer = socket->read(socketBuffer.getDataSize()-socketBuffer.getReadDataSize());		// Read all the available message data from the socket
+
+
+	socketBuffer.append(dataBuffer);
+
+	if (socketBuffer.bufferReadyRead()) {
+
+		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		quint16 mType = socketBuffer.getType();
+
+		messageHandler((MessageType)socketBuffer.getType(),dataStream);
+
+		socketBuffer.clear();
+	}
 }
 
 void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
@@ -127,8 +128,8 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 {
 	QByteArray dataBuffer;
-	SocketBuffer socketBuffer;
-	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
+	
+	socketBuffer.clear(); //clear the buffer before starting reaeding
 
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
@@ -153,10 +154,12 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 	stream >> socketBuffer;
 
-	dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());
+	dataBuffer = socket->read(socketBuffer.getDataSize());
+
+	socketBuffer.append(dataBuffer);
 	/* If not all bytes were received with the first chunk, wait for the next chunks
 	to arrive on the socket and append their content to the read buffer */
-	while (socketBuffer.getDataSize() > socketBuffer.getReadDataSize()) {
+	while (!socketBuffer.bufferReadyRead()) {
 
 		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
@@ -181,12 +184,14 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 		dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());	
 
+		socketBuffer.append(dataBuffer);
+
 	}
 
 		// Read all the available message data from the socket
 
 
-
+	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 	message->readFrom(dataStream);
 
@@ -516,15 +521,12 @@ void Client::deleteChar(QDataStream& in) {
 void Client::sendAccountUpdate(QString nickname, QImage image, QString password) 
 {
 	QDataStream in(socket);
-	quint16 typeOfMessage;
-	qint32 messageSize;
 	QByteArray dataBuffer;
-	QDataStream dataStream(&dataBuffer, QIODevice::ReadWrite);
 
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
 	accountUpdate->sendTo(socket);
-
+	
 
 	while (true) {
 
@@ -533,20 +535,28 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 			return;
 		}
 
-		in >> typeOfMessage;		/* take the type of incoming message */
-		in >> messageSize;			/* read the size of the message */
+		in >> socketBuffer;		/* take the type of incoming message and read the size of the message */
 
-		dataBuffer = socket->read(messageSize);		// Read all the available message data from the socket
+		dataBuffer = socket->read(socketBuffer.getDataSize());		// Read all the available message data from the socket
 
+		socketBuffer.append(dataBuffer);
 		/* If not all bytes were received with the first chunk, wait for the next chunks
 		to arrive on the socket and append their content to the read buffer */
-		while (dataBuffer.size() < messageSize)
+		while (!socketBuffer.bufferReadyRead())
 		{
-			socket->waitForReadyRead();
-			dataBuffer.append(socket->read((qint64)messageSize - dataBuffer.size()));
+			if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
+				// emit accountModificationFail(tr("Server not responding")); // che segnale emetto? teoricamente non dovrebbe mai succedere
+				break;
+			}
+			dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());
+			socketBuffer.append(dataBuffer);
 		}
 
-		switch (typeOfMessage) {
+		if (!socketBuffer.bufferReadyRead())  // skip the message if it's not complete
+			continue;
+
+		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		switch (socketBuffer.getType()) {
 		case AccountConfirmed: {
 			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
 			recivedAccountUpdate->readFrom(dataStream);
@@ -565,9 +575,11 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		}
 			break;
 		default:
-			messageHandler((MessageType)typeOfMessage, dataStream);
+			messageHandler((MessageType)socketBuffer.getType(),dataStream);
 			break;
 		}
+
+		socketBuffer.clear();
 	}
 }
 
