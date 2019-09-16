@@ -6,17 +6,17 @@ Client::Client(QObject* parent) : QObject(parent)
 	socket = new QSslSocket(this);
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
-	connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
+	//connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-	//connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandle()));
+	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
 	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-		[&](QAbstractSocket::SocketError socketError) { // Error in connection
-	emit impossibleToConnect();
-	socket->abort(); });
-
+		[&](QAbstractSocket::SocketError socketError) {
+			emit impossibleToConnect();						// Error in connection
+			socket->abort(); 
+		});
 }
 
 
@@ -60,11 +60,10 @@ void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
 }
 
-void Client::errorHandler() {
+void Client::errorHandler(QAbstractSocket::SocketError socketError) {
 
-	qDebug() << "Error raised";
+	qDebug() << "Socket error raised: " << socketError;
 	socket->close();
-
 }
 
 void Client::readBuffer() {
@@ -129,7 +128,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 {
 	QByteArray dataBuffer;
 	
-	socketBuffer.clear(); //clear the buffer before starting reaeding
+	socketBuffer.clear();	// clear the buffer before starting reaeding
 
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
@@ -188,8 +187,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 	}
 
-		// Read all the available message data from the socket
-
+	// Read all the available message data from the socket
 
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
@@ -200,6 +198,8 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
+	socket->waitForEncrypted();
+	ready();
 }
 
 void Client::Disconnect() {
@@ -210,13 +210,11 @@ void Client::Disconnect() {
 void Client::setUsername(QString username) {
 
 	this->username = username;
-
 }
 
 void Client::setPassword(QString password) {
 
 	this->password = password;
-
 }
 
 void Client::setNickname(QString nickname) {

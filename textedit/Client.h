@@ -108,7 +108,7 @@ public slots:
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
-	void errorHandler();
+	void errorHandler(QAbstractSocket::SocketError socketError);
 	void writeOnServer();
 	void ready();
 	void handleSslErrors(const QList<QSslError>& sslErrors);
