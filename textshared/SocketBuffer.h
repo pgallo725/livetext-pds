@@ -11,7 +11,7 @@ class SocketBuffer
 	friend class Client;
 
 	/* Operators for QDataStream deserialization */
-	friend QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer);			// Input
+	friend QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer);		// Input
 
 private:
 	quint16 mType;

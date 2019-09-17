@@ -286,12 +286,12 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 		{
 			if (std::abs(b - a) == 1)				// if the elements' fPos are separated by only 1, add a new level 
 			{										// and make sure it's higher than the value of prev.fPos[i + 1]
-				result.push_back(prev._fPos[i]);
+				result.push_back(a);
 				int next_a = i + 1 < prev._fPos.size() ? prev._fPos[i + 1] : 0;
 
 				// the gap between the fPos values is increased in deeper levels to avoid making the vector
 				// become too long with subsequent insertions in between elements
-				result.push_back(next_a + i * fPosGapSize);
+				result.push_back(next_a + (i + 1) * fPosGapSize);
 			}
 			else result.push_back((a + b) / 2);		// if the gap is wide enough, choose the middle value between the two
 
@@ -305,7 +305,7 @@ QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
 
 QVector<qint32> Document::fractionalPosAtIndex(int index)
 {
-	return fractionalPosBetween(index, index + 1);
+	return fractionalPosBetween(index - 1, index);
 }
 
 int Document::length()
