@@ -263,7 +263,7 @@ int Document::binarySearch(QVector<qint32> position)
 		if (_text[m]._fPos == position)
 			return m;
 		else if (_text[m]._fPos < position)
-			lower = m + 1;
+			m = lower = m + 1;
 		else  // _text[m]._fPos > position
 			higher = m - 1;
 	}
