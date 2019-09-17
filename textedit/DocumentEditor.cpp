@@ -13,7 +13,7 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 
 void DocumentEditor::openDocument()
 {
-	_textedit->loadDocument(_document.toString()); //TEST
+	_textedit->loadDocument(_document.toString(), _document.getName()); //TEST
 }
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
@@ -37,6 +37,6 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 
 void DocumentEditor::deleteCharAtIndex(int position)
 {
-	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
+	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);	
 	emit deleteChar(fractionalPosition);
 }

@@ -35,7 +35,7 @@ public:
 	//Document
 	void setDocumentURI(QString uri);
 	bool load(const QString& f);
-	void loadDocument(QString text); //TEST
+	void loadDocument(QString text, QString name); //TEST
 
 
 
@@ -91,6 +91,7 @@ private:
 	void setupShareActions();
 	void setupUserActions();
 	void setupOnlineUsersActions();
+	void setupOnlineUsersToolbar();
 	void setCurrentFileName(const QString& fileName);
 
 	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
@@ -142,7 +143,7 @@ private:
 	QFontComboBox* comboFont;
 	QComboBox* comboSize;
 
-	QToolBar* tb;
+	QToolBar* onlineUsersToolbar;
 	QString fileName;
 	QTextEdit* textEdit;
 

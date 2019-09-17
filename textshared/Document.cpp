@@ -227,7 +227,7 @@ QVector<qint32> Document::removeAt(QVector<qint32> fPos)
 
 QVector<qint32> Document::removeAtIndex(int index)
 {
-	return removeAt(fractionalPosBetween(index, index + 1));
+	return removeAt(_text[index]._fPos);
 }
 
 

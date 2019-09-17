@@ -89,6 +89,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 	setupTextActions();
 	setupShareActions();
 	setupUserActions();
+	setupOnlineUsersToolbar();
 
 	//Crea il carattere e lo stile
 	QFont textFont("Helvetica");
@@ -199,10 +200,8 @@ void TextEdit::setupUserActions()
 
 void TextEdit::setupOnlineUsersActions()
 {
-	QToolBar* tb = new QToolBar(tr("&Online users"));
-	addToolBar(Qt::RightToolBarArea, tb);
-
 	QMap<qint32, Presence>::iterator it;
+	onlineUsersToolbar->clear();
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
 		Presence p = it.value();
@@ -222,8 +221,14 @@ void TextEdit::setupOnlineUsersActions()
 
 		QAction* onlineAction = new QAction(users, p.name().toStdString().c_str(), this);
 		connect(onlineAction, &QAction::triggered, this, [this, p]() { handleUserSelection(p); });
-		tb->addAction(onlineAction);
+		onlineUsersToolbar->addAction(onlineAction);
 	}
+}
+
+void TextEdit::setupOnlineUsersToolbar()
+{
+	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 }
 
 
@@ -503,11 +508,11 @@ bool TextEdit::load(const QString& f)
 		textEdit->setPlainText(str);
 	}
 
-	setCurrentFileName(f);
+	
 	return true;
 }
 
-void TextEdit::loadDocument(QString text)
+void TextEdit::loadDocument(QString text, QString name)
 {
 	if (text.isEmpty()) {
 		textEdit->setHtml("");
@@ -515,23 +520,16 @@ void TextEdit::loadDocument(QString text)
 	else {
 		textEdit->setHtml(text);
 	}
-	
+	setCurrentFileName(name);
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
 	textEdit->document()->setModified(false);
-
-	//Assegna il titolo alla finestra, se vuoto untitled.txt
-	QString shownName;
-	if (fileName.isEmpty())
-		shownName = "untitled.txt";
-	else
-		shownName = QFileInfo(fileName).fileName();
-
+		
 	//Sulla finestra appare nomeFile - nomeApplicazione
-	setWindowTitle(tr("%1[*] - %2").arg(shownName, QCoreApplication::applicationName()));
+	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 	setWindowModified(false); //Il documento non ha modifiche non salvate
 }
 
@@ -566,6 +564,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 //Remove presence in document
 void TextEdit::removePresence(qint32 userId)
 {
+	onlineUsers.find(userId).value().label()->close();
 	onlineUsers.remove(userId);
 	setupOnlineUsersActions();
 }
@@ -1091,7 +1090,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
-			//emit deleteChar(position);
+			emit deleteChar(position);
 		}
 	}
 
