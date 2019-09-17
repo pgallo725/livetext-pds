@@ -15,7 +15,7 @@ Client::Client(QObject* parent) : QObject(parent)
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
 		[&](QAbstractSocket::SocketError socketError) {
 			emit impossibleToConnect();						// Error in connection
-			socket->abort(); 
+			socket->abort();
 		});
 }
 
@@ -69,19 +69,20 @@ void Client::errorHandler(QAbstractSocket::SocketError socketError) {
 void Client::readBuffer() {
 
 	qDebug() << "Reading socket";
-	
+
 	QByteArray dataBuffer;
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	QDataStream in(socket);
-	 
-	if (!socketBuffer.getDataSize()) {
+
+	if (!socketBuffer.getDataSize())
+	{
+		// Begin reading a new message
+		socketBuffer.clear();
 		in >> socketBuffer;
 	}
 
-	in >> socketBuffer;
-
-	dataBuffer = socket->read(socketBuffer.getDataSize()-socketBuffer.getReadDataSize());		// Read all the available message data from the socket
-
+	// Read all the available message data from the socket
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
 
 	socketBuffer.append(dataBuffer);
 
@@ -90,7 +91,7 @@ void Client::readBuffer() {
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
 
-		messageHandler((MessageType)socketBuffer.getType(),dataStream);
+		messageHandler((MessageType)socketBuffer.getType(), dataStream);
 
 		socketBuffer.clear();
 	}
@@ -127,7 +128,7 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 {
 	QByteArray dataBuffer;
-	
+
 	socketBuffer.clear();	// clear the buffer before starting reaeding
 
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
@@ -177,11 +178,11 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 			default:
 				break;
 			}
-			
+
 			return MessageCapsule();
 		}
 
-		dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());	
+		dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
 
 		socketBuffer.append(dataBuffer);
 
@@ -246,14 +247,14 @@ void Client::Login() {
 	loginRequest->sendTo(socket);
 
 	QDataStream in(socket);
-	incomingMessage = readMessage(in,LoginMessage);
+	incomingMessage = readMessage(in, LoginMessage);
 	if (!incomingMessage)
 		return;
 
 	// switch to check the correctness of the type of Message
 	switch (incomingMessage->getType()) {
 	case LoginChallenge:
-		break; 
+		break;
 	case LoginError:
 	{
 		// user not exist
@@ -267,13 +268,13 @@ void Client::Login() {
 		return;
 	}
 
-	LoginChallengeMessage *loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
+	LoginChallengeMessage* loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
 	QByteArray nonce = loginChallenge->getNonce();
 	QByteArray salt = loginChallenge->getSalt();
 
 	qDebug() << "Cripting salt " << nonce;
 	//QString result = password + salt + nonce;
-	
+
 	//QCryptographicHash hash(QCryptographicHash::Md5);
 	//hash.addData(result.toStdString().c_str(), result.length());
 
@@ -292,7 +293,7 @@ void Client::Login() {
 
 	loginUnlock->sendTo(socket);
 
-	incomingMessage = readMessage(in,LoginMessage);
+	incomingMessage = readMessage(in, LoginMessage);
 	if (!incomingMessage)
 		return;
 
@@ -325,7 +326,7 @@ void Client::Register() {
 	accountCreate->sendTo(socket);
 
 	//wait the response from the server
-	incomingMessage = readMessage(in,RegisterMessage);
+	incomingMessage = readMessage(in, RegisterMessage);
 	if (!incomingMessage)
 		return;
 
@@ -337,14 +338,14 @@ void Client::Register() {
 	}
 	case AccountError: {
 		// impossible to create the account
-		AccountErrorMessage *accountDenied = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
+		AccountErrorMessage* accountDenied = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
 		emit registrationFailed(accountDenied->getErrorMessage());
 		return;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		// EMIT?
-		return ;
+		return;
 	}
 }
 
@@ -405,7 +406,7 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 
-	incomingMessage = readMessage(in,CreateFileMessage);
+	incomingMessage = readMessage(in, CreateFileMessage);
 	if (!incomingMessage)
 		return;
 
@@ -439,7 +440,7 @@ void Client::deleteDocument(URI URI) {
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
 
-	incomingMessage = readMessage(in,DeleteMessage);
+	incomingMessage = readMessage(in, DeleteMessage);
 	if (!incomingMessage)
 		return;
 
@@ -474,7 +475,7 @@ void Client::sendCursor(qint32 userId, qint32 position) {
 }
 
 void Client::receiveCursor(QDataStream& in) {
-	
+
 	MessageCapsule moveCursor = MessageFactory::Empty(CursorMove);
 	moveCursor->readFrom(in);
 	CursorMoveMessage* movecursor = dynamic_cast<CursorMoveMessage*>(moveCursor.get());
@@ -501,7 +502,7 @@ void Client::receiveChar(QDataStream& in) {
 
 	MessageCapsule reciveChar = MessageFactory::Empty(CharInsert);
 	reciveChar->readFrom(in);
-	CharInsertMessage *recivechar = dynamic_cast<CharInsertMessage*>(reciveChar.get());
+	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(reciveChar.get());
 	emit recivedSymbol(recivechar->getSymbol());
 }
 
@@ -516,7 +517,7 @@ void Client::deleteChar(QDataStream& in) {
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
 
-void Client::sendAccountUpdate(QString nickname, QImage image, QString password) 
+void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 {
 	QDataStream in(socket);
 	QByteArray dataBuffer;
@@ -524,7 +525,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
 	accountUpdate->sendTo(socket);
-	
+
 
 	while (true) {
 
@@ -546,7 +547,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 				// emit accountModificationFail(tr("Server not responding")); // che segnale emetto? teoricamente non dovrebbe mai succedere
 				break;
 			}
-			dataBuffer = socket->read(socketBuffer.getDataSize() - socketBuffer.getReadDataSize());
+			dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
 			socketBuffer.append(dataBuffer);
 		}
 
@@ -555,25 +556,28 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		switch (socketBuffer.getType()) {
-		case AccountConfirmed: {
+		case AccountConfirmed:
+		{
 			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
 			recivedAccountUpdate->readFrom(dataStream);
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			emit personalAccountModified(accountconfirmed->getUserObj());
+			socketBuffer.clear();
 			return;
 		}
-		case AccountError: {
+		case AccountError:
+		{
 			MessageCapsule accountError = MessageFactory::Empty(AccountError);
 			accountError->readFrom(dataStream);
 			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(accountError.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			emit accountModificationFail(accounterror->getErrorMessage());
+			socketBuffer.clear();
 			return;
 		}
-			break;
 		default:
-			messageHandler((MessageType)socketBuffer.getType(),dataStream);
+			messageHandler((MessageType)socketBuffer.getType(), dataStream);
 			break;
 		}
 
@@ -614,5 +618,4 @@ void Client::removeFromFile(qint32 myId) {
 
 	MessageCapsule userPresence = MessageFactory::PresenceRemove(myId);
 	userPresence->sendTo(socket);
-
 }
