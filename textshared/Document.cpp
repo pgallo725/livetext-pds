@@ -308,6 +308,11 @@ QVector<qint32> Document::fractionalPosAtIndex(int index)
 	return fractionalPosBetween(index, index + 1);
 }
 
+int Document::length()
+{
+	return _text.length();
+}
+
 QVector<qint32> Document::fractionalPosBegin()
 {
 	QVector<qint32> result;

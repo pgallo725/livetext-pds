@@ -75,6 +75,8 @@ public:
 	QVector<qint32> fractionalPosBetween(int prev_i, int next_i);
 	QVector<qint32> fractionalPosAtIndex(int index);
 
+	int length();
+
 	/* getters */
 	URI getURI();
 	QString getName();

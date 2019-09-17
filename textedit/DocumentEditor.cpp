@@ -22,9 +22,13 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 	if (position == 0) {
 		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosBegin());
 	}
+	else if (position == _document.length()-1) {
+		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosEnd());
+	}
 	else {
 		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
 	}
+
 	
 	_document.insert(s);
 	emit insertChar(s);
