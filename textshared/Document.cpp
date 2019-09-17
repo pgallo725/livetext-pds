@@ -199,7 +199,7 @@ void Document::save()
 }
 
 
-void Document::insert(Symbol s)
+int Document::insert(Symbol s)
 {
 	int insertionIndex = -binarySearch(s._fPos);	// should be a negative position index (for a non-existing Symbol)
 
@@ -209,6 +209,8 @@ void Document::insert(Symbol s)
 
 		_text.insert(it, s);	// insert the symbol in the vector
 	}
+
+	return insertionIndex;
 }
 
 void Document::remove(const Symbol& s)
@@ -216,18 +218,19 @@ void Document::remove(const Symbol& s)
 	this->removeAt(s._fPos);
 }
 
-QVector<qint32> Document::removeAt(QVector<qint32> fPos)
+int Document::removeAt(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
 		_text.removeAt(pos);	// and removes it
 
-	return fPos;
+	return pos;
 }
 
 QVector<qint32> Document::removeAtIndex(int index)
 {
-	return removeAt(_text[index]._fPos);
+	removeAt(_text[index]._fPos);
+	return _text[index]._fPos;
 }
 
 

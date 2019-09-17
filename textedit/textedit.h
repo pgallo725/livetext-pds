@@ -27,15 +27,19 @@ class TextEdit : public QMainWindow
 
 public:
 	TextEdit(QWidget* parent = 0);
-	
+
 	void setUser(User* user); //User logged
 	void accountUpdateSuccessful(); //Account updated
 
-	
+
 	//Document
 	void setDocumentURI(QString uri);
 	bool load(const QString& f);
-	void loadDocument(QString text, QString name); //TEST
+	void loadDocument(QString text); //TEST
+	void setCurrentFileName(const QString& fileName);
+
+	void newChar(QChar ch, QTextCharFormat format, int position);
+	void removeChar(int position);
 
 
 
@@ -61,7 +65,7 @@ private slots:
 	void filePrintPdf();
 
 	void fileShare();
-	
+
 	void editProfile();
 
 	void highlightUsersText();
@@ -92,7 +96,7 @@ private:
 	void setupUserActions();
 	void setupOnlineUsersActions();
 	void setupOnlineUsersToolbar();
-	void setCurrentFileName(const QString& fileName);
+
 
 	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
 	void fontChanged(const QFont& f);

@@ -14,6 +14,10 @@ public:
 	DocumentEditor(Document doc, TextEdit* editor, User user, QObject* parent = nullptr);
 	void openDocument();
 
+public slots:
+	void addSymbol(Symbol s);
+	void removeSymbol(QVector<int> position);
+
 private:
 	Document _document;
 	User _user;
@@ -22,6 +26,7 @@ private:
 private slots:
 	void deleteCharAtIndex(int position);
 	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
+
 
 signals:
 	void deleteChar(QVector<qint32> fPos);

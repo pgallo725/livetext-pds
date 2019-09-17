@@ -512,7 +512,8 @@ bool TextEdit::load(const QString& f)
 	return true;
 }
 
-void TextEdit::loadDocument(QString text, QString name)
+
+void TextEdit::loadDocument(QString text)
 {
 	if (text.isEmpty()) {
 		textEdit->setHtml("");
@@ -520,7 +521,6 @@ void TextEdit::loadDocument(QString text, QString name)
 	else {
 		textEdit->setHtml(text);
 	}
-	setCurrentFileName(name);
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
@@ -531,6 +531,23 @@ void TextEdit::setCurrentFileName(const QString& fileName)
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 	setWindowModified(false); //Il documento non ha modifiche non salvate
+}
+
+void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
+{
+	QTextCursor cursor = textEdit->textCursor();
+	cursor.setPosition(position);
+
+	cursor.insertText(ch);
+	cursor.setCharFormat(format);
+}
+
+void TextEdit::removeChar(int position)
+{
+	QTextCursor cursor = textEdit->textCursor();
+	cursor.setPosition(position);
+
+	cursor.deleteChar();
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare

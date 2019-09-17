@@ -13,7 +13,8 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 
 void DocumentEditor::openDocument()
 {
-	_textedit->loadDocument(_document.toString(), _document.getName()); //TEST
+	_textedit->loadDocument(_document.toString()); //TEST
+	_textedit->setCurrentFileName(_document.getName());
 }
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
@@ -32,6 +33,18 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 	
 	_document.insert(s);
 	emit insertChar(s);
+}
+
+void DocumentEditor::addSymbol(Symbol s)
+{
+	int position = _document.insert(s);
+	_textedit->newChar(s.getChar, s.getFormat, position);
+}
+
+void DocumentEditor::removeSymbol(QVector<int> position)
+{
+	int pos = _document.removeAt(position);
+	_textedit->removeChar(pos);
 }
 
 
