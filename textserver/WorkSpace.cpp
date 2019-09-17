@@ -81,8 +81,7 @@ void WorkSpace::readMessage()
 
 		socketBuffer.clear();
 
-		if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
-			mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+		if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove))
 		{
 			messageHandler.process(message, socket);
 		}
