@@ -38,7 +38,7 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 void DocumentEditor::addSymbol(Symbol s)
 {
 	int position = _document.insert(s);
-	_textedit->newChar(s.getChar, s.getFormat, position);
+	_textedit->newChar(s.getAuthorId(), s.getChar(), s.getFormat(), position);
 }
 
 void DocumentEditor::removeSymbol(QVector<int> position)

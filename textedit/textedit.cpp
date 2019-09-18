@@ -131,9 +131,6 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
 
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
-
-	//Stringa vuota
-	setCurrentFileName(QString());
 }
 
 /*
@@ -515,12 +512,17 @@ bool TextEdit::load(const QString& f)
 
 void TextEdit::loadDocument(QString text)
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	if (text.isEmpty()) {
 		textEdit->setHtml("");
 	}
 	else {
 		textEdit->setHtml(text);
 	}
+
+
+	timerId = startTimer(250);
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
@@ -533,21 +535,31 @@ void TextEdit::setCurrentFileName(const QString& fileName)
 	setWindowModified(false); //Il documento non ha modifiche non salvate
 }
 
-void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
+void TextEdit::newChar(qint32 user, QChar ch, QTextCharFormat format, int position)
 {
-	QTextCursor cursor = textEdit->textCursor();
-	cursor.setPosition(position);
+	const QSignalBlocker blocker(textEdit->document());
 
-	cursor.insertText(ch);
-	cursor.setCharFormat(format);
+	Presence p = onlineUsers.find(user).value();
+	QTextCursor* cursor = p.cursor();
+	
+	cursor->setPosition(position);
+	cursor->insertText(ch);
+	
+	cursor->setPosition(cursor->position());
+	cursor->setCharFormat(format);
+	
 }
 
 void TextEdit::removeChar(int position)
 {
-	QTextCursor cursor = textEdit->textCursor();
-	cursor.setPosition(position);
+	const QSignalBlocker blocker(textEdit->document());
 
-	cursor.deleteChar();
+	QTextCursor* cursor = new QTextCursor(textEdit->document());
+	cursor->setPosition(position);
+
+	cursor->deleteChar();
+
+
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare
@@ -1011,13 +1023,10 @@ void TextEdit::cursorPositionChanged()
 	//Setta nel combobox l'heading level corretto
 	int headingLevel = textEdit->textCursor().blockFormat().headingLevel();
 	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);
-
-	emit(newCursorPosition(textEdit->textCursor().position()));
 }
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
-
 	//To change with unique id
 	Presence p = onlineUsers.find(user).value();
 	QTextCursor* cursor = p.cursor();
@@ -1209,4 +1218,9 @@ void TextEdit::handleMultipleSelections()
 void TextEdit::handleUserSelection(Presence p)
 {
 	//TODO Handle user icon pressed
+}
+
+void TextEdit::timerEvent(QTimerEvent* event)
+{
+	emit newCursorPosition(textEdit->textCursor().position());
 }

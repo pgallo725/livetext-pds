@@ -38,7 +38,7 @@ public:
 	void loadDocument(QString text); //TEST
 	void setCurrentFileName(const QString& fileName);
 
-	void newChar(QChar ch, QTextCharFormat format, int position);
+	void newChar(qint32 user, QChar ch, QTextCharFormat format, int position);
 	void removeChar(int position);
 
 
@@ -150,7 +150,10 @@ private:
 	QToolBar* onlineUsersToolbar;
 	QString fileName;
 	QTextEdit* textEdit;
+	int timerId;
 
+protected:
+	void timerEvent(QTimerEvent* event);
 
 };
 
