@@ -205,8 +205,8 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
-	socket->waitForEncrypted();
-	ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
+	if(socket->waitForEncrypted(READYREAD_TIMEOUT))
+		ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
 }
 
 void Client::Disconnect() {
@@ -242,10 +242,6 @@ bool Client::getLogin() {
 }
 
 void Client::Login() {
-
-	SocketBuffer sock;
-
-	sock.buffer;		// TODO EDO: ??? cosa serve?
 
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
@@ -624,4 +620,5 @@ void Client::removeFromFile(qint32 myId) {
 
 	MessageCapsule userPresence = MessageFactory::PresenceRemove(myId);
 	userPresence->sendTo(socket);
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 }
