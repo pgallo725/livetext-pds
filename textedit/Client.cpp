@@ -77,7 +77,6 @@ void Client::readBuffer() {
 	if (!socketBuffer.getDataSize())
 	{
 		// Begin reading a new message
-		socketBuffer.clear();
 		in >> socketBuffer;
 	}
 
@@ -130,6 +129,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 	QByteArray dataBuffer;
 
 	socketBuffer.clear();	// clear the buffer before starting reaeding
+							// TODO EDO: se faccio clear alla fine di ogni lettura/errore, il clear all'inizio si potrebbe togliere?
 
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
@@ -143,12 +143,15 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 			break;
 		case OpenFileMessage:
 			emit openFileFailed(tr("Server not responding"));
+			break;
 		case CreateFileMessage:
 			emit removeFileFailed(tr("Server not responding"));
+			break;
 		default:
 			break;
 		}
 
+		socketBuffer.clear();
 		return MessageCapsule();
 	}
 
@@ -179,6 +182,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 				break;
 			}
 
+			socketBuffer.clear();
 			return MessageCapsule();
 		}
 
@@ -194,17 +198,19 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 	message->readFrom(dataStream);
 
+	socketBuffer.clear();
+
 	return message;
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
 	socket->waitForEncrypted();
-	ready();
+	ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
 }
 
 void Client::Disconnect() {
-	socket->close();
+	socket->close();	// TODO EDO: meglio closeHostConnection?
 	qDebug() << "Connection closed by client";
 }
 
@@ -239,7 +245,7 @@ void Client::Login() {
 
 	SocketBuffer sock;
 
-	sock.buffer;
+	sock.buffer;		// TODO EDO: ??? cosa serve?
 
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
