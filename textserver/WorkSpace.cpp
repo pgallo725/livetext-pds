@@ -43,9 +43,6 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
 
-	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
-		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
-
 	// Send to the new user all the Presence messages of other editors in the workspace
 	for (auto i = editors.begin(); i != editors.end(); ++i)
 	{
@@ -53,6 +50,9 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(),
 			editor->getIcon())->sendTo(socket);
 	}
+
+	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
+		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
 
 	editors.insert(socket, client);
 }

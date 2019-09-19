@@ -604,7 +604,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
-	emit newCursorPosition(textEdit->textCursor().position());
+	//emit newCursorPosition(textEdit->textCursor().position());
 }
 
 //Remove presence in document
