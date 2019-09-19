@@ -210,7 +210,7 @@ void Client::Connect(QString ipAddress, quint16 port) {
 }
 
 void Client::Disconnect() {
-	socket->close();	// TODO EDO: meglio closeHostConnection?
+	socket->disconnectFromHost();
 	qDebug() << "Connection closed by client";
 }
 
@@ -359,6 +359,8 @@ void Client::Logout() {
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->sendTo(socket);
+
+	
 }
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
