@@ -39,6 +39,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
+	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 
 	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
 
@@ -184,6 +185,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 	// Delete the client's socket in the current thread
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
+	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 
 	// Move the socket object back to the main server thread
 	QSslSocket* s = client->getSocket();
@@ -194,4 +196,10 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
+}
+
+
+void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
+{
+	qDebug() << "Socket error: " << socketError << endl;
 }

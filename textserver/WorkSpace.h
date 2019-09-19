@@ -54,6 +54,8 @@ public slots:
 	MessageCapsule updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
 	void clientQuit(QSslSocket* clientSocket);
 
+	void socketErr(QAbstractSocket::SocketError socketError);
+
 signals: void noEditors(URI documentURI);
 signals: void returnClient(QSharedPointer<Client> client);
 signals: void restoreUserAvaiable(QString username);
