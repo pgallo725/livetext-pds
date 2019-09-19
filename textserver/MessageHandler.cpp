@@ -146,7 +146,6 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	case PresenceRemove:
 	{
 		emit removePresence(socket);
-		emit messageDispatch(message, socket);
 		break;
 	}
 
