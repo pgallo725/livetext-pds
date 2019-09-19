@@ -199,11 +199,6 @@ void TextEdit::setupOnlineUsersActions()
 {
 	QMap<qint32, Presence>::iterator it;
 
-	if (onlineUsersToolbar == nullptr) {
-
-
-	}
-	
 	onlineUsersToolbar->clear();
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
