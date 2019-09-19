@@ -49,7 +49,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
+TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 {
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -522,8 +522,13 @@ void TextEdit::loadDocument(QString text)
 		textEdit->setHtml(text);
 	}
 
+	startCursorTimer();
+}
 
-	timerId = startTimer(250);
+void TextEdit::startCursorTimer()
+{
+	timerId = startTimer(CURSOR_SEND_INTERVAL);
+	qDebug() << "Started timer with ID = " << timerId;
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
@@ -566,8 +571,6 @@ void TextEdit::removeChar(int position)
 	cursor->setPosition(position);
 
 	cursor->deleteChar();
-
-
 }
 
 void TextEdit::closeEditor()
@@ -575,7 +578,8 @@ void TextEdit::closeEditor()
 	const QSignalBlocker blocker(textEdit->document());
 
 	textEdit->document()->clear();
-	killTimer(timerId);
+	if (timerId > 0)
+		killTimer(timerId);
 	this->close();
 }
 
@@ -605,6 +609,9 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	setupOnlineUsersActions();
 
 	//emit newCursorPosition(textEdit->textCursor().position());
+
+	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
+	// even if the user is not moving his cursor
 }
 
 //Remove presence in document

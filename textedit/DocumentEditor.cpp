@@ -19,6 +19,7 @@ void DocumentEditor::openDocument()
 		position++;
 	}
 	_textedit->setCurrentFileName(_document.getName());
+	_textedit->startCursorTimer();
 }
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
