@@ -198,12 +198,6 @@ void TextEdit::setupUserActions()
 void TextEdit::setupOnlineUsersActions()
 {
 	QMap<qint32, Presence>::iterator it;
-
-	if (onlineUsersToolbar == nullptr) {
-
-
-	}
-	
 	onlineUsersToolbar->clear();
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
@@ -551,10 +545,8 @@ void TextEdit::newChar(qint32 user, QChar ch, QTextCharFormat format, int positi
 	cursor->setPosition(position);
 	cursor->insertText(ch);
 	
-	cursor->setPosition(position);
-	cursor->setPosition(position + 1, QTextCursor::KeepAnchor);
-
-	cursor->setCharFormat(format);
+	cursor->setPosition(cursor->position());
+	cursor->mergeCharFormat(format);
 	textEdit->mergeCurrentCharFormat(format);
 }
 
