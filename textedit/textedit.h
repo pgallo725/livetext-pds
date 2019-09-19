@@ -38,7 +38,7 @@ public:
 	void loadDocument(QString text); //TEST
 	void setCurrentFileName(const QString& fileName);
 
-	void newChar(qint32 user, QChar ch, QTextCharFormat format, int position);
+	void newChar(QChar ch, QTextCharFormat format, int position, qint32 user = -1);
 	void removeChar(int position);
 
 	void stopTimer();
@@ -57,8 +57,8 @@ signals:
 	void closeDocument();
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString nickname, QImage image, QString password);
-	void deleteChar(int position);
-	void insertChar(QChar ch, QTextCharFormat format, int position);
+	void charDeleted(int position);
+	void charInserted(QChar ch, QTextCharFormat format, int position);
 
 private slots:
 	void fileOpen();

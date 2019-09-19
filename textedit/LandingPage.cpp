@@ -410,6 +410,9 @@ void LandingPage::setupFileList(QList<URI> documents)
 		ui->listWidget->addItem("<No files found>");
 		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
+
+	ui->pushButton_remove->setEnabled(false);
+	ui->pushButton_open->setEnabled(false);
 }
 
 void LandingPage::closeAll()

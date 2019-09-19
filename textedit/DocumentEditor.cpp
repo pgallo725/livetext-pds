@@ -6,14 +6,18 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 	_textedit->setDocumentURI(doc.getURI().toString());
 
 	//CONNECT
-	connect(_textedit, &TextEdit::deleteChar, this, &DocumentEditor::deleteCharAtIndex);
-	connect(_textedit, &TextEdit::insertChar, this, &DocumentEditor::addCharAtIndex);
+	connect(_textedit, &TextEdit::charDeleted, this, &DocumentEditor::deleteCharAtIndex);
+	connect(_textedit, &TextEdit::charInserted, this, &DocumentEditor::addCharAtIndex);
 
 }
 
 void DocumentEditor::openDocument()
 {
-	_textedit->loadDocument(_document.toString()); //TEST
+	int position = 0;
+	foreach(Symbol s, _document.getContent()) {
+		_textedit->newChar(s.getChar(), s.getFormat(), position);
+		position++;
+	}
 	_textedit->setCurrentFileName(_document.getName());
 }
 
@@ -38,7 +42,7 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 void DocumentEditor::addSymbol(Symbol s)
 {
 	int position = _document.insert(s);
-	_textedit->newChar(s.getAuthorId(), s.getChar(), s.getFormat(), position);
+	_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
 }
 
 void DocumentEditor::removeSymbol(QVector<int> position)
