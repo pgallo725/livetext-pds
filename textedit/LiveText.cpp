@@ -200,8 +200,7 @@ void LiveText::openEditor()
 void LiveText::returnToLanding()
 {
 	delete _docEditor;
-	_textEdit->stopTimer();
-	_textEdit->close();
+	_textEdit->closeEditor();
 	_client->removeFromFile(_user.getUserId());
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();

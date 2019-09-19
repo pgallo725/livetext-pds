@@ -365,12 +365,12 @@ void LandingPage::pushButtonNewClicked()
 void LandingPage::pushButtonBackClicked()
 {
 	ui->lineEdit_psw->setText("");
-	ui->lineEdit_usr->setText("");
 	ui->lineEdit_regUsr->setText("");
 	ui->lineEdit_regNick->setText("");
 	ui->lineEdit_regPsw->setText("");
 	ui->lineEdit_regPswConf->setText("");
 	ui->lineEdit_UsrIconPath->setText("");
+	ui->label_incorrect_operation->setText("");
 
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();

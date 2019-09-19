@@ -41,7 +41,7 @@ public:
 	void newChar(QChar ch, QTextCharFormat format, int position, qint32 user = -1);
 	void removeChar(int position);
 
-	void stopTimer();
+	void closeEditor();
 
 
 

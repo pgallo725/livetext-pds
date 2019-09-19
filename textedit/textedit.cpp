@@ -570,9 +570,13 @@ void TextEdit::removeChar(int position)
 
 }
 
-void TextEdit::stopTimer()
-{
+void TextEdit::closeEditor()
+{	
+	const QSignalBlocker blocker(textEdit->document());
+
+	textEdit->document()->clear();
 	killTimer(timerId);
+	this->close();
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare
