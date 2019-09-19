@@ -40,8 +40,6 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
 
-	socket->readAll();
-
 	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
 
 	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
