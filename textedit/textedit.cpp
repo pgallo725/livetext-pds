@@ -543,14 +543,12 @@ void TextEdit::newChar(qint32 user, QChar ch, QTextCharFormat format, int positi
 	Presence p = onlineUsers.find(user).value();
 	QTextCursor* cursor = p.cursor();
 	
-	cursor->setPosition(position);
-	cursor->insertText(ch);
+	cursor->setPosition(position);	
 	
-	cursor->setPosition(position);
-	cursor->setPosition(position + 1, QTextCursor::KeepAnchor);
-
 	cursor->setCharFormat(format);
 	textEdit->mergeCurrentCharFormat(format);
+	
+	cursor->insertText(ch);
 }
 
 void TextEdit::removeChar(int position)
@@ -563,6 +561,11 @@ void TextEdit::removeChar(int position)
 	cursor->deleteChar();
 
 
+}
+
+void TextEdit::stopTimer()
+{
+	killTimer(timerId);
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare

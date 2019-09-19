@@ -41,6 +41,8 @@ public:
 	void newChar(qint32 user, QChar ch, QTextCharFormat format, int position);
 	void removeChar(int position);
 
+	void stopTimer();
+
 
 
 public slots:
