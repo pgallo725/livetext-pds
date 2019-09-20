@@ -139,7 +139,7 @@ public slots:
 	bool getLogin();
 	// Account handler
 	void newUserPresence(QDataStream& in);
-	void accountUpdate(QDataStream& in);
+	void updateUserPresence(QDataStream& in);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void deleteUserPresence(QDataStream& in);
 	void removeFromFile(qint32 myId);
