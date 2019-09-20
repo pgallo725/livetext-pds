@@ -22,6 +22,7 @@ private:
 	QList<QTextEdit::ExtraSelection> _userText;
 public:
 	Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
+	~Presence();
 
 	QColor color();
 	QString name();
