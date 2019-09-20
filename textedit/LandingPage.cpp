@@ -119,8 +119,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
 
-	/* LOADING GIF */
-	loading = new QLabel(this);
 
 	//If there's a saved credential it opens it
 	QFile file("userLogin.dat");
@@ -142,6 +140,13 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	}
 
 	file.close();
+
+
+
+	/* LOADING GIF */
+	loading = new QLabel(this);
+
+	movie = new QMovie(rsrcPath + "/gif/loading.gif");
 }
 
 LandingPage::~LandingPage()
@@ -153,6 +158,7 @@ void LandingPage::confirmOperation()
 {
 	QString serverIP = ui->lineEdit_serverIP->text();
 	QString serverPort = ui->lineEdit_serverPort->text();
+
 
 	//Controllo se i dati sono stati inseriti correttamente
 	if (serverIP.isEmpty() || serverPort.isEmpty()) {
@@ -181,7 +187,8 @@ void LandingPage::confirmOperation()
 
 	//Function to show loading animation
 	startLoadingAnimation();
-
+	
+	
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
@@ -276,6 +283,7 @@ void LandingPage::incorrectFileOperation(QString error)
 
 void LandingPage::connectionEstabilished()
 {
+	stopLoadingAnimation();
 	switch (ui->tabWidget->currentIndex()) {
 	case 0:
 		Login();
@@ -475,14 +483,7 @@ void LandingPage::centerAndResize() {
 
 void LandingPage::startLoadingAnimation()
 {
-	//Disable main window until client->Connect(...)return the result of the connection
-	setEnabled(false);
-
-	//Loading GIF
-	QMovie* movie = new QMovie(rsrcPath + "/gif/loading.gif");
-
 	loading->setMovie(movie);
-	movie->start();
 
 	//Center and resize
 	movie->setScaledSize(QSize(64, 64));
@@ -490,8 +491,13 @@ void LandingPage::startLoadingAnimation()
 
 	loading->move(width() / 2 - 32, height() / 2 - 32);
 
+	movie->start();
+
 	//loadingScreen->exec();
 	loading->show();
+	
+	//Disable main window until client->Connect(...)return the result of the connection
+	setEnabled(false);
 }
 
 void LandingPage::stopLoadingAnimation()

@@ -205,8 +205,10 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
-	if(socket->waitForEncrypted(READYREAD_TIMEOUT))
+	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
 		ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
+	else
+		emit impossibleToConnect();
 }
 
 void Client::Disconnect() {

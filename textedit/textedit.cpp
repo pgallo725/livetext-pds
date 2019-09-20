@@ -577,6 +577,7 @@ void TextEdit::closeEditor()
 {	
 	const QSignalBlocker blocker(textEdit->document());
 
+	onlineUsers.clear();
 	textEdit->document()->clear();
 	if (timerId > 0)
 		killTimer(timerId);

@@ -29,6 +29,9 @@ public:
 	void setupFileList(QList<URI> documents); //Document List
 	void closeAll();
 
+	void startLoadingAnimation();
+	void stopLoadingAnimation();
+
 private slots:
 	void pushButtonNewClicked();
 	void pushButtonRegisterClicked();
@@ -64,14 +67,14 @@ private:
 	Client* client;
 
 	QLabel* loading;
+	QMovie* movie;
 
 	OpenUriWindow* openURIWindow;
 	NewFileWindow* newFileWindow;
 
 private:
 	void centerAndResize();
-	void startLoadingAnimation();
-	void stopLoadingAnimation();
+
 	void Register();
 	void Login();
 
