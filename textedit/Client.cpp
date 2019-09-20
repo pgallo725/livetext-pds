@@ -368,6 +368,8 @@ void Client::openDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
+
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->sendTo(socket);
 
@@ -402,6 +404,8 @@ void Client::createDocument(QString name) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->sendTo(socket);
@@ -438,6 +442,8 @@ void Client::deleteDocument(URI URI) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
