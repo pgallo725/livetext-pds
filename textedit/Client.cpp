@@ -102,14 +102,14 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 	case CursorMove:
 		receiveCursor(in);
 		break;
-	case AccountUpdate:
-		accountUpdate(in);
-		break;
 	case PresenceAdd:
 		newUserPresence(in);
 		break;
 	case PresenceRemove:
 		deleteUserPresence(in);
+		break;
+	case PresenceUpdate:
+		updateUserPresence(in);
 		break;
 	case CharInsert:
 		receiveChar(in);
@@ -118,7 +118,7 @@ void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
 		deleteChar(in);
 		break;
 	default:
-		//thorw exception
+		//throw exception (?)
 		break;
 	}
 
@@ -205,8 +205,10 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
-	if(socket->waitForEncrypted(READYREAD_TIMEOUT))
+	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
 		ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
+	else
+		emit impossibleToConnect();
 }
 
 void Client::Disconnect() {
@@ -370,6 +372,8 @@ void Client::openDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
+
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->sendTo(socket);
 
@@ -404,6 +408,8 @@ void Client::createDocument(QString name) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->sendTo(socket);
@@ -440,6 +446,8 @@ void Client::deleteDocument(URI URI) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
@@ -592,22 +600,12 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 /*--------------------------- PRESENCE HANDLER --------------------------------*/
 
-void Client::accountUpdate(QDataStream& in) {
-
-	MessageCapsule accountUpdate = MessageFactory::Empty(PresenceUpdate);
-	accountUpdate->readFrom(in);
-	PresenceUpdateMessage* accountupdate = dynamic_cast<PresenceUpdateMessage*>(accountUpdate.get());
-	emit accountModified(accountupdate->getUserId(), accountupdate->getNickname(), accountupdate->getIcon());
-
-}
-
 void Client::newUserPresence(QDataStream& in) {
 
 	MessageCapsule newAccountPresence = MessageFactory::Empty(PresenceAdd);
 	newAccountPresence->readFrom(in);
 	PresenceAddMessage* newaccountpresence = dynamic_cast<PresenceAddMessage*>(newAccountPresence.get());
 	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
-
 }
 
 void Client::deleteUserPresence(QDataStream& in) {
@@ -616,6 +614,14 @@ void Client::deleteUserPresence(QDataStream& in) {
 	userPresence->readFrom(in);
 	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(userPresence.get());
 	emit cancelUserPresence(userpresence->getUserId());
+}
+
+void Client::updateUserPresence(QDataStream& in) {
+
+	MessageCapsule presenceUpdate = MessageFactory::Empty(PresenceUpdate);
+	presenceUpdate->readFrom(in);
+	PresenceUpdateMessage* presenceupdate = dynamic_cast<PresenceUpdateMessage*>(presenceUpdate.get());
+	emit accountModified(presenceupdate->getUserId(), presenceupdate->getNickname(), presenceupdate->getIcon());
 }
 
 void Client::removeFromFile(qint32 myId) {

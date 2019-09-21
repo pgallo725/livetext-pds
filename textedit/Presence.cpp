@@ -7,6 +7,11 @@ Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* te
 	_label = new QLabel(textedit);
 }
 
+Presence::~Presence()
+{
+
+}
+
 QColor Presence::color()
 {
 	return _color;

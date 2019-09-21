@@ -9,6 +9,8 @@
 #include "Presence.h"
 #include "ProfileEditWindow.h"
 
+#define CURSOR_SEND_INTERVAL 300
+
 //Serve per incapsulare tutti i metodi delle classi
 class QAction;
 class QComboBox;
@@ -36,10 +38,13 @@ public:
 	void setDocumentURI(QString uri);
 	bool load(const QString& f);
 	void loadDocument(QString text); //TEST
+	void startCursorTimer();
 	void setCurrentFileName(const QString& fileName);
 
-	void newChar(qint32 user, QChar ch, QTextCharFormat format, int position);
+	void newChar(QChar ch, QTextCharFormat format, int position, qint32 user = -1);
 	void removeChar(int position);
+
+	void closeEditor();
 
 
 
@@ -55,8 +60,8 @@ signals:
 	void closeDocument();
 	void newCursorPosition(qint32 position);
 	void accountUpdate(QString nickname, QImage image, QString password);
-	void deleteChar(int position);
-	void insertChar(QChar ch, QTextCharFormat format, int position);
+	void charDeleted(int position);
+	void charInserted(QChar ch, QTextCharFormat format, int position);
 
 private slots:
 	void fileOpen();

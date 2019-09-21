@@ -49,7 +49,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent)
+TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 {
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -198,6 +198,7 @@ void TextEdit::setupUserActions()
 void TextEdit::setupOnlineUsersActions()
 {
 	QMap<qint32, Presence>::iterator it;
+
 	onlineUsersToolbar->clear();
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
@@ -505,7 +506,7 @@ bool TextEdit::load(const QString& f)
 		textEdit->setPlainText(str);
 	}
 
-	
+
 	return true;
 }
 
@@ -521,33 +522,45 @@ void TextEdit::loadDocument(QString text)
 		textEdit->setHtml(text);
 	}
 
+	startCursorTimer();
+}
 
-	timerId = startTimer(250);
+void TextEdit::startCursorTimer()
+{
+	timerId = startTimer(CURSOR_SEND_INTERVAL);
+	qDebug() << "Started timer with ID = " << timerId;
 }
 
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
 	textEdit->document()->setModified(false);
-		
+
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 	setWindowModified(false); //Il documento non ha modifiche non salvate
 }
 
-void TextEdit::newChar(qint32 user, QChar ch, QTextCharFormat format, int position)
+void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 user)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	Presence p = onlineUsers.find(user).value();
-	QTextCursor* cursor = p.cursor();
-	
+	QTextCursor* cursor;
+
+	if (user != -1) {
+		Presence p = onlineUsers.find(user).value();
+		cursor = p.cursor();
+	}
+	else {
+		cursor = new QTextCursor(textEdit->document());
+	}
+
 	cursor->setPosition(position);
-	cursor->insertText(ch);
-	
-	cursor->setPosition(cursor->position());
+
 	cursor->setCharFormat(format);
-	
+	textEdit->mergeCurrentCharFormat(format);
+
+	cursor->insertText(ch);
 }
 
 void TextEdit::removeChar(int position)
@@ -558,8 +571,17 @@ void TextEdit::removeChar(int position)
 	cursor->setPosition(position);
 
 	cursor->deleteChar();
+}
 
+void TextEdit::closeEditor()
+{	
+	const QSignalBlocker blocker(textEdit->document());
 
+	onlineUsers.clear();
+	textEdit->document()->clear();
+	if (timerId > 0)
+		killTimer(timerId);
+	this->close();
 }
 
 //Nuovo file, se ho modifiche non salvate chiede se salvare
@@ -587,7 +609,10 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
-	emit newCursorPosition(textEdit->textCursor().position());
+	//emit newCursorPosition(textEdit->textCursor().position());
+
+	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
+	// even if the user is not moving his cursor
 }
 
 //Remove presence in document
@@ -1116,7 +1141,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
-			emit deleteChar(position);
+			emit charDeleted(position);
 		}
 	}
 
@@ -1149,7 +1174,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			//Ricavo formato carattere inserio
 			QTextCharFormat fmt = cursor.charFormat();
 
-			emit insertChar(ch, fmt, i);
+			emit charInserted(ch, fmt, i);
 		}
 	}
 }

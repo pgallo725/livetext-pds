@@ -9,7 +9,6 @@
 LiveText::LiveText(QObject* parent) : QObject(parent)
 {
 	_landingPage = new LandingPage();
-	_textEdit = new TextEdit();
 	_client = new Client();
 
 
@@ -44,23 +43,11 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	
-	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
-	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
-	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
-
-	//CLIENT - TEXTEDIT
-	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
-	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
-	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
-	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 }
 
 LiveText::~LiveText()
 {
 	delete _landingPage;
-	delete _textEdit;
 	delete _client;
 }
 
@@ -89,7 +76,6 @@ void LiveText::Login(QString username, QString password)
 void LiveText::loginSuccess(User user)
 {
 	_user = user;
-	_textEdit->setUser(&_user);
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 }
@@ -159,15 +145,30 @@ void LiveText::addDocument(QString uri)
 
 void LiveText::openDocumentCompleted(Document doc)
 {
+	_textEdit = new TextEdit();
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
-	
+
+	//TEXTEDIT - LIVETEXT
+	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
+	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
+
+	//CLIENT - TEXTEDIT
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
+	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
+	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
+
 	
 	
 	if (!_user.getDocuments().contains(doc.getURI())) {
 		_user.addDocument(doc.getURI());
 	}
-
+	
+	_textEdit->setUser(&_user);
 	_docEditor->openDocument();
+	
 	
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
@@ -198,13 +199,16 @@ void LiveText::openEditor()
 
 //Close editor
 void LiveText::returnToLanding()
-{
-	delete _docEditor;
-	_textEdit->close();
+{	
+	_textEdit->closeEditor();
+	
 	_client->removeFromFile(_user.getUserId());
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
+	
+	delete _docEditor;
+	delete _textEdit;
 }
 
 //Send cursor

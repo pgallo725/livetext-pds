@@ -498,6 +498,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	/* this thread will not receives more messages from client */
 	disconnect(author, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(author, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(author, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	/* move the socket's affinity to the workspace thread */
 	QSslSocket* s = client->getSocket();
@@ -543,6 +544,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	/* this thread will not recives more messages from client */
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
 
 	/* move the socket's affinity to the workspace thread */
 	QSslSocket* s = client->getSocket();
