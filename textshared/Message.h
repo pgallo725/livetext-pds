@@ -29,6 +29,8 @@ enum MessageType : quint16
 	DocumentDismissed,
 	DocumentOpen,
 	DocumentReady,
+	DocumentClose,
+	DocumentExit,
 	DocumentError,
 
 	// Text-editing messages

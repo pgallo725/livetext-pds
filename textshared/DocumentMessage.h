@@ -115,7 +115,7 @@ private:
 
 protected:
 
-	DocumentReadyMessage();	// empty constructor
+	DocumentReadyMessage();		// empty constructor
 
 	// Use this to create a DocumentReady response, containing the Document object
 	DocumentReadyMessage(Document doc);
@@ -130,6 +130,45 @@ public:
 	Document getDocument() const;
 };
 
+
+class DocumentCloseMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+protected:
+
+	// Creates a DocumentClose message, to inform the server that the client wants to exit the Workspace
+	DocumentCloseMessage();
+
+public:
+
+	~DocumentCloseMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QSslSocket* socket) const override;
+};
+
+
+class DocumentExitMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+protected:
+
+	// Creates a DocumentExit response
+	DocumentExitMessage();
+
+public:
+
+	~DocumentExitMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QSslSocket* socket) const override;
+};
 
 
 class DocumentErrorMessage : public Message
