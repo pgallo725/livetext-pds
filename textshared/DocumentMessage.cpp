@@ -169,6 +169,54 @@ Document DocumentReadyMessage::getDocument() const
 }
 
 
+/*************** DOCUMENT CLOSE MESSAGE ***************/
+
+DocumentCloseMessage::DocumentCloseMessage()
+	: Message(DocumentClose)
+{
+}
+
+void DocumentCloseMessage::readFrom(QDataStream& stream)
+{
+	// NO CONTENT TO READ
+}
+
+void DocumentCloseMessage::sendTo(QSslSocket* socket) const
+{
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
+
+	stream << DocumentClose << quint32(0);
+
+	socket->write(buffer);
+	socket->flush();
+}
+
+
+/*************** DOCUMENT CLOSED CONFIRMATION MESSAGE ***************/
+
+DocumentExitMessage::DocumentExitMessage()
+	: Message(DocumentExit)
+{
+}
+
+void DocumentExitMessage::readFrom(QDataStream& stream)
+{
+	// NO CONTENT TO READ
+}
+
+void DocumentExitMessage::sendTo(QSslSocket* socket) const
+{
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
+
+	stream << DocumentExit << quint32(0);
+
+	socket->write(buffer);
+	socket->flush();
+}
+
+
 /*************** DOCUMENT ERROR MESSAGE ***************/
 
 DocumentErrorMessage::DocumentErrorMessage()
