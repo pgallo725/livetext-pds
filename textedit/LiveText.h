@@ -53,6 +53,8 @@ private:
 	TextEdit* _textEdit;
 	DocumentEditor* _docEditor;
 	User _user;
+
+	QThread* _waitingThread;
 };
 
 
