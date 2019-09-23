@@ -14,7 +14,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//LANDINGPAGE - LIVETEXT
 	//connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor
-	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
+	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer,Qt::QueuedConnection); //Server connection
 	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
 	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
