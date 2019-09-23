@@ -80,7 +80,7 @@ void WorkSpace::readMessage()
 
 		socketBuffer.clear();
 
-		if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove))
+		if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
 		{
 			messageHandler.process(message, socket);
 		}
@@ -181,6 +181,9 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
+
+	// Send the DocumentExit confirmation to the client
+	MessageFactory::DocumentExit()->sendTo(clientSocket);
 
 	// Delete the client's socket in the current thread
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);

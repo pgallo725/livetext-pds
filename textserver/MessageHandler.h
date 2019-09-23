@@ -51,7 +51,7 @@ signals: void charInsert(Symbol& s);
 signals: void charDelete(QVector<qint32> pos);
 signals: void messageDispatch(MessageCapsule message, QSslSocket* sender);
 
-signals: void removePresence(QSslSocket* clientSocket);
+signals: void documentClose(QSslSocket* clientSocket);
 signals: void userLogout(QSslSocket* clientSocket);
 
 };

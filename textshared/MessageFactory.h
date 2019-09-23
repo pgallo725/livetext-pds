@@ -30,6 +30,8 @@ public:
 	static MessageCapsule DocumentOpen(QString docURI);
 	static MessageCapsule DocumentDismissed();
 	static MessageCapsule DocumentReady(Document doc);
+	static MessageCapsule DocumentClose();
+	static MessageCapsule DocumentExit();
 	static MessageCapsule DocumentError(QString error);
 
 	static MessageCapsule CharInsert(Symbol symbol);

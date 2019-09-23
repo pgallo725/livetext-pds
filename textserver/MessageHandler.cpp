@@ -23,7 +23,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 
-	connect(this, &MessageHandler::removePresence, w, &WorkSpace::clientQuit, Qt::DirectConnection);
+	connect(this, &MessageHandler::documentClose, w, &WorkSpace::clientQuit, Qt::DirectConnection);
 }
 
 MessageHandler::MessageHandler(TcpServer* s)
@@ -117,6 +117,12 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		break;
 	}
 
+	case DocumentClose:
+	{
+		emit documentClose(socket);
+		break;
+	}
+
 		/* TEXTEDIT MESSAGES */
 
 	case CharInsert:
@@ -140,12 +146,6 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	case CursorMove:
 	{
 		emit messageDispatch(message, socket);
-		break;
-	}
-		
-	case PresenceRemove:
-	{
-		emit removePresence(socket);
 		break;
 	}
 

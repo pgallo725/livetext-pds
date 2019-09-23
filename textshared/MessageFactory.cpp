@@ -29,6 +29,8 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::DocumentDismissed:	return new DocumentDismissedMessage();
 		case MessageType::DocumentOpen:			return new DocumentOpenMessage();
 		case MessageType::DocumentReady:		return new DocumentReadyMessage();
+		case MessageType::DocumentClose:		return new DocumentCloseMessage();
+		case MessageType::DocumentExit:			return new DocumentExitMessage();
 		case MessageType::DocumentError:		return new DocumentErrorMessage();
 		case MessageType::CharInsert:			return new CharInsertMessage();
 		case MessageType::CharDelete:			return new CharDeleteMessage();
@@ -118,6 +120,16 @@ MessageCapsule MessageFactory::DocumentDismissed()
 MessageCapsule MessageFactory::DocumentReady(Document doc)
 {
 	return new DocumentReadyMessage(doc);
+}
+
+MessageCapsule MessageFactory::DocumentClose()
+{
+	return new DocumentCloseMessage();
+}
+
+MessageCapsule MessageFactory::DocumentExit()
+{
+	return new DocumentExitMessage();
 }
 
 MessageCapsule MessageFactory::DocumentError(QString error)
