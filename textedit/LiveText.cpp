@@ -8,9 +8,15 @@
 
 LiveText::LiveText(QObject* parent) : QObject(parent)
 {
+	qDebug() << this->thread()->currentThreadId();
 	_landingPage = new LandingPage();
 	_client = new Client();
 
+	_waitingThread = new QThread(parent);
+	connect(_waitingThread, &QThread::finished, _waitingThread, &QThread::deleteLater);
+
+	_landingPage->moveToThread(_waitingThread);
+	_waitingThread->start();
 
 	//LANDINGPAGE - LIVETEXT
 	//connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor

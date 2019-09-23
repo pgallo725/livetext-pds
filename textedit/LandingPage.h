@@ -29,7 +29,7 @@ public:
 	void setupFileList(QList<URI> documents); //Document List
 	void closeAll();
 
-	void startLoadingAnimation();
+	void startLoadingAnimation(QString text);
 	void stopLoadingAnimation();
 
 private slots:

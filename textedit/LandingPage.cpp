@@ -185,10 +185,12 @@ void LandingPage::confirmOperation()
 		}
 	}
 
+
 	//Function to show loading animation
-	startLoadingAnimation();
-	
-	
+	startLoadingAnimation(tr("Connecting to server..."));
+
+	QCoreApplication::processEvents();
+
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
@@ -341,7 +343,7 @@ void LandingPage::pushButtonOpenClicked()
 {
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>") {
-		startLoadingAnimation();
+		startLoadingAnimation(tr("Opening document..."));
 		emit openDocument(ui->listWidget->currentRow());
 	}
 
@@ -352,7 +354,7 @@ void LandingPage::pushButtonRemoveClicked()
 	QString fileSelected = ui->listWidget->currentItem()->text();
 
 	if (fileSelected != "<No files found>") {
-		startLoadingAnimation();
+		startLoadingAnimation(tr("Removing document..."));
 		emit removeDocument(ui->listWidget->currentRow());
 	}
 }
@@ -481,27 +483,34 @@ void LandingPage::centerAndResize() {
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }
 
-void LandingPage::startLoadingAnimation()
+void LandingPage::startLoadingAnimation(QString text)
 {
-	loading->setMovie(movie);
+
+	//loading->setMovie(movie);
+	loading->setText(text);
+	QFont font = loading->font();
+	font.setPointSize(25);
+	
+	loading->setAlignment(Qt::AlignCenter);
+
+	loading->setFont(font);
 
 	//Center and resize
-	movie->setScaledSize(QSize(64, 64));
-	loading->resize(QSize(64, 64));
+	loading->resize(QSize(512, 128));
 
-	loading->move(width() / 2 - 32, height() / 2 - 32);
+	loading->move(width() / 2 - 256, height() / 2 - 64);
 
-	movie->start();
+	QApplication::setOverrideCursor(Qt::WaitCursor);
 
-	//loadingScreen->exec();
 	loading->show();
-	
+
 	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
 }
 
 void LandingPage::stopLoadingAnimation()
 {
+	QApplication::restoreOverrideCursor();
 	loading->close();
 	setEnabled(true);
 }
