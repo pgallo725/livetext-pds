@@ -39,6 +39,8 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
+	//connect(_client, &Client::documentExitSucced,);
+	//connect(_client, &Client::documentExitFailed,);
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);

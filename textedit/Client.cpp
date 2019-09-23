@@ -611,7 +611,6 @@ void Client::removeFromFile(qint32 myId) {
 		switch (socketBuffer.getType()) {
 		case DocumentExit:
 		{
-			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
 			emit documentExitSucced();
 			socketBuffer.clear();
@@ -619,7 +618,6 @@ void Client::removeFromFile(qint32 myId) {
 		}
 		case DocumentError:
 		{
-			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			DocumentErrorMessage* accounterror = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 			emit documentExitFailed(accounterror->getErrorMessage());
 			socketBuffer.clear();
