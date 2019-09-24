@@ -548,18 +548,18 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		switch (incomingMessage->getType()) {
 		case AccountConfirmed:
 		{
+			socketBuffer.clear();
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 			emit personalAccountModified(accountconfirmed->getUserObj());
-			socketBuffer.clear();
 			return;
 		}
 		case AccountError:
 		{
+			socketBuffer.clear();
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
 			emit accountModificationFail(accounterror->getErrorMessage());
-			socketBuffer.clear();
 			return;
 		}
 		default:
