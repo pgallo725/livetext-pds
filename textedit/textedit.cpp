@@ -606,6 +606,11 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	QPixmap userPic;
 
 	userPic.convertFromImage(image);
+
+	if (onlineUsers.contains(userId)) {
+		removePresence(userId);
+	}
+
 	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
@@ -618,7 +623,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 //Remove presence in document
 void TextEdit::removePresence(qint32 userId)
 {
-	onlineUsers.find(userId).value().label()->close();
+	onlineUsers.find(userId).value().label()->clear();
 	onlineUsers.remove(userId);
 	setupOnlineUsersActions();
 }
