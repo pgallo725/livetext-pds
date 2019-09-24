@@ -88,34 +88,35 @@ void Client::readBuffer() {
 	if (socketBuffer.bufferReadyRead()) {
 
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
-		quint16 mType = socketBuffer.getType();
+		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
+		message->readFrom(dataStream);
 
-		messageHandler((MessageType)socketBuffer.getType(), dataStream);
+		messageHandler(message);
 
 		socketBuffer.clear();
 	}
 }
 
-void Client::messageHandler(MessageType typeOfMessage, QDataStream& in) {
+void Client::messageHandler(MessageCapsule message) {
 
-	switch (typeOfMessage) {
+	switch (message->getType()) {
 	case CursorMove:
-		receiveCursor(in);
+		receiveCursor(message);
 		break;
 	case PresenceAdd:
-		newUserPresence(in);
+		newUserPresence(message);
 		break;
 	case PresenceRemove:
-		deleteUserPresence(in);
+		deleteUserPresence(message);
 		break;
 	case PresenceUpdate:
-		updateUserPresence(in);
+		updateUserPresence(message);
 		break;
 	case CharInsert:
-		receiveChar(in);
+		receiveChar(message);
 		break;
 	case CharDelete:
-		deleteChar(in);
+		deleteChar(message);
 		break;
 	default:
 		//throw exception (?)
@@ -178,6 +179,8 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 				emit openFileFailed(tr("Server not responding"));
 			case CreateFileMessage:
 				emit removeFileFailed(tr("Server not responding"));
+			case AccountUpdate:
+				emit accountModificationFail(tr("Server not responding"));
 			default:
 				break;
 			}
@@ -206,13 +209,14 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
-		ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
+		emit connectionEstablished();
+		//ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
 	else
 		emit impossibleToConnect();
 }
 
 void Client::Disconnect() {
-	socket->close();	// TODO EDO: meglio closeHostConnection?
+	socket->disconnectFromHost();
 	qDebug() << "Connection closed by client";
 }
 
@@ -361,6 +365,8 @@ void Client::Logout() {
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->sendTo(socket);
+
+	
 }
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
@@ -445,7 +451,7 @@ void Client::deleteDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	socket->readAll();		// Dirty fix for pending messages received after closing another document
+	socket->readAll();		// Dirty fix for pending messages received after closing another document 
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->sendTo(socket);
@@ -484,11 +490,9 @@ void Client::sendCursor(qint32 userId, qint32 position) {
 	return;
 }
 
-void Client::receiveCursor(QDataStream& in) {
+void Client::receiveCursor(MessageCapsule message) {
 
-	MessageCapsule moveCursor = MessageFactory::Empty(CursorMove);
-	moveCursor->readFrom(in);
-	CursorMoveMessage* movecursor = dynamic_cast<CursorMoveMessage*>(moveCursor.get());
+	CursorMoveMessage* movecursor = dynamic_cast<CursorMoveMessage*>(message.get());
 	emit cursorMoved(movecursor->getCursorPosition(), movecursor->getUserId());
 
 }
@@ -508,19 +512,15 @@ void Client::removeChar(QVector<int> position)
 	removeChar->sendTo(socket);
 }
 
-void Client::receiveChar(QDataStream& in) {
+void Client::receiveChar(MessageCapsule message) {
 
-	MessageCapsule reciveChar = MessageFactory::Empty(CharInsert);
-	reciveChar->readFrom(in);
-	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(reciveChar.get());
+	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(message.get());
 	emit recivedSymbol(recivechar->getSymbol());
 }
 
-void Client::deleteChar(QDataStream& in) {
+void Client::deleteChar(MessageCapsule message) {
 
-	MessageCapsule deleteChar = MessageFactory::Empty(CharDelete);
-	deleteChar->readFrom(in);
-	CharDeleteMessage* deletechar = dynamic_cast<CharDeleteMessage*>(deleteChar.get());
+	CharDeleteMessage* deletechar = dynamic_cast<CharDeleteMessage*>(message.get());
 	emit removeSymbol(deletechar->getPosition());
 }
 
@@ -531,63 +531,39 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 {
 	QDataStream in(socket);
 	QByteArray dataBuffer;
-
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+	MessageCapsule incomingMessage;
 	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
-	accountUpdate->sendTo(socket);
+
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
+	
+	accountUpdate->sendTo(socket); //Start the Account Update sequence of messages
 
 
 	while (true) {
 
-		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
-			emit accountModificationFail(tr("Server not responding"));
+		incomingMessage = readMessage(in, (qint16) AccountUpdate);
+		if (!incomingMessage)
 			return;
-		}
 
-		in >> socketBuffer;		/* take the type of incoming message and read the size of the message */
-
-		dataBuffer = socket->read(socketBuffer.getDataSize());		// Read all the available message data from the socket
-
-		socketBuffer.append(dataBuffer);
-		/* If not all bytes were received with the first chunk, wait for the next chunks
-		to arrive on the socket and append their content to the read buffer */
-		while (!socketBuffer.bufferReadyRead())
-		{
-			if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
-				// emit accountModificationFail(tr("Server not responding")); // che segnale emetto? teoricamente non dovrebbe mai succedere
-				break;
-			}
-			dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
-			socketBuffer.append(dataBuffer);
-		}
-
-		if (!socketBuffer.bufferReadyRead())  // skip the message if it's not complete
-			continue;
-
-		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
-		switch (socketBuffer.getType()) {
+		switch (incomingMessage->getType()) {
 		case AccountConfirmed:
 		{
-			MessageCapsule recivedAccountUpdate = MessageFactory::Empty(AccountConfirmed);
-			recivedAccountUpdate->readFrom(dataStream);
-			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(recivedAccountUpdate.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 			emit personalAccountModified(accountconfirmed->getUserObj());
 			socketBuffer.clear();
 			return;
 		}
 		case AccountError:
 		{
-			MessageCapsule accountError = MessageFactory::Empty(AccountError);
-			accountError->readFrom(dataStream);
-			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(accountError.get());
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
 			emit accountModificationFail(accounterror->getErrorMessage());
 			socketBuffer.clear();
 			return;
 		}
 		default:
-			messageHandler((MessageType)socketBuffer.getType(), dataStream);
+			messageHandler(incomingMessage);
 			break;
 		}
 
@@ -598,33 +574,62 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 /*--------------------------- PRESENCE HANDLER --------------------------------*/
 
-void Client::newUserPresence(QDataStream& in) {
+void Client::newUserPresence(MessageCapsule message) {
 
-	MessageCapsule newAccountPresence = MessageFactory::Empty(PresenceAdd);
-	newAccountPresence->readFrom(in);
-	PresenceAddMessage* newaccountpresence = dynamic_cast<PresenceAddMessage*>(newAccountPresence.get());
+	PresenceAddMessage* newaccountpresence = dynamic_cast<PresenceAddMessage*>(message.get());
 	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
 }
 
-void Client::deleteUserPresence(QDataStream& in) {
+void Client::deleteUserPresence(MessageCapsule message) {
 
-	MessageCapsule userPresence = MessageFactory::Empty(PresenceRemove);
-	userPresence->readFrom(in);
-	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(userPresence.get());
+	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(message.get());
 	emit cancelUserPresence(userpresence->getUserId());
 }
 
-void Client::updateUserPresence(QDataStream& in) {
+void Client::updateUserPresence(MessageCapsule message) {
 
-	MessageCapsule presenceUpdate = MessageFactory::Empty(PresenceUpdate);
-	presenceUpdate->readFrom(in);
-	PresenceUpdateMessage* presenceupdate = dynamic_cast<PresenceUpdateMessage*>(presenceUpdate.get());
+	PresenceUpdateMessage* presenceupdate = dynamic_cast<PresenceUpdateMessage*>(message.get());
 	emit accountModified(presenceupdate->getUserId(), presenceupdate->getNickname(), presenceupdate->getIcon());
 }
 
 void Client::removeFromFile(qint32 myId) {
 
-	MessageCapsule userPresence = MessageFactory::PresenceRemove(myId);
-	userPresence->sendTo(socket);
+
+	QDataStream in(socket);
+	MessageCapsule incomingMessage;
+	
+	MessageCapsule closeDocument = MessageFactory::DocumentClose();
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+	closeDocument->sendTo(socket);
+
+	while (true) {
+
+		incomingMessage = readMessage(in, DeleteMessage);
+		if (!incomingMessage)
+			return;
+
+		switch (socketBuffer.getType()) {
+		case DocumentExit:
+		{
+			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
+			emit documentExitSucced();
+			socketBuffer.clear();
+			return;
+		}
+		case DocumentError:
+		{
+			DocumentErrorMessage* accounterror = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
+			emit documentExitFailed(accounterror->getErrorMessage());
+			socketBuffer.clear();
+			return;
+		}
+		default:
+			messageHandler(incomingMessage);
+			break;
+		}
+
+		socketBuffer.clear();
+	}
+
+	
 }

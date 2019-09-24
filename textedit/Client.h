@@ -89,6 +89,8 @@ signals:
 	void openFileCompleted(Document document);
 	void openFileFailed(QString error);
 	void documentDismissed(URI URI);
+	void documentExitSucced();
+	void documentExitFailed(QString errorType);
 	
 	// Symbol Signals
 	void recivedSymbol(Symbol character);
@@ -99,7 +101,7 @@ public:
 	Client(QObject* parent = 0);
 	~Client();
 
-	void messageHandler(MessageType typeOfMeassage, QDataStream& in);
+	void messageHandler(MessageCapsule message);
 	MessageCapsule readMessage(QDataStream& stream, qint16 typeOfMessage);
 
 public slots:
@@ -118,11 +120,11 @@ public slots:
 	void Logout();
 	// Data Exchange
 	void sendCursor(qint32 userId, qint32 position);
-	void receiveCursor(QDataStream& in);
+	void receiveCursor(MessageCapsule message);
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
-	void receiveChar(QDataStream& in);
-	void deleteChar(QDataStream& in);
+	void receiveChar(MessageCapsule message);
+	void deleteChar(MessageCapsule message);
 	// Document handler
 	void openDocument(URI URI);
 	void createDocument(QString name);
@@ -138,10 +140,10 @@ public slots:
 	void setImage(QImage image);
 	bool getLogin();
 	// Account handler
-	void newUserPresence(QDataStream& in);
-	void updateUserPresence(QDataStream& in);
+	void newUserPresence(MessageCapsule message);
+	void updateUserPresence(MessageCapsule message);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
-	void deleteUserPresence(QDataStream& in);
+	void deleteUserPresence(MessageCapsule message);
 	void removeFromFile(qint32 myId);
 };
 
