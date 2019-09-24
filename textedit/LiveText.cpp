@@ -153,6 +153,8 @@ void LiveText::addDocument(QString uri)
 
 void LiveText::openDocumentCompleted(Document doc)
 {
+	_landingPage->stopLoadingAnimation();
+
 	_textEdit = new TextEdit();
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
