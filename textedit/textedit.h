@@ -28,7 +28,7 @@ class TextEdit : public QMainWindow
 	Q_OBJECT
 
 public:
-	TextEdit(QWidget* parent = 0);
+	TextEdit(User* user, QWidget* parent = 0);
 
 	void setUser(User* user); //User logged
 	void accountUpdateSuccessful(); //Account updated
@@ -54,6 +54,7 @@ public slots:
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
 	void accountUpdateFailed(QString error);
+	void closeDocumentError(QString error);
 
 
 signals:
@@ -102,6 +103,7 @@ private:
 	void setupOnlineUsersActions();
 	void setupOnlineUsersToolbar();
 
+	void askBeforeCloseDocument();
 
 	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
 	void fontChanged(const QFont& f);

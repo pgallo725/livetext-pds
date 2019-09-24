@@ -49,7 +49,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
+TextEdit::TextEdit(User* user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
 {
 	setWindowTitle(QCoreApplication::applicationName());
 	setWindowIcon(QIcon(":/images/logo.png"));
@@ -190,7 +190,7 @@ void TextEdit::setupUserActions()
 
 
 	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
-	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::closeDocument);
+	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
 	tb->addAction(actioncloseDocument);
 
 }
@@ -227,6 +227,14 @@ void TextEdit::setupOnlineUsersToolbar()
 {
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
+}
+
+void TextEdit::askBeforeCloseDocument()
+{
+	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes) {
+		emit closeDocument();
+	}
 }
 
 
@@ -472,6 +480,11 @@ void TextEdit::accountUpdateFailed(QString error)
 	ew->updateFailed(error);
 }
 
+void TextEdit::closeDocumentError(QString error)
+{
+	statusBar()->showMessage(error);
+}
+
 void TextEdit::setDocumentURI(QString uri)
 {
 	URI = uri;
@@ -574,7 +587,7 @@ void TextEdit::removeChar(int position)
 }
 
 void TextEdit::closeEditor()
-{	
+{
 	const QSignalBlocker blocker(textEdit->document());
 
 	onlineUsers.clear();
