@@ -1159,6 +1159,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = position; i < position + charsRemoved; ++i) {
+			QChar ch = textEdit->document()->characterAt(i);
 			emit charDeleted(position);
 		}
 	}
@@ -1184,7 +1185,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 		for (int i = position; i < position + charsAdded; ++i) {
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
 			//precedente al cursore.
-			cursor.setPosition(i + 1);
+			cursor.setPosition(i);
 
 			//Ricavo il carattere inserito
 			QChar ch = textEdit->document()->characterAt(i);
