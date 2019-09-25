@@ -18,6 +18,7 @@ private:
 public:
 
 	Client(QSslSocket* s);
+	Client() {};
 	~Client();
 
 	void login(User* user);

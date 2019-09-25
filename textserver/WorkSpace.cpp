@@ -6,8 +6,8 @@
 #include "ServerException.h"
 
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
-	: doc(d), messageHandler(this), users_mutex(m)
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
+	: doc(d), messageHandler(this)
 {
 	doc->load();	// Load the document contents
 
@@ -146,28 +146,26 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 
 
 /* Update user's fields and return response message for the client */
-MessageCapsule WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
+void WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
-	if (!client->isLogged())
-		return MessageFactory::AccountError("You are not logged in");
+	emit sendAccountUpdate(client, nickname, icon, password);
+}
 
-	User* user = client->getUser();
-	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
+void WorkSpace::receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsule msg)
+{
+	QSslSocket* clientSocket = client->getSocket();
 
-	if (!nickname.isEmpty())
-		user->setNickname(nickname);
-	if (!icon.isNull())
-		user->setIcon(icon);
-	if (!password.isEmpty())
-		user->setPassword(password);
+	if (msg->getType() == AccountConfirmed) {
+		User* user = client->getUser();
 
-	// Notify all other clients of the changes in this user's account
-	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
-		user->getNickname(), user->getIcon()), clientSocket);
-
-	return MessageFactory::AccountConfirmed(*user);
+		// Notify all other clients of the changes in this user's account
+		dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
+			user->getNickname(), user->getIcon()), clientSocket);
+	}
+	
+	msg->sendTo(clientSocket);
 }
 
 
@@ -206,3 +204,4 @@ void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "Socket error: " << socketError << endl;
 }
+

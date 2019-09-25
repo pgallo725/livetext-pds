@@ -82,10 +82,17 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 
 	case AccountUpdate:
 	{
-		AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
-		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
-			accntUpdate->getIcon(), accntUpdate->getPassword());
-		response->sendTo(socket);
+		if (!_usecase) {	// usecase = server(0)
+			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
+			MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
+				accntUpdate->getIcon(), accntUpdate->getPassword());
+			response->sendTo(socket);
+		}
+		else {
+			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
+			emit accountUpdate(socket, accntUpdate->getNickname(), 
+				accntUpdate->getIcon(), accntUpdate->getPassword());
+		}
 		break;
 	}
 

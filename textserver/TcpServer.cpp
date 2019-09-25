@@ -25,6 +25,7 @@ TcpServer::TcpServer(QObject* parent)
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
 	qRegisterMetaType<URI>("URI");
+	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
 	/* initialize random number generator with timestamp */
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -193,10 +194,6 @@ void TcpServer::saveUsers()
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream usersDb(&file);
-
-		/* Serialization of users database must be done in mutual exclusion with
-		any other AccountUpdate operations that workspace threads might be performing */
-		QMutexLocker locker(&users_mutex);		
 
 		std::cout << "\nSaving users database... ";
 
@@ -382,13 +379,16 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
-	User* user = client->getUser();
+	return accountUpdate(client->getUser(), nickname, icon, password);
+}
 
-	if (!nickname.isNull())
+MessageCapsule TcpServer::accountUpdate(User* user, QString nickname, QImage icon, QString password)
+{
+	if (!nickname.isEmpty())
 		user->setNickname(nickname);
 	if (!icon.isNull())
 		user->setIcon(icon);
-	if (!password.isNull())
+	if (!password.isEmpty())
 		user->setPassword(password);
 
 	return MessageFactory::AccountConfirmed(*user);
@@ -417,6 +417,19 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	connect(socket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 
 	socket->readAll();
+}
+
+void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password)
+{
+	WorkSpace* w = dynamic_cast<WorkSpace*>(sender());
+	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	if (!client->isLogged())
+		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
+	else
+	{
+		emit sendAccountUpdate(client, accountUpdate(client->getUser(), nickname, icon, password));
+	}
+	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
 }
 
 void TcpServer::restoreUserAvaiable(QString username)
@@ -456,7 +469,7 @@ void addToIndex(QSharedPointer<Document> doc)
 /* Create a new worskpace for a document */
 QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, users_mutex));
+	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document));
 	documents.insert(document->getURI(), document);
 	workspaces.insert(document->getURI(), w);
 	
@@ -464,7 +477,8 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
 	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
-
+	connect(w.get(), &WorkSpace::sendAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
+	
 	return w;
 }
 
@@ -580,8 +594,6 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 /* Release all resources owned by workspace and delete it */
 void TcpServer::deleteWorkspace(URI document)
 {
-	WorkSpace* w = workspaces.find(document).value().get();
-
 	/* delete workspace and remove it from the map */
 	workspaces.remove(document);	
 	qDebug() << "workspace (" << document.toString() << ") closed";
