@@ -165,7 +165,8 @@ void WorkSpace::receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsu
 			user->getNickname(), user->getIcon()), clientSocket);
 	}
 	
-	msg->sendTo(clientSocket);
+	if(clientSocket->isOpen())
+		msg->sendTo(clientSocket);
 }
 
 
