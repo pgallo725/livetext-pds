@@ -158,8 +158,8 @@ void TcpServer::initialize()
 	}
 
 	// Setup timer for autosave
-	time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
-	time.start(USERS_SAVE_TIMEOUT);
+	//time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
+	//time.start(USERS_SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
 }
@@ -224,7 +224,6 @@ void TcpServer::saveUsers()
 		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
 	}
 }
-
 
 /* Handle a new connection from a client */
 void TcpServer::newClientConnection()
@@ -367,11 +366,12 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	client->login(&(*i));		// client is automatically logged
 
+	saveUsers();
+
 	return MessageFactory::AccountConfirmed(user);
 }
 
-
-/* Update user's fields and return response message for the client */
+/* Check and update user's fields and return response message for the client in tcpServer */
 MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
@@ -379,9 +379,13 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
-	return accountUpdate(client->getUser(), nickname, icon, password);
+	MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
+	saveUsers();
+	
+	return msg;
 }
 
+/* Update user's fields */
 MessageCapsule TcpServer::accountUpdate(User* user, QString nickname, QImage icon, QString password)
 {
 	if (!nickname.isEmpty())
@@ -393,7 +397,6 @@ MessageCapsule TcpServer::accountUpdate(User* user, QString nickname, QImage ico
 
 	return MessageFactory::AccountConfirmed(*user);
 }
-
 
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QSslSocket* clientSocket)
@@ -419,6 +422,7 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	socket->readAll();
 }
 
+/* Check and update user's fields and return response message for the client in workSpace */
 void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password)
 {
 	WorkSpace* w = dynamic_cast<WorkSpace*>(sender());
@@ -428,6 +432,7 @@ void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nick
 	else
 	{
 		emit sendAccountUpdate(client, accountUpdate(client->getUser(), nickname, icon, password));
+		saveUsers();
 	}
 	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
 }
@@ -506,6 +511,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
+	saveUsers();
 	/* add this user to the list of document editors */
 	doc->insertNewEditor(client->getUsername());
 
@@ -550,8 +556,10 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	User* user = client->getUser();
 
 	/* if it's the first time opening this document, add it to the user's list of documents */	
-	if (!user->hasDocument(docUri))
+	if (!user->hasDocument(docUri)) {
 		user->addDocument(docUri);
+		saveUsers();
+	}
 	/* and add the new editor to the document's list of editors */
 	doc->insertNewEditor(user->getUsername());
 
