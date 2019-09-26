@@ -46,6 +46,7 @@ public slots:
 	void documentSave();
 	void documentInsertSymbol(Symbol& symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
+	void documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format);
 
 	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 

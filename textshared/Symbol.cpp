@@ -53,12 +53,12 @@ bool TextList::isEmpty() const
 
 
 TextBlock::TextBlock()
-	: _blockId(-1), _nChars(0), _listRef(-1)
+	: _blockId(-1), _authorId(-1), _nChars(0), _listRef(-1)
 {
 }
 
-TextBlock::TextBlock(qint32 blockId, QTextBlockFormat _fmt, qint32 listRef)
-	: _blockId(blockId), _nChars(0), _listRef(listRef)
+TextBlock::TextBlock(qint32 blockId, qint32 authorId, QTextBlockFormat _fmt, qint32 listRef)
+	: _blockId(blockId), _authorId(authorId), _nChars(0), _listRef(listRef)
 {
 }
 
@@ -94,6 +94,16 @@ qint32 TextBlock::getId() const
 	return _blockId;
 }
 
+qint32 TextBlock::getAuthorId() const
+{
+	return _authorId;
+}
+
+QPair<qint32, qint32> TextBlock::getIdPair() const
+{
+	return qMakePair(_blockId, _authorId);
+}
+
 QTextBlockFormat TextBlock::getFormat() const
 {
 	return _format;
@@ -102,6 +112,11 @@ QTextBlockFormat TextBlock::getFormat() const
 qint32 TextBlock::getListIdentifier() const
 {
 	return _listRef;
+}
+
+int TextBlock::size() const
+{
+	return _nChars;
 }
 
 bool TextBlock::isEmpty() const
@@ -114,12 +129,12 @@ bool TextBlock::isEmpty() const
 
 
 Symbol::Symbol()
-	: _blockRef(-1)
+	: _blockRef(qMakePair(-1, -1))
 {
 }
 
 Symbol::Symbol(QChar sym, QTextCharFormat fmt, qint32 authorId, QVector<qint32> fractionPos)
-	: _char(sym), _format(fmt), _fPos(fractionPos), _blockRef(-1)
+	: _char(sym), _format(fmt), _fPos(fractionPos), _blockRef(qMakePair(-1, -1))
 {
 	_fPos.push_back(authorId);		// User ID is added as part of the fractional position to ensure uniqueness
 }
@@ -132,13 +147,13 @@ void Symbol::setFormat(QTextCharFormat fmt)
 
 void Symbol::assignToBlock(TextBlock& block)
 {
-	_blockRef = block.getId();
+	_blockRef = block.getIdPair();
 	block.incrementSymbols();
 }
 
 void Symbol::removeFromBlock(TextBlock& block)
 {
-	_blockRef = -1;
+	_blockRef = qMakePair(-1, -1);
 	block.decrementSymbols();
 }
 
@@ -178,7 +193,7 @@ QTextCharFormat Symbol::getFormat()
 	return _format;
 }
 
-qint32 Symbol::getBlockIdentifier()
+QPair<qint32, qint32> Symbol::getBlockIdentifier()
 {
 	return _blockRef;
 }

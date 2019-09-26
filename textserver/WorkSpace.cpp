@@ -144,6 +144,11 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 	doc->removeAt(position);
 }
 
+void WorkSpace::documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format)
+{
+	doc->formatBlock(blockId, format);
+}
+
 
 /* Update user's fields and return response message for the client */
 void WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
