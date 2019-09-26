@@ -29,7 +29,7 @@ protected:
 };
 
 
-class FileLoadException : public ServerException
+class FileLoadException : public FileException
 {
 
 public:
@@ -38,12 +38,13 @@ public:
 };
 
 
-class FileWriteException : public ServerException
+class FileWriteException : public FileException
 {
-
+private:
+	std::string path;
 public:
-
 	FileWriteException(std::string fileName, std::string path);
+	std::string getPath();
 };
 
 
@@ -53,20 +54,24 @@ public:
 	FileCreateException(std::string fileName, std::string path);
 };
 
-class FileOverwriteException : public ServerException
+
+class FileOpenException : public FileException
 {
-
 public:
+	FileOpenException(std::string fileName, std::string path);
+};
 
+
+class FileOverwriteException : public FileException
+{
+public:
 	FileOverwriteException(std::string filePath);
 };
 
 
 class MessageException : public ServerException
 {
-
 public:
-
 	MessageException(std::string msg);
 };
 
@@ -78,7 +83,6 @@ private:
 	int errType;
 
 public:
-
 	MessageUnexpectedTypeException(int type);
 	int getErrType();
 };
@@ -89,7 +93,6 @@ public:
 class SocketException : public ServerException
 {
 protected:
-
 	SocketException(std::string msg);
 };
 
@@ -97,7 +100,6 @@ protected:
 class SocketNullException : public SocketException
 {
 public:
-
 	SocketNullException(std::string msg);
 };
 
@@ -105,7 +107,6 @@ public:
 class SocketDuplicateException : public SocketException
 {
 public:
-
 	SocketDuplicateException(std::string msg);
 };
 
@@ -113,6 +114,5 @@ public:
 class UserNotFoundException : public ServerException
 {
 public:
-
 	UserNotFoundException(std::string msg);
 };
