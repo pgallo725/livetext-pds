@@ -41,3 +41,18 @@ QLabel* Presence::label()
 {
 	return _label;
 }
+
+QList<QTextEdit::ExtraSelection> Presence::userText()
+{
+	return _userText;
+}
+
+void Presence::addUserText(QTextEdit::ExtraSelection selection)
+{
+	_userText.append(selection);
+}
+
+void Presence::clearSelections()
+{
+	_userText.clear();
+}

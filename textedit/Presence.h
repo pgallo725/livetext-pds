@@ -30,7 +30,11 @@ public:
 	QPixmap profilePicture();
 	QTextCursor* cursor();
 	QLabel* label();
+	QList<QTextEdit::ExtraSelection> userText();
 
+
+	void addUserText(QTextEdit::ExtraSelection selection);
+	void clearSelections();
 };
 
 
