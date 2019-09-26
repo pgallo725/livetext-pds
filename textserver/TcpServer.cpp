@@ -90,7 +90,7 @@ TcpServer::TcpServer(QObject* parent)
 TcpServer::~TcpServer()
 {
 	time.stop();
-	saveUsers();
+	saveUsers();		// TODO: serve ancora? se si bisogna gestire le eccezioni?
 
 	qDebug() << "Server down";
 }
@@ -156,10 +156,6 @@ void TcpServer::initialize()
 		QFileInfo info(docsFile);
 		throw FileLoadException(info.absoluteFilePath().toStdString());
 	}
-
-	// Setup timer for autosave
-	//time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
-	//time.start(USERS_SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
 }
@@ -366,8 +362,22 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	client->login(&(*i));		// client is automatically logged
 
-	saveUsers();
-
+	try {
+		saveUsers();
+	}
+	catch (FileOverwriteException& foe) {
+		QFile file(TMP_USERS_FILENAME);
+		file.remove();
+		client->logout();
+		users.remove(username);
+		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
+	}
+	catch (FileWriteException& fwe) {
+		client->logout();
+		users.remove(username);
+		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
+	}
+	
 	return MessageFactory::AccountConfirmed(user);
 }
 
@@ -375,12 +385,26 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
 	MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
-	saveUsers();
+	
+	try {
+		saveUsers();
+	}
+	catch (FileOverwriteException& foe) {
+		QFile file(TMP_USERS_FILENAME);
+		file.remove();
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+	}
+	catch (FileWriteException& fwe) {
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+	}
 	
 	return msg;
 }
@@ -431,12 +455,27 @@ void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nick
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
 	else
 	{
-		emit sendAccountUpdate(client, accountUpdate(client->getUser(), nickname, icon, password));
-		saveUsers();
+		User recoveryUser = *(client->getUser());
+		MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
+		try {
+			saveUsers();
+		}
+		catch (FileOverwriteException& foe) {
+			QFile file(TMP_USERS_FILENAME);
+			file.remove();
+			client->getUser()->recoveryUser(recoveryUser);
+			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+		}
+		catch (FileWriteException& fwe) {
+			client->getUser()->recoveryUser(recoveryUser);
+			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+		}
+		emit sendAccountUpdate(client, msg);
 	}
 	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
 }
 
+/* Delete user from UnAvaiable list when they logout or close connection */
 void TcpServer::restoreUserAvaiable(QString username)
 {
 	usersNotAvaiable.removeOne(username);
@@ -491,6 +530,7 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 {
 	QSharedPointer<Client> client = clients.find(author).value();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
@@ -502,16 +542,40 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
 	QSharedPointer<Document> doc(new Document(docURI));
-
-	/* add the document to the index and save the file */
-	addToIndex(doc);
-	doc->save();
-
 	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
-	saveUsers();
+
+	try {
+		/* add the document to the index and save the file */
+		addToIndex(doc);
+		doc->save();
+		/* save users */
+		saveUsers();
+	}
+	catch (FileOverwriteException& foe) {
+		QFile file(TMP_USERS_FILENAME);
+		file.remove();
+
+		// need to remove the new doc
+
+		// need to delete last row of indexDocFile
+
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+	catch (FileWriteException& fwe) {
+		// devo distinguere chi ha lanciato l'eccezzione?
+
+		// need to remove the new doc if saveUsers trow the exception
+
+		// need to delete last row of indexDocFile if saveUsers trow the exception
+
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+
 	/* add this user to the list of document editors */
 	doc->insertNewEditor(client->getUsername());
 
@@ -539,6 +603,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
@@ -558,7 +623,19 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	/* if it's the first time opening this document, add it to the user's list of documents */	
 	if (!user->hasDocument(docUri)) {
 		user->addDocument(docUri);
-		saveUsers();
+		try {
+			saveUsers();
+		}
+		catch (FileOverwriteException& foe) {
+			QFile file(TMP_USERS_FILENAME);
+			file.remove();
+			client->getUser()->recoveryUser(recoveryUser);
+			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		}
+		catch (FileWriteException& fwe) {
+			client->getUser()->recoveryUser(recoveryUser);
+			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		}
 	}
 	/* and add the new editor to the document's list of editors */
 	doc->insertNewEditor(user->getUsername());
