@@ -50,7 +50,7 @@ public:
 	void setIcon(QImage newIcon);
 	void deleteIcon();	
 	void setPassword(QString newPassword);
-
+	void recoveryUser(User u);
 };
 
 

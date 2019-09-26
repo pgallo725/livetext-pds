@@ -19,13 +19,18 @@ FileException::FileException(std::string msg)
 }
 
 FileLoadException::FileLoadException(std::string filePath)
-	: ServerException("Unable to read file " + filePath)
+	: FileException("Unable to read file " + filePath)
 {
 }
 
 FileWriteException::FileWriteException(std::string fileName, std::string path)
-	: ServerException("Unable to write file '" + fileName + "' in " + path)
+	: FileException("Unable to write file '" + fileName + "' in " + path), path(path)
 {
+}
+
+std::string FileWriteException::getPath()
+{
+	return path;
 }
 
 FileCreateException::FileCreateException(std::string fileName, std::string path)
@@ -33,8 +38,13 @@ FileCreateException::FileCreateException(std::string fileName, std::string path)
 {
 }
 
+FileOpenException::FileOpenException(std::string fileName, std::string path)
+	: FileException("Unable to open file '" + fileName + "' in " + path)
+{
+}
+
 FileOverwriteException::FileOverwriteException(std::string filePath)
-	: ServerException("Unable to overwrite file " + filePath)
+	: FileException("Unable to overwrite file " + filePath)
 {
 }
 
