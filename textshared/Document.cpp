@@ -235,18 +235,26 @@ int Document::insert(Symbol& s)
 			// Insert the new block in the document
 			_blocks.insert(block.getIdPair(), block);
 
-			QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
-
-			// The paragraph delimiter belongs to the block on which it is inserted
-			s.assignToBlock(_blocks[prevBlockId]);
-			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
-
-			// And any following symbol of that paragraph is assigned to the new block
-			for (int i = insertionIndex + 1; 
-				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
-				i++)
+			if (insertionIndex < _text.length())	// The paragraph separator is splitting an existing block
 			{
-				_text[i].assignToBlock(block);
+				QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
+
+				// The paragraph delimiter belongs to the block on which it is inserted
+				s.assignToBlock(_blocks[prevBlockId]);
+				_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+
+				// And any following symbol of that paragraph is assigned to the new block
+				for (int i = insertionIndex + 1;
+					i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
+					i++)
+				{
+					_text[i].assignToBlock(block);
+				}
+			}
+			else	// The paragraph separator marks the first block in the document
+			{
+				s.assignToBlock(block);
+				_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
 			}
 		}
 		else
@@ -272,14 +280,15 @@ int Document::removeAt(QVector<qint32> fPos)
 	if (pos >= 0)
 	{
 		// Check if the symbol removal implies the deletion of a paragraph separator
-		if (_text[pos].getChar() == QChar::ParagraphSeparator)
+		if (_text[pos].getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
 		{
 			TextBlock mergedBlock = _blocks[_text[pos].getBlockIdentifier()];
 
 			// The paragraph following the deleted ParagraphSeparator will disappear
-			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();	
+			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();
 
 			_text.removeAt(pos);	// Removes the paragraph separator
+			mergedBlock.decrementSymbols();
 
 			// All symbols belonging to the next block will be assigned to the current block
 			for (int i = pos;
@@ -291,8 +300,16 @@ int Document::removeAt(QVector<qint32> fPos)
 
 			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
 		}
+		else if (_text[pos].getChar() == QChar::ParagraphSeparator && pos == _text.length())
+		{
+			// Deletes the block which is now empty
+			_blocks.remove(_text[pos].getBlockIdentifier());
+
+			_text.removeAt(pos);	// Removes the paragraph separator
+		}
 		else
 		{
+			_blocks[_text[pos].getBlockIdentifier()].decrementSymbols();
 			_text.removeAt(pos);	// Remove the symbol from the document
 		}
 	}
