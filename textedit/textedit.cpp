@@ -218,7 +218,8 @@ void TextEdit::setupOnlineUsersActions()
 		const QIcon users(background);
 
 		QAction* onlineAction = new QAction(users, p->name().toStdString().c_str(), this);
-		//connect(onlineAction, &QAction::triggered, this, [this, p]() { handleUserSelection(p); });
+		//connect(onlineAction, &QAction::triggered, this, [this, p, onlineAction]() { handleUserSelection(p, onlineAction); });
+		onlineAction->setCheckable(true);
 		onlineUsersToolbar->addAction(onlineAction);
 	}
 }
@@ -1162,7 +1163,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
-		for (int i = position; i < position + charsRemoved; ++i) {
+		for (int i = 0; i < charsRemoved; ++i) {
 			QChar ch = textEdit->document()->characterAt(i);
 			emit charDeleted(position);
 		}
@@ -1189,7 +1190,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 		for (int i = position; i < position + charsAdded; ++i) {
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
 			//precedente al cursore.
-			cursor.setPosition(i);
+			cursor.setPosition(i+1);
 
 			//Ricavo il carattere inserito
 			QChar ch = textEdit->document()->characterAt(i);
@@ -1273,12 +1274,12 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 
 void TextEdit::handleMultipleSelections()
 {
-	QList<QTextEdit::ExtraSelection> usersSelections;
-	usersSelections.clear();
-	textEdit->setExtraSelections(usersSelections);
-
-	QMap<qint32, Presence*>::iterator it;
 	if (actionHighlightUsers->isChecked()) {
+		QList<QTextEdit::ExtraSelection> usersSelections;
+		textEdit->setExtraSelections(usersSelections);
+
+		QMap<qint32, Presence*>::iterator it;
+
 
 		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
 			Presence* p = it.value();
@@ -1289,9 +1290,20 @@ void TextEdit::handleMultipleSelections()
 	}
 }
 
-void TextEdit::handleUserSelection(Presence p)
+void TextEdit::handleUserSelection(Presence* p, QAction* onlineAction)
 {
-	//TODO Handle user icon pressed
+	if (onlineAction->isChecked()) {
+		QList<QTextEdit::ExtraSelection> usersSelections;
+		textEdit->setExtraSelections(usersSelections);
+
+		usersSelections.append(p->userText());
+
+		textEdit->setExtraSelections(usersSelections);
+	}
+	else {
+		QList<QTextEdit::ExtraSelection> emptySelection;
+		textEdit->setExtraSelections(emptySelection);
+	}
 }
 
 void TextEdit::timerEvent(QTimerEvent* event)

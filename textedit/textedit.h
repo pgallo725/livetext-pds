@@ -115,7 +115,7 @@ private:
 	//Extra selections and multiple cursors
 	void handleUsersCursors();
 	void handleMultipleSelections();
-	void handleUserSelection(Presence p);
+	void handleUserSelection(Presence* p, QAction* onlineAction);
 
 	//List type
 	QToolButton* listButton;

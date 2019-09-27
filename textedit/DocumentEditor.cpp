@@ -14,10 +14,10 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 
 void DocumentEditor::openDocument()
 {
-	int position = 0;
-	foreach(Symbol s, _document.getContent()) {
-		_textedit->newChar(s.getChar(), s.getFormat(), position);
-		position++;
+	QVector<Symbol> document = _document.getContent();
+
+	for (int i = 0; i < document.length() - 1; i++){
+		_textedit->newChar(document[i].getChar(), document[i].getFormat(), i);
 	}
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
