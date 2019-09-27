@@ -54,8 +54,7 @@ class TextBlock
 
 private:
 
-	qint32 _blockId;
-	qint32 _authorId;
+	QPair<qint32, qint32> _blockId;
 	QTextBlockFormat _format;
 	qint32 _nChars;
 	qint32 _listRef;
@@ -64,7 +63,8 @@ public:
 
 	TextBlock();		// Empty constructor, to use before populating fields with deserialization
 
-	TextBlock(qint32 blockId, qint32 authorId, QTextBlockFormat _fmt, qint32 listRef = -1);
+	TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat fmt, qint32 listRef = -1);
+	TextBlock(QPair<qint32, qint32> blockIdPair, QTextBlockFormat fmt, qint32 listRef = -1);
 
 	/* setters */
 	void setFormat(QTextBlockFormat fmt);
@@ -74,7 +74,7 @@ public:
 	void removeFromList(TextList& list);
 
 	/* getters */
-	qint32 getId() const;
+	qint32 getBlockNumber() const;
 	qint32 getAuthorId() const;
 	QPair<qint32, qint32> getIdPair() const;
 	QTextBlockFormat getFormat() const;

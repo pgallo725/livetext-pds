@@ -53,12 +53,17 @@ bool TextList::isEmpty() const
 
 
 TextBlock::TextBlock()
-	: _blockId(-1), _authorId(-1), _nChars(0), _listRef(-1)
+	: _blockId(qMakePair(-1, -1)), _nChars(0), _listRef(-1)
 {
 }
 
-TextBlock::TextBlock(qint32 blockId, qint32 authorId, QTextBlockFormat _fmt, qint32 listRef)
-	: _blockId(blockId), _authorId(authorId), _nChars(0), _listRef(listRef)
+TextBlock::TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat _fmt, qint32 listRef)
+	: _blockId(qMakePair(blockNum, authorId)), _nChars(0), _listRef(listRef)
+{
+}
+
+TextBlock::TextBlock(QPair<qint32, qint32> blockIdPair, QTextBlockFormat fmt, qint32 listRef)
+	: _blockId(blockIdPair), _format(fmt), _listRef(listRef)
 {
 }
 
@@ -89,19 +94,19 @@ void TextBlock::removeFromList(TextList& list)
 	list.decrementBlocks();
 }
 
-qint32 TextBlock::getId() const
+qint32 TextBlock::getBlockNumber() const
 {
-	return _blockId;
+	return _blockId.first;
 }
 
 qint32 TextBlock::getAuthorId() const
 {
-	return _authorId;
+	return _blockId.second;
 }
 
 QPair<qint32, qint32> TextBlock::getIdPair() const
 {
-	return qMakePair(_blockId, _authorId);
+	return _blockId;
 }
 
 QTextBlockFormat TextBlock::getFormat() const

@@ -217,28 +217,45 @@ int Document::insert(Symbol& s)
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
 		{
-			qint32 blockNum = -1;
+			TextBlock block;
 
 			if (s.getBlockIdentifier() == qMakePair(-1, -1))
-				blockNum = _blockCounter++;
-			else blockNum = s.getBlockIdentifier().first;
+			{
+				// Create a new TextBlock with locally-generated ID (symbol received from Qt editor)
+				block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+			}
+			else
+			{
+				// Create a TextBlock with the ID carried by the symbol itself (received from another client)
+				block = TextBlock(s.getBlockIdentifier(), QTextBlockFormat());
 
-			TextBlock block(blockNum, s.getAuthorId(), QTextBlockFormat());
+				_blockCounter++;	// (keep the block counter aligned between clients)
+			}
 
 			// Insert the new block in the document
 			_blocks.insert(block.getIdPair(), block);
 
-			QPair<qint32, qint32> prevIdPair = s.getBlockIdentifier();
-			for (int i = binarySearch(s._fPos)+1; i < _text.length() && _text[i].getBlockIdentifier() == prevIdPair; i++)
+			QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
+
+			// The paragraph delimiter belongs to the block on which it is inserted
+			s.assignToBlock(_blocks[prevBlockId]);
+			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+
+			// And any following symbol of that paragraph is assigned to the new block
+			for (int i = insertionIndex + 1; 
+				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
+				i++)
 			{
-				// Assign any following symbol of that paragraph to the new block
 				_text[i].assignToBlock(block);
 			}
 		}
-
-		QVector<Symbol>::iterator it = _text.begin() + insertionIndex;
-
-		_text.insert(it, s);	// insert the symbol in the vector
+		else
+		{
+			// Assign the character to the block on which it is inserted
+			QPair<qint32, qint32> blockId = getBlockAt(insertionIndex);
+			s.assignToBlock(_blocks[blockId]);
+			_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
+		}
 	}
 
 	return insertionIndex;
