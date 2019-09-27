@@ -270,7 +270,32 @@ int Document::removeAt(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
-		_text.removeAt(pos);	// and removes it
+	{
+		// Check if the symbol removal implies the deletion of a paragraph separator
+		if (_text[pos].getChar() == QChar::ParagraphSeparator)
+		{
+			TextBlock mergedBlock = _blocks[_text[pos].getBlockIdentifier()];
+
+			// The paragraph following the deleted ParagraphSeparator will disappear
+			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();	
+
+			_text.removeAt(pos);	// Removes the paragraph separator
+
+			// All symbols belonging to the next block will be assigned to the current block
+			for (int i = pos;
+				i < _text.length() && _text[i].getChar() != QChar::ParagraphSeparator;
+				i++)
+			{
+				_text[pos].assignToBlock(mergedBlock);
+			}
+
+			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
+		}
+		else
+		{
+			_text.removeAt(pos);	// Remove the symbol from the document
+		}
+	}
 
 	return pos;
 }
