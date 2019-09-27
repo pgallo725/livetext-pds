@@ -92,7 +92,8 @@ Document::Document(URI docURI) :
 	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>(2, std::numeric_limits<qint32>::max()));
 	eof.assignToBlock(defaultBlock);
 
-	this->insert(eof);
+	_blocks.insert(defaultBlock.getIdPair(), defaultBlock);
+	_text.insert(_text.begin(), eof);
 }
 
 Document::~Document()
