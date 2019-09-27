@@ -3,7 +3,6 @@
 #include <QDataStream>
 #include <QFile>
 #include <QFileInfo>
-#include <limits>
 
 #include <iostream>
 
@@ -89,7 +88,7 @@ Document::Document(URI docURI) :
 
 	// Insert a ParagraphTerminator character inside a default block in the empty document
 	TextBlock defaultBlock = TextBlock(_blockCounter++, -1, QTextBlockFormat());
-	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>(2, std::numeric_limits<qint32>::max()));
+	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>({ 1000, 1000 }));
 	eof.assignToBlock(defaultBlock);
 
 	_blocks.insert(defaultBlock.getIdPair(), defaultBlock);
