@@ -235,26 +235,18 @@ int Document::insert(Symbol& s)
 			// Insert the new block in the document
 			_blocks.insert(block.getIdPair(), block);
 
-			if (insertionIndex < _text.length())	// The paragraph separator is splitting an existing block
-			{
-				QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
+			QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
 
-				// The paragraph delimiter belongs to the block on which it is inserted
-				s.assignToBlock(_blocks[prevBlockId]);
-				_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+			// The paragraph delimiter belongs to the block on which it is inserted
+			s.assignToBlock(_blocks[prevBlockId]);
+			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
 
-				// And any following symbol of that paragraph is assigned to the new block
-				for (int i = insertionIndex + 1;
-					i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
-					i++)
-				{
-					_text[i].assignToBlock(block);
-				}
-			}
-			else	// The paragraph separator marks the first block in the document
+			// And any following symbol of that paragraph is assigned to the new block
+			for (int i = insertionIndex + 1;
+				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
+				i++)
 			{
-				s.assignToBlock(block);
-				_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+				_text[i].assignToBlock(block);
 			}
 		}
 		else
@@ -287,25 +279,24 @@ int Document::removeAt(QVector<qint32> fPos)
 			// The paragraph following the deleted ParagraphSeparator will disappear
 			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();
 
-			_text.removeAt(pos);	// Removes the paragraph separator
+			_text.removeAt(pos);				// Removes the paragraph separator
 			mergedBlock.decrementSymbols();
 
 			// All symbols belonging to the next block will be assigned to the current block
-			for (int i = pos;
-				i < _text.length() && _text[i].getChar() != QChar::ParagraphSeparator;
-				i++)
+			for (int i = pos; i < _text.length(); i++)
 			{
-				_text[pos].assignToBlock(mergedBlock);
+				_text[i].assignToBlock(mergedBlock);
+				if (_text[i].getChar() == QChar::ParagraphSeparator)
+					break;
 			}
 
 			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
 		}
-		else if (_text[pos].getChar() == QChar::ParagraphSeparator && pos == _text.length())
+		else if (pos == _text.length() - 1)
 		{
-			// Deletes the block which is now empty
-			_blocks.remove(_text[pos].getBlockIdentifier());
-
-			_text.removeAt(pos);	// Removes the paragraph separator
+			// Avoid deleting the last character in the document (pseudo-EOF symbol)
+			// but make sure to reset its format
+			_blocks[_text[pos].getBlockIdentifier()].setFormat(QTextBlockFormat());
 		}
 		else
 		{
