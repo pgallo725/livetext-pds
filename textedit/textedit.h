@@ -46,6 +46,7 @@ public:
 
 	void closeEditor();
 
+	void setExtraSelections(qint32 userId, QPair<int, int> selection);
 
 
 public slots:
@@ -63,6 +64,7 @@ signals:
 	void accountUpdate(QString nickname, QImage image, QString password);
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
+	void generateExtraSelection();
 
 private slots:
 	void fileOpen();
@@ -113,13 +115,16 @@ private:
 	//Extra selections and multiple cursors
 	void handleUsersCursors();
 	void handleMultipleSelections();
-	void handleUserSelection(Presence p);
+	void handleUserSelection(Presence* p, QAction* onlineAction);
 
 	//List type
 	QToolButton* listButton;
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
 
-	QMap<qint32, Presence> onlineUsers;
+	//Users
+	QMap<qint32, Presence*> onlineUsers;
+	
+	
 	//Logged user
 	User* _user;
 

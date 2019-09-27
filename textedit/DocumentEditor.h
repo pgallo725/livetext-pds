@@ -26,6 +26,7 @@ private:
 private slots:
 	void deleteCharAtIndex(int position);
 	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
+	void generateExtraSelection();
 
 
 signals:

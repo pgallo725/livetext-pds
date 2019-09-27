@@ -21,6 +21,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::blockEdit, w, &WorkSpace::documentEditBlock, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 
 	connect(this, &MessageHandler::documentClose, w, &WorkSpace::clientQuit, Qt::DirectConnection);
@@ -145,6 +146,17 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		CharDeleteMessage* deleteMsg = dynamic_cast<CharDeleteMessage*>(message.get());
 		emit charDelete(deleteMsg->getPosition());
 		emit messageDispatch(message, socket);
+		break;
+	}
+
+	case BlockEdit:
+	{
+		BlockEditMessage* blockEditMsg = dynamic_cast<BlockEditMessage*>(message.get());
+		emit blockEdit(blockEditMsg->getBlockIdPair(), blockEditMsg->getBlockFormat());
+
+		// We want to achieve a server-enforced global ordering of format changes, therefore
+		// the BlockEdit message is sent back to all editors by not specifying a sender [nullptr]
+		emit messageDispatch(message, nullptr);
 		break;
 	}
 

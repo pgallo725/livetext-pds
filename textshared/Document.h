@@ -45,9 +45,10 @@ private:
 
 	URI uri;
 	QStringList editors;
-	QVector<Symbol> _text;	// Actual document contents
+	QVector<Symbol> _text;		// Actual document contents
 
-	QMap<qint32, TextBlock> _blocks;
+	qint32 _blockCounter;
+	QMap<QPair<qint32, qint32>, TextBlock> _blocks;
 	QMap<qint32, TextList> _lists;
 
 	static const int fPosGapSize = 4;
@@ -65,28 +66,31 @@ public:
 	void unload();
 	void save();
 
-	int insert(Symbol s);
+	int insert(Symbol& s);
 	void remove(const Symbol& s);
 	int removeAt(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
+	int formatBlock(QPair<qint32, qint32> id, QTextBlockFormat fmt);
 
 	QVector<qint32> fractionalPosBegin();
 	QVector<qint32> fractionalPosEnd();
 	QVector<qint32> fractionalPosBetween(int prev_i, int next_i);
 	QVector<qint32> fractionalPosAtIndex(int index);
 
-	int length();
-
 	/* getters */
 	URI getURI();
 	QString getName();
 	QString getAuthor();
 
+	int length();
+
 	QVector<Symbol> getContent();
+	QString toString();				// returns a printable representation of the document's contents
 
-	QString toString();		// returns a printable representation of the document's contents
+	QPair<qint32, qint32> getBlockAt(int index);
+	int getBlockPosition(QPair<qint32, qint32> blockIdPair);
 
-	void insertNewEditor(QString edit);
+	void insertNewEditor(QString editor);
 
 private:
 

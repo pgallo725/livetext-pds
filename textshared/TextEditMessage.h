@@ -54,3 +54,33 @@ public:
 
 	QVector<qint32> getPosition() const;
 };
+
+
+class BlockEditMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	qint32 m_editorId;
+	QPair<qint32, qint32> m_blockId;
+	QTextBlockFormat m_blockFmt;
+
+protected:
+
+	BlockEditMessage();		// empty constructor
+
+	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
+	BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId);
+
+public:
+
+	~BlockEditMessage() {};
+
+	void readFrom(QDataStream& stream) override;
+	void sendTo(QSslSocket* socket) const override;
+
+	qint32 getAuthorId() const;
+	QPair<qint32, qint32> getBlockIdPair() const;
+	QTextBlockFormat getBlockFormat() const;
+};
