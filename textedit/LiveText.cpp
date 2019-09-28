@@ -138,7 +138,9 @@ void LiveText::openDocumentCompleted(Document doc)
 {
 	_landingPage->stopLoadingAnimation();
 
-	_textEdit = new TextEdit(&_user);
+	_textEdit = new TextEdit();
+	_textEdit->setUser(&_user);
+	
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
 	//TEXTEDIT - LIVETEXT

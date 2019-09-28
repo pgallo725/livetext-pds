@@ -47,6 +47,11 @@ QList<QTextEdit::ExtraSelection> Presence::userText()
 	return _userText;
 }
 
+QAction* Presence::action()
+{
+	return _iconPressedAction;
+}
+
 void Presence::addUserText(QTextEdit::ExtraSelection selection)
 {
 	_userText.append(selection);
@@ -55,4 +60,9 @@ void Presence::addUserText(QTextEdit::ExtraSelection selection)
 void Presence::clearSelections()
 {
 	_userText.clear();
+}
+
+void Presence::setAction(QAction* action)
+{
+	_iconPressedAction = action;
 }

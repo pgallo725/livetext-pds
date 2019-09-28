@@ -28,7 +28,7 @@ class TextEdit : public QMainWindow
 	Q_OBJECT
 
 public:
-	TextEdit(User* user, QWidget* parent = 0);
+	TextEdit(QWidget* parent = 0);
 
 	void setUser(User* user); //User logged
 	void accountUpdateSuccessful(); //Account updated
@@ -115,7 +115,7 @@ private:
 	//Extra selections and multiple cursors
 	void handleUsersCursors();
 	void handleMultipleSelections();
-	void handleUserSelection(Presence* p, QAction* onlineAction);
+	void updateUsersSelections();
 
 	//List type
 	QToolButton* listButton;
