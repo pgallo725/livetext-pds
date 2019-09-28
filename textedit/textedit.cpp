@@ -553,11 +553,9 @@ void TextEdit::startCursorTimer()
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
-	textEdit->document()->setModified(false);
 
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
-	setWindowModified(false); //Il documento non ha modifiche non salvate
 }
 
 void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 user)
@@ -577,7 +575,6 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 	cursor->setPosition(position);
 
 	cursor->setCharFormat(format);
-	textEdit->mergeCurrentCharFormat(format);
 
 	cursor->insertText(ch);
 	highlightUsersText();
@@ -617,7 +614,7 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	// Initialize random sequence
-	qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
+	qsrand(QDateTime::currentMSecsSinceEpoch());
 
 	int randomNumber = 7 + (qrand() % 11);
 
@@ -634,6 +631,8 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
+	emit generateExtraSelection();
+	
 	//emit newCursorPosition(textEdit->textCursor().position());
 
 	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
@@ -1177,7 +1176,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			//Ricavo formato carattere inserio
 			QTextCharFormat fmt = cursor.charFormat();
 
-			emit charInserted(ch, fmt, i);
+			if ((i != position + charsAdded - 1) || (i != textEdit->document()->characterCount() - 1) || ch != QChar::ParagraphSeparator) {
+				emit charInserted(ch, fmt, i);
+			}
 		}
 	}
 }
@@ -1309,7 +1310,7 @@ void TextEdit::handleMultipleSelections()
 
 		if (p->action()->isChecked()) {
 			usersSelections.append(p->userText());
-				actionsChecked++;
+			actionsChecked++;
 		}
 	}
 

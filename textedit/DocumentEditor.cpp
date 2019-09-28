@@ -21,6 +21,8 @@ void DocumentEditor::openDocument()
 	}
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
+
+	generateExtraSelection();
 }
 
 
