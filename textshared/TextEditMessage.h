@@ -16,15 +16,16 @@ protected:
 
 	CharInsertMessage();	// empty constructor
 
-	// Constructor for CharInsert messages
+	// Constructor for CharInsert messages, carrying the symbol object
 	CharInsertMessage(Symbol symbol);
+
+	void writeContent(QDataStream& stream) const override;
 
 public:
 
 	~CharInsertMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	Symbol& getSymbol();
 };
@@ -42,15 +43,16 @@ protected:
 
 	CharDeleteMessage();	// empty constructor
 
-	// Constructor for CharDelete messages
+	// Constructor for CharDelete messages, with the fractional position of the symbol to delete
 	CharDeleteMessage(QVector<qint32> position);
+
+	void writeContent(QDataStream& stream) const override;
 
 public:
 
 	~CharDeleteMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QVector<qint32> getPosition() const;
 };
@@ -73,12 +75,13 @@ protected:
 	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
 	BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~BlockEditMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getAuthorId() const;
 	QPair<qint32, qint32> getBlockIdPair() const;

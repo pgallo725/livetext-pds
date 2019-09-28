@@ -13,22 +13,14 @@ CharInsertMessage::CharInsertMessage(Symbol symbol)
 {
 }
 
+void CharInsertMessage::writeContent(QDataStream& stream) const
+{
+	stream << m_symbol;
+}
+
 void CharInsertMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_symbol;
-}
-
-void CharInsertMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << CharInsert << quint32(0) << m_symbol;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 Symbol& CharInsertMessage::getSymbol()
@@ -49,22 +41,14 @@ CharDeleteMessage::CharDeleteMessage(QVector<qint32> position)
 {
 }
 
+void CharDeleteMessage::writeContent(QDataStream& stream) const
+{
+	stream << m_fPos;
+}
+
 void CharDeleteMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_fPos;
-}
-
-void CharDeleteMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << CharDelete << quint32(0) << m_fPos;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 QVector<qint32> CharDeleteMessage::getPosition() const
@@ -85,22 +69,14 @@ BlockEditMessage::BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockForm
 {
 }
 
+void BlockEditMessage::writeContent(QDataStream& stream) const
+{
+	stream << m_blockId << m_blockFmt << m_editorId;
+}
+
 void BlockEditMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_blockId >> m_blockFmt >> m_editorId;
-}
-
-void BlockEditMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << BlockEdit << quint32(0) << m_blockId << m_blockFmt << m_editorId;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 qint32 BlockEditMessage::getAuthorId() const

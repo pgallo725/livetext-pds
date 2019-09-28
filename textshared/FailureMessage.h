@@ -18,12 +18,13 @@ protected:
 	// Construct FailureMessage items with the appropriate error description
 	FailureMessage(QString description);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~FailureMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getDescription();
 };
