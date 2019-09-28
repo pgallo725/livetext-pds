@@ -6,6 +6,26 @@ Message::Message(MessageType type)
 {
 }
 
+void Message::sendTo(QSslSocket* socket) const
+{
+	QByteArray buffer;
+	QDataStream stream(&buffer, QIODevice::WriteOnly);
+
+	// Serialize the message contents on the byte-stream, first the Type and Length fields,
+	// then the Payload (specific to each message) and therefore handled by the sub-class
+	stream << m_type << quint32(0); 
+	this->writeContent(stream);
+
+	// Seek back to the beginning of the message byte-stream, right after 
+	// the Type field, and write the proper value in the Length field
+	stream.device()->seek(sizeof(MessageType));
+	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
+
+	// Write the buffer on the socket and send it immediately
+	socket->write(buffer);
+	socket->flush();
+}
+
 int Message::getType()
 {
 	return m_type;

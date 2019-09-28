@@ -6,6 +6,7 @@
 #include <QSslConfiguration>
 #include <QString>
 #include <QTimer>
+#include <QSaveFile>
 
 #include <User.h>
 #include "Client.h"
@@ -36,6 +37,8 @@ private:
 	QMap<QSslSocket*, QSharedPointer<Client>> clients;
 	QStringList usersNotAvaiable;
 	qint32 _userIdCounter;
+	QSaveFile usersFile;
+	QSaveFile docsFile;
 
 	QTimer time;
 
@@ -44,6 +47,7 @@ private:
 	SocketBuffer socketBuffer;
 
 	URI generateURI(QString authorName, QString docName) const;
+	void TcpServer::addToIndex(QSharedPointer<Document> doc);
 
 public:
 

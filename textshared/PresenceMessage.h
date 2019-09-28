@@ -20,12 +20,13 @@ protected:
 	// Construct a CursorMove message, specifying the new position of the user's cursor
 	CursorMoveMessage(qint32 userId, qint32 newPosition);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~CursorMoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	qint32 getCursorPosition() const;
@@ -49,12 +50,13 @@ protected:
 	// Construct a PresenceUpdate message, specifying the updated user's data
 	PresenceUpdateMessage(qint32 userId, QString nickname, QImage icon);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~PresenceUpdateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -79,12 +81,13 @@ protected:
 	// Construct a PresenceAdd message, specifying the new user's data
 	PresenceAddMessage(qint32 userId, QString nickname, QImage icon);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~PresenceAddMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -107,12 +110,13 @@ protected:
 	// Construct a PresenceRemove message, specifying the id of the user which disconnected
 	PresenceRemoveMessage(qint32 userId);
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~PresenceRemoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	qint32 getUserId() const;
 };

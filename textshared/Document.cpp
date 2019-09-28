@@ -242,7 +242,7 @@ int Document::insert(Symbol& s)
 			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
 
 			// And any following symbol of that paragraph is assigned to the new block
-			for (int i = insertionIndex + 1; 
+			for (int i = insertionIndex + 1;
 				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
 				i++)
 			{
@@ -272,27 +272,35 @@ int Document::removeAt(QVector<qint32> fPos)
 	if (pos >= 0)
 	{
 		// Check if the symbol removal implies the deletion of a paragraph separator
-		if (_text[pos].getChar() == QChar::ParagraphSeparator)
+		if (_text[pos].getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
 		{
 			TextBlock mergedBlock = _blocks[_text[pos].getBlockIdentifier()];
 
 			// The paragraph following the deleted ParagraphSeparator will disappear
-			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();	
+			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();
 
-			_text.removeAt(pos);	// Removes the paragraph separator
+			_text.removeAt(pos);				// Removes the paragraph separator
+			mergedBlock.decrementSymbols();
 
 			// All symbols belonging to the next block will be assigned to the current block
-			for (int i = pos;
-				i < _text.length() && _text[i].getChar() != QChar::ParagraphSeparator;
-				i++)
+			for (int i = pos; i < _text.length(); i++)
 			{
-				_text[pos].assignToBlock(mergedBlock);
+				_text[i].assignToBlock(mergedBlock);
+				if (_text[i].getChar() == QChar::ParagraphSeparator)
+					break;
 			}
 
 			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
 		}
+		else if (pos == _text.length() - 1)
+		{
+			// Avoid deleting the last character in the document (pseudo-EOF symbol)
+			// but make sure to reset its format
+			_blocks[_text[pos].getBlockIdentifier()].setFormat(QTextBlockFormat());
+		}
 		else
 		{
+			_blocks[_text[pos].getBlockIdentifier()].decrementSymbols();
 			_text.removeAt(pos);	// Remove the symbol from the document
 		}
 	}

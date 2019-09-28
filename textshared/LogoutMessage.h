@@ -14,10 +14,11 @@ protected:
 	// Construct a LogoutRequest, no additional information needed
 	LogoutMessage();
 
+	void writeContent(QDataStream& stream) const override;
+
 public:
 
 	~LogoutMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 };
