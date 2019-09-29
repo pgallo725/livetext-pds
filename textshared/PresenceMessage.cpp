@@ -13,7 +13,7 @@ CursorMoveMessage::CursorMoveMessage(qint32 userId, qint32 newPosition)
 {
 }
 
-void CursorMoveMessage::writeContent(QDataStream& stream) const
+void CursorMoveMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_userId << m_cursorPos;
 }
@@ -46,7 +46,7 @@ PresenceUpdateMessage::PresenceUpdateMessage(qint32 userId, QString nickname, QI
 {
 }
 
-void PresenceUpdateMessage::writeContent(QDataStream& stream) const
+void PresenceUpdateMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_userId << m_userName << m_userIcon;
 }
@@ -84,7 +84,7 @@ PresenceAddMessage::PresenceAddMessage(qint32 userId, QString nickname, QImage i
 {
 }
 
-void PresenceAddMessage::writeContent(QDataStream& stream) const
+void PresenceAddMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_userId << m_userName << m_userIcon;
 }
@@ -122,7 +122,7 @@ PresenceRemoveMessage::PresenceRemoveMessage(qint32 userId)
 {
 }
 
-void PresenceRemoveMessage::writeContent(QDataStream& stream) const
+void PresenceRemoveMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_userId;
 }

@@ -19,7 +19,7 @@ protected:
 	// Costruct LoginRequest message with the username of the account that is trying to login
 	LoginRequestMessage(QString username);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -48,7 +48,7 @@ protected:
 	// Costruct LoginChallenge message with the cryptographic nonce
 	LoginChallengeMessage(QByteArray salt, QByteArray nonce);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -77,7 +77,7 @@ protected:
 	// Costruct LoginUnlock message with the solved cryptographic challenge
 	LoginUnlockMessage(QByteArray token);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -105,7 +105,7 @@ protected:
 	// Costruct LoginGranted message with the account information for the user
 	LoginGrantedMessage(User loggedUser);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -133,7 +133,7 @@ protected:
 	// Costruct LoginError message with a string as the error description
 	LoginErrorMessage(QString reason);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 

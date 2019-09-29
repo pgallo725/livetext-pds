@@ -19,7 +19,7 @@ protected:
 	// Constructor for CharInsert messages, carrying the symbol object
 	CharInsertMessage(Symbol symbol);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -46,7 +46,7 @@ protected:
 	// Constructor for CharDelete messages, with the fractional position of the symbol to delete
 	CharDeleteMessage(QVector<qint32> position);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -75,7 +75,7 @@ protected:
 	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
 	BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 

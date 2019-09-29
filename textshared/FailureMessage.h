@@ -18,7 +18,7 @@ protected:
 	// Construct FailureMessage items with the appropriate error description
 	FailureMessage(QString description);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 

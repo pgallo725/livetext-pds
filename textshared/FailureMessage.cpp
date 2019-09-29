@@ -11,7 +11,7 @@ FailureMessage::FailureMessage(QString description)
 {
 }
 
-void FailureMessage::writeContent(QDataStream& stream) const
+void FailureMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_error;
 }

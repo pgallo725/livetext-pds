@@ -8,7 +8,7 @@ LogoutMessage::LogoutMessage()
 {
 }
 
-void LogoutMessage::writeContent(QDataStream& stream) const
+void LogoutMessage::writeTo(QDataStream& stream) const
 {
 	// NOTHING TO WRITE
 }

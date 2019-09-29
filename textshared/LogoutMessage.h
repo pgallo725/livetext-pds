@@ -14,7 +14,7 @@ protected:
 	// Construct a LogoutRequest, no additional information needed
 	LogoutMessage();
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 

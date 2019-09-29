@@ -66,7 +66,7 @@ public:
 	virtual ~Message() { };
 
 	// Handles serialization of the message contents to a byte-stream and writes it on the socket
-	void sendTo(QSslSocket* socket) const;
+	void send(QSslSocket* socket) const;
 
 	// Read from the data-stream the bytes needed to fill this message, according to its type
 	virtual void readFrom(QDataStream& stream) = 0;
@@ -77,7 +77,7 @@ public:
 protected:
 
 	// Write the message fields on the data-stream's buffer
-	virtual void writeContent(QDataStream& stream) const = 0;
+	virtual void writeTo(QDataStream& stream) const = 0;
 };
 
 

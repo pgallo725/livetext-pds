@@ -255,7 +255,7 @@ void Client::Login() {
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
 
-	loginRequest->sendTo(socket);
+	loginRequest->send(socket);
 
 	QDataStream in(socket);
 	incomingMessage = readMessage(in, LoginMessage);
@@ -302,7 +302,7 @@ void Client::Login() {
 
 	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(hash2.result());
 
-	loginUnlock->sendTo(socket);
+	loginUnlock->send(socket);
 
 	incomingMessage = readMessage(in, LoginMessage);
 	if (!incomingMessage)
@@ -334,7 +334,7 @@ void Client::Register() {
 	// Link the stream to the socke and send the byte
 
 	MessageCapsule accountCreate = MessageFactory::AccountCreate(username, nickname, image, password);
-	accountCreate->sendTo(socket);
+	accountCreate->send(socket);
 
 	//wait the response from the server
 	incomingMessage = readMessage(in, RegisterMessage);
@@ -367,7 +367,7 @@ void Client::Logout() {
 	MessageCapsule incomingMessage;*/
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
-	logoutRequest->sendTo(socket);
+	logoutRequest->send(socket);
 
 	
 }
@@ -382,7 +382,7 @@ void Client::openDocument(URI URI) {
 	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
-	openDocument->sendTo(socket);
+	openDocument->send(socket);
 
 	//wait the response from the server
 
@@ -419,7 +419,7 @@ void Client::createDocument(QString name) {
 	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
-	newDocument->sendTo(socket);
+	newDocument->send(socket);
 
 	//wait the response from the server
 
@@ -457,7 +457,7 @@ void Client::deleteDocument(URI URI) {
 	socket->readAll();		// Dirty fix for pending messages received after closing another document 
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
-	removeDocument->sendTo(socket);
+	removeDocument->send(socket);
 
 	incomingMessage = readMessage(in, DeleteMessage);
 	if (!incomingMessage)
@@ -489,7 +489,7 @@ void Client::sendCursor(qint32 userId, qint32 position) {
 
 	// Link the stream to the socket and send the byte
 	MessageCapsule moveCursor = MessageFactory::CursorMove(userId, position);
-	moveCursor->sendTo(socket);
+	moveCursor->send(socket);
 	return;
 }
 
@@ -506,19 +506,19 @@ void Client::receiveCursor(MessageCapsule message) {
 void Client::sendChar(Symbol character) {
 
 	MessageCapsule sendChar = MessageFactory::CharInsert(character);
-	sendChar->sendTo(socket);
+	sendChar->send(socket);
 }
 
 void Client::removeChar(QVector<int> position)
 {
 	MessageCapsule removeChar = MessageFactory::CharDelete(position);
-	removeChar->sendTo(socket);
+	removeChar->send(socket);
 }
 
 void Client::blockModified(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
 {
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
-	blockEdit->sendTo(socket);
+	blockEdit->send(socket);
 }
 
 void Client::receiveChar(MessageCapsule message) {
@@ -551,7 +551,7 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 	
-	accountUpdate->sendTo(socket); //Start the Account Update sequence of messages
+	accountUpdate->send(socket); //Start the Account Update sequence of messages
 
 
 	while (true) {
@@ -615,7 +615,7 @@ void Client::removeFromFile(qint32 myId) {
 	
 	MessageCapsule closeDocument = MessageFactory::DocumentClose();
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-	closeDocument->sendTo(socket);
+	closeDocument->send(socket);
 
 	while (true) {
 

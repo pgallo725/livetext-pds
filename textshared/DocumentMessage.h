@@ -19,7 +19,7 @@ protected:
 	// Costruct DocumentCreate message specifying the document's name
 	DocumentCreateMessage(QString documentName);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -47,7 +47,7 @@ protected:
 	// Costruct DocumentRemove message with the URI of the document to be removed
 	DocumentRemoveMessage(URI documentURI);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -75,7 +75,7 @@ protected:
 	// Costruct DocumentOpen message specifying the document's URI
 	DocumentOpenMessage(URI documentURI);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -99,7 +99,7 @@ protected:
 	// Creates a DocumentDismissed message, confirmation of a document delete operation
 	DocumentDismissedMessage();
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -125,7 +125,7 @@ protected:
 	// Use this to create a DocumentReady response, containing the Document object
 	DocumentReadyMessage(Document doc);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -148,7 +148,7 @@ protected:
 	// Creates a DocumentClose message, to inform the server that the client wants to exit the Workspace
 	DocumentCloseMessage();
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -169,7 +169,7 @@ protected:
 	// Creates a DocumentExit response
 	DocumentExitMessage();
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
@@ -194,7 +194,7 @@ protected:
 	// Costruct DocumentError message with a string describing the error
 	DocumentErrorMessage(QString reason);
 
-	void writeContent(QDataStream& stream) const override;
+	void writeTo(QDataStream& stream) const override;
 
 public:
 

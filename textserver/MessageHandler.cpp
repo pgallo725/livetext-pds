@@ -58,7 +58,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		LoginRequestMessage* loginRqst = dynamic_cast<LoginRequestMessage*>(message.get());
 		MessageCapsule response = emit loginRequest(socket, loginRqst->getUsername());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -66,7 +66,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		LoginUnlockMessage* loginUnlck = dynamic_cast<LoginUnlockMessage*>(message.get());
 		MessageCapsule response = emit loginUnlock(socket, loginUnlck->getToken());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -77,7 +77,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		AccountCreateMessage* accntCreate = dynamic_cast<AccountCreateMessage*>(message.get());
 		MessageCapsule response = emit accountCreate(socket, accntCreate->getUsername(),
 			accntCreate->getNickname(), accntCreate->getIcon(), accntCreate->getPassword());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -87,7 +87,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
 			MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
 				accntUpdate->getIcon(), accntUpdate->getPassword());
-			response->sendTo(socket);
+			response->send(socket);
 		}
 		else {
 			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
@@ -104,7 +104,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		DocumentCreateMessage* docMsg = dynamic_cast<DocumentCreateMessage*>(message.get());
 		MessageCapsule errorMsg = emit documentCreate(socket, docMsg->getDocumentName());
 		if (errorMsg)
-			errorMsg->sendTo(socket);
+			errorMsg->send(socket);
 		break;
 	}
 
@@ -113,7 +113,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		DocumentOpenMessage* docMsg = dynamic_cast<DocumentOpenMessage*>(message.get());
 		MessageCapsule errorMsg = emit documentOpen(socket, docMsg->getDocumentURI());
 		if (errorMsg) 
-			errorMsg->sendTo(socket);
+			errorMsg->send(socket);
 		break;
 	}
 
@@ -121,7 +121,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		DocumentRemoveMessage* docMsg = dynamic_cast<DocumentRemoveMessage*>(message.get());
 		MessageCapsule response = emit documentRemove(socket, docMsg->getDocumentURI());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
