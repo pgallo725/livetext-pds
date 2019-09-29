@@ -494,6 +494,8 @@ void TextEdit::closeDocumentError(QString error)
 //Apply changes to blocks
 void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
 
