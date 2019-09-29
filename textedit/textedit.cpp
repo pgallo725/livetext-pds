@@ -491,6 +491,24 @@ void TextEdit::closeDocumentError(QString error)
 	statusBar()->showMessage(error);
 }
 
+//Apply changes to blocks
+void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
+{
+	if (onlineUsers.contains(userId)) {
+		Presence* p = onlineUsers.find(userId).value();
+
+		QTextCursor* userCursor = p->cursor();
+		
+		userCursor->setPosition(position);
+		userCursor->setBlockFormat(fmt);
+
+		alignmentChanged(fmt.alignment());
+
+		//Setta nel combobox l'heading level corretto
+		comboStyle->setCurrentIndex(fmt.headingLevel(); ? fmt.headingLevel(); : 0);
+	}
+}
+
 void TextEdit::setDocumentURI(QString uri)
 {
 	URI = uri;
@@ -934,6 +952,8 @@ void TextEdit::listStyle(int styleIndex)
 
 void TextEdit::textStyle(int styleIndex)
 {
+	
+	const QSignalBlocker blocker(textEdit->document());
 
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
@@ -968,6 +988,8 @@ void TextEdit::textStyle(int styleIndex)
 
 	cursor.endEditBlock();
 
+
+	emit blockFormatChanged(_user->getUserId(), cursor.position(), cursor.blockFormat());
 }
 
 void TextEdit::textColor()
@@ -990,26 +1012,34 @@ void TextEdit::textColor()
 //Sono esclusivi
 void TextEdit::textAlign(QAction* a)
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Applico gli allineamenti
-	if (a == actionAlignLeft) {
+	if (a == actionAlignLeft)
 		textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
-
-		/*QTextCursor* cursor = new QTextCursor(textEdit->document());
-		QTextBlockFormat fmt;
-
-		cursor->setPosition(5);
-
-		fmt.setAlignment(Qt::AlignRight);
-		cursor->setBlockFormat(fmt);
-		alignmentChanged(Qt::AlignRight);
-		*/
-	}
 	else if (a == actionAlignCenter)
 		textEdit->setAlignment(Qt::AlignHCenter);
 	else if (a == actionAlignRight)
 		textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
 	else if (a == actionAlignJustify)
 		textEdit->setAlignment(Qt::AlignJustify);
+
+
+
+	emit blockFormatChanged(_user->getUserId(), textEdit->textCursor().position(), textEdit->textCursor().blockFormat());
+}
+
+void TextEdit::alignmentChanged(Qt::Alignment a)
+{
+	//Se cambia allineamento setto i vari checked degli allineamenti
+	if (a & Qt::AlignLeft)
+		actionAlignLeft->setChecked(true);
+	else if (a & Qt::AlignHCenter)
+		actionAlignCenter->setChecked(true);
+	else if (a & Qt::AlignRight)
+		actionAlignRight->setChecked(true);
+	else if (a & Qt::AlignJustify)
+		actionAlignJustify->setChecked(true);
 }
 
 //Bind di QTextEdit quando cambia il formato
@@ -1120,19 +1150,6 @@ void TextEdit::colorChanged(const QColor& c)
 	pix.fill(c);
 	pix.setMask(mask);
 	actionTextColor->setIcon(pix);
-}
-
-void TextEdit::alignmentChanged(Qt::Alignment a)
-{
-	//Se cambia allineamento setto i vari checked degli allineamenti
-	if (a & Qt::AlignLeft)
-		actionAlignLeft->setChecked(true);
-	else if (a & Qt::AlignHCenter)
-		actionAlignCenter->setChecked(true);
-	else if (a & Qt::AlignRight)
-		actionAlignRight->setChecked(true);
-	else if (a & Qt::AlignJustify)
-		actionAlignJustify->setChecked(true);
 }
 
 //Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
