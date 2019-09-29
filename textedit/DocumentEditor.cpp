@@ -9,7 +9,7 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 	connect(_textedit, &TextEdit::charDeleted, this, &DocumentEditor::deleteCharAtIndex);
 	connect(_textedit, &TextEdit::charInserted, this, &DocumentEditor::addCharAtIndex);
 	connect(_textedit, &TextEdit::generateExtraSelection, this, &DocumentEditor::generateExtraSelection);
-	connect(_textedit, &TextEdit::blockFormatChanged, this, &DocumentEditor::blockFormatChanged);
+	connect(_textedit, &TextEdit::blockFormatChanged, this, &DocumentEditor::changeBlockFormat);
 
 }
 
@@ -90,12 +90,12 @@ void DocumentEditor::generateExtraSelection()
 }
 
 //Block format
-void DocumentEditor::blockFormatChanged(qint32 userId, int position, QTextBlockFormat fmt)
+void DocumentEditor::changeBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
 {
 	QPair<int, int> blockId = _document.getBlockAt(position);
 	_document.formatBlock(blockId, fmt);
 
-	emit userBlockFormatChanged(blockId, fmt, userId);
+	emit blockFormatChanged(blockId, fmt, userId);
 }
 
 void DocumentEditor::applyBlockFormat(QPair<int, int> blockId, QTextBlockFormat fmt, qint32 userId)

@@ -505,7 +505,7 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 		alignmentChanged(fmt.alignment());
 
 		//Setta nel combobox l'heading level corretto
-		comboStyle->setCurrentIndex(fmt.headingLevel(); ? fmt.headingLevel(); : 0);
+		comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 	}
 }
 
