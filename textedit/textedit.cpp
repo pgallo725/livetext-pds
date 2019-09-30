@@ -1356,6 +1356,8 @@ void TextEdit::updateUsersSelections()
 	}
 
 	emit generateExtraSelection();
+
+	handleMultipleSelections();
 }
 
 void TextEdit::timerEvent(QTimerEvent* event)
