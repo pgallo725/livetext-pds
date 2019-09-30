@@ -46,7 +46,9 @@ public:
 
 	void closeEditor();
 
-
+	void setExtraSelections(qint32 userId, QPair<int, int> selection);
+	
+	void applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
@@ -54,7 +56,7 @@ public slots:
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
 	void accountUpdateFailed(QString error);
-
+	void closeDocumentError(QString error);
 
 signals:
 	void closeDocument();
@@ -62,6 +64,8 @@ signals:
 	void accountUpdate(QString nickname, QImage image, QString password);
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
+	void generateExtraSelection();
+	void blockFormatChanged(qint32 userId, int position, QTextBlockFormat fmt);
 
 private slots:
 	void fileOpen();
@@ -102,6 +106,7 @@ private:
 	void setupOnlineUsersActions();
 	void setupOnlineUsersToolbar();
 
+	void askBeforeCloseDocument();
 
 	void mergeFormatOnWordOrSelection(const QTextCharFormat& format);
 	void fontChanged(const QFont& f);
@@ -111,13 +116,16 @@ private:
 	//Extra selections and multiple cursors
 	void handleUsersCursors();
 	void handleMultipleSelections();
-	void handleUserSelection(Presence p);
+	void updateUsersSelections();
 
 	//List type
 	QToolButton* listButton;
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
 
-	QMap<qint32, Presence> onlineUsers;
+	//Users
+	QMap<qint32, Presence*> onlineUsers;
+	
+	
 	//Logged user
 	User* _user;
 

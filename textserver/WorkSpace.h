@@ -30,13 +30,11 @@ private:
 
 	MessageHandler messageHandler;
 
-	QMutex& users_mutex;
-
 	SocketBuffer socketBuffer;
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, /*QMutex& m,*/ QObject* parent = 0);
 	~WorkSpace();
 
 public slots:
@@ -48,10 +46,13 @@ public slots:
 	void documentSave();
 	void documentInsertSymbol(Symbol& symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
+	void documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format);
 
 	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 
-	MessageCapsule updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
+	void updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
+	void receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsule msg);
+
 	void clientQuit(QSslSocket* clientSocket);
 
 	void socketErr(QAbstractSocket::SocketError socketError);
@@ -59,5 +60,6 @@ public slots:
 signals: void noEditors(URI documentURI);
 signals: void returnClient(QSharedPointer<Client> client);
 signals: void restoreUserAvaiable(QString username);
+signals: void sendAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
 };
 

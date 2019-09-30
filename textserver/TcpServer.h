@@ -6,6 +6,7 @@
 #include <QSslConfiguration>
 #include <QString>
 #include <QTimer>
+#include <QSaveFile>
 
 #include <User.h>
 #include "Client.h"
@@ -20,7 +21,6 @@
 
 Q_DECLARE_METATYPE(qintptr);
 Q_DECLARE_METATYPE(URI);
-
 
 class TcpServer : public QTcpServer
 {
@@ -37,16 +37,17 @@ private:
 	QMap<QSslSocket*, QSharedPointer<Client>> clients;
 	QStringList usersNotAvaiable;
 	qint32 _userIdCounter;
+	QSaveFile usersFile;
+	QSaveFile docsFile;
 
 	QTimer time;
 
 	MessageHandler messageHandler;
 
-	QMutex users_mutex;
-
 	SocketBuffer socketBuffer;
 
 	URI generateURI(QString authorName, QString docName) const;
+	void TcpServer::addToIndex(QSharedPointer<Document> doc);
 
 public:
 
@@ -69,6 +70,7 @@ public slots:
 
 	MessageCapsule createAccount(QSslSocket* clientSocket, QString username, QString nickname, QImage icon, QString password);
 	MessageCapsule updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
+	MessageCapsule accountUpdate(User* user, QString nickname, QImage icon, QString password);
 
 	MessageCapsule removeDocument(QSslSocket* client, URI docUri);
 	MessageCapsule createDocument(QSslSocket* author, QString docName);
@@ -76,7 +78,8 @@ public slots:
 
 	void logoutClient(QSslSocket* clientSocket);
 	void receiveClient(QSharedPointer<Client> client);
-	
+	void receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
+
 	void restoreUserAvaiable(QString username);
 
 	void incomingConnection(qintptr handle) Q_DECL_OVERRIDE;
@@ -86,5 +89,5 @@ public slots:
 
 signals: void newSocket(qint64 handle);
 signals: void clientToWorkspace(QSharedPointer<Client> client);
-
+signals: void sendAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg);
 };

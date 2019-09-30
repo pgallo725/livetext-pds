@@ -6,8 +6,8 @@
 #include "ServerException.h"
 
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d, QMutex& m, QObject* parent)
-	: doc(d), messageHandler(this), users_mutex(m)
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
+	: doc(d), messageHandler(this)
 {
 	doc->load();	// Load the document contents
 
@@ -41,14 +41,14 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 
-	MessageFactory::DocumentReady(*doc)->sendTo(socket);		// Send the document to the client
+	MessageFactory::DocumentReady(*doc)->send(socket);		// Send the document to the client
 
 	// Send to the new user all the Presence messages of other editors in the workspace
 	for (auto i = editors.begin(); i != editors.end(); ++i)
 	{
 		User* editor = i.value()->getUser();
 		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(),
-			editor->getIcon())->sendTo(socket);
+			editor->getIcon())->send(socket);
 	}
 
 	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
@@ -87,7 +87,7 @@ void WorkSpace::readMessage()
 		else
 		{
 			message = MessageFactory::Failure("Unknown message type : " + mType);
-			message->sendTo(socket);
+			message->send(socket);
 		}
 	}
 }
@@ -100,7 +100,7 @@ void WorkSpace::dispatchMessage(MessageCapsule message, QSslSocket* sender)
 	{
 		if (*target != sender)
 		{
-			message->sendTo(*target);
+			message->send(*target);
 		}
 	}
 }
@@ -144,30 +144,34 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 	doc->removeAt(position);
 }
 
+void WorkSpace::documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format)
+{
+	doc->formatBlock(blockId, format);
+}
+
 
 /* Update user's fields and return response message for the client */
-MessageCapsule WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
+void WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
-	if (!client->isLogged())
-		return MessageFactory::AccountError("You are not logged in");
+	emit sendAccountUpdate(client, nickname, icon, password);
+}
 
-	User* user = client->getUser();
-	QMutexLocker locker(&users_mutex);		// Modification of a user object must be done in mutex with the server thread
+void WorkSpace::receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsule msg)
+{
+	QSslSocket* clientSocket = client->getSocket();
 
-	if (!nickname.isEmpty())
-		user->setNickname(nickname);
-	if (!icon.isNull())
-		user->setIcon(icon);
-	if (!password.isEmpty())
-		user->setPassword(password);
+	if (msg->getType() == AccountConfirmed) {
+		User* user = client->getUser();
 
-	// Notify all other clients of the changes in this user's account
-	dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
-		user->getNickname(), user->getIcon()), clientSocket);
-
-	return MessageFactory::AccountConfirmed(*user);
+		// Notify all other clients of the changes in this user's account
+		dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
+			user->getNickname(), user->getIcon()), clientSocket);
+	}
+	
+	if(clientSocket->isOpen())
+		msg->send(clientSocket);
 }
 
 
@@ -183,7 +187,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
 	// Send the DocumentExit confirmation to the client
-	MessageFactory::DocumentExit()->sendTo(clientSocket);
+	MessageFactory::DocumentExit()->send(clientSocket);
 
 	// Delete the client's socket in the current thread
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
@@ -206,3 +210,4 @@ void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	qDebug() << "Socket error: " << socketError << endl;
 }
+

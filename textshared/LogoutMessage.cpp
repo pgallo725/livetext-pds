@@ -8,19 +8,12 @@ LogoutMessage::LogoutMessage()
 {
 }
 
+void LogoutMessage::writeTo(QDataStream& stream) const
+{
+	// NOTHING TO WRITE
+}
+
 void LogoutMessage::readFrom(QDataStream& stream)
 {
-	// NO MESSAGE CONTENT
+	// NOTHING TO READ
 }
-
-void LogoutMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << Logout << (quint32)0;
-
-	socket->write(buffer);
-	socket->flush();
-}
-

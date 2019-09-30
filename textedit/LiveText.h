@@ -30,7 +30,8 @@ private slots:
 	void addDocument(QString uri);
 	
 	//TEXTEDIT
-	void returnToLanding();
+	void closeDocument();
+	void closeDocumentCompleted();
 	void sendCursor(qint32 pos);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void accountUpdated(User user);
@@ -53,8 +54,6 @@ private:
 	TextEdit* _textEdit;
 	DocumentEditor* _docEditor;
 	User _user;
-
-	QThread* _waitingThread;
 };
 
 

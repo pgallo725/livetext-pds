@@ -72,10 +72,10 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 
 	//Gestione automatica della posizione delle selezioni degli altri utenti quando cambia la visualizzazione
-	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleMultipleSelections);
-	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleMultipleSelections);
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
-	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::handleMultipleSelections);
+	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
+	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
+	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
+	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateUsersSelections);
 
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
@@ -190,36 +190,40 @@ void TextEdit::setupUserActions()
 
 
 	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
-	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::closeDocument);
+	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
 	tb->addAction(actioncloseDocument);
 
 }
 
 void TextEdit::setupOnlineUsersActions()
 {
-	QMap<qint32, Presence>::iterator it;
+	QMap<qint32, Presence*>::iterator it;
 
 	onlineUsersToolbar->clear();
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence p = it.value();
+		Presence* p = it.value();
 
 		QPixmap background(32, 32);
 
-		QColor color = p.color();
+		QColor color = p->color();
 		background.fill(color);
 
 		QPainter painter(&background);
-		QPixmap userIcon(p.profilePicture());
+		QPixmap userIcon(p->profilePicture());
 
 		painter.drawPixmap(3, 3, 26, 26, userIcon.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		painter.end();
 
 		const QIcon users(background);
 
-		QAction* onlineAction = new QAction(users, p.name().toStdString().c_str(), this);
-		connect(onlineAction, &QAction::triggered, this, [this, p]() { handleUserSelection(p); });
+		QAction* onlineAction = new QAction(users, p->name().toStdString().c_str(), this);
+
+		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
+		onlineAction->setCheckable(true);
 		onlineUsersToolbar->addAction(onlineAction);
+
+		p->setAction(onlineAction);
 	}
 }
 
@@ -227,6 +231,14 @@ void TextEdit::setupOnlineUsersToolbar()
 {
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
+}
+
+void TextEdit::askBeforeCloseDocument()
+{
+	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes) {
+		emit closeDocument();
+	}
 }
 
 
@@ -459,6 +471,8 @@ void TextEdit::setupTextActions()
 void TextEdit::setUser(User* user)
 {
 	_user = user;
+
+	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
 }
 
 void TextEdit::accountUpdateSuccessful()
@@ -470,6 +484,31 @@ void TextEdit::accountUpdateSuccessful()
 void TextEdit::accountUpdateFailed(QString error)
 {
 	ew->updateFailed(error);
+}
+
+void TextEdit::closeDocumentError(QString error)
+{
+	statusBar()->showMessage(error);
+}
+
+//Apply changes to blocks
+void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	if (onlineUsers.contains(userId)) {
+		Presence* p = onlineUsers.find(userId).value();
+
+		QTextCursor* userCursor = p->cursor();
+		
+		userCursor->setPosition(position);
+		userCursor->setBlockFormat(fmt);
+
+		alignmentChanged(fmt.alignment());
+
+		//Setta nel combobox l'heading level corretto
+		comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
+	}
 }
 
 void TextEdit::setDocumentURI(QString uri)
@@ -534,11 +573,9 @@ void TextEdit::startCursorTimer()
 void TextEdit::setCurrentFileName(const QString& fileName)
 {
 	this->fileName = fileName;
-	textEdit->document()->setModified(false);
 
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
-	setWindowModified(false); //Il documento non ha modifiche non salvate
 }
 
 void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 user)
@@ -548,8 +585,8 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 	QTextCursor* cursor;
 
 	if (user != -1) {
-		Presence p = onlineUsers.find(user).value();
-		cursor = p.cursor();
+		Presence* p = onlineUsers.find(user).value();
+		cursor = p->cursor();
 	}
 	else {
 		cursor = new QTextCursor(textEdit->document());
@@ -558,9 +595,9 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 	cursor->setPosition(position);
 
 	cursor->setCharFormat(format);
-	textEdit->mergeCurrentCharFormat(format);
 
 	cursor->insertText(ch);
+	highlightUsersText();
 }
 
 void TextEdit::removeChar(int position)
@@ -574,7 +611,7 @@ void TextEdit::removeChar(int position)
 }
 
 void TextEdit::closeEditor()
-{	
+{
 	const QSignalBlocker blocker(textEdit->document());
 
 	onlineUsers.clear();
@@ -597,7 +634,7 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	// Initialize random sequence
-	qsrand(QDateTime::currentMSecsSinceEpoch() / 1000);
+	qsrand(QDateTime::currentMSecsSinceEpoch());
 
 	int randomNumber = 7 + (qrand() % 11);
 
@@ -611,9 +648,11 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 		removePresence(userId);
 	}
 
-	onlineUsers.insert(userId, Presence(username, color, userPic, textEdit));
+	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
+	emit generateExtraSelection();
+	
 	//emit newCursorPosition(textEdit->textCursor().position());
 
 	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
@@ -623,9 +662,13 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 //Remove presence in document
 void TextEdit::removePresence(qint32 userId)
 {
-	onlineUsers.find(userId).value().label()->clear();
+	Presence* p = onlineUsers.find(userId).value();
+
+	p->label()->clear();
 	onlineUsers.remove(userId);
 	setupOnlineUsersActions();
+
+	delete p;
 }
 
 void TextEdit::fileOpen()
@@ -753,17 +796,6 @@ void TextEdit::editProfile()
 
 	//Mostra la finestra di mw formata
 	ew->exec();
-}
-
-void TextEdit::highlightUsersText()
-{
-	if (actionHighlightUsers->isChecked()) {
-		handleMultipleSelections();
-	}
-	else {
-		QList<QTextEdit::ExtraSelection> emptySelection;
-		textEdit->setExtraSelections(emptySelection);
-	}
 }
 
 void TextEdit::textBold()
@@ -922,6 +954,8 @@ void TextEdit::listStyle(int styleIndex)
 
 void TextEdit::textStyle(int styleIndex)
 {
+	
+	const QSignalBlocker blocker(textEdit->document());
 
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
@@ -956,6 +990,8 @@ void TextEdit::textStyle(int styleIndex)
 
 	cursor.endEditBlock();
 
+
+	emit blockFormatChanged(_user->getUserId(), cursor.position(), cursor.blockFormat());
 }
 
 void TextEdit::textColor()
@@ -978,6 +1014,7 @@ void TextEdit::textColor()
 //Sono esclusivi
 void TextEdit::textAlign(QAction* a)
 {
+	const QSignalBlocker blocker(textEdit->document());
 
 	//Applico gli allineamenti
 	if (a == actionAlignLeft)
@@ -988,6 +1025,23 @@ void TextEdit::textAlign(QAction* a)
 		textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
 	else if (a == actionAlignJustify)
 		textEdit->setAlignment(Qt::AlignJustify);
+
+
+
+	emit blockFormatChanged(_user->getUserId(), textEdit->textCursor().position(), textEdit->textCursor().blockFormat());
+}
+
+void TextEdit::alignmentChanged(Qt::Alignment a)
+{
+	//Se cambia allineamento setto i vari checked degli allineamenti
+	if (a & Qt::AlignLeft)
+		actionAlignLeft->setChecked(true);
+	else if (a & Qt::AlignHCenter)
+		actionAlignCenter->setChecked(true);
+	else if (a & Qt::AlignRight)
+		actionAlignRight->setChecked(true);
+	else if (a & Qt::AlignJustify)
+		actionAlignJustify->setChecked(true);
 }
 
 //Bind di QTextEdit quando cambia il formato
@@ -1055,32 +1109,6 @@ void TextEdit::cursorPositionChanged()
 	comboStyle->setCurrentIndex(headingLevel ? headingLevel : 0);
 }
 
-void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
-{
-	//To change with unique id
-	Presence p = onlineUsers.find(user).value();
-	QTextCursor* cursor = p.cursor();
-	QLabel* userCursorLabel = p.label();
-
-	//Hide label to move it
-	userCursorLabel->close();
-
-	//Change usercursor position
-	cursor->setPosition(position);
-
-	//Draw cursor
-	const QRect qRect = textEdit->cursorRect(*cursor);
-
-	QPixmap pix(qRect.width() * 2.5, qRect.height());
-	pix.fill(p.color());
-	userCursorLabel->setPixmap(pix);
-
-	//Show moved label
-	userCursorLabel->move(qRect.left(), qRect.top());
-	userCursorLabel->show();
-
-}
-
 void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
@@ -1126,26 +1154,14 @@ void TextEdit::colorChanged(const QColor& c)
 	actionTextColor->setIcon(pix);
 }
 
-void TextEdit::alignmentChanged(Qt::Alignment a)
-{
-	//Se cambia allineamento setto i vari checked degli allineamenti
-	if (a & Qt::AlignLeft)
-		actionAlignLeft->setChecked(true);
-	else if (a & Qt::AlignHCenter)
-		actionAlignCenter->setChecked(true);
-	else if (a & Qt::AlignRight)
-		actionAlignRight->setChecked(true);
-	else if (a & Qt::AlignJustify)
-		actionAlignJustify->setChecked(true);
-}
-
 //Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
-		for (int i = position; i < position + charsRemoved; ++i) {
+		for (int i = 0; i < charsRemoved; ++i) {
+			QChar ch = textEdit->document()->characterAt(i);
 			emit charDeleted(position);
 		}
 	}
@@ -1179,7 +1195,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			//Ricavo formato carattere inserio
 			QTextCharFormat fmt = cursor.charFormat();
 
-			emit charInserted(ch, fmt, i);
+			if ((i != position + charsAdded - 1) || (i != textEdit->document()->characterCount() - 1) || ch != QChar::ParagraphSeparator) {
+				emit charInserted(ch, fmt, i);
+			}
 		}
 	}
 }
@@ -1192,62 +1210,145 @@ Recomputes all positions based on document scroll positions.
 
 */
 
+
+//Handles users cursor
+
+void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
+{
+	//To change with unique id
+	Presence* p = onlineUsers.find(user).value();
+	QTextCursor* cursor = p->cursor();
+	QLabel* userCursorLabel = p->label();
+
+	//Hide label to move it
+	userCursorLabel->close();
+
+	//Change usercursor position
+	cursor->setPosition(position);
+
+	//Draw cursor
+	const QRect qRect = textEdit->cursorRect(*cursor);
+
+	QPixmap pix(qRect.width() * 2.5, qRect.height());
+	pix.fill(p->color());
+	userCursorLabel->setPixmap(pix);
+
+	//Show moved label
+	userCursorLabel->move(qRect.left(), qRect.top());
+	userCursorLabel->show();
+
+}
+
+
 void TextEdit::handleUsersCursors() {
 
-	QMap<qint32, Presence>::iterator it;
+	QMap<qint32, Presence*>::iterator it;
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence p = it.value();
-		QTextCursor* cursor = p.cursor();
-		QLabel* cursorLabel = p.label();
+		if (it.key() != _user->getUserId()) {
 
-		cursorLabel->close();
+			Presence* p = it.value();
 
-		const QRect qRect = textEdit->cursorRect(*cursor);
+			QTextCursor* cursor = p->cursor();
+			QLabel* cursorLabel = p->label();
 
-		QPixmap pix(qRect.width() * 2.5, qRect.height());
-		pix.fill(p.color());
-		cursorLabel->setPixmap(pix);
+			cursorLabel->close();
 
-		cursorLabel->move(qRect.left(), qRect.top());
-		cursorLabel->show();
+			const QRect qRect = textEdit->cursorRect(*cursor);
+
+			QPixmap pix(qRect.width() * 2.5, qRect.height());
+			pix.fill(p->color());
+			cursorLabel->setPixmap(pix);
+
+			cursorLabel->move(qRect.left(), qRect.top());
+			cursorLabel->show();
+		}
 	}
 }
 
+
+//Handle different users selections
+void TextEdit::highlightUsersText()
+{
+	if (actionHighlightUsers->isChecked()) {
+		QMap<qint32, Presence*>::iterator it;
+
+		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+			Presence* p = it.value();
+
+			p->action()->setChecked(true);
+		}
+
+		handleMultipleSelections();
+	}
+	else {
+		QList<QTextEdit::ExtraSelection> emptySelection;
+		textEdit->setExtraSelections(emptySelection);
+
+		QMap<qint32, Presence*>::iterator it;
+
+		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+			Presence* p = it.value();
+
+			p->action()->setChecked(false);
+		}
+	}
+}
+
+void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
+{
+	if (onlineUsers.contains(userId)) {
+		Presence* p = onlineUsers.find(userId).value();
+		QTextCursor* cursor = p->cursor();
+
+		cursor->setPosition(selection.first);
+		cursor->setPosition(selection.second, QTextCursor::KeepAnchor);
+
+		QTextEdit::ExtraSelection userText;
+
+		QColor color = p->color();
+		color.setAlpha(70);
+		userText.format.setBackground(color);
+		userText.cursor = *cursor;
+
+		p->addUserText(userText);
+	}
+}
 
 void TextEdit::handleMultipleSelections()
 {
-	QMap<qint32, Presence>::iterator it;
-	QList<QTextEdit::ExtraSelection> sellist;
-	if (actionHighlightUsers->isChecked()) {
-		int i = 0;
-		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-			Presence p = it.value();
+	QList<QTextEdit::ExtraSelection> usersSelections;
+	textEdit->setExtraSelections(usersSelections);
 
-			//Change with function to check users selection
-			QTextCursor cursor3(textEdit->document());
-			cursor3.setPosition(i);
-			cursor3.setPosition(i + 10, QTextCursor::KeepAnchor);
+	QMap<qint32, Presence*>::iterator it;
 
-			QTextEdit::ExtraSelection selection;
-			QColor color = p.color();
-			color.setAlpha(70);
-			selection.format.setBackground(color);
-			selection.cursor = cursor3;
+	int actionsChecked = 0;
 
-			sellist.append(selection);
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		Presence* p = it.value();
 
-
-			i += 10;
+		if (p->action()->isChecked()) {
+			usersSelections.append(p->userText());
+			actionsChecked++;
 		}
-		textEdit->setExtraSelections(sellist);
 	}
 
+	if (actionsChecked == 0) {
+		actionHighlightUsers->setChecked(false);
+	}
+
+	textEdit->setExtraSelections(usersSelections);
 }
 
-void TextEdit::handleUserSelection(Presence p)
+
+void TextEdit::updateUsersSelections()
 {
-	//TODO Handle user icon pressed
+	QMap<qint32, Presence*>::iterator it;
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		it.value()->clearSelections();
+	}
+
+	emit generateExtraSelection();
 }
 
 void TextEdit::timerEvent(QTimerEvent* event)

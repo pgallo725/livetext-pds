@@ -8,19 +8,12 @@
 
 LiveText::LiveText(QObject* parent) : QObject(parent)
 {
-	qDebug() << this->thread()->currentThreadId();
 	_landingPage = new LandingPage();
 	_client = new Client();
 
-	_waitingThread = new QThread(parent);
-	connect(_waitingThread, &QThread::finished, _waitingThread, &QThread::deleteLater);
-
-	_landingPage->moveToThread(_waitingThread);
-	_waitingThread->start();
-
 	//LANDINGPAGE - LIVETEXT
 	//connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor
-	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer,Qt::QueuedConnection); //Server connection
+	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
 	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
 	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
@@ -39,18 +32,16 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
-	//connect(_client, &Client::documentExitSucced,);
-	//connect(_client, &Client::documentExitFailed,);
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
 	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
-	connect(_client, &Client::registrationCompleted, this, &LiveText::registrationSuccess);
+	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess);
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
-	
+	connect(_client, &Client::documentExitSucced, this, &LiveText::closeDocumentCompleted);
 }
 
 LiveText::~LiveText()
@@ -111,14 +102,6 @@ void LiveText::registrationFailed(QString errorType)
 	_client->Disconnect();
 }
 
-void LiveText::registrationSuccess(User user)
-{
-	_user = user;
-	_textEdit->setUser(&_user);
-	_landingPage->setupFileList(_user.getDocuments());
-	_landingPage->openLoggedPage();
-}
-
 //Logout
 void LiveText::Logout()
 {
@@ -156,10 +139,12 @@ void LiveText::openDocumentCompleted(Document doc)
 	_landingPage->stopLoadingAnimation();
 
 	_textEdit = new TextEdit();
+	_textEdit->setUser(&_user);
+	
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::returnToLanding);
+	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 
@@ -169,23 +154,24 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
 	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
-
+	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);
 	
 	
 	if (!_user.getDocuments().contains(doc.getURI())) {
 		_user.addDocument(doc.getURI());
 	}
 	
-	_textEdit->setUser(&_user);
 	_docEditor->openDocument();
 	
 	
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendChar);
+	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::blockModified);
 
 	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol);
+	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat);
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();
@@ -208,15 +194,19 @@ void LiveText::openEditor()
 }
 
 //Close editor
-void LiveText::returnToLanding()
+void LiveText::closeDocument()
 {	
-	_textEdit->closeEditor();
-	
 	_client->removeFromFile(_user.getUserId());
+}
+
+void LiveText::closeDocumentCompleted()
+{
+	_textEdit->closeEditor();
+
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
-	
+
 	delete _docEditor;
 	delete _textEdit;
 }

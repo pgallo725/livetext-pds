@@ -19,12 +19,13 @@ protected:
 	// Costruct DocumentCreate message specifying the document's name
 	DocumentCreateMessage(QString documentName);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getDocumentName() const;
 };
@@ -46,12 +47,13 @@ protected:
 	// Costruct DocumentRemove message with the URI of the document to be removed
 	DocumentRemoveMessage(URI documentURI);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentRemoveMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	URI getDocumentURI() const;
 };
@@ -73,12 +75,13 @@ protected:
 	// Costruct DocumentOpen message specifying the document's URI
 	DocumentOpenMessage(URI documentURI);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentOpenMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	URI getDocumentURI() const;
 };
@@ -93,14 +96,16 @@ private:
 
 protected:
 
-	DocumentDismissedMessage();	 // empty constructor
+	// Creates a DocumentDismissed message, confirmation of a document delete operation
+	DocumentDismissedMessage();
+
+	void writeTo(QDataStream& stream) const override;
 
 public:
 
 	~DocumentDismissedMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 };
 
 
@@ -120,12 +125,13 @@ protected:
 	// Use this to create a DocumentReady response, containing the Document object
 	DocumentReadyMessage(Document doc);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentReadyMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	Document getDocument() const;
 };
@@ -142,12 +148,13 @@ protected:
 	// Creates a DocumentClose message, to inform the server that the client wants to exit the Workspace
 	DocumentCloseMessage();
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentCloseMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 };
 
 
@@ -162,12 +169,13 @@ protected:
 	// Creates a DocumentExit response
 	DocumentExitMessage();
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentExitMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 };
 
 
@@ -186,12 +194,13 @@ protected:
 	// Costruct DocumentError message with a string describing the error
 	DocumentErrorMessage(QString reason);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~DocumentErrorMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getErrorMessage() const;
 };

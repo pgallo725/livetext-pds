@@ -21,6 +21,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::blockEdit, w, &WorkSpace::documentEditBlock, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 
 	connect(this, &MessageHandler::documentClose, w, &WorkSpace::clientQuit, Qt::DirectConnection);
@@ -57,7 +58,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		LoginRequestMessage* loginRqst = dynamic_cast<LoginRequestMessage*>(message.get());
 		MessageCapsule response = emit loginRequest(socket, loginRqst->getUsername());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -65,7 +66,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		LoginUnlockMessage* loginUnlck = dynamic_cast<LoginUnlockMessage*>(message.get());
 		MessageCapsule response = emit loginUnlock(socket, loginUnlck->getToken());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -76,16 +77,23 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		AccountCreateMessage* accntCreate = dynamic_cast<AccountCreateMessage*>(message.get());
 		MessageCapsule response = emit accountCreate(socket, accntCreate->getUsername(),
 			accntCreate->getNickname(), accntCreate->getIcon(), accntCreate->getPassword());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
 	case AccountUpdate:
 	{
-		AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
-		MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
-			accntUpdate->getIcon(), accntUpdate->getPassword());
-		response->sendTo(socket);
+		if (!_usecase) {	// usecase = server(0)
+			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
+			MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
+				accntUpdate->getIcon(), accntUpdate->getPassword());
+			response->send(socket);
+		}
+		else {
+			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
+			emit accountUpdate(socket, accntUpdate->getNickname(), 
+				accntUpdate->getIcon(), accntUpdate->getPassword());
+		}
 		break;
 	}
 
@@ -96,7 +104,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		DocumentCreateMessage* docMsg = dynamic_cast<DocumentCreateMessage*>(message.get());
 		MessageCapsule errorMsg = emit documentCreate(socket, docMsg->getDocumentName());
 		if (errorMsg)
-			errorMsg->sendTo(socket);
+			errorMsg->send(socket);
 		break;
 	}
 
@@ -105,7 +113,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		DocumentOpenMessage* docMsg = dynamic_cast<DocumentOpenMessage*>(message.get());
 		MessageCapsule errorMsg = emit documentOpen(socket, docMsg->getDocumentURI());
 		if (errorMsg) 
-			errorMsg->sendTo(socket);
+			errorMsg->send(socket);
 		break;
 	}
 
@@ -113,7 +121,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	{
 		DocumentRemoveMessage* docMsg = dynamic_cast<DocumentRemoveMessage*>(message.get());
 		MessageCapsule response = emit documentRemove(socket, docMsg->getDocumentURI());
-		response->sendTo(socket);
+		response->send(socket);
 		break;
 	}
 
@@ -138,6 +146,17 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		CharDeleteMessage* deleteMsg = dynamic_cast<CharDeleteMessage*>(message.get());
 		emit charDelete(deleteMsg->getPosition());
 		emit messageDispatch(message, socket);
+		break;
+	}
+
+	case BlockEdit:
+	{
+		BlockEditMessage* blockEditMsg = dynamic_cast<BlockEditMessage*>(message.get());
+		emit blockEdit(blockEditMsg->getBlockIdPair(), blockEditMsg->getBlockFormat());
+
+		// We want to achieve a server-enforced global ordering of format changes, therefore
+		// the BlockEdit message is sent back to all editors by not specifying a sender [nullptr]
+		emit messageDispatch(message, nullptr);
 		break;
 	}
 

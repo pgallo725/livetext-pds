@@ -130,6 +130,15 @@ void User::setPassword(QString newPassword)
 	m_passwd = hash.result();
 }
 
+void User::recoveryUser(User u)
+{
+	m_nickname = u.getNickname();
+	m_icon = u.getIcon();
+	m_passwd = u.getPasswordHash();
+	m_salt = u.getSalt();
+	m_documents = u.getDocuments();
+}
+
 
 
 QDataStream& operator>>(QDataStream& in, User& user)

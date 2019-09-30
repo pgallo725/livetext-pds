@@ -20,6 +20,8 @@ private:
 	QLabel* _label;
 	QTextCursor* _userCursor;
 	QList<QTextEdit::ExtraSelection> _userText;
+	QAction* _iconPressedAction;
+
 public:
 	Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
 	~Presence();
@@ -30,7 +32,14 @@ public:
 	QPixmap profilePicture();
 	QTextCursor* cursor();
 	QLabel* label();
+	QList<QTextEdit::ExtraSelection> userText();
+	QAction* action();
+	
 
+
+	void addUserText(QTextEdit::ExtraSelection selection);
+	void clearSelections();
+	void setAction(QAction* action);
 };
 
 

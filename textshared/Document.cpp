@@ -77,13 +77,22 @@ QDataStream& operator<<(QDataStream& out, const URI& uri)
 
 
 Document::Document()
+	: _blockCounter(0)
 {
 }
 
 Document::Document(URI docURI) :
-	uri(docURI)
+	uri(docURI), _blockCounter(0)
 {
 	editors << getAuthor();
+
+	// Insert a ParagraphTerminator character inside a default block in the empty document
+	TextBlock defaultBlock = TextBlock(_blockCounter++, -1, QTextBlockFormat());
+	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>({ 1000, 1000 }));
+	eof.assignToBlock(defaultBlock);
+
+	_blocks.insert(defaultBlock.getIdPair(), defaultBlock);
+	_text.insert(_text.begin(), eof);
 }
 
 Document::~Document()
@@ -199,15 +208,54 @@ void Document::save()
 }
 
 
-int Document::insert(Symbol s)
+int Document::insert(Symbol& s)
 {
 	int insertionIndex = -binarySearch(s._fPos);	// should be a negative position index (for a non-existing Symbol)
 
 	if (insertionIndex >= 0)
 	{
-		QVector<Symbol>::iterator it = _text.begin() + insertionIndex;
+		// Check if the inserted symbol implies the creation of a new block
+		if (s.getChar() == QChar::ParagraphSeparator)
+		{
+			TextBlock block;
 
-		_text.insert(it, s);	// insert the symbol in the vector
+			if (s.getBlockIdentifier() == qMakePair(-1, -1))
+			{
+				// Create a new TextBlock with locally-generated ID (symbol received from Qt editor)
+				block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+			}
+			else
+			{
+				// Create a TextBlock with the ID carried by the symbol itself (received from another client)
+				block = TextBlock(s.getBlockIdentifier(), QTextBlockFormat());
+
+				_blockCounter++;	// (keep the block counter aligned between clients)
+			}
+
+			// Insert the new block in the document
+			_blocks.insert(block.getIdPair(), block);
+
+			QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
+
+			// The paragraph delimiter belongs to the block on which it is inserted
+			s.assignToBlock(_blocks[prevBlockId]);
+			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+
+			// And any following symbol of that paragraph is assigned to the new block
+			for (int i = insertionIndex + 1;
+				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
+				i++)
+			{
+				_text[i].assignToBlock(block);
+			}
+		}
+		else
+		{
+			// Assign the character to the block on which it is inserted
+			QPair<qint32, qint32> blockId = getBlockAt(insertionIndex);
+			s.assignToBlock(_blocks[blockId]);
+			_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
+		}
 	}
 
 	return insertionIndex;
@@ -222,7 +270,40 @@ int Document::removeAt(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
-		_text.removeAt(pos);	// and removes it
+	{
+		// Check if the symbol removal implies the deletion of a paragraph separator
+		if (_text[pos].getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
+		{
+			TextBlock mergedBlock = _blocks[_text[pos].getBlockIdentifier()];
+
+			// The paragraph following the deleted ParagraphSeparator will disappear
+			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();
+
+			_text.removeAt(pos);				// Removes the paragraph separator
+			mergedBlock.decrementSymbols();
+
+			// All symbols belonging to the next block will be assigned to the current block
+			for (int i = pos; i < _text.length(); i++)
+			{
+				_text[i].assignToBlock(mergedBlock);
+				if (_text[i].getChar() == QChar::ParagraphSeparator)
+					break;
+			}
+
+			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
+		}
+		else if (pos == _text.length() - 1)
+		{
+			// Avoid deleting the last character in the document (pseudo-EOF symbol)
+			// but make sure to reset its format
+			_blocks[_text[pos].getBlockIdentifier()].setFormat(QTextBlockFormat());
+		}
+		else
+		{
+			_blocks[_text[pos].getBlockIdentifier()].decrementSymbols();
+			_text.removeAt(pos);	// Remove the symbol from the document
+		}
+	}
 
 	return pos;
 }
@@ -233,6 +314,16 @@ QVector<qint32> Document::removeAtIndex(int index)
 	
 	removeAt(position);
 	return position;
+}
+
+int Document::formatBlock(QPair<qint32, qint32> id, QTextBlockFormat fmt)
+{
+	TextBlock block = _blocks[id];		// find the desired block
+	block.setFormat(fmt);				// change the format
+
+	_blocks.insert(id, block);		// and replace its entry with the updated one
+
+	return getBlockPosition(id);
 }
 
 
@@ -246,6 +337,26 @@ QString Document::toString()
 	}
 
 	return text;
+}
+
+
+QPair<qint32, qint32> Document::getBlockAt(int index)
+{
+	return _text[index].getBlockIdentifier();
+}
+
+int Document::getBlockPosition(QPair<qint32, qint32> blockIdPair)
+{
+	int i = 0;
+	while (i < _text.length())
+	{
+		QPair<qint32, qint32> curBlockId = _text[i].getBlockIdentifier();
+		if (curBlockId == blockIdPair)
+			return i;
+		else i += _blocks[curBlockId].size();
+	}
+
+	return -1;
 }
 
 
@@ -349,10 +460,12 @@ QVector<qint32> Document::fractionalPosEnd()
 }
 
 
+// TODO: update serialization operators with all new Document fields
+
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.uri >> doc.editors >> doc._text;
+	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks /* >> _lists */ >> doc._text ;
 
 	return in;
 }
@@ -360,7 +473,7 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.uri << doc.editors << doc._text;
+	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks /* << _lists */ << doc._text;
 
 	return out;
 }

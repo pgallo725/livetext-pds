@@ -22,12 +22,13 @@ protected:
 	// Create an AccountCreate message, with the account information
 	AccountCreateMessage(QString username, QString nickname, QImage icon, QString password);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~AccountCreateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getUsername() const;
 	QString getNickname() const;
@@ -54,12 +55,13 @@ protected:
 	// Create an AccountUpdate message, with the new account information
 	AccountUpdateMessage(QString nickname, QImage icon, QString password);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~AccountUpdateMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getNickname() const;
 	QImage getIcon() const;
@@ -83,12 +85,13 @@ protected:
 	// Construct the AccountConfirmed message, with the User object just created or updated by the server
 	AccountConfirmedMessage(User user);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~AccountConfirmedMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	User& getUserObj();
 };
@@ -110,12 +113,13 @@ protected:
 	// Create the AccountError message, with a string describing the error
 	AccountErrorMessage(QString reason);
 
+	void writeTo(QDataStream& stream) const override;
+
 public:
 
 	~AccountErrorMessage() {};
 
 	void readFrom(QDataStream& stream) override;
-	void sendTo(QSslSocket* socket) const override;
 
 	QString getErrorMessage() const;
 };

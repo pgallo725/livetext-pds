@@ -13,22 +13,14 @@ LoginRequestMessage::LoginRequestMessage(QString username)
 {
 }
 
+void LoginRequestMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_username;
+}
+
 void LoginRequestMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_username;
-}
-
-void LoginRequestMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << LoginRequest << quint32(0) << m_username;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 QString LoginRequestMessage::getUsername() const
@@ -49,22 +41,14 @@ LoginChallengeMessage::LoginChallengeMessage(QByteArray salt, QByteArray nonce)
 {
 }
 
+void LoginChallengeMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_salt << m_nonce;
+}
+
 void LoginChallengeMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_salt >> m_nonce;
-}
-
-void LoginChallengeMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << LoginChallenge << quint32(0) << m_salt << m_nonce;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 QByteArray LoginChallengeMessage::getSalt() const
@@ -90,22 +74,14 @@ LoginUnlockMessage::LoginUnlockMessage(QByteArray token)
 {
 }
 
+void LoginUnlockMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_token;
+}
+
 void LoginUnlockMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_token;
-}
-
-void LoginUnlockMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << LoginUnlock << quint32(0) << m_token;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 QByteArray LoginUnlockMessage::getToken() const
@@ -126,22 +102,14 @@ LoginGrantedMessage::LoginGrantedMessage(User loggedUser)
 {
 }
 
+void LoginGrantedMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_user;
+}
+
 void LoginGrantedMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_user;
-}
-
-void LoginGrantedMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << LoginGranted << quint32(0) << m_user;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 User& LoginGrantedMessage::getLoggedUser()
@@ -162,22 +130,14 @@ LoginErrorMessage::LoginErrorMessage(QString reason)
 {
 }
 
+void LoginErrorMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_error;
+}
+
 void LoginErrorMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_error;
-}
-
-void LoginErrorMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << LoginError << quint32(0) << m_error;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 QString LoginErrorMessage::getErrorMessage() const

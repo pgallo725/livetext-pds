@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include <QFile>
 #include <QFileInfo>
 #include <QDataStream>
 #include <QtNetwork>
@@ -21,10 +20,12 @@
 
 /* Server costructor */
 TcpServer::TcpServer(QObject* parent)
-	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
+	: QTcpServer(parent), messageHandler(this), _userIdCounter(0), 
+	usersFile(QSaveFile(USERS_FILENAME)), docsFile(QSaveFile(INDEX_FILENAME))
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
 	qRegisterMetaType<URI>("URI");
+	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
 	/* initialize random number generator with timestamp */
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -89,7 +90,7 @@ TcpServer::TcpServer(QObject* parent)
 TcpServer::~TcpServer()
 {
 	time.stop();
-	saveUsers();
+	saveUsers();		// TODO: serve ancora? se si bisogna gestire le eccezioni?
 
 	qDebug() << "Server down";
 }
@@ -103,11 +104,16 @@ void TcpServer::initialize()
 	{
 		std::cout << "\nLoading users database... ";
 
-		QDataStream usersDbStream(&usersFile);
+		QDataStream usersDbStream(&(usersFile));
 
 		// Load the users database in the server's memory
 		// using built-in Qt Map deserialization
 		usersDbStream >> users;
+
+		if (usersDbStream.status() != QTextStream::Status::Ok)
+		{
+			// THROW: handle error or FileFormatException ?
+		}
 
 		usersFile.close();
 
@@ -115,8 +121,7 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		QFileInfo info(usersFile);
-		throw FileLoadException(info.absoluteFilePath().toStdString());
+		throw FileLoadException(USERS_FILENAME);
 	}
 
 	// Initialize the counter to assign user IDs
@@ -147,18 +152,12 @@ void TcpServer::initialize()
 		}
 
 		docsFile.close();
-
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		QFileInfo info(docsFile);
-		throw FileLoadException(info.absoluteFilePath().toStdString());
+		throw FileLoadException(INDEX_FILENAME);
 	}
-
-	// Setup timer for autosave
-	time.callOnTimeout<TcpServer*>(this, &TcpServer::saveUsers);
-	time.start(USERS_SAVE_TIMEOUT);
 
 	std::cout << "\nServer up" << std::endl;
 }
@@ -189,45 +188,31 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 void TcpServer::saveUsers()
 {
 	// Create the new users database file and write the data to it
-	QFile file(TMP_USERS_FILENAME);
-	if (file.open(QIODevice::WriteOnly))
-	{
-		QDataStream usersDb(&file);
+	//QSaveFile file(USERS_FILENAME);
 
-		/* Serialization of users database must be done in mutual exclusion with
-		any other AccountUpdate operations that workspace threads might be performing */
-		QMutexLocker locker(&users_mutex);		
+	if (usersFile.open(QIODevice::WriteOnly)) {
+		QDataStream usersDb(&usersFile);
 
 		std::cout << "\nSaving users database... ";
 
 		// Write the the current users informations to file
 		// using built-in Qt Map serialization
 		usersDb << users;
-
-		QFile oldFile(USERS_FILENAME);
-		if (oldFile.exists())
+		
+		// Check datastream status
+		if (usersDb.status() == QTextStream::Status::WriteFailed)
 		{
-			if (oldFile.remove())
-				file.rename(USERS_FILENAME);
-			else
-			{
-				QFileInfo info(oldFile);
-				throw FileOverwriteException(info.absoluteFilePath().toStdString());
-			}
+			usersFile.cancelWriting();
+			usersFile.commit();
+			throw FileWriteException(".", USERS_FILENAME);
 		}
-		else file.rename(USERS_FILENAME);
-
-		file.close();
-
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		QFileInfo info(file);
-		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+		throw FileCreateException(".", USERS_FILENAME);
 	}
 }
-
 
 /* Handle a new connection from a client */
 void TcpServer::newClientConnection()
@@ -370,30 +355,75 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	client->login(&(*i));		// client is automatically logged
 
+	try {
+		saveUsers();
+		usersFile.commit();
+	}
+	catch (FileCreateException& fce) {
+		client->logout();
+		users.remove(username);
+		usersFile.cancelWriting();
+		usersFile.commit();
+		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
+	}
+	catch (FileException& fe) {
+		QFile file(TMP_USERS_FILENAME);
+		file.remove();
+		client->logout();
+		users.remove(username);
+		usersFile.cancelWriting();
+		usersFile.commit();
+		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
+	}
+	
+	
+	
 	return MessageFactory::AccountConfirmed(user);
 }
 
-
-/* Update user's fields and return response message for the client */
+/* Check and update user's fields and return response message for the client in tcpServer */
 MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	Client* client = clients.find(clientSocket).value().get();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
-	User* user = client->getUser();
+	MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
+	
+	try {
+		saveUsers();
+		usersFile.commit();
+	}
+	catch (FileCreateException& fwe) {
+		usersFile.cancelWriting();
+		usersFile.commit();
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+	}
+	catch (FileException& fe) {
+		usersFile.cancelWriting();
+		usersFile.commit();
+		client->getUser()->recoveryUser(recoveryUser);
+		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+	}
+	
+	return msg;
+}
 
-	if (!nickname.isNull())
+/* Update user's fields */
+MessageCapsule TcpServer::accountUpdate(User* user, QString nickname, QImage icon, QString password)
+{
+	if (!nickname.isEmpty())
 		user->setNickname(nickname);
 	if (!icon.isNull())
 		user->setIcon(icon);
-	if (!password.isNull())
+	if (!password.isEmpty())
 		user->setPassword(password);
 
 	return MessageFactory::AccountConfirmed(*user);
 }
-
 
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QSslSocket* clientSocket)
@@ -419,6 +449,39 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	socket->readAll();
 }
 
+/* Check and update user's fields and return response message for the client in workSpace */
+void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password)
+{
+	WorkSpace* w = dynamic_cast<WorkSpace*>(sender());
+	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	if (!client->isLogged())
+		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
+	else
+	{
+		User recoveryUser = *(client->getUser());
+		MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
+		try {
+			saveUsers();
+			usersFile.commit();
+		}
+		catch (FileCreateException& fwe) {
+			usersFile.cancelWriting();
+			usersFile.commit();
+			client->getUser()->recoveryUser(recoveryUser);
+			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+		}
+		catch (FileException& fe) {
+			usersFile.cancelWriting();
+			usersFile.commit();
+			client->getUser()->recoveryUser(recoveryUser);
+			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+		}
+		emit sendAccountUpdate(client, msg);
+	}
+	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+}
+
+/* Delete user from UnAvaiable list when they logout or close connection */
 void TcpServer::restoreUserAvaiable(QString username)
 {
 	usersNotAvaiable.removeOne(username);
@@ -429,26 +492,25 @@ void TcpServer::restoreUserAvaiable(QString username)
 /****************************** DOCUMENT METHODS ******************************/
 
 
-void addToIndex(QSharedPointer<Document> doc)
+void TcpServer::addToIndex(QSharedPointer<Document> doc)
 {
-	QFile file(INDEX_FILENAME);
-	if (file.open(QIODevice::Append | QIODevice::Text))
+	if (docsFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
-		QTextStream indexFileStream(&file);
+		QTextStream indexFileStream(&docsFile);
 
-		indexFileStream << doc->getURI().toString() << endl;
-
+		for (URI uri : documents.keys())
+			indexFileStream << uri.toString() << endl;
+		
 		if (indexFileStream.status() == QTextStream::Status::WriteFailed)
 		{
-			// THROW: handle error or FileWriteException ?
+			docsFile.cancelWriting();
+			docsFile.commit();
+			throw FileWriteException(INDEX_FILENAME, INDEX_FILENAME);
 		}
-
-		file.close();
 	}
 	else
 	{
-		QFileInfo info(file);
-		throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+		throw FileOpenException(INDEX_FILENAME, INDEX_FILENAME);
 	}
 }
 
@@ -456,7 +518,7 @@ void addToIndex(QSharedPointer<Document> doc)
 /* Create a new worskpace for a document */
 QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client)
 {
-	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document, users_mutex));
+	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document));
 	documents.insert(document->getURI(), document);
 	workspaces.insert(document->getURI(), w);
 	
@@ -464,7 +526,8 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
 	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
-
+	connect(w.get(), &WorkSpace::sendAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
+	
 	return w;
 }
 
@@ -472,6 +535,7 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 {
 	QSharedPointer<Client> client = clients.find(author).value();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
@@ -483,15 +547,54 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
 	QSharedPointer<Document> doc(new Document(docURI));
-
-	/* add the document to the index and save the file */
-	addToIndex(doc);
-	doc->save();
-
 	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
+
+	try {
+		/* add the document to the index and save the file */
+		addToIndex(doc);
+		doc->save();
+		/* save users */
+		saveUsers();
+
+		docsFile.commit();
+		usersFile.commit();
+	}
+	catch (FileOpenException& foe) {
+		client->getUser()->recoveryUser(recoveryUser);
+		documents.remove(doc->getURI());
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+	catch (FileWriteException& fwe) {
+		if (fwe.getPath().find(TMP_USERS_FILENAME) == std::string::npos) {
+			usersFile.cancelWriting();
+			usersFile.commit();
+		}
+		docsFile.cancelWriting();
+		docsFile.commit();
+		client->getUser()->recoveryUser(recoveryUser);
+		documents.remove(doc->getURI());
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+	catch (FileCreateException& fwe) {
+		docsFile.cancelWriting();
+		docsFile.commit();
+		client->getUser()->recoveryUser(recoveryUser);
+		documents.remove(doc->getURI());
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+	catch (FileOverwriteException& foe) {
+		docsFile.cancelWriting();
+		docsFile.commit();
+		usersFile.cancelWriting();
+		usersFile.commit();
+		client->getUser()->recoveryUser(recoveryUser);
+		documents.remove(doc->getURI());
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
+
 	/* add this user to the list of document editors */
 	doc->insertNewEditor(client->getUsername());
 
@@ -519,6 +622,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	User recoveryUser = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
@@ -536,8 +640,24 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	User* user = client->getUser();
 
 	/* if it's the first time opening this document, add it to the user's list of documents */	
-	if (!user->hasDocument(docUri))
+	if (!user->hasDocument(docUri)) {
 		user->addDocument(docUri);
+		try {
+			saveUsers();
+			usersFile.commit();
+		}
+		catch (FileCreateException& fwe) {
+			client->getUser()->recoveryUser(recoveryUser);
+			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		}
+		catch (FileOverwriteException& foe) {
+			usersFile.cancelWriting();
+			usersFile.commit();
+			client->getUser()->recoveryUser(recoveryUser);
+			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		}
+		
+	}
 	/* and add the new editor to the document's list of editors */
 	doc->insertNewEditor(user->getUsername());
 
@@ -580,8 +700,6 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 /* Release all resources owned by workspace and delete it */
 void TcpServer::deleteWorkspace(URI document)
 {
-	WorkSpace* w = workspaces.find(document).value().get();
-
 	/* delete workspace and remove it from the map */
 	workspaces.remove(document);	
 	qDebug() << "workspace (" << document.toString() << ") closed";
@@ -623,7 +741,7 @@ void TcpServer::readMessage()
 		else
 		{
 			message = MessageFactory::Failure("Unknown message type : " + mType);
-			message->sendTo(socket);
+			message->send(socket);
 		}
 	}
 }

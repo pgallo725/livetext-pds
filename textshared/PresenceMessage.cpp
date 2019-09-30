@@ -13,22 +13,14 @@ CursorMoveMessage::CursorMoveMessage(qint32 userId, qint32 newPosition)
 {
 }
 
+void CursorMoveMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_userId << m_cursorPos;
+}
+
 void CursorMoveMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_userId >> m_cursorPos;
-}
-
-void CursorMoveMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << CursorMove << quint32(0) << m_userId << m_cursorPos;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 qint32 CursorMoveMessage::getUserId() const
@@ -54,23 +46,14 @@ PresenceUpdateMessage::PresenceUpdateMessage(qint32 userId, QString nickname, QI
 {
 }
 
+void PresenceUpdateMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_userId << m_userName << m_userIcon;
+}
+
 void PresenceUpdateMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_userId >> m_userName >> m_userIcon;
-}
-
-void PresenceUpdateMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << PresenceUpdate << quint32(0) << m_userId
-		<< m_userName << m_userIcon;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 qint32 PresenceUpdateMessage::getUserId() const
@@ -101,23 +84,14 @@ PresenceAddMessage::PresenceAddMessage(qint32 userId, QString nickname, QImage i
 {
 }
 
+void PresenceAddMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_userId << m_userName << m_userIcon;
+}
+
 void PresenceAddMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_userId >> m_userName >> m_userIcon;
-}
-
-void PresenceAddMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << PresenceAdd << quint32(0) << m_userId
-		<< m_userName << m_userIcon;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 qint32 PresenceAddMessage::getUserId() const
@@ -148,22 +122,14 @@ PresenceRemoveMessage::PresenceRemoveMessage(qint32 userId)
 {
 }
 
+void PresenceRemoveMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_userId;
+}
+
 void PresenceRemoveMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_userId;
-}
-
-void PresenceRemoveMessage::sendTo(QSslSocket* socket) const
-{
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-	stream << PresenceRemove << quint32(0) << m_userId;
-
-	stream.device()->seek(sizeof(MessageType));
-	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
-	socket->write(buffer);
-	socket->flush();
 }
 
 qint32 PresenceRemoveMessage::getUserId() const
