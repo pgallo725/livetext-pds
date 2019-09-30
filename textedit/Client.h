@@ -69,7 +69,7 @@ signals:
 	// Login, Logout & Register
 	void loginSuccess(User user);
 	void loginFailed(QString errorType);
-	void registrationCompleted(User user);
+	void registrationCompleted(User& user);
 	void registrationFailed(QString errorType);
 	void logoutCompleted();
 	void logoutFailed(QString errorType);

@@ -611,16 +611,16 @@ void Client::removeFromFile(qint32 myId) {
 		switch (socketBuffer.getType()) {
 		case DocumentExit:
 		{
+			socketBuffer.clear();
 			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
 			emit documentExitSucced();
-			socketBuffer.clear();
 			return;
 		}
 		case DocumentError:
 		{
+			socketBuffer.clear();
 			DocumentErrorMessage* accounterror = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 			emit documentExitFailed(accounterror->getErrorMessage());
-			socketBuffer.clear();
 			return;
 		}
 		default:
