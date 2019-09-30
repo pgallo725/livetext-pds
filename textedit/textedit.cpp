@@ -1335,6 +1335,11 @@ void TextEdit::handleMultipleSelections()
 		actionHighlightUsers->setChecked(false);
 	}
 
+	if (actionsChecked == onlineUsers.size()) {
+		actionHighlightUsers->setChecked(true);
+	}
+
+
 	textEdit->setExtraSelections(usersSelections);
 }
 
