@@ -145,8 +145,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	/* LOADING GIF */
 	loading = new QLabel(this);
-
-	movie = new QMovie(rsrcPath + "/gif/loading.gif");
 }
 
 LandingPage::~LandingPage()
@@ -467,8 +465,8 @@ void LandingPage::centerAndResize() {
 	int height = availableSize.height();
 
 	//Proporzionamento
-	width *= 0.5;
-	height *= 0.6;
+	width *= 0.7;
+	height *= 0.8;
 
 	//Le dimensioni vengono fissate per rendere la finestra non resizable
 	setMaximumHeight(height);

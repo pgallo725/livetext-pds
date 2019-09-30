@@ -478,6 +478,8 @@ void TextEdit::setUser(User* user)
 void TextEdit::accountUpdateSuccessful()
 {
 	ew->updateSuccessful();
+	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
+	
 }
 
 
@@ -990,7 +992,7 @@ void TextEdit::textStyle(int styleIndex)
 
 	cursor.endEditBlock();
 
-
+	
 	emit blockFormatChanged(_user->getUserId(), cursor.position(), cursor.blockFormat());
 }
 
@@ -1337,6 +1339,11 @@ void TextEdit::handleMultipleSelections()
 		actionHighlightUsers->setChecked(false);
 	}
 
+	if (actionsChecked == onlineUsers.size()) {
+		actionHighlightUsers->setChecked(true);
+	}
+
+
 	textEdit->setExtraSelections(usersSelections);
 }
 
@@ -1349,6 +1356,8 @@ void TextEdit::updateUsersSelections()
 	}
 
 	emit generateExtraSelection();
+
+	handleMultipleSelections();
 }
 
 void TextEdit::timerEvent(QTimerEvent* event)

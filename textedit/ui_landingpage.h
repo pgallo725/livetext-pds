@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'landingpage.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -127,7 +127,7 @@ public:
     {
         if (LandingPage->objectName().isEmpty())
             LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
-        LandingPage->resize(1301, 969);
+        LandingPage->resize(831, 524);
         LandingPage->setMinimumSize(QSize(0, 0));
         LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -268,7 +268,9 @@ public:
 
         label_3 = new QLabel(tab_2);
         label_3->setObjectName(QString::fromUtf8("label_3"));
-        label_3->setFont(font1);
+        QFont font4;
+        font4.setPointSize(14);
+        label_3->setFont(font4);
         label_3->setAlignment(Qt::AlignCenter);
 
         verticalLayout->addWidget(label_3);
@@ -288,8 +290,10 @@ public:
         sizePolicy1.setHeightForWidth(label_UsrIcon->sizePolicy().hasHeightForWidth());
         label_UsrIcon->setSizePolicy(sizePolicy1);
         label_UsrIcon->setMinimumSize(QSize(130, 130));
-        label_UsrIcon->setMaximumSize(QSize(130, 130));
+        label_UsrIcon->setMaximumSize(QSize(16777215, 16777215));
+        label_UsrIcon->setBaseSize(QSize(0, 0));
         label_UsrIcon->setFrameShape(QFrame::StyledPanel);
+        label_UsrIcon->setScaledContents(false);
         label_UsrIcon->setAlignment(Qt::AlignCenter);
 
         horizontalLayout_15->addWidget(label_UsrIcon);
@@ -381,9 +385,9 @@ public:
 
         pushButton_browse = new QPushButton(tab_2);
         pushButton_browse->setObjectName(QString::fromUtf8("pushButton_browse"));
-        QFont font4;
-        font4.setPointSize(10);
-        pushButton_browse->setFont(font4);
+        QFont font5;
+        font5.setPointSize(10);
+        pushButton_browse->setFont(font5);
 
         horizontalLayout_14->addWidget(pushButton_browse);
 
@@ -442,21 +446,21 @@ public:
 
         label_8 = new QLabel(page_2);
         label_8->setObjectName(QString::fromUtf8("label_8"));
-        QFont font5;
-        font5.setPointSize(18);
-        font5.setBold(true);
-        font5.setWeight(75);
-        label_8->setFont(font5);
+        QFont font6;
+        font6.setPointSize(18);
+        font6.setBold(true);
+        font6.setWeight(75);
+        label_8->setFont(font6);
         label_8->setAlignment(Qt::AlignCenter);
 
         verticalLayout_14->addWidget(label_8);
 
         label_7 = new QLabel(page_2);
         label_7->setObjectName(QString::fromUtf8("label_7"));
-        QFont font6;
-        font6.setBold(false);
-        font6.setWeight(50);
-        label_7->setFont(font6);
+        QFont font7;
+        font7.setBold(false);
+        font7.setWeight(50);
+        label_7->setFont(font7);
         label_7->setAlignment(Qt::AlignCenter);
 
         verticalLayout_14->addWidget(label_7);
@@ -562,12 +566,12 @@ public:
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
-        QFont font7;
-        font7.setFamily(QString::fromUtf8("Calibri"));
-        font7.setPointSize(14);
-        font7.setBold(false);
-        font7.setWeight(50);
-        groupBox_2->setFont(font7);
+        QFont font8;
+        font8.setFamily(QString::fromUtf8("Calibri"));
+        font8.setPointSize(14);
+        font8.setBold(false);
+        font8.setWeight(50);
+        groupBox_2->setFont(font8);
         verticalLayout_12 = new QVBoxLayout(groupBox_2);
         verticalLayout_12->setSpacing(6);
         verticalLayout_12->setContentsMargins(11, 11, 11, 11);
@@ -589,10 +593,10 @@ public:
         pushButton_remove->setObjectName(QString::fromUtf8("pushButton_remove"));
         pushButton_remove->setEnabled(false);
         pushButton_remove->setMinimumSize(QSize(0, 30));
-        QFont font8;
-        font8.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font8.setPointSize(10);
-        pushButton_remove->setFont(font8);
+        QFont font9;
+        font9.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font9.setPointSize(10);
+        pushButton_remove->setFont(font9);
 
         horizontalLayout_4->addWidget(pushButton_remove);
 
@@ -606,12 +610,12 @@ public:
         sizePolicy3.setHeightForWidth(pushButton_open->sizePolicy().hasHeightForWidth());
         pushButton_open->setSizePolicy(sizePolicy3);
         pushButton_open->setMinimumSize(QSize(0, 30));
-        QFont font9;
-        font9.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
-        font9.setPointSize(10);
-        font9.setBold(false);
-        font9.setWeight(50);
-        pushButton_open->setFont(font9);
+        QFont font10;
+        font10.setFamily(QString::fromUtf8("MS Shell Dlg 2"));
+        font10.setPointSize(10);
+        font10.setBold(false);
+        font10.setWeight(50);
+        pushButton_open->setFont(font10);
 
         horizontalLayout_4->addWidget(pushButton_open);
 
@@ -727,7 +731,7 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
         tabWidget->setCurrentIndex(1);
 
 
@@ -736,40 +740,40 @@ public:
 
     void retranslateUi(QMainWindow *LandingPage)
     {
-        LandingPage->setWindowTitle(QApplication::translate("LandingPage", "LiveText", nullptr));
-        label->setText(QApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
-        label_27->setText(QApplication::translate("LandingPage", "Username", nullptr));
-        label_28->setText(QApplication::translate("LandingPage", "Password", nullptr));
-        checkBox_saveCredential->setText(QApplication::translate("LandingPage", "Save this settings as default", nullptr));
-        label_4->setText(QApplication::translate("LandingPage", "If you don't have an account", nullptr));
-        pushButton_register->setText(QApplication::translate("LandingPage", "Register", nullptr));
+        LandingPage->setWindowTitle(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
+        label->setText(QCoreApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
+        label_27->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
+        label_28->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
+        checkBox_saveCredential->setText(QCoreApplication::translate("LandingPage", "Save this settings as default", nullptr));
+        label_4->setText(QCoreApplication::translate("LandingPage", "If you don't have an account", nullptr));
+        pushButton_register->setText(QCoreApplication::translate("LandingPage", "Register", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QString());
-        label_3->setText(QApplication::translate("LandingPage", "Please fill the form with required information to\n"
+        label_3->setText(QCoreApplication::translate("LandingPage", "Please fill the form with required information to\n"
 "create your account", nullptr));
         label_UsrIcon->setText(QString());
-        label_15->setText(QApplication::translate("LandingPage", "Profile icon\n"
+        label_15->setText(QCoreApplication::translate("LandingPage", "Profile icon\n"
 "(optional)", nullptr));
-        label_2->setText(QApplication::translate("LandingPage", "Username", nullptr));
-        label_5->setText(QApplication::translate("LandingPage", "Nickname\n"
+        label_2->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
+        label_5->setText(QCoreApplication::translate("LandingPage", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QApplication::translate("LandingPage", "Password", nullptr));
-        label_11->setText(QApplication::translate("LandingPage", "Confirm\n"
+        label_6->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
+        label_11->setText(QCoreApplication::translate("LandingPage", "Confirm\n"
 "password", nullptr));
         pushButton_browse->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QString());
         label_logo->setText(QString());
-        label_8->setText(QApplication::translate("LandingPage", "LiveText", nullptr));
-        label_7->setText(QApplication::translate("LandingPage", "Politecnico di Torino\n"
+        label_8->setText(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
+        label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
-        groupBox_5->setTitle(QApplication::translate("LandingPage", "Server settings", nullptr));
-        label_19->setText(QApplication::translate("LandingPage", "Address", nullptr));
-        label_20->setText(QApplication::translate("LandingPage", "Port", nullptr));
+        groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
+        label_19->setText(QCoreApplication::translate("LandingPage", "Address", nullptr));
+        label_20->setText(QCoreApplication::translate("LandingPage", "Port", nullptr));
         label_incorrect_operation->setText(QString());
         pushButton_confirmOperation->setText(QString());
-        groupBox_2->setTitle(QApplication::translate("LandingPage", "Open existing file", nullptr));
-        pushButton_remove->setText(QApplication::translate("LandingPage", "Remove selected", nullptr));
-        pushButton_open->setText(QApplication::translate("LandingPage", "Open selected", nullptr));
-        pushButton_back->setText(QApplication::translate("LandingPage", "Logout", nullptr));
+        groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
+        pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
+        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Logout", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
         label_incorrect_file_operation->setText(QString());

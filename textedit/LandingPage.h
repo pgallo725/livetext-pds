@@ -67,7 +67,6 @@ private:
 	Client* client;
 
 	QLabel* loading;
-	QMovie* movie;
 
 	OpenUriWindow* openURIWindow;
 	NewFileWindow* newFileWindow;
