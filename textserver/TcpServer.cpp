@@ -146,9 +146,12 @@ void TcpServer::initialize()
 			{
 				// THROW: handle error or FileFormatException ?
 			}
-
-			// Create the actual Document object and store it in the server document map
-			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+			if (!docURI.isEmpty())
+			{
+				// Create the actual Document object and store it in the server document map
+				documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+			}
+			
 		}
 
 		docsFile.close();
@@ -204,14 +207,14 @@ void TcpServer::saveUsers()
 		{
 			usersFile.cancelWriting();
 			usersFile.commit();
-			throw FileWriteException(".", USERS_FILENAME);
+			throw FileWriteException(USERS_FILENAME, QDir::currentPath().toStdString());
 		}
 		usersFile.commit();
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		throw FileCreateException(".", USERS_FILENAME);
+		throw FileCreateException(USERS_FILENAME, QDir::currentPath().toStdString());
 	}
 }
 
@@ -474,12 +477,12 @@ void TcpServer::addToIndex(QSharedPointer<Document> doc)
 		{
 			docsFile.cancelWriting();
 			docsFile.commit();
-			throw FileWriteException(INDEX_FILENAME, INDEX_FILENAME);
+			throw FileWriteException(INDEX_FILENAME, QDir::currentPath().toStdString());
 		}
 	}
 	else
 	{
-		throw FileOpenException(INDEX_FILENAME, INDEX_FILENAME);
+		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
 	}
 }
 
@@ -524,7 +527,6 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	try {
 		/* add the document to the index and save the file */
 		addToIndex(doc);
-		doc->save();
 		saveUsers();
 		docsFile.commit();
 	}

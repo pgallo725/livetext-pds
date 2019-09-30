@@ -23,6 +23,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Message.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)MessageFactory.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)PresenceMessage.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SocketBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Symbol.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TextEditMessage.h" />
@@ -38,6 +39,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Message.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)MessageFactory.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)PresenceMessage.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Symbol.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TextEditMessage.cpp" />
