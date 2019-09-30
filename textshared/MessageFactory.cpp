@@ -34,6 +34,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::DocumentError:		return new DocumentErrorMessage();
 		case MessageType::CharInsert:			return new CharInsertMessage();
 		case MessageType::CharDelete:			return new CharDeleteMessage();
+		case MessageType::BlockEdit:			return new BlockEditMessage();
 		case MessageType::CursorMove:			return new CursorMoveMessage();
 		case MessageType::PresenceUpdate:		return new PresenceUpdateMessage();
 		case MessageType::PresenceAdd:			return new PresenceAddMessage();
@@ -41,7 +42,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::Failure:				return new FailureMessage();
 
 		default:
-			throw 1;
+			throw 1;	// TODO: add proper exception
 			break;
 	}
 }
@@ -145,6 +146,11 @@ MessageCapsule MessageFactory::CharInsert(Symbol symbol)
 MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)
 {
 	return new CharDeleteMessage(position);
+}
+
+MessageCapsule MessageFactory::BlockEdit(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
+{
+	return new BlockEditMessage(blockId, fmt, editorId);
 }
 
 MessageCapsule MessageFactory::CursorMove(qint32 userId, qint32 newPosition)

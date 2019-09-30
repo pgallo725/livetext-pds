@@ -13,7 +13,7 @@ DocumentCreateMessage::DocumentCreateMessage(QString documentName)
 {
 }
 
-void DocumentCreateMessage::writeContent(QDataStream& stream) const
+void DocumentCreateMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_docName;
 }
@@ -41,7 +41,7 @@ DocumentRemoveMessage::DocumentRemoveMessage(URI documentURI)
 {
 }
 
-void DocumentRemoveMessage::writeContent(QDataStream& stream) const
+void DocumentRemoveMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_docURI;
 }
@@ -69,7 +69,7 @@ DocumentOpenMessage::DocumentOpenMessage(URI documentURI)
 {
 }
 
-void DocumentOpenMessage::writeContent(QDataStream& stream) const
+void DocumentOpenMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_docURI;
 }
@@ -92,7 +92,7 @@ DocumentDismissedMessage::DocumentDismissedMessage()
 {
 }
 
-void DocumentDismissedMessage::writeContent(QDataStream& stream) const
+void DocumentDismissedMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
 }
@@ -115,7 +115,7 @@ DocumentReadyMessage::DocumentReadyMessage(Document doc)
 {
 }
 
-void DocumentReadyMessage::writeContent(QDataStream& stream) const
+void DocumentReadyMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_document;
 }
@@ -138,7 +138,7 @@ DocumentCloseMessage::DocumentCloseMessage()
 {
 }
 
-void DocumentCloseMessage::writeContent(QDataStream& stream) const
+void DocumentCloseMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
 }
@@ -156,7 +156,7 @@ DocumentExitMessage::DocumentExitMessage()
 {
 }
 
-void DocumentExitMessage::writeContent(QDataStream& stream) const
+void DocumentExitMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
 }
@@ -179,7 +179,7 @@ DocumentErrorMessage::DocumentErrorMessage(QString reason)
 {
 }
 
-void DocumentErrorMessage::writeContent(QDataStream& stream) const
+void DocumentErrorMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_error;
 }

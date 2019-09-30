@@ -167,9 +167,11 @@ void LiveText::openDocumentCompleted(Document doc)
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendChar);
+	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::blockModified);
 
 	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol);
+	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat);
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();

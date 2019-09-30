@@ -741,7 +741,7 @@ void TcpServer::readMessage()
 		else
 		{
 			message = MessageFactory::Failure("Unknown message type : " + mType);
-			message->sendTo(socket);
+			message->send(socket);
 		}
 	}
 }

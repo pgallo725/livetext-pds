@@ -13,7 +13,7 @@ LoginRequestMessage::LoginRequestMessage(QString username)
 {
 }
 
-void LoginRequestMessage::writeContent(QDataStream& stream) const
+void LoginRequestMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_username;
 }
@@ -41,7 +41,7 @@ LoginChallengeMessage::LoginChallengeMessage(QByteArray salt, QByteArray nonce)
 {
 }
 
-void LoginChallengeMessage::writeContent(QDataStream& stream) const
+void LoginChallengeMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_salt << m_nonce;
 }
@@ -74,7 +74,7 @@ LoginUnlockMessage::LoginUnlockMessage(QByteArray token)
 {
 }
 
-void LoginUnlockMessage::writeContent(QDataStream& stream) const
+void LoginUnlockMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_token;
 }
@@ -102,7 +102,7 @@ LoginGrantedMessage::LoginGrantedMessage(User loggedUser)
 {
 }
 
-void LoginGrantedMessage::writeContent(QDataStream& stream) const
+void LoginGrantedMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_user;
 }
@@ -130,7 +130,7 @@ LoginErrorMessage::LoginErrorMessage(QString reason)
 {
 }
 
-void LoginErrorMessage::writeContent(QDataStream& stream) const
+void LoginErrorMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_error;
 }

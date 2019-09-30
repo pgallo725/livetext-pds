@@ -13,7 +13,7 @@ CharInsertMessage::CharInsertMessage(Symbol symbol)
 {
 }
 
-void CharInsertMessage::writeContent(QDataStream& stream) const
+void CharInsertMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_symbol;
 }
@@ -41,7 +41,7 @@ CharDeleteMessage::CharDeleteMessage(QVector<qint32> position)
 {
 }
 
-void CharDeleteMessage::writeContent(QDataStream& stream) const
+void CharDeleteMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_fPos;
 }
@@ -69,7 +69,7 @@ BlockEditMessage::BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockForm
 {
 }
 
-void BlockEditMessage::writeContent(QDataStream& stream) const
+void BlockEditMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_blockId << m_blockFmt << m_editorId;
 }

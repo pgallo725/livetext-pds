@@ -69,7 +69,7 @@ signals:
 	// Login, Logout & Register
 	void loginSuccess(User user);
 	void loginFailed(QString errorType);
-	void registrationCompleted(User user);
+	void registrationCompleted(User& user);
 	void registrationFailed(QString errorType);
 	void logoutCompleted();
 	void logoutFailed(QString errorType);
@@ -80,11 +80,11 @@ signals:
 	void cancelUserPresence(qint32 userId);
 	void accountModified(qint32 userId, QString username, QImage image);
 
-	//Account signals
+	// Account signals
 	void personalAccountModified(User user);
 	void accountModificationFail(QString error);
 	
-	//Document Signals
+	// Document Signals
 	void removeFileFailed(QString errorType);
 	void openFileCompleted(Document document);
 	void openFileFailed(QString error);
@@ -92,9 +92,10 @@ signals:
 	void documentExitSucced();
 	void documentExitFailed(QString errorType);
 	
-	// Symbol Signals
+	// TextEdit Signals
 	void recivedSymbol(Symbol character);
 	void removeSymbol(QVector<int> position);
+	void formatBlock(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId);
 
 public:
 
@@ -123,8 +124,10 @@ public slots:
 	void receiveCursor(MessageCapsule message);
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
+	void blockModified(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId);
 	void receiveChar(MessageCapsule message);
 	void deleteChar(MessageCapsule message);
+	void editBlock(MessageCapsule message);
 	// Document handler
 	void openDocument(URI URI);
 	void createDocument(QString name);

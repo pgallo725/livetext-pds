@@ -14,7 +14,7 @@ AccountCreateMessage::AccountCreateMessage(QString username, QString nickname, Q
 {
 }
 
-void AccountCreateMessage::writeContent(QDataStream& stream) const
+void AccountCreateMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_username << m_nickname << m_password << m_icon;
 }
@@ -57,7 +57,7 @@ AccountUpdateMessage::AccountUpdateMessage(QString nickname, QImage icon, QStrin
 {
 }
 
-void AccountUpdateMessage::writeContent(QDataStream& stream) const
+void AccountUpdateMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_nickname << m_password << m_icon;
 }
@@ -95,7 +95,7 @@ AccountConfirmedMessage::AccountConfirmedMessage(User user)
 {
 }
 
-void AccountConfirmedMessage::writeContent(QDataStream& stream) const
+void AccountConfirmedMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_user;
 }
@@ -123,7 +123,7 @@ AccountErrorMessage::AccountErrorMessage(QString reason)
 {
 }
 
-void AccountErrorMessage::writeContent(QDataStream& stream) const
+void AccountErrorMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_error;
 }
