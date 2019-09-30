@@ -94,12 +94,6 @@ Document::Document(URI docURI) :
 
 	_blocks.insert(defaultBlock.getIdPair(), defaultBlock);
 	_text.insert(_text.begin(), eof);
-
-	QSaveFile file(DOCUMENTS_DIRNAME + uri.toString());
-	if (!file.open(QIODevice::WriteOnly)) {
-		//throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
-	}
-	file.commit();
 }
 
 Document::~Document()

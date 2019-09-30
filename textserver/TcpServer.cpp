@@ -12,6 +12,7 @@
 
 #include <MessageFactory.h>
 #include "ServerException.h"
+#include <SharedException.h>
 
 #define INDEX_FILENAME "./Documents/documents.dat"
 #define USERS_FILENAME "users.dat"
@@ -148,10 +149,8 @@ void TcpServer::initialize()
 			}
 			if (!docURI.isEmpty())
 			{
-				// Create the actual Document object and store it in the server document map
 				documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 			}
-			
 		}
 
 		docsFile.close();
@@ -519,7 +518,14 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
 	QSharedPointer<Document> doc(new Document(docURI));
-	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
+	QSharedPointer<WorkSpace> w;
+
+	try {
+		w = createWorkspace(doc, client);
+	}
+	catch (DocumentException& de) {
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
@@ -580,10 +586,17 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 		return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
-
-	QSharedPointer<WorkSpace> w = workspaces.contains(docUri) ?
-		workspaces.find(docUri).value() :
-		createWorkspace(doc, client);
+	QSharedPointer<WorkSpace> w;
+	try
+	{
+		w = workspaces.contains(docUri) ?
+			workspaces.find(docUri).value() :
+			createWorkspace(doc, client);
+	}
+	catch (DocumentException& de)
+	{
+		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+	}
 
 	User* user = client->getUser();
 
@@ -641,7 +654,14 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 void TcpServer::deleteWorkspace(URI document)
 {
 	/* delete workspace and remove it from the map */
-	workspaces.remove(document);	
+	try {
+		workspaces.remove(document);
+	}
+	catch (DocumentException& de)
+	{
+		//TODO: who handle?
+	}
+		
 	qDebug() << "workspace (" << document.toString() << ") closed";
 }
 
