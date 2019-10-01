@@ -382,7 +382,7 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
 	// Check validity of the symbol position inside the block range
-	if (s._fPos >= b.begin() || s._fPos <= b.end())
+	if (s._fPos >= b.begin() && s._fPos <= b.end())
 		return;
 
 	s.setBlock(b.getId());
