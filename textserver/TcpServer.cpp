@@ -115,7 +115,7 @@ void TcpServer::initialize()
 		// using built-in Qt Map deserialization
 		usersDbStream >> users;
 
-		if (usersDbStream.status() != QTextStream::Status::Ok)
+		if (usersDbStream.status() == QTextStream::ReadCorruptData)
 		{
 			throw FileLoadException(USERS_FILENAME);
 		}

@@ -102,7 +102,7 @@ bool TextBlockID::operator==(const TextBlockID& other) const noexcept
 
 TextBlockID::operator bool() const noexcept
 {
-	return (_number != -1 || _authorId != -1);
+	return !(_number == -1 && _authorId == -1);
 }
 
 
