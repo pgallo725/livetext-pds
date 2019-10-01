@@ -513,6 +513,11 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 	}
 }
 
+void TextEdit::forceClosingDocumentError()
+{
+	QMessageBox::StandardButton error = QMessageBox::critical(this, QCoreApplication::applicationName(), tr("Server encountered an error, the document will be closed"), QMessageBox::Ok);
+}
+
 void TextEdit::setDocumentURI(QString uri)
 {
 	URI = uri;

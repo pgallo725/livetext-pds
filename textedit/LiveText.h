@@ -31,7 +31,7 @@ private slots:
 	
 	//TEXTEDIT
 	void closeDocument();
-	void closeDocumentCompleted();
+	void closeDocumentCompleted(bool isForced);
 	void sendCursor(qint32 pos);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void accountUpdated(User user);

@@ -199,8 +199,12 @@ void LiveText::closeDocument()
 	_client->removeFromFile(_user.getUserId());
 }
 
-void LiveText::closeDocumentCompleted()
+void LiveText::closeDocumentCompleted(bool isForced)
 {
+	if (isForced) {
+		_textEdit->forceClosingDocumentError();
+	}
+
 	_textEdit->closeEditor();
 
 	_landingPage->setupFileList(_user.getDocuments());
