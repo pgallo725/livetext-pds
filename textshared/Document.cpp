@@ -91,7 +91,9 @@ Document::Document(URI docURI, qint32 authorId) :
 	TextBlock defaultBlock = TextBlock(_blockCounter++, authorId, QTextBlockFormat());
 	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(),
 		authorId, QVector<qint32>({ 1000, 1000 }));
-	addCharToBlock(eof, defaultBlock);
+	defaultBlock.setBegin(eof._fPos);
+	defaultBlock.setEnd(eof._fPos);
+	eof.setBlock(defaultBlock.getId());
 
 	_blocks.insert(defaultBlock.getId(), defaultBlock);
 	_text.insert(_text.begin(), eof);
