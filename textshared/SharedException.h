@@ -9,19 +9,19 @@ protected:
 	DocumentException(std::string msg);
 };
 
-class DocumentOpenException : DocumentException
+class DocumentOpenException : public DocumentException
 {
 public:
 	DocumentOpenException(std::string fileName, std::string path);
 };
 
-class DocumentLoadException : DocumentException
+class DocumentLoadException : public DocumentException
 {
 public:
 	DocumentLoadException(std::string fileName, std::string path);
 };
 
-class DocumentWriteException : DocumentException
+class DocumentWriteException : public DocumentException
 {
 public:
 	DocumentWriteException(std::string fileName, std::string path);
