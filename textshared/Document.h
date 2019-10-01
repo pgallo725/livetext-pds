@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+
 #include "Symbol.h"
 #include "TextBlock.h"
 //#include "TextList.h"

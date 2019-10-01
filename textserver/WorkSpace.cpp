@@ -4,10 +4,10 @@
 
 #include <MessageFactory.h>
 #include "ServerException.h"
-
+#include <SharedException.h>
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
-	: doc(d), messageHandler(this)
+	: doc(d), messageHandler(this), fails(0)
 {
 	doc->load();	// Load the document contents
 
@@ -131,7 +131,21 @@ void WorkSpace::clientDisconnection()
 
 void WorkSpace::documentSave()
 {
-	doc->save();
+	try
+	{
+		doc->save();
+	}
+	catch (DocumentException& de) {
+		if (fails >= DOCUMENT_MAX_FAILS) {
+			fails = 0;	// to avoid circular calling
+			// move workspace clients to tcpserver clients
+			for (QSharedPointer<Client> client : editors.values()) {
+				//TODO: need to send to client something??
+				clientQuit(client->getSocket());
+			}
+		}
+		fails++;
+	}
 }
 
 void WorkSpace::documentInsertSymbol(Symbol& symbol)
@@ -181,7 +195,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug() << " - client '" << client->getUsername() << "' closed the document";
+	qDebug() << " - client " << client->getUsername() << " closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);

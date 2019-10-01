@@ -1,8 +1,9 @@
 #include "Document.h"
+#include "SharedException.h"
 
 #include <QDataStream>
 #include <QFile>
-#include <QFileInfo>
+#include <QSaveFile>
 
 #include <iostream>
 
@@ -143,18 +144,16 @@ void Document::load()
 			docFileStream >> editors >> _text;
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
-		{
-			// THROW: handle error or throw DocumentLoadException ?
+		{	
+			throw DocumentLoadException(uri.toStdString(), DOCUMENTS_DIRNAME);
 		}
 
 		file.close();
-
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		QFileInfo info(file);
-		//throw FileLoadException(info.absolutePath().toStdString());
+		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
 }
 
@@ -169,7 +168,7 @@ void Document::unload()
 void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file(DOCUMENTS_DIRNAME + ("tmp_" + uri.toString()));
+	QSaveFile file(DOCUMENTS_DIRNAME + uri.toString());
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
@@ -180,29 +179,19 @@ void Document::save()
 		// using built-in Qt Vector and StringList serialization
 		docFileStream << editors << _text;
 
-		QFile oldFile(DOCUMENTS_DIRNAME + uri.toString());
-		if (oldFile.exists())
+		if (docFileStream.status() == QDataStream::Status::WriteFailed)
 		{
-			if (oldFile.remove())
-				file.rename(DOCUMENTS_DIRNAME + uri.toString());
-			else
-			{
-				// Remove temporary file if overwriting of the old file failed
-				file.remove();
-				QFileInfo info(oldFile);
-				//throw FileOverwriteException(info.absoluteFilePath().toStdString());
-			}
+			file.cancelWriting();
+			file.commit();
+			throw DocumentWriteException(uri.toStdString(), DOCUMENTS_DIRNAME);
 		}
-		else file.rename(DOCUMENTS_DIRNAME + uri.toString());
 
-		file.close();
-
+		file.commit();
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		QFileInfo info(file);
-		//throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
 }
 
