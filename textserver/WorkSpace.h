@@ -37,7 +37,7 @@ private:
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, /*QMutex& m,*/ QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:
