@@ -64,7 +64,7 @@ protected:
 
 public:
 
-	Document(URI uri);
+	Document(URI uri, qint32 authorId = -1);
 	~Document();
 
 	void load();

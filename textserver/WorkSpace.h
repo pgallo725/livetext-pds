@@ -13,7 +13,7 @@
 #include "SocketBuffer.h"
 
 #define DOCUMENT_SAVE_TIMEOUT 5000	/* ms */
-#define DOCUMENT_MAX_FAILS 5		/* #  */
+#define DOCUMENT_MAX_FAILS 1		/* #  */
 
 class WorkSpace : public QObject
 {
@@ -37,7 +37,7 @@ private:
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, /*QMutex& m,*/ QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:

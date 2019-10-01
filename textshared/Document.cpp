@@ -82,14 +82,16 @@ Document::Document()
 {
 }
 
-Document::Document(URI docURI) :
+Document::Document(URI docURI, qint32 authorId) :
 	uri(docURI), _blockCounter(0)
 {
 	editors << getAuthor();
 
 	// Insert a ParagraphTerminator character inside a default block in the empty document
-	TextBlock defaultBlock = TextBlock(_blockCounter++, -1, QTextBlockFormat());
-	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>({ 1000, 1000 }), defaultBlock);
+	TextBlock defaultBlock = TextBlock(_blockCounter++, authorId, QTextBlockFormat());
+	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(),
+		authorId, QVector<qint32>({ 1000, 1000 }));
+	addCharToBlock(eof, defaultBlock);
 
 	_blocks.insert(defaultBlock.getId(), defaultBlock);
 	_text.insert(_text.begin(), eof);
@@ -365,59 +367,54 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	{
 		TextBlock& block = _blocks[getBlockAt(n)];		// Get the block and add it to the list of results
 		result.push_back(block.getId());
-		n = binarySearch(block.end()) + 1;		// Skip to the beginning of the next block
+		n = binarySearch(block.end());
+		if (n < 0)
+			break;
+		n += 1;		// Skip to the beginning of the next block
 	}
 
 	return result;
 }
 
 
-// TODO: OPTIMIZE ?
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
-	int charIndex = binarySearch(s._fPos),
-		beginIndex = binarySearch(b.begin()),
-		endIndex = binarySearch(b.end());
-
 	// Check validity of the symbol position inside the block range
-	if (charIndex < 0 || beginIndex < 0 || endIndex < 0 ||
-		charIndex < beginIndex - 1 || charIndex > endIndex + 1)
+	if (s._fPos >= b.begin() || s._fPos <= b.end())
 		return;
 
 	s.setBlock(b.getId());
 
-	if (charIndex == beginIndex - 1)
-		b.setBegin(s._fPos);				// update block begin
-	else if (charIndex == endIndex + 1)
-		b.setEnd(s._fPos);					// update block end
+	if (s._fPos < b.begin())
+		b.setBegin(s._fPos);		// update block begin
+	else if (s._fPos > b.end())
+		b.setEnd(s._fPos);			// update block end
 }
 
-// TODO: OPTIMIZE ?
 void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 {
-	int charIndex = binarySearch(s._fPos),
-		beginIndex = binarySearch(b.begin()),
-		endIndex = binarySearch(b.end()); 
-	
 	// Check validity of the symbol position inside the block range
-	if (charIndex < 0 || beginIndex < 0 || endIndex < 0 ||
-		charIndex < beginIndex || charIndex > endIndex)
+	if (s._fPos < b.begin() || s._fPos > b.end())
 		return;
 
 	s.setBlock(nullptr);
 
-	if (charIndex == beginIndex == endIndex)
+	if (s._fPos == b.begin() && s._fPos == b.end())
 	{
 		b.setBegin(QVector<qint32>({ -1, -1 }));	// Reset the block when deleting the last character
 		b.setEnd(QVector<qint32>({ -1, -1 }));
 	}
-	else if (charIndex == beginIndex)
+	else if (s._fPos == b.begin())
 	{
-		b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
+		int beginIndex = binarySearch(b.begin());
+		if (beginIndex > 0)
+			b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
 	}
-	else if (charIndex == beginIndex)
+	else if (s._fPos == b.end())
 	{
-		b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
+		int endIndex = binarySearch(b.end());
+		if (endIndex > 0)
+			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
 	}
 }
 

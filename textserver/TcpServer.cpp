@@ -517,7 +517,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (documents.contains(docURI))
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
-	QSharedPointer<Document> doc(new Document(docURI));
+	QSharedPointer<Document> doc(new Document(docURI, client->getUserId()));
 	QSharedPointer<WorkSpace> w;
 
 	try {
@@ -700,7 +700,7 @@ void TcpServer::readMessage()
 		}
 		else
 		{
-			message = MessageFactory::Failure("Unknown message type : " + mType);
+			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
 		}
 	}

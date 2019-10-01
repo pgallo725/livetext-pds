@@ -86,7 +86,7 @@ void WorkSpace::readMessage()
 		}
 		else
 		{
-			message = MessageFactory::Failure("Unknown message type : " + mType);
+			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
 		}
 	}
