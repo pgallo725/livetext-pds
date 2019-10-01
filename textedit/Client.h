@@ -89,7 +89,7 @@ signals:
 	void openFileCompleted(Document document);
 	void openFileFailed(QString error);
 	void documentDismissed(URI URI);
-	void documentExitSucced();
+	void documentExitSuccess(bool isForced = false);
 	void documentExitFailed(QString errorType);
 	
 	// TextEdit Signals
@@ -132,6 +132,7 @@ public slots:
 	void openDocument(URI URI);
 	void createDocument(QString name);
 	void deleteDocument(URI URI);
+	void forceDocumentClose();
 	// Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
