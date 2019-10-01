@@ -16,10 +16,17 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 void DocumentEditor::openDocument()
 {
 	QVector<Symbol> document = _document.getContent();
+	QList<TextBlockID> blocks = _document.getBlocksBetween(0, _document.length() - 1);
 
 	for (int i = 0; i < document.length() - 1; i++){
 		_textedit->newChar(document[i].getChar(), document[i].getFormat(), i);
 	}
+
+	foreach(TextBlockID id, blocks) {
+		TextBlock& blk = _document.getBlock(id);
+		_textedit->applyBlockFormat(id.getAuthorId(), _document.getBlockPosition(id), blk.getFormat());
+	}
+	
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
 
