@@ -24,7 +24,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
     QByteArrayData data[42];
-    char stringdata0[530];
+    char stringdata0[521];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -58,23 +58,23 @@ QT_MOC_LITERAL(21, 241, 20), // "documentDeleteSymbol"
 QT_MOC_LITERAL(22, 262, 15), // "QVector<qint32>"
 QT_MOC_LITERAL(23, 278, 8), // "position"
 QT_MOC_LITERAL(24, 287, 17), // "documentEditBlock"
-QT_MOC_LITERAL(25, 305, 20), // "QPair<qint32,qint32>"
-QT_MOC_LITERAL(26, 326, 7), // "blockId"
-QT_MOC_LITERAL(27, 334, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(28, 351, 6), // "format"
-QT_MOC_LITERAL(29, 358, 15), // "dispatchMessage"
-QT_MOC_LITERAL(30, 374, 14), // "MessageCapsule"
-QT_MOC_LITERAL(31, 389, 7), // "message"
-QT_MOC_LITERAL(32, 397, 11), // "QSslSocket*"
-QT_MOC_LITERAL(33, 409, 6), // "sender"
-QT_MOC_LITERAL(34, 416, 13), // "updateAccount"
-QT_MOC_LITERAL(35, 430, 12), // "clientSocket"
-QT_MOC_LITERAL(36, 443, 20), // "receiveUpdateAccount"
-QT_MOC_LITERAL(37, 464, 3), // "msg"
-QT_MOC_LITERAL(38, 468, 10), // "clientQuit"
-QT_MOC_LITERAL(39, 479, 9), // "socketErr"
-QT_MOC_LITERAL(40, 489, 28), // "QAbstractSocket::SocketError"
-QT_MOC_LITERAL(41, 518, 11) // "socketError"
+QT_MOC_LITERAL(25, 305, 11), // "TextBlockID"
+QT_MOC_LITERAL(26, 317, 7), // "blockId"
+QT_MOC_LITERAL(27, 325, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(28, 342, 6), // "format"
+QT_MOC_LITERAL(29, 349, 15), // "dispatchMessage"
+QT_MOC_LITERAL(30, 365, 14), // "MessageCapsule"
+QT_MOC_LITERAL(31, 380, 7), // "message"
+QT_MOC_LITERAL(32, 388, 11), // "QSslSocket*"
+QT_MOC_LITERAL(33, 400, 6), // "sender"
+QT_MOC_LITERAL(34, 407, 13), // "updateAccount"
+QT_MOC_LITERAL(35, 421, 12), // "clientSocket"
+QT_MOC_LITERAL(36, 434, 20), // "receiveUpdateAccount"
+QT_MOC_LITERAL(37, 455, 3), // "msg"
+QT_MOC_LITERAL(38, 459, 10), // "clientQuit"
+QT_MOC_LITERAL(39, 470, 9), // "socketErr"
+QT_MOC_LITERAL(40, 480, 28), // "QAbstractSocket::SocketError"
+QT_MOC_LITERAL(41, 509, 11) // "socketError"
 
     },
     "WorkSpace\0noEditors\0\0URI\0documentURI\0"
@@ -85,12 +85,11 @@ QT_MOC_LITERAL(41, 518, 11) // "socketError"
     "readMessage\0documentSave\0documentInsertSymbol\0"
     "Symbol&\0symbol\0documentDeleteSymbol\0"
     "QVector<qint32>\0position\0documentEditBlock\0"
-    "QPair<qint32,qint32>\0blockId\0"
-    "QTextBlockFormat\0format\0dispatchMessage\0"
-    "MessageCapsule\0message\0QSslSocket*\0"
-    "sender\0updateAccount\0clientSocket\0"
-    "receiveUpdateAccount\0msg\0clientQuit\0"
-    "socketErr\0QAbstractSocket::SocketError\0"
+    "TextBlockID\0blockId\0QTextBlockFormat\0"
+    "format\0dispatchMessage\0MessageCapsule\0"
+    "message\0QSslSocket*\0sender\0updateAccount\0"
+    "clientSocket\0receiveUpdateAccount\0msg\0"
+    "clientQuit\0socketErr\0QAbstractSocket::SocketError\0"
     "socketError"
 };
 #undef QT_MOC_LITERAL
@@ -167,7 +166,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 7: _t->documentSave(); break;
         case 8: _t->documentInsertSymbol((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 9: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
-        case 10: _t->documentEditBlock((*reinterpret_cast< QPair<qint32,qint32>(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
+        case 10: _t->documentEditBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
         case 11: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
         case 12: _t->updateAccount((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4]))); break;
         case 13: _t->receiveUpdateAccount((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1])),(*reinterpret_cast< MessageCapsule(*)>(_a[2]))); break;

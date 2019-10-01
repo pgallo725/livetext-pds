@@ -536,7 +536,7 @@ void Client::deleteChar(MessageCapsule message) {
 void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockIdPair(), blockedit->getBlockFormat(), blockedit->getAuthorId());
+	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat(), blockedit->getAuthorId());
 }
 
 

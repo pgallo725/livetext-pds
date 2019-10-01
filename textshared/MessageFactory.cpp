@@ -148,7 +148,7 @@ MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)
 	return new CharDeleteMessage(position);
 }
 
-MessageCapsule MessageFactory::BlockEdit(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
+MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
 {
 	return new BlockEditMessage(blockId, fmt, editorId);
 }

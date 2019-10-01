@@ -3,6 +3,9 @@
 #include <QString>
 
 #include "Symbol.h"
+#include "TextBlock.h"
+//#include "TextList.h"
+
 
 class URI
 {
@@ -22,8 +25,8 @@ public:
 	QString toString();
 	std::string toStdString();
 
-	QString getAuthorName();		// extract the document's author name from the URI
-	QString getDocumentName();		// get the document name from the URI
+	QString getAuthorName() const;		// extract the document's author name from the URI
+	QString getDocumentName() const;	// get the document name from the URI
 
 
 	bool operator<(const URI& other) const noexcept;		// Comparators so that the URI type can be used as a key in QMap collections
@@ -32,6 +35,7 @@ public:
 
 };
 
+Q_DECLARE_METATYPE(URI);
 
 
 class Document
@@ -49,7 +53,7 @@ private:
 	QVector<Symbol> _text;		// Actual document contents
 
 	qint32 _blockCounter;
-	QMap<QPair<qint32, qint32>, TextBlock> _blocks;
+	QMap<TextBlockID, TextBlock> _blocks;
 	QMap<qint32, TextList> _lists;
 
 	static const int fPosGapSize = 4;
@@ -67,11 +71,13 @@ public:
 	void unload();
 	void save();
 
+	Symbol& operator[](QVector<qint32> fPos);
+
 	int insert(Symbol& s);
 	void remove(const Symbol& s);
 	int removeAt(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
-	int formatBlock(QPair<qint32, qint32> id, QTextBlockFormat fmt);
+	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 
 	QVector<qint32> fractionalPosBegin();
 	QVector<qint32> fractionalPosEnd();
@@ -88,13 +94,18 @@ public:
 	QVector<Symbol> getContent();
 	QString toString();				// returns a printable representation of the document's contents
 
-	QPair<qint32, qint32> getBlockAt(int index);
-	int getBlockPosition(QPair<qint32, qint32> blockIdPair);
+	TextBlock& getBlock(TextBlockID id);
+	TextBlockID getBlockAt(int index);
+	int getBlockPosition(TextBlockID blockId);
+	QList<TextBlockID> getBlocksBetween(int start, int end);
 
 	void insertNewEditor(QString editor);
 
 private:
 
 	int binarySearch(QVector<qint32> position);
+
+	void addCharToBlock(Symbol& s, TextBlock& b);
+	void removeCharFromBlock(Symbol& s, TextBlock& b);
 };
 

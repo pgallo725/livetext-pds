@@ -158,7 +158,7 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 	doc->removeAt(position);
 }
 
-void WorkSpace::documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format)
+void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)
 {
 	doc->formatBlock(blockId, format);
 }
