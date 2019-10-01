@@ -606,7 +606,7 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 	cursor->setCharFormat(format);
 
 	cursor->insertText(ch);
-	highlightUsersText();
+	updateUsersSelections();
 }
 
 void TextEdit::removeChar(int position)
@@ -662,7 +662,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	
 	_currentCursorPosition = -1;
 
-	emit generateExtraSelection();
+	updateUsersSelections();
 
 	
 }

@@ -337,6 +337,7 @@ void LandingPage::pushButtonOpenClicked()
 	QString fileSelected = ui->listWidget->currentItem()->text();
 	if (fileSelected != "<No files found>") {
 		startLoadingAnimation(tr("Opening document..."));
+		QCoreApplication::processEvents();
 		emit openDocument(ui->listWidget->currentRow());
 	}
 
@@ -348,6 +349,7 @@ void LandingPage::pushButtonRemoveClicked()
 
 	if (fileSelected != "<No files found>") {
 		startLoadingAnimation(tr("Removing document..."));
+		QCoreApplication::processEvents();
 		emit removeDocument(ui->listWidget->currentRow());
 	}
 }

@@ -128,6 +128,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	}
 
 	startLoadingAnimation(tr("Updating profile..."));
+	QCoreApplication::processEvents();
 	emit(accountUpdate(nick, userIcon, newPassword));
 }
 
