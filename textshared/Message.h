@@ -3,7 +3,6 @@
 #include <QSslSocket>
 #include <QDataStream>
 #include <QByteArray>
-#include <QBuffer>
 
 enum MessageType : quint16
 {

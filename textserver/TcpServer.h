@@ -20,7 +20,7 @@
 #define USERS_SAVE_TIMEOUT 10000	/* ms */
 
 Q_DECLARE_METATYPE(qintptr);
-Q_DECLARE_METATYPE(URI);
+
 
 class TcpServer : public QTcpServer
 {

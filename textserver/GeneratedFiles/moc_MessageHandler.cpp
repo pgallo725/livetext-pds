@@ -23,7 +23,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
     QByteArrayData data[37];
-    char stringdata0[384];
+    char stringdata0[375];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -60,15 +60,15 @@ QT_MOC_LITERAL(24, 242, 10), // "charDelete"
 QT_MOC_LITERAL(25, 253, 15), // "QVector<qint32>"
 QT_MOC_LITERAL(26, 269, 3), // "pos"
 QT_MOC_LITERAL(27, 273, 9), // "blockEdit"
-QT_MOC_LITERAL(28, 283, 20), // "QPair<qint32,qint32>"
-QT_MOC_LITERAL(29, 304, 2), // "id"
-QT_MOC_LITERAL(30, 307, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(31, 324, 3), // "fmt"
-QT_MOC_LITERAL(32, 328, 15), // "messageDispatch"
-QT_MOC_LITERAL(33, 344, 7), // "message"
-QT_MOC_LITERAL(34, 352, 6), // "sender"
-QT_MOC_LITERAL(35, 359, 13), // "documentClose"
-QT_MOC_LITERAL(36, 373, 10) // "userLogout"
+QT_MOC_LITERAL(28, 283, 11), // "TextBlockID"
+QT_MOC_LITERAL(29, 295, 2), // "id"
+QT_MOC_LITERAL(30, 298, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(31, 315, 3), // "fmt"
+QT_MOC_LITERAL(32, 319, 15), // "messageDispatch"
+QT_MOC_LITERAL(33, 335, 7), // "message"
+QT_MOC_LITERAL(34, 343, 6), // "sender"
+QT_MOC_LITERAL(35, 350, 13), // "documentClose"
+QT_MOC_LITERAL(36, 364, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -78,10 +78,9 @@ QT_MOC_LITERAL(36, 373, 10) // "userLogout"
     "accountUpdate\0documentCreate\0docName\0"
     "documentOpen\0URI\0docUri\0documentRemove\0"
     "charInsert\0Symbol&\0s\0charDelete\0"
-    "QVector<qint32>\0pos\0blockEdit\0"
-    "QPair<qint32,qint32>\0id\0QTextBlockFormat\0"
-    "fmt\0messageDispatch\0message\0sender\0"
-    "documentClose\0userLogout"
+    "QVector<qint32>\0pos\0blockEdit\0TextBlockID\0"
+    "id\0QTextBlockFormat\0fmt\0messageDispatch\0"
+    "message\0sender\0documentClose\0userLogout"
 };
 #undef QT_MOC_LITERAL
 
@@ -153,7 +152,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 7: _t->charInsert((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 8: _t->charDelete((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
-        case 9: _t->blockEdit((*reinterpret_cast< QPair<qint32,qint32>(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
+        case 9: _t->blockEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
         case 10: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
         case 11: _t->documentClose((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
         case 12: _t->userLogout((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
@@ -306,7 +305,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = void (MessageHandler::*)(QPair<qint32,qint32> , QTextBlockFormat );
+            using _t = void (MessageHandler::*)(TextBlockID , QTextBlockFormat );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::blockEdit)) {
                 *result = 9;
                 return;
@@ -454,7 +453,7 @@ void MessageHandler::charDelete(QVector<qint32> _t1)
 }
 
 // SIGNAL 9
-void MessageHandler::blockEdit(QPair<qint32,qint32> _t1, QTextBlockFormat _t2)
+void MessageHandler::blockEdit(TextBlockID _t1, QTextBlockFormat _t2)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 9, _a);

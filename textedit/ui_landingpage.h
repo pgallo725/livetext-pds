@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'landingpage.ui'
 **
-** Created by: Qt User Interface Compiler version 5.13.0
+** Created by: Qt User Interface Compiler version 5.12.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -740,40 +740,40 @@ public:
 
     void retranslateUi(QMainWindow *LandingPage)
     {
-        LandingPage->setWindowTitle(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
-        label->setText(QCoreApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
-        label_27->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
-        label_28->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
-        checkBox_saveCredential->setText(QCoreApplication::translate("LandingPage", "Save this settings as default", nullptr));
-        label_4->setText(QCoreApplication::translate("LandingPage", "If you don't have an account", nullptr));
-        pushButton_register->setText(QCoreApplication::translate("LandingPage", "Register", nullptr));
+        LandingPage->setWindowTitle(QApplication::translate("LandingPage", "LiveText", nullptr));
+        label->setText(QApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
+        label_27->setText(QApplication::translate("LandingPage", "Username", nullptr));
+        label_28->setText(QApplication::translate("LandingPage", "Password", nullptr));
+        checkBox_saveCredential->setText(QApplication::translate("LandingPage", "Save this settings as default", nullptr));
+        label_4->setText(QApplication::translate("LandingPage", "If you don't have an account", nullptr));
+        pushButton_register->setText(QApplication::translate("LandingPage", "Register", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QString());
-        label_3->setText(QCoreApplication::translate("LandingPage", "Please fill the form with required information to\n"
+        label_3->setText(QApplication::translate("LandingPage", "Please fill the form with required information to\n"
 "create your account", nullptr));
         label_UsrIcon->setText(QString());
-        label_15->setText(QCoreApplication::translate("LandingPage", "Profile icon\n"
+        label_15->setText(QApplication::translate("LandingPage", "Profile icon\n"
 "(optional)", nullptr));
-        label_2->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
-        label_5->setText(QCoreApplication::translate("LandingPage", "Nickname\n"
+        label_2->setText(QApplication::translate("LandingPage", "Username", nullptr));
+        label_5->setText(QApplication::translate("LandingPage", "Nickname\n"
 "(optional)", nullptr));
-        label_6->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
-        label_11->setText(QCoreApplication::translate("LandingPage", "Confirm\n"
+        label_6->setText(QApplication::translate("LandingPage", "Password", nullptr));
+        label_11->setText(QApplication::translate("LandingPage", "Confirm\n"
 "password", nullptr));
         pushButton_browse->setText(QString());
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QString());
         label_logo->setText(QString());
-        label_8->setText(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
-        label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
+        label_8->setText(QApplication::translate("LandingPage", "LiveText", nullptr));
+        label_7->setText(QApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
-        groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
-        label_19->setText(QCoreApplication::translate("LandingPage", "Address", nullptr));
-        label_20->setText(QCoreApplication::translate("LandingPage", "Port", nullptr));
+        groupBox_5->setTitle(QApplication::translate("LandingPage", "Server settings", nullptr));
+        label_19->setText(QApplication::translate("LandingPage", "Address", nullptr));
+        label_20->setText(QApplication::translate("LandingPage", "Port", nullptr));
         label_incorrect_operation->setText(QString());
         pushButton_confirmOperation->setText(QString());
-        groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
-        pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
-        pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
-        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Logout", nullptr));
+        groupBox_2->setTitle(QApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_remove->setText(QApplication::translate("LandingPage", "Remove selected", nullptr));
+        pushButton_open->setText(QApplication::translate("LandingPage", "Open selected", nullptr));
+        pushButton_back->setText(QApplication::translate("LandingPage", "Logout", nullptr));
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
         label_incorrect_file_operation->setText(QString());

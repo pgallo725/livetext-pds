@@ -60,11 +60,11 @@ QVector<qint32> CharDeleteMessage::getPosition() const
 /*************** BLOCK FORMAT EDIT MESSAGE ***************/
 
 BlockEditMessage::BlockEditMessage()
-	: Message(BlockEdit), m_editorId(-1)
+	: Message(BlockEdit), m_blockId(TextBlockID(nullptr)), m_editorId(-1)
 {
 }
 
-BlockEditMessage::BlockEditMessage(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
+BlockEditMessage::BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
 	: Message(BlockEdit), m_blockId(blockId), m_blockFmt(fmt), m_editorId(editorId)
 {
 }
@@ -84,7 +84,7 @@ qint32 BlockEditMessage::getAuthorId() const
 	return m_editorId;
 }
 
-QPair<qint32, qint32> BlockEditMessage::getBlockIdPair() const
+TextBlockID BlockEditMessage::getBlockId() const
 {
 	return m_blockId;
 }
