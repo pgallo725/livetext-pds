@@ -365,7 +365,7 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	QList<TextBlockID> result;
 
 	int n = start;
-	while (n < _text.length() && n < end)
+	while (n < _text.length() && n <= end)
 	{
 		TextBlock& block = _blocks[getBlockAt(n)];		// Get the block and add it to the list of results
 		result.push_back(block.getId());

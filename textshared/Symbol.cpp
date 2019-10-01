@@ -81,7 +81,7 @@ qint32 Symbol::getAuthorId()
 // Symbol deserialization operator
 QDataStream& operator>>(QDataStream& in, Symbol& sym)
 {
-	in >> sym._char >> sym._format >> sym._fPos;
+	in >> sym._char >> sym._format >> sym._fPos >> sym._blockRef;
 
 	return in;
 }
@@ -89,7 +89,7 @@ QDataStream& operator>>(QDataStream& in, Symbol& sym)
 // Symbol serialization operator
 QDataStream& operator<<(QDataStream& out, const Symbol& sym)
 {
-	out << sym._char << sym._format << sym._fPos;
+	out << sym._char << sym._format << sym._fPos << sym._blockRef;
 
 	return out;
 }
