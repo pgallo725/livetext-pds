@@ -479,7 +479,7 @@ void TextEdit::accountUpdateSuccessful()
 {
 	ew->updateSuccessful();
 	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
-	
+
 }
 
 
@@ -502,7 +502,7 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 		Presence* p = onlineUsers.find(userId).value();
 
 		QTextCursor* userCursor = p->cursor();
-		
+
 		userCursor->setPosition(position);
 		userCursor->setBlockFormat(fmt);
 
@@ -654,7 +654,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	setupOnlineUsersActions();
 
 	emit generateExtraSelection();
-	
+
 	//emit newCursorPosition(textEdit->textCursor().position());
 
 	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
@@ -956,26 +956,9 @@ void TextEdit::listStyle(int styleIndex)
 
 void TextEdit::textStyle(int styleIndex)
 {
-	
-	const QSignalBlocker blocker(textEdit->document());
-
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
-
-	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
-	cursor.beginEditBlock();
-
-	//Salva il formato del blocco
-	QTextBlockFormat blockFmt = cursor.blockFormat();
-
-	//Se Standard lo stile
-	blockFmt.setObjectIndex(-1); //(?)
-
-	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
 	int headingLevel = styleIndex > 0 ? styleIndex : 0; // H1 to H6, or Standard
-	blockFmt.setHeadingLevel(headingLevel);
-	cursor.setBlockFormat(blockFmt);
-
 	int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
 
 	//Crea formattazione carattere
@@ -990,10 +973,24 @@ void TextEdit::textStyle(int styleIndex)
 	cursor.mergeCharFormat(fmt);
 	textEdit->mergeCurrentCharFormat(fmt);
 
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
+	cursor.beginEditBlock();
+
+	//Salva il formato del blocco
+	QTextBlockFormat blockFmt = cursor.blockFormat();
+
+	//Se Standard lo stile
+	blockFmt.setObjectIndex(-1); //(?)
+
+	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
+	blockFmt.setHeadingLevel(headingLevel);
+	cursor.setBlockFormat(blockFmt);
+
 	cursor.endEditBlock();
 
-	
-	emit blockFormatChanged(_user->getUserId(), cursor.position(), cursor.blockFormat());
+	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::textColor()
@@ -1028,9 +1025,9 @@ void TextEdit::textAlign(QAction* a)
 	else if (a == actionAlignJustify)
 		textEdit->setAlignment(Qt::AlignJustify);
 
+	QTextCursor cursor = textEdit->textCursor();
 
-
-	emit blockFormatChanged(_user->getUserId(), textEdit->textCursor().position(), textEdit->textCursor().blockFormat());
+	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::alignmentChanged(Qt::Alignment a)

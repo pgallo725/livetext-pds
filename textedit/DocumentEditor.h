@@ -17,7 +17,7 @@ public:
 public slots:
 	void addSymbol(Symbol s);
 	void removeSymbol(QVector<int> position);
-	void applyBlockFormat(QPair<int, int> blockId, QTextBlockFormat fmt, qint32 userId);
+	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
 
 
 private:
@@ -29,13 +29,13 @@ private slots:
 	void deleteCharAtIndex(int position);
 	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
 	void generateExtraSelection();
-	void changeBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
+	void changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt);
 
 
 signals:
 	void deleteChar(QVector<qint32> fPos);
 	void insertChar(Symbol s);
-	void blockFormatChanged(QPair<int, int> blockId, QTextBlockFormat fmt, qint32 userId);
+	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
 };
 
 
