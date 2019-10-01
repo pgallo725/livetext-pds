@@ -8,7 +8,7 @@
 #include <QHostAddress>
 #include <QDateTime>
 #include <QRandomGenerator>
-#include <QMutexLocker>
+#include <QDir>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
@@ -90,18 +90,22 @@ TcpServer::TcpServer(QObject* parent)
 /* Destructor */
 TcpServer::~TcpServer()
 {
-	time.stop();
-	saveUsers();		// TODO: serve ancora? se si bisogna gestire le eccezioni?
-
 	qDebug() << "Server down";
 }
 
 /* Load users and documents */
 void TcpServer::initialize()
 {
+	if (!QFileInfo(QFile("server.key")).exists()) {
+		throw ServerStartException("Cannot find 'server.key' file");
+	}
+	if (!QFileInfo(QFile("server.pem")).exists()) {
+		throw ServerStartException("Cannot find 'server.pem' file");
+	}
+	
 	// Open the file and read the users database
 	QFile usersFile(USERS_FILENAME);
-	if (usersFile.open(QIODevice::ReadOnly))
+	if (usersFile.open(QIODevice::ReadWrite))
 	{
 		std::cout << "\nLoading users database... ";
 
@@ -113,7 +117,7 @@ void TcpServer::initialize()
 
 		if (usersDbStream.status() != QTextStream::Status::Ok)
 		{
-			// THROW: handle error or FileFormatException ?
+			throw FileLoadException(USERS_FILENAME);
 		}
 
 		usersFile.close();
@@ -122,15 +126,21 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		throw FileLoadException(USERS_FILENAME);
+		throw FileOpenException(USERS_FILENAME, QDir::currentPath().toStdString());
 	}
 
 	// Initialize the counter to assign user IDs
 	_userIdCounter = users.size();
 
+	if (!QDir("Documents").exists()) {
+		if (!QDir().mkdir("Documents")) {
+			throw ServerStartException("Cannot create 'Documents' folder");
+		}
+	}
+
 	// Read the documents' index file
 	QFile docsFile(INDEX_FILENAME);
-	if (docsFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	if (docsFile.open(QIODevice::ReadWrite| QIODevice::Text))
 	{
 		std::cout << "\nLoading documents index file... ";
 
@@ -143,9 +153,9 @@ void TcpServer::initialize()
 
 			docIndexStream >> docURI;
 
-			if (docIndexStream.status() != QTextStream::Status::Ok)
+			if (docIndexStream.status() == QTextStream::ReadCorruptData)
 			{
-				// THROW: handle error or FileFormatException ?
+				throw FileLoadException(INDEX_FILENAME);
 			}
 			if (!docURI.isEmpty())
 			{
@@ -158,7 +168,7 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		throw FileLoadException(INDEX_FILENAME);
+		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
 	}
 
 	std::cout << "\nServer up" << std::endl;

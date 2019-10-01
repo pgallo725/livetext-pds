@@ -40,8 +40,6 @@ private:
 	QSaveFile usersFile;
 	QSaveFile docsFile;
 
-	QTimer time;
-
 	MessageHandler messageHandler;
 
 	SocketBuffer socketBuffer;

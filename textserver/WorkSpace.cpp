@@ -140,7 +140,6 @@ void WorkSpace::documentSave()
 			fails = 0;	// to avoid circular calling
 			// move workspace clients to tcpserver clients
 			for (QSharedPointer<Client> client : editors.values()) {
-				//TODO: need to send to client something??
 				clientQuit(client->getSocket());
 			}
 		}
