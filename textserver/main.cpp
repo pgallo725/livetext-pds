@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
 	}
 	catch (ServerStartException& e) 
 	{
-		std::cerr << '\n' << e.what() << "\ntextserver unable to start ... please check connection" << std::endl;
+		std::cerr << '\n' << e.what() << "\ntextserver unable to start ... " << std::endl;
+		return EXIT_FAILURE;
 	}
 	catch (FileException &fe)
 	{
