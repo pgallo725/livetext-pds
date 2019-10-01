@@ -218,10 +218,11 @@ int Document::insert(Symbol& s)
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
 		{
-			if (s.getBlockId())
+			if (!s.getBlockId())
 			{
 				// Create a new TextBlock with locally-generated ID (symbol received from Qt editor)
 				TextBlock block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+				s.setBlock(block.getId());
 
 				// Insert the new block in the document
 				_blocks.insert(block.getId(), block);
