@@ -65,7 +65,7 @@ signals:
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
 	void generateExtraSelection();
-	void blockFormatChanged(qint32 userId, int position, QTextBlockFormat fmt);
+	void blockFormatChanged(qint32 userId, int start, int end, QTextBlockFormat fmt);
 
 private slots:
 	void fileOpen();

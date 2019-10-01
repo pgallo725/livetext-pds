@@ -90,15 +90,18 @@ void DocumentEditor::generateExtraSelection()
 }
 
 //Block format
-void DocumentEditor::changeBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
+void DocumentEditor::changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt)
 {
-	QPair<int, int> blockId = _document.getBlockAt(position);
-	_document.formatBlock(blockId, fmt);
-
-	emit blockFormatChanged(blockId, fmt, userId);
+	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
+	
+	
+	foreach(TextBlockID textBlock, blocks) {
+		_document.formatBlock(textBlock, fmt);
+		emit blockFormatChanged(textBlock, fmt, userId);
+	}
 }
 
-void DocumentEditor::applyBlockFormat(QPair<int, int> blockId, QTextBlockFormat fmt, qint32 userId)
+void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId)
 {
 	int position = _document.formatBlock(blockId, fmt);
 	_textedit->applyBlockFormat(userId, position, fmt);

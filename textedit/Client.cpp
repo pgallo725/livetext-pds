@@ -523,7 +523,7 @@ void Client::removeChar(QVector<int> position)
 	removeChar->send(socket);
 }
 
-void Client::blockModified(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
+void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
 {
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
 	blockEdit->send(socket);

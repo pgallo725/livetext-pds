@@ -12,7 +12,7 @@
 
 #include <MessageFactory.h>
 #include "ServerException.h"
-#include <SharedException.h>
+#include "SharedException.h"
 
 #define INDEX_FILENAME "./Documents/documents.dat"
 #define USERS_FILENAME "users.dat"
@@ -523,7 +523,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	try {
 		w = createWorkspace(doc, client);
 	}
-	catch (DocumentException& de) {
+	catch (DocumentException & de) {
 		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
 	}
 	
@@ -593,7 +593,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 			workspaces.find(docUri).value() :
 			createWorkspace(doc, client);
 	}
-	catch (DocumentException& de)
+	catch (DocumentException & de)
 	{
 		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
 	}
