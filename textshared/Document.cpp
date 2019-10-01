@@ -141,7 +141,7 @@ void Document::load()
 		// Load the document content (_text vector<Symbol>) from file
 		// using built-in Qt Vector and StringList deserialization
 		if (!docFileStream.atEnd())
-			docFileStream >> editors >> _text;
+			docFileStream >> editors >> _blockCounter >> _blocks /* >> _lists */ >> _text;
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
 		{	
@@ -177,7 +177,7 @@ void Document::save()
 
 		// Write the the current document content to file
 		// using built-in Qt Vector and StringList serialization
-		docFileStream << editors << _text;
+		docFileStream << editors << _blockCounter << _blocks /* << _lists */ << _text;
 
 		if (docFileStream.status() == QDataStream::Status::WriteFailed)
 		{
