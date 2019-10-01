@@ -126,7 +126,9 @@ private:
 	//Users
 	QMap<qint32, Presence*> onlineUsers;
 	
-	
+	//Current cursor position
+	int _currentCursorPosition;
+
 	//Logged user
 	User* _user;
 

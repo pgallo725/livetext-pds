@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>831</width>
-    <height>524</height>
+    <height>563</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -64,7 +64,7 @@
            <enum>QTabWidget::West</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -153,6 +153,22 @@
              </layout>
             </item>
             <item>
+             <spacer name="verticalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QCheckBox" name="checkBox_saveCredential">
               <property name="text">
                <string>Save this settings as default</string>
@@ -204,6 +220,12 @@
               </property>
               <item>
                <widget class="QPushButton" name="pushButton_register">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>75</width>
@@ -365,8 +387,7 @@ create your account</string>
               <item row="0" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="text">
-                 <string>Profile icon
-(optional)</string>
+                 <string>Profile icon</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
@@ -376,7 +397,7 @@ create your account</string>
               <item row="1" column="0">
                <widget class="QLabel" name="label_2">
                 <property name="text">
-                 <string>Username</string>
+                 <string>Username*</string>
                 </property>
                </widget>
               </item>
@@ -390,7 +411,7 @@ create your account</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>350</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -399,8 +420,7 @@ create your account</string>
               <item row="2" column="0">
                <widget class="QLabel" name="label_5">
                 <property name="text">
-                 <string>Nickname
-(optional)</string>
+                 <string>Nickname</string>
                 </property>
                </widget>
               </item>
@@ -414,7 +434,7 @@ create your account</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>350</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -423,7 +443,7 @@ create your account</string>
               <item row="3" column="0">
                <widget class="QLabel" name="label_6">
                 <property name="text">
-                 <string>Password</string>
+                 <string>Password*</string>
                 </property>
                </widget>
               </item>
@@ -437,7 +457,7 @@ create your account</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>350</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -450,7 +470,7 @@ create your account</string>
                <widget class="QLabel" name="label_11">
                 <property name="text">
                  <string>Confirm
-password</string>
+password*</string>
                 </property>
                </widget>
               </item>
@@ -464,7 +484,7 @@ password</string>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>350</width>
+                  <width>16777215</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -493,6 +513,19 @@ password</string>
                </layout>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>* = Required field</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_3">
@@ -544,7 +577,7 @@ password</string>
             <item>
              <widget class="QLabel" name="label_logo">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -634,14 +667,14 @@ a.a 2018/2019</string>
           <item>
            <widget class="QGroupBox" name="groupBox_5">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>300</width>
               <height>0</height>
              </size>
             </property>

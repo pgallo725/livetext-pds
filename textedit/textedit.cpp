@@ -131,6 +131,8 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
+
+	_currentCursorPosition = -1;
 }
 
 /*
@@ -657,13 +659,12 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
+	
+	_currentCursorPosition = -1;
 
 	emit generateExtraSelection();
 
-	//emit newCursorPosition(textEdit->textCursor().position());
-
-	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
-	// even if the user is not moving his cursor
+	
 }
 
 //Remove presence in document
@@ -1364,5 +1365,9 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::timerEvent(QTimerEvent* event)
 {
-	emit newCursorPosition(textEdit->textCursor().position());
+	//if (textEdit->textCursor().position() != _currentCursorPosition) {
+		_currentCursorPosition = textEdit->textCursor().position();
+		emit newCursorPosition(textEdit->textCursor().position());
+	//}
+		
 }

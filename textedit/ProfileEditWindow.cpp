@@ -73,7 +73,7 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 {
 	//Apre il dialogo per la scelta dell'icona utente
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp) ;; All files (*.*)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
 
 	//Setta nel form il path scelto
 	ui->lineEdit_UsrIconPath->setText(filename);
