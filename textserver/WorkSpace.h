@@ -13,6 +13,7 @@
 #include "SocketBuffer.h"
 
 #define DOCUMENT_SAVE_TIMEOUT 5000	/* ms */
+#define DOCUMENT_MAX_FAILS 5		/* #  */
 
 class WorkSpace : public QObject
 {
@@ -31,6 +32,8 @@ private:
 	MessageHandler messageHandler;
 
 	SocketBuffer socketBuffer;
+
+	quint16 fails;
 
 public:
 
