@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'newfilewindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -11,7 +11,6 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHBoxLayout>
@@ -30,7 +29,6 @@ public:
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_fileName;
-    QComboBox *comboBox_fileType;
     QHBoxLayout *horizontalLayout_2;
     QSpacerItem *horizontalSpacer;
     QLabel *label_incorrectFilename;
@@ -72,14 +70,9 @@ public:
         lineEdit_fileName->setObjectName(QString::fromUtf8("lineEdit_fileName"));
         lineEdit_fileName->setMinimumSize(QSize(0, 27));
         lineEdit_fileName->setFont(font1);
+        lineEdit_fileName->setMaxLength(50);
 
         horizontalLayout->addWidget(lineEdit_fileName);
-
-        comboBox_fileType = new QComboBox(NewFileWindow);
-        comboBox_fileType->setObjectName(QString::fromUtf8("comboBox_fileType"));
-        comboBox_fileType->setMinimumSize(QSize(65, 27));
-
-        horizontalLayout->addWidget(comboBox_fileType);
 
 
         verticalLayout->addLayout(horizontalLayout);
@@ -127,9 +120,9 @@ public:
 
     void retranslateUi(QDialog *NewFileWindow)
     {
-        NewFileWindow->setWindowTitle(QApplication::translate("NewFileWindow", "New File", nullptr));
-        label_2->setText(QApplication::translate("NewFileWindow", "Choose filename to create a new document", nullptr));
-        label->setText(QApplication::translate("NewFileWindow", "Filename", nullptr));
+        NewFileWindow->setWindowTitle(QCoreApplication::translate("NewFileWindow", "New File", nullptr));
+        label_2->setText(QCoreApplication::translate("NewFileWindow", "Choose filename to create a new document", nullptr));
+        label->setText(QCoreApplication::translate("NewFileWindow", "Filename", nullptr));
         label_incorrectFilename->setText(QString());
     } // retranslateUi
 

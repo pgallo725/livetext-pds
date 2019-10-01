@@ -103,11 +103,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Connect per lineEdit userIcon permette di aggiornare l'anteprima
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
-
-
-	//Connect con Client quando un utente sposta il cursore
-	// connect(client, &Client::cursorMoved, this, /*funzione*/);
-
 	//Setta indice a 0 (finestra di login) per lo Stacked Widget
 	ui->stackedWidget->setCurrentIndex(0);
 
@@ -331,7 +326,7 @@ void LandingPage::pushButtonBrowseClicked()
 {
 	//Apre il dialogo per la scelta dell'icona utente
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp) ;; All files (*.*)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
 
 	//Setta nel form il path scelto
 	ui->lineEdit_UsrIconPath->setText(filename);
@@ -488,7 +483,7 @@ void LandingPage::startLoadingAnimation(QString text)
 	loading->setText(text);
 	QFont font = loading->font();
 	font.setPointSize(25);
-	
+
 	loading->setAlignment(Qt::AlignCenter);
 
 	loading->setFont(font);
