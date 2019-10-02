@@ -18,7 +18,7 @@ private:
 	QString m_nickname;
 	QByteArray m_passwd;		// hashed
 	QByteArray m_salt;			// randomly generated
-	QImage m_icon;			// nullable, check with QImage::isNull()
+	QImage m_icon;				// nullable, check with QImage::isNull()
 	QList<URI> m_documents;
 
 	static const QString saltCharacters;

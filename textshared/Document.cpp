@@ -384,10 +384,17 @@ void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
 	s.setBlock(b.getId());
 
-	if (s._fPos < b.begin())
-		b.setBegin(s._fPos);		// update block begin
-	else if (s._fPos > b.end())
-		b.setEnd(s._fPos);			// update block end
+	if (b.isEmpty())
+	{
+		b.setBegin(s._fPos);
+		b.setEnd(s._fPos);
+	}
+	else if (s._fPos < b.begin()) {
+		b.setBegin(s._fPos);		 // update block begin
+	}
+	else if (s._fPos > b.end()) {
+		b.setEnd(s._fPos);			 // update block end
+	}
 }
 
 void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
