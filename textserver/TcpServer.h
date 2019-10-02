@@ -4,8 +4,6 @@
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslConfiguration>
-#include <QString>
-#include <QTimer>
 #include <QSaveFile>
 
 #include <User.h>
@@ -16,10 +14,6 @@
 #include "MessageHandler.h"
 #include "SocketBuffer.h"
 
-#define CONNECT_TIMEOUT 15000		/* ms */
-#define USERS_SAVE_TIMEOUT 10000	/* ms */
-
-Q_DECLARE_METATYPE(qintptr);
 
 
 class TcpServer : public QTcpServer
@@ -45,6 +39,8 @@ private:
 	SocketBuffer socketBuffer;
 
 	URI generateURI(QString authorName, QString docName) const;
+	bool validateURI(URI uri) const;
+
 	void TcpServer::saveDocIndex();
 
 public:
@@ -88,4 +84,5 @@ public slots:
 signals: void newSocket(qint64 handle);
 signals: void clientToWorkspace(QSharedPointer<Client> client);
 signals: void sendAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg);
+
 };

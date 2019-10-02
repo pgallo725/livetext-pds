@@ -18,22 +18,22 @@ private:
 public:
 
 	Client(QSslSocket* s);
-	Client() {};
+
 	~Client();
 
 	void login(User* user);
 	void logout();
+	bool isLogged();
 
 	bool authentication(QByteArray token);
 	QByteArray challenge(User* user);
-	bool isLogged();
 
 	/* getters */
 	User* getUser();
 	int getUserId();
 	QString getUsername();
-	qintptr getSocketDescriptor();
 	QSslSocket* getSocket();
+	qintptr getSocketDescriptor();
 
 };
 

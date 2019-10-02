@@ -38,7 +38,6 @@ public:
 };
 
 
-
 class TextBlockID
 {
 	/* Operators for QDataStream serialization and deserialization */

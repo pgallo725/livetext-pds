@@ -6,14 +6,22 @@
 #include "ServerException.h"
 #include <SharedException.h>
 
-WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
-	: doc(d), messageHandler(this), fails(0)
-{
-	doc->load();	// Load the document contents
 
+WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
+	: doc(d), messageHandler(this), nFails(0)
+{
+	qDebug() << endl << ">> Loading document" << doc->getURI().toString();
+
+	// Load the document contents
+	doc->load();
+
+	qDebug() << ">> (LOAD COMPLETED)";
+
+	// Start the auto-save timer
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
 	timer.start(DOCUMENT_SAVE_TIMEOUT);
 
+	// Instantiate the Workspace thread and start it
 	workThread = QSharedPointer<QThread>(new QThread(parent));
 	connect(workThread.get(), &QThread::finished, workThread.get(), &QThread::deleteLater);
 	this->moveToThread(workThread.get());
@@ -26,14 +34,19 @@ WorkSpace::~WorkSpace()
 	timer.stop();			// Stop timer which is periodically saving the doc
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
+
+	qDebug() << ">> Saving and unloading document" << doc->getURI().toString();
+
 	doc->save();			// Saving changes to the document before closing the workspace
 	doc->unload();			// Unload the document contents from memory until it gets re-opened
+
+	qDebug() << ">> (COMPLETED)" << endl;
 }
 
 
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
-	/* get the active socket from the Client object */
+	/* Get the active socket from the Client object */
 	QSslSocket* socket = client->getSocket();
 	socket->setParent(this);
 
@@ -58,6 +71,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 }
 
 
+// Read an incoming message on the workspace socket and process it
 void WorkSpace::readMessage()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
@@ -68,11 +82,13 @@ void WorkSpace::readMessage()
 		streamIn >> socketBuffer;
 	}
 
-	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));	// Read all the available message data from the socket
+	// Read all the available message data from the socket
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
 
 	socketBuffer.append(dataBuffer);
 
-	if (socketBuffer.bufferReadyRead()) {
+	if (socketBuffer.bufferReadyRead()) 
+	{
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
 		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
@@ -86,6 +102,7 @@ void WorkSpace::readMessage()
 		}
 		else
 		{
+			qDebug() << ">> (ERROR) Received unexpected message type: " << mType;
 			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
 		}
@@ -93,13 +110,12 @@ void WorkSpace::readMessage()
 }
 
 
-// Send the specified message to all connected clients except the one from which the message was received
+// Send the specified message to all clients except the one from which it was received
 void WorkSpace::dispatchMessage(MessageCapsule message, QSslSocket* sender)
 {
 	for (auto target = editors.keyBegin(); target != editors.keyEnd(); ++target)
 	{
-		if (*target != sender)
-		{
+		if (*target != sender) {
 			message->send(*target);
 		}
 	}
@@ -115,10 +131,10 @@ void WorkSpace::clientDisconnection()
 	editors.remove(socket);
 	socket->close();
 	socket->deleteLater();
-	qDebug() << " - client '" << c->getUsername() << "' disconnected";
+	qDebug() << ">> Connection from client" << c->getUsername() << "was closed abruptly";
 	
-	// make this user avaiable to be logged again	
-	emit restoreUserAvaiable(c->getUsername());
+	// Make this user avaiable to be logged again	
+	emit userDisconnected(c->getUsername());
 
 	// Send to other clients that this client is disconnected
 	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
@@ -129,21 +145,32 @@ void WorkSpace::clientDisconnection()
 }
 
 
+void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
+{
+	qDebug() << ">> (ERROR) Socket error: " << socketError;
+}
+
+
 void WorkSpace::documentSave()
 {
 	try
 	{
+		// Save the document's contents to file
+		qDebug() << ">> Saving document" << doc->getURI().toString();
 		doc->save();
+
+		qDebug() << ">> (SAVE COMPLETED)";
+		nFails = 0;
 	}
-	catch (DocumentException& de) {
-		if (fails >= DOCUMENT_MAX_FAILS) {
-			fails = 0;	// to avoid circular calling
-			// move workspace clients to tcpserver clients
+	catch (DocumentException& de) 
+	{
+		if (nFails >= DOCUMENT_MAX_FAILS) {
+			// Move Workspace clients back to TcpServer
 			for (QSharedPointer<Client> client : editors.values()) {
 				clientQuit(client->getSocket());
 			}
 		}
-		fails++;
+		nFails++;
 	}
 }
 
@@ -163,15 +190,16 @@ void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)
 }
 
 
-/* Update user's fields and return response message for the client */
-void WorkSpace::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
+/* Forwards to the main TcpServer the user request for an account update */
+void WorkSpace::handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();
 
-	emit sendAccountUpdate(client, nickname, icon, password);
+	emit requestAccountUpdate(client, nickname, icon, password);
 }
 
-void WorkSpace::receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsule msg)
+/* Receives the TcpServer response to the account update message and sends it to the clients */
+void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg)
 {
 	QSslSocket* clientSocket = client->getSocket();
 
@@ -194,7 +222,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug() << " - client " << client->getUsername() << " closed the document";
+	qDebug() << ">> Client" << client->getUsername() << "closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
@@ -217,10 +245,3 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
 }
-
-
-void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
-{
-	qDebug() << "Socket error: " << socketError << endl;
-}
-

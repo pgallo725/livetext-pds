@@ -6,7 +6,6 @@
 #include <QFileInfo>
 #include <QSaveFile>
 
-#include <iostream>
 
 #define DOCUMENTS_DIRNAME "./Documents/"
 #define URI_FIELD_SEPARATOR '_'
@@ -141,8 +140,6 @@ void Document::load()
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nLoading document \"" << uri.toStdString() << "\"... ";
-
 		// Load the document content (_text vector<Symbol>) from file
 		// using built-in Qt Vector and StringList deserialization
 		if (!docFileStream.atEnd())
@@ -154,7 +151,6 @@ void Document::load()
 		}
 
 		file.close();
-		std::cout << "done" << std::endl;
 	}
 	else
 	{
@@ -179,8 +175,6 @@ void Document::save()
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nSaving document \"" << uri.toStdString() << "\"... ";
-
 		// Write the the current document content to file
 		// using built-in Qt Vector and StringList serialization
 		docFileStream << editors << _blockCounter << _blocks /* << _lists */ << _text;
@@ -193,7 +187,6 @@ void Document::save()
 		}
 
 		file.commit();
-		std::cout << "done" << std::endl;
 	}
 	else
 	{

@@ -17,7 +17,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 {
 	// Connecting all signals to Workspace slots
 
-	connect(this, &MessageHandler::accountUpdate, w, &WorkSpace::updateAccount, Qt::DirectConnection);
+	connect(this, &MessageHandler::accountUpdate, w, &WorkSpace::handleAccountUpdate, Qt::DirectConnection);
 
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);

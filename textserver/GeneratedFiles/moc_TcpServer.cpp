@@ -278,13 +278,6 @@ void TcpServer::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
-        case 21:
-            switch (*reinterpret_cast<int*>(_a[1])) {
-            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
-            case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< qintptr >(); break;
-            }
-            break;
         case 22:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;

@@ -8,6 +8,7 @@
 #include <QHostAddress>
 #include <QDateTime>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QDir>
 
 #include <MessageFactory.h>
@@ -16,7 +17,6 @@
 
 #define INDEX_FILENAME "./Documents/documents.dat"
 #define USERS_FILENAME "users.dat"
-#define TMP_USERS_FILENAME "users.tmp"
 
 
 /* Server costructor */
@@ -46,7 +46,7 @@ TcpServer::TcpServer(QObject* parent)
 	if (!this->isListening())
 	{
 		qDebug() << "Server could not start";
-		throw ServerStartException("Server could not start");
+		throw StartupException("Server could not start");
 	}
 	else
 	{
@@ -97,10 +97,10 @@ TcpServer::~TcpServer()
 void TcpServer::initialize()
 {
 	if (!QFileInfo(QFile("server.key")).exists()) {
-		throw ServerStartException("Cannot find 'server.key' file");
+		throw StartupException("Cannot find 'server.key' file");
 	}
 	if (!QFileInfo(QFile("server.pem")).exists()) {
-		throw ServerStartException("Cannot find 'server.pem' file");
+		throw StartupException("Cannot find 'server.pem' file");
 	}
 	
 	// Open the file and read the users database
@@ -134,7 +134,7 @@ void TcpServer::initialize()
 
 	if (!QDir("Documents").exists()) {
 		if (!QDir().mkdir("Documents")) {
-			throw ServerStartException("Cannot create 'Documents' folder");
+			throw StartupException("Cannot create 'Documents' folder");
 		}
 	}
 
@@ -157,7 +157,7 @@ void TcpServer::initialize()
 			{
 				throw FileLoadException(INDEX_FILENAME);
 			}
-			if (!docURI.isEmpty())
+			if (!docURI.isEmpty() && validateURI(docURI))
 			{
 				documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 			}
@@ -194,6 +194,19 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 	}
 
 	return URI(str);
+}
+
+/* Verifies if an URI satisfies all format constraints to be considered valid */
+bool TcpServer::validateURI(URI uri) const
+{
+	QRegularExpression uriFormat("^[^_]+_[^_]+_[a-zA-Z0-9]{12}$");
+
+	// Check if the candidate URI has the correct format
+	if (!uriFormat.match(uri.toString()).hasMatch())
+		return false;
+
+	// Check the correctness of the trailing hash sequence
+	return uri == generateURI(uri.getAuthorName(), uri.getDocumentName());
 }
 
 /* Save users list on persistent storage */
@@ -443,7 +456,7 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password)
 {
 	WorkSpace* w = dynamic_cast<WorkSpace*>(sender());
-	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 	if (!client->isLogged())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
 	else
@@ -459,7 +472,7 @@ void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nick
 		}
 		emit sendAccountUpdate(client, msg);
 	}
-	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 }
 
 /* Delete user from UnAvaiable list when they logout or close connection */
@@ -506,8 +519,8 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
 	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
-	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
-	connect(w.get(), &WorkSpace::sendAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
+	connect(w.get(), &WorkSpace::userDisconnected, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
+	connect(w.get(), &WorkSpace::requestAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
 	
 	return w;
 }
