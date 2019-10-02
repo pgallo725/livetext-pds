@@ -83,7 +83,7 @@ void DocumentEditor::generateExtraSelection()
 	selectionDelimiters.first = 0;
 	selectionDelimiters.second = 0;
 
-	for (int i = 0; i < document.length(); i++) {
+	for (int i = 0; i < document.length() - 1; i++) {
 		if (document[i].getAuthorId() != userId) {
 			_textedit->setExtraSelections(userId, selectionDelimiters);
 

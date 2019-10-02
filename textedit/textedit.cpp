@@ -77,6 +77,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateUsersSelections);
 
+
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
 
@@ -642,9 +643,10 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	// Initialize random sequence
-	qsrand(QDateTime::currentMSecsSinceEpoch());
+	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
-	int randomNumber = 7 + (qrand() % 11);
+	//Test with user ID for more separate colors
+	int randomNumber = 7 + (userId*3) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
@@ -1161,6 +1163,7 @@ void TextEdit::colorChanged(const QColor& c)
 //Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
+
 
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
