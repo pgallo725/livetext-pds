@@ -40,8 +40,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)SocketBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)TextBlock.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextBlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
@@ -83,8 +87,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -165,6 +165,7 @@ void Document::unload()
 {
 	// Unload the Document object contents from memory
 	editors.clear();
+	_blocks.clear();
 	_text.clear();
 	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
 }
@@ -351,14 +352,14 @@ TextBlock& Document::getBlock(TextBlockID id)
 	return _blocks[id];
 }
 
-TextBlockID Document::getBlockAt(int index)
-{
-	return _text[index].getBlockId();
-}
-
 int Document::getBlockPosition(TextBlockID blockId)
 {
 	return binarySearch(_blocks[blockId].begin());
+}
+
+TextBlockID Document::getBlockAt(int index)
+{
+	return _text[index].getBlockId();
 }
 
 QList<TextBlockID> Document::getBlocksBetween(int start, int end)
@@ -366,14 +367,13 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	QList<TextBlockID> result;
 
 	int n = start;
-	while (n < _text.length() && n <= end)
+	while (n < _text.length())
 	{
 		TextBlock& block = _blocks[getBlockAt(n)];		// Get the block and add it to the list of results
 		result.push_back(block.getId());
-		n = binarySearch(block.end());
-		if (n < 0)
-			break;
-		n += 1;		// Skip to the beginning of the next block
+		n = binarySearch(block.end()) + 1;		// Skip to the beginning of the next block
+		if (n <= 0 || n >= end)
+			break;	
 	}
 
 	return result;
@@ -382,10 +382,6 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
-	// Check validity of the symbol position inside the block range
-	//if (s._fPos >= b.begin() && s._fPos <= b.end())
-		//return;
-
 	s.setBlock(b.getId());
 
 	if (s._fPos < b.begin())
@@ -396,10 +392,6 @@ void Document::addCharToBlock(Symbol& s, TextBlock& b)
 
 void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 {
-	// Check validity of the symbol position inside the block range
-	//if (s._fPos < b.begin() || s._fPos > b.end())
-		//return;
-
 	s.setBlock(nullptr);
 
 	if (s._fPos == b.begin() && s._fPos == b.end())

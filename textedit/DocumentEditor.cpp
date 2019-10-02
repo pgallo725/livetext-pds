@@ -16,7 +16,7 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 void DocumentEditor::openDocument()
 {
 	QVector<Symbol> document = _document.getContent();
-	QList<TextBlockID> blocks = _document.getBlocksBetween(0, _document.length() - 1);
+	QList<TextBlockID> blocks = _document.getBlocksBetween(0, _document.length());
 
 	for (int i = 0; i < document.length() - 1; i++){
 		_textedit->newChar(document[i].getChar(), document[i].getFormat(), i);

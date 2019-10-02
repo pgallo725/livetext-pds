@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Application generated files
+textedit/userLogin.dat
+textserver/users.dat
+textserver/Documents/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -338,4 +343,3 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/textserver/GeneratedFiles/moc_TcpServer.cpp

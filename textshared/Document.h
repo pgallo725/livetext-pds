@@ -95,8 +95,8 @@ public:
 	QString toString();				// returns a printable representation of the document's contents
 
 	TextBlock& getBlock(TextBlockID id);
-	TextBlockID getBlockAt(int index);
 	int getBlockPosition(TextBlockID blockId);
+	TextBlockID getBlockAt(int index);
 	QList<TextBlockID> getBlocksBetween(int start, int end);
 
 	void insertNewEditor(QString editor);
