@@ -77,6 +77,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateUsersSelections);
 
+
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
 
@@ -132,7 +133,11 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
 
+	//Setup cursor position
 	_currentCursorPosition = -1;
+
+	//Setup extra cursor
+	_extraCursor = new QTextCursor(textEdit->document());
 }
 
 /*
@@ -500,19 +505,14 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	if (onlineUsers.contains(userId)) {
-		Presence* p = onlineUsers.find(userId).value();
+	_extraCursor->setPosition(position);
+	_extraCursor->setBlockFormat(fmt);
 
-		QTextCursor* userCursor = p->cursor();
+	alignmentChanged(fmt.alignment());
 
-		userCursor->setPosition(position);
-		userCursor->setBlockFormat(fmt);
+	//Setta nel combobox l'heading level corretto
+	comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 
-		alignmentChanged(fmt.alignment());
-
-		//Setta nel combobox l'heading level corretto
-		comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
-	}
 }
 
 void TextEdit::forceClosingDocumentError()
@@ -643,9 +643,10 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	// Initialize random sequence
-	qsrand(QDateTime::currentMSecsSinceEpoch());
+	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
-	int randomNumber = 7 + (qrand() % 11);
+	//Test with user ID for more separate colors
+	int randomNumber = 7 + (userId*3) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
@@ -659,12 +660,12 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
-	
+
 	_currentCursorPosition = -1;
 
 	updateUsersSelections();
 
-	
+
 }
 
 //Remove presence in document
@@ -1163,6 +1164,7 @@ void TextEdit::colorChanged(const QColor& c)
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 
+
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = 0; i < charsRemoved; ++i) {
@@ -1366,8 +1368,8 @@ void TextEdit::updateUsersSelections()
 void TextEdit::timerEvent(QTimerEvent* event)
 {
 	//if (textEdit->textCursor().position() != _currentCursorPosition) {
-		_currentCursorPosition = textEdit->textCursor().position();
-		emit newCursorPosition(textEdit->textCursor().position());
+	_currentCursorPosition = textEdit->textCursor().position();
+	emit newCursorPosition(textEdit->textCursor().position());
 	//}
-		
+
 }
