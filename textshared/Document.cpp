@@ -3,6 +3,7 @@
 
 #include <QDataStream>
 #include <QFile>
+#include <QFileInfo>
 #include <QSaveFile>
 
 #include <iostream>
@@ -198,6 +199,11 @@ void Document::save()
 	{
 		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
+}
+
+bool Document::exist()
+{
+	return QFileInfo(QFile(DOCUMENTS_DIRNAME+uri.toString())).exists();
 }
 
 

@@ -45,7 +45,7 @@ private:
 	SocketBuffer socketBuffer;
 
 	URI generateURI(QString authorName, QString docName) const;
-	void TcpServer::addToIndex(QSharedPointer<Document> doc);
+	void TcpServer::saveDocIndex();
 
 public:
 

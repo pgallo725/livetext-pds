@@ -473,7 +473,7 @@ void TcpServer::restoreUserAvaiable(QString username)
 /****************************** DOCUMENT METHODS ******************************/
 
 
-void TcpServer::addToIndex(QSharedPointer<Document> doc)
+void TcpServer::saveDocIndex()
 {
 	if (docsFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
@@ -542,7 +542,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 
 	try {
 		/* add the document to the index and save the file */
-		addToIndex(doc);
+		saveDocIndex();
 		saveUsers();
 		docsFile.commit();
 	}
@@ -597,11 +597,30 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
 	QSharedPointer<WorkSpace> w;
+
 	try
 	{
+		// check if the documents exist
+		if (!doc->exist()) {
+			// if the doc doesn't exist docUri is removed from documents map and from user documents
+			documents.remove(docUri);
+			client->getUser()->removeDocument(docUri);
+
+			saveDocIndex();
+			saveUsers();
+			docsFile.commit();
+
+			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		}
+
 		w = workspaces.contains(docUri) ?
 			workspaces.find(docUri).value() :
 			createWorkspace(doc, client);
+	}
+	catch (FileException & fe) {
+		docsFile.cancelWriting();
+		docsFile.commit();
+		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
 	}
 	catch (DocumentException & de)
 	{

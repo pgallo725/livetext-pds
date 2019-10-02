@@ -70,6 +70,7 @@ public:
 	void load();
 	void unload();
 	void save();
+	bool exist();
 
 	Symbol& operator[](QVector<qint32> fPos);
 
