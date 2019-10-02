@@ -132,7 +132,11 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
 
+	//Setup cursor position
 	_currentCursorPosition = -1;
+
+	//Setup extra cursor
+	_extraCursor = new QTextCursor(textEdit->document());
 }
 
 /*
@@ -500,19 +504,14 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	if (onlineUsers.contains(userId)) {
-		Presence* p = onlineUsers.find(userId).value();
+	_extraCursor->setPosition(position);
+	_extraCursor->setBlockFormat(fmt);
 
-		QTextCursor* userCursor = p->cursor();
+	alignmentChanged(fmt.alignment());
 
-		userCursor->setPosition(position);
-		userCursor->setBlockFormat(fmt);
+	//Setta nel combobox l'heading level corretto
+	comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 
-		alignmentChanged(fmt.alignment());
-
-		//Setta nel combobox l'heading level corretto
-		comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
-	}
 }
 
 void TextEdit::forceClosingDocumentError()
@@ -659,12 +658,12 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
-	
+
 	_currentCursorPosition = -1;
 
 	updateUsersSelections();
 
-	
+
 }
 
 //Remove presence in document
@@ -1366,8 +1365,8 @@ void TextEdit::updateUsersSelections()
 void TextEdit::timerEvent(QTimerEvent* event)
 {
 	//if (textEdit->textCursor().position() != _currentCursorPosition) {
-		_currentCursorPosition = textEdit->textCursor().position();
-		emit newCursorPosition(textEdit->textCursor().position());
+	_currentCursorPosition = textEdit->textCursor().position();
+	emit newCursorPosition(textEdit->textCursor().position());
 	//}
-		
+
 }

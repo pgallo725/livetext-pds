@@ -128,6 +128,7 @@ private:
 	
 	//Current cursor position
 	int _currentCursorPosition;
+	QTextCursor* _extraCursor;
 
 	//Logged user
 	User* _user;
