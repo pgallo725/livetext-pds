@@ -610,7 +610,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 			saveUsers();
 			docsFile.commit();
 
-			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+			return MessageFactory::DocumentError("This document doesn't exist");
 		}
 
 		w = workspaces.contains(docUri) ?
