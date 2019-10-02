@@ -238,18 +238,19 @@ int Document::insert(Symbol& s)
 
 			TextBlock& newBlock = _blocks[s.getBlockId()];
 			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
+			Symbol newSymbol(s);
 
 			// The paragraph delimiter belongs to the block on which it is inserted
-			addCharToBlock(s, _blocks[prevBlock]);
-			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+			addCharToBlock(newSymbol, _blocks[prevBlock]);
+			_text.insert(_text.begin() + insertionIndex, newSymbol);	// (insert the symbol in the vector)
 
 			// And any following symbol of that paragraph is assigned to the new block
-			for (int i = insertionIndex + 1;
-				i < _text.length() && _text[i].getBlockId() == prevBlock;
-				i++)
+			for (int i = insertionIndex + 1; i < _text.length(); i++)
 			{
 				removeCharFromBlock(_text[i], prevBlock);
 				addCharToBlock(_text[i], newBlock);
+				if (_text[i].getChar() == QChar::ParagraphSeparator)	// stop at the first paragraph separator
+					break;
 			}
 		}
 		else
