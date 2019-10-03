@@ -58,12 +58,14 @@ void Client::ready() {
 
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
+	emit abortConnection();
+	socket->abort();
 }
 
 void Client::errorHandler(QAbstractSocket::SocketError socketError) {
 
 	qDebug() << "Socket error raised: " << socketError;
-	socket->close();
+	socket->abort();
 }
 
 void Client::readBuffer() {
@@ -372,7 +374,6 @@ void Client::Logout() {
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->send(socket);
 
-	
 }
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
