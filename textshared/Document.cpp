@@ -237,6 +237,10 @@ int Document::insert(Symbol& s)
 
 			TextBlock& newBlock = _blocks[s.getBlockId()];
 			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
+
+			// The new block inherits the format from the previous one
+			newBlock.setFormat(prevBlock.getFormat());
+
 			Symbol newSymbol(s);
 
 			// The paragraph delimiter belongs to the block on which it is inserted
