@@ -48,6 +48,8 @@ ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(pare
 	//Set username
 	ui->label_username->setText(user->getUsername());
 	ui->lineEdit_editNick->setText(user->getNickname());
+
+	loading = new QLabel(this);
 }
 
 ProfileEditWindow::~ProfileEditWindow()
@@ -57,11 +59,13 @@ ProfileEditWindow::~ProfileEditWindow()
 
 void ProfileEditWindow::updateSuccessful()
 {
+	stopLoadingAnimation();
 	this->close();
 }
 
 void ProfileEditWindow::updateFailed(QString error)
 {
+	stopLoadingAnimation();
 	ui->label_incorrect_edit->setText(error);
 }
 
@@ -69,7 +73,7 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 {
 	//Apre il dialogo per la scelta dell'icona utente
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp) ;; All files (*.*)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
 
 	//Setta nel form il path scelto
 	ui->lineEdit_UsrIconPath->setText(filename);
@@ -123,6 +127,8 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 		}
 	}
 
+	startLoadingAnimation(tr("Updating profile..."));
+	QCoreApplication::processEvents();
 	emit(accountUpdate(nick, userIcon, newPassword));
 }
 
@@ -135,8 +141,8 @@ void ProfileEditWindow::centerAndResize() {
 	int height = availableSize.height();
 
 	//Proporzionamento
-	width *= 0.4;
-	height *= 0.5;
+	width *= 0.6;
+	height *= 0.7;
 
 	//Le dimensioni vengono fissate per rendere la finestra non resizable
 	setMaximumHeight(height);
@@ -149,4 +155,36 @@ void ProfileEditWindow::centerAndResize() {
 
 	//Crea il nuovo rettangolo su cui aprire la finestra
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
+}
+
+void ProfileEditWindow::startLoadingAnimation(QString text)
+{
+
+	//loading->setMovie(movie);
+	loading->setText(text);
+	QFont font = loading->font();
+	font.setPointSize(25);
+
+	loading->setAlignment(Qt::AlignCenter);
+
+	loading->setFont(font);
+
+	//Center and resize
+	loading->resize(QSize(512, 128));
+
+	loading->move(width() / 2 - 256, height() / 2 - 64);
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
+	loading->show();
+
+	//Disable main window until client->Connect(...)return the result of the connection
+	setEnabled(false);
+}
+
+void ProfileEditWindow::stopLoadingAnimation()
+{
+	QApplication::restoreOverrideCursor();
+	loading->close();
+	setEnabled(true);
 }

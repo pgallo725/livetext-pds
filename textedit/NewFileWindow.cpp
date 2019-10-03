@@ -7,6 +7,7 @@
 #include <QStyle>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QRegExpValidator>
 
 NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp), QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow) {
 	//Costruttore landing page
@@ -16,14 +17,13 @@ NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp)
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
 	centerAndResize();
-	
+
 	//Connect con i bottoni del dialog box
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewFileWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewFileWindow::rejectClicked);
 
-	//Inizializzo il comboBox
-	ui->comboBox_fileType->addItem("RTF");
-	ui->comboBox_fileType->addItem("TXT");
+	//Validator per non inserire lettere nei campi server/port
+	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
 }
 
 NewFileWindow::~NewFileWindow()
@@ -39,15 +39,12 @@ void NewFileWindow::incorrectOperation(QString error)
 void NewFileWindow::acceptClicked()
 {
 	QString name = ui->lineEdit_fileName->text();
-	QString extension = ui->comboBox_fileType->currentText();
 
 	if (name.isEmpty()) {
 		incorrectOperation(tr("Please insert a valid filename"));
 	}
 	else {
-		QString filename = name + "." + extension;
-
-		emit landingPage->newDocument(filename);
+		emit landingPage->newDocument(name);
 	}
 }
 

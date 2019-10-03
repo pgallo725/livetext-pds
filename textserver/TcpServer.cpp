@@ -8,14 +8,15 @@
 #include <QHostAddress>
 #include <QDateTime>
 #include <QRandomGenerator>
-#include <QMutexLocker>
+#include <QRegularExpression>
+#include <QDir>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
+#include "SharedException.h"
 
 #define INDEX_FILENAME "./Documents/documents.dat"
 #define USERS_FILENAME "users.dat"
-#define TMP_USERS_FILENAME "users.tmp"
 
 
 /* Server costructor */
@@ -45,7 +46,7 @@ TcpServer::TcpServer(QObject* parent)
 	if (!this->isListening())
 	{
 		qDebug() << "Server could not start";
-		throw ServerStartException("Server could not start");
+		throw StartupException("Server could not start");
 	}
 	else
 	{
@@ -89,18 +90,22 @@ TcpServer::TcpServer(QObject* parent)
 /* Destructor */
 TcpServer::~TcpServer()
 {
-	time.stop();
-	saveUsers();		// TODO: serve ancora? se si bisogna gestire le eccezioni?
-
 	qDebug() << "Server down";
 }
 
 /* Load users and documents */
 void TcpServer::initialize()
 {
+	if (!QFileInfo(QFile("server.key")).exists()) {
+		throw StartupException("Cannot find 'server.key' file");
+	}
+	if (!QFileInfo(QFile("server.pem")).exists()) {
+		throw StartupException("Cannot find 'server.pem' file");
+	}
+	
 	// Open the file and read the users database
 	QFile usersFile(USERS_FILENAME);
-	if (usersFile.open(QIODevice::ReadOnly))
+	if (usersFile.open(QIODevice::ReadWrite))
 	{
 		std::cout << "\nLoading users database... ";
 
@@ -110,9 +115,9 @@ void TcpServer::initialize()
 		// using built-in Qt Map deserialization
 		usersDbStream >> users;
 
-		if (usersDbStream.status() != QTextStream::Status::Ok)
+		if (usersDbStream.status() == QTextStream::ReadCorruptData)
 		{
-			// THROW: handle error or FileFormatException ?
+			throw FileLoadException(USERS_FILENAME);
 		}
 
 		usersFile.close();
@@ -121,15 +126,21 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		throw FileLoadException(USERS_FILENAME);
+		throw FileOpenException(USERS_FILENAME, QDir::currentPath().toStdString());
 	}
 
 	// Initialize the counter to assign user IDs
 	_userIdCounter = users.size();
 
+	if (!QDir("Documents").exists()) {
+		if (!QDir().mkdir("Documents")) {
+			throw StartupException("Cannot create 'Documents' folder");
+		}
+	}
+
 	// Read the documents' index file
 	QFile docsFile(INDEX_FILENAME);
-	if (docsFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	if (docsFile.open(QIODevice::ReadWrite| QIODevice::Text))
 	{
 		std::cout << "\nLoading documents index file... ";
 
@@ -142,13 +153,14 @@ void TcpServer::initialize()
 
 			docIndexStream >> docURI;
 
-			if (docIndexStream.status() != QTextStream::Status::Ok)
+			if (docIndexStream.status() == QTextStream::ReadCorruptData)
 			{
-				// THROW: handle error or FileFormatException ?
+				throw FileLoadException(INDEX_FILENAME);
 			}
-
-			// Create the actual Document object and store it in the server document map
-			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+			if (!docURI.isEmpty() && validateURI(docURI))
+			{
+				documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+			}
 		}
 
 		docsFile.close();
@@ -156,7 +168,7 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		throw FileLoadException(INDEX_FILENAME);
+		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
 	}
 
 	std::cout << "\nServer up" << std::endl;
@@ -184,6 +196,19 @@ URI TcpServer::generateURI(QString authorName, QString docName) const
 	return URI(str);
 }
 
+/* Verifies if an URI satisfies all format constraints to be considered valid */
+bool TcpServer::validateURI(URI uri) const
+{
+	QRegularExpression uriFormat("^[^_]+_[^_]+_[a-zA-Z0-9]{12}$");
+
+	// Check if the candidate URI has the correct format
+	if (!uriFormat.match(uri.toString()).hasMatch())
+		return false;
+
+	// Check the correctness of the trailing hash sequence
+	return uri == generateURI(uri.getAuthorName(), uri.getDocumentName());
+}
+
 /* Save users list on persistent storage */
 void TcpServer::saveUsers()
 {
@@ -204,13 +229,14 @@ void TcpServer::saveUsers()
 		{
 			usersFile.cancelWriting();
 			usersFile.commit();
-			throw FileWriteException(".", USERS_FILENAME);
+			throw FileWriteException(USERS_FILENAME, QDir::currentPath().toStdString());
 		}
+		usersFile.commit();
 		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		throw FileCreateException(".", USERS_FILENAME);
+		throw FileCreateException(USERS_FILENAME, QDir::currentPath().toStdString());
 	}
 }
 
@@ -357,26 +383,12 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	try {
 		saveUsers();
-		usersFile.commit();
-	}
-	catch (FileCreateException& fce) {
-		client->logout();
-		users.remove(username);
-		usersFile.cancelWriting();
-		usersFile.commit();
-		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
 	}
 	catch (FileException& fe) {
-		QFile file(TMP_USERS_FILENAME);
-		file.remove();
 		client->logout();
 		users.remove(username);
-		usersFile.cancelWriting();
-		usersFile.commit();
 		return MessageFactory::AccountError("Cannot create new account for internal problem, plese try later");
 	}
-	
-	
 	
 	return MessageFactory::AccountConfirmed(user);
 }
@@ -394,17 +406,8 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	
 	try {
 		saveUsers();
-		usersFile.commit();
 	}
-	catch (FileCreateException& fwe) {
-		usersFile.cancelWriting();
-		usersFile.commit();
-		client->getUser()->recoveryUser(recoveryUser);
-		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
-	}
-	catch (FileException& fe) {
-		usersFile.cancelWriting();
-		usersFile.commit();
+	catch (FileException & fe) {
 		client->getUser()->recoveryUser(recoveryUser);
 		return MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
 	}
@@ -453,7 +456,7 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password)
 {
 	WorkSpace* w = dynamic_cast<WorkSpace*>(sender());
-	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 	if (!client->isLogged())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
 	else
@@ -462,23 +465,14 @@ void TcpServer::receiveUpdateAccount(QSharedPointer<Client> client, QString nick
 		MessageCapsule msg = accountUpdate(client->getUser(), nickname, icon, password);
 		try {
 			saveUsers();
-			usersFile.commit();
-		}
-		catch (FileCreateException& fwe) {
-			usersFile.cancelWriting();
-			usersFile.commit();
-			client->getUser()->recoveryUser(recoveryUser);
-			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
 		}
 		catch (FileException& fe) {
-			usersFile.cancelWriting();
-			usersFile.commit();
 			client->getUser()->recoveryUser(recoveryUser);
-			emit MessageFactory::AccountError("Cannot update the account for internal problem, plese try later");
+			emit sendAccountUpdate(client, MessageFactory::AccountError("Cannot update the account for internal problem, plese try later"));
 		}
 		emit sendAccountUpdate(client, msg);
 	}
-	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::receiveUpdateAccount);
+	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 }
 
 /* Delete user from UnAvaiable list when they logout or close connection */
@@ -492,7 +486,7 @@ void TcpServer::restoreUserAvaiable(QString username)
 /****************************** DOCUMENT METHODS ******************************/
 
 
-void TcpServer::addToIndex(QSharedPointer<Document> doc)
+void TcpServer::saveDocIndex()
 {
 	if (docsFile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
@@ -505,12 +499,12 @@ void TcpServer::addToIndex(QSharedPointer<Document> doc)
 		{
 			docsFile.cancelWriting();
 			docsFile.commit();
-			throw FileWriteException(INDEX_FILENAME, INDEX_FILENAME);
+			throw FileWriteException(INDEX_FILENAME, QDir::currentPath().toStdString());
 		}
 	}
 	else
 	{
-		throw FileOpenException(INDEX_FILENAME, INDEX_FILENAME);
+		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
 	}
 }
 
@@ -525,8 +519,8 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 	/* workspace will notify when clients quit editing the document and when it becomes empty */
 	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
-	connect(w.get(), &WorkSpace::restoreUserAvaiable, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
-	connect(w.get(), &WorkSpace::sendAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
+	connect(w.get(), &WorkSpace::userDisconnected, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
+	connect(w.get(), &WorkSpace::requestAccountUpdate, this, &TcpServer::receiveUpdateAccount, Qt::QueuedConnection);
 	
 	return w;
 }
@@ -546,50 +540,33 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (documents.contains(docURI))
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
-	QSharedPointer<Document> doc(new Document(docURI));
-	QSharedPointer<WorkSpace> w = createWorkspace(doc, client);
+	QSharedPointer<Document> doc(new Document(docURI, client->getUserId()));
+	QSharedPointer<WorkSpace> w;
+
+	try {
+		w = createWorkspace(doc, client);
+	}
+	catch (DocumentException & de) {
+		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+	}
 	
 	/* add to newly created document to those owned by the user */
 	client->getUser()->addDocument(docURI);
 
 	try {
 		/* add the document to the index and save the file */
-		addToIndex(doc);
-		doc->save();
-		/* save users */
+		saveDocIndex();
 		saveUsers();
-
 		docsFile.commit();
-		usersFile.commit();
 	}
 	catch (FileOpenException& foe) {
 		client->getUser()->recoveryUser(recoveryUser);
 		documents.remove(doc->getURI());
 		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
 	}
-	catch (FileWriteException& fwe) {
-		if (fwe.getPath().find(TMP_USERS_FILENAME) == std::string::npos) {
-			usersFile.cancelWriting();
-			usersFile.commit();
-		}
+	catch (FileException& fe) {
 		docsFile.cancelWriting();
 		docsFile.commit();
-		client->getUser()->recoveryUser(recoveryUser);
-		documents.remove(doc->getURI());
-		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
-	}
-	catch (FileCreateException& fwe) {
-		docsFile.cancelWriting();
-		docsFile.commit();
-		client->getUser()->recoveryUser(recoveryUser);
-		documents.remove(doc->getURI());
-		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
-	}
-	catch (FileOverwriteException& foe) {
-		docsFile.cancelWriting();
-		docsFile.commit();
-		usersFile.cancelWriting();
-		usersFile.commit();
 		client->getUser()->recoveryUser(recoveryUser);
 		documents.remove(doc->getURI());
 		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
@@ -632,10 +609,36 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 		return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
 
 	QSharedPointer<Document> doc = documents.find(docUri).value();
+	QSharedPointer<WorkSpace> w;
 
-	QSharedPointer<WorkSpace> w = workspaces.contains(docUri) ?
-		workspaces.find(docUri).value() :
-		createWorkspace(doc, client);
+	try
+	{
+		// check if the documents exist
+		if (!doc->exist()) {
+			// if the doc doesn't exist docUri is removed from documents map and from user documents
+			documents.remove(docUri);
+			client->getUser()->removeDocument(docUri);
+
+			saveDocIndex();
+			saveUsers();
+			docsFile.commit();
+
+			return MessageFactory::DocumentError("This document doesn't exist");
+		}
+
+		w = workspaces.contains(docUri) ?
+			workspaces.find(docUri).value() :
+			createWorkspace(doc, client);
+	}
+	catch (FileException & fe) {
+		docsFile.cancelWriting();
+		docsFile.commit();
+		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+	}
+	catch (DocumentException & de)
+	{
+		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+	}
 
 	User* user = client->getUser();
 
@@ -644,19 +647,11 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 		user->addDocument(docUri);
 		try {
 			saveUsers();
-			usersFile.commit();
 		}
-		catch (FileCreateException& fwe) {
+		catch (FileException& fe) {
 			client->getUser()->recoveryUser(recoveryUser);
 			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
 		}
-		catch (FileOverwriteException& foe) {
-			usersFile.cancelWriting();
-			usersFile.commit();
-			client->getUser()->recoveryUser(recoveryUser);
-			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
-		}
-		
 	}
 	/* and add the new editor to the document's list of editors */
 	doc->insertNewEditor(user->getUsername());
@@ -701,7 +696,14 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 void TcpServer::deleteWorkspace(URI document)
 {
 	/* delete workspace and remove it from the map */
-	workspaces.remove(document);	
+	try {
+		workspaces.remove(document);
+	}
+	catch (DocumentException& de)
+	{
+		//TODO: who handle?
+	}
+		
 	qDebug() << "workspace (" << document.toString() << ") closed";
 }
 
@@ -740,7 +742,7 @@ void TcpServer::readMessage()
 		}
 		else
 		{
-			message = MessageFactory::Failure("Unknown message type : " + mType);
+			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
 		}
 	}

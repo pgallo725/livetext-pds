@@ -11,7 +11,6 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHBoxLayout>
@@ -30,7 +29,6 @@ public:
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_fileName;
-    QComboBox *comboBox_fileType;
     QHBoxLayout *horizontalLayout_2;
     QSpacerItem *horizontalSpacer;
     QLabel *label_incorrectFilename;
@@ -72,14 +70,9 @@ public:
         lineEdit_fileName->setObjectName(QString::fromUtf8("lineEdit_fileName"));
         lineEdit_fileName->setMinimumSize(QSize(0, 27));
         lineEdit_fileName->setFont(font1);
+        lineEdit_fileName->setMaxLength(50);
 
         horizontalLayout->addWidget(lineEdit_fileName);
-
-        comboBox_fileType = new QComboBox(NewFileWindow);
-        comboBox_fileType->setObjectName(QString::fromUtf8("comboBox_fileType"));
-        comboBox_fileType->setMinimumSize(QSize(65, 27));
-
-        horizontalLayout->addWidget(comboBox_fileType);
 
 
         verticalLayout->addLayout(horizontalLayout);

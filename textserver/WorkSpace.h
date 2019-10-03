@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QThread>
 #include <QTimer>
-#include <QMutex>
 #include <QSslSocket>
 
 #include <Document.h>
@@ -12,7 +11,9 @@
 #include "ServerException.h"
 #include "SocketBuffer.h"
 
-#define DOCUMENT_SAVE_TIMEOUT 5000	/* ms */
+#define DOCUMENT_SAVE_TIMEOUT 30000		/* ms */
+#define DOCUMENT_MAX_FAILS 3			/* #  */
+
 
 class WorkSpace : public QObject
 {
@@ -27,6 +28,7 @@ private:
 	QMap<QSslSocket*, QSharedPointer<Client>> editors;
 
 	QTimer timer;
+	quint16 nFails;
 
 	MessageHandler messageHandler;
 
@@ -34,32 +36,31 @@ private:
 
 public:
 
-	WorkSpace(QSharedPointer<Document> d, /*QMutex& m,*/ QObject* parent = 0);
+	WorkSpace(QSharedPointer<Document> d, QObject* parent = 0);
 	~WorkSpace();
 
 public slots:
 
 	void newClient(QSharedPointer<Client> client);
 	void clientDisconnection();
+	void clientQuit(QSslSocket* clientSocket);
+	void socketErr(QAbstractSocket::SocketError socketError);
+
 	void readMessage();
+	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 	
 	void documentSave();
 	void documentInsertSymbol(Symbol& symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
-	void documentEditBlock(QPair<qint32, qint32> blockId, QTextBlockFormat format);
+	void documentEditBlock(TextBlockID blockId, QTextBlockFormat format);
 
-	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
+	void handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
+	void answerAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg);
 
-	void updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
-	void receiveUpdateAccount(QSharedPointer<Client> client, MessageCapsule msg);
-
-	void clientQuit(QSslSocket* clientSocket);
-
-	void socketErr(QAbstractSocket::SocketError socketError);
-
-signals: void noEditors(URI documentURI);
+signals: void requestAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
 signals: void returnClient(QSharedPointer<Client> client);
-signals: void restoreUserAvaiable(QString username);
-signals: void sendAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
+signals: void userDisconnected(QString username);
+signals: void noEditors(URI documentURI);
+
 };
 

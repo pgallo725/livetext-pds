@@ -83,15 +83,8 @@
          <pointsize>10</pointsize>
         </font>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBox_fileType">
-       <property name="minimumSize">
-        <size>
-         <width>65</width>
-         <height>27</height>
-        </size>
+       <property name="maxLength">
+        <number>50</number>
        </property>
       </widget>
      </item>

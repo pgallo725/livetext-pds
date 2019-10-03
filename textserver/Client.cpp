@@ -17,24 +17,26 @@ Client::~Client()
 	// NOTHING, activeUser is owned by TcpServer and therefore it does NOT need to be destroyed
 }
 
-int Client::getUserId()
+QSslSocket* Client::getSocket()
 {
-	return activeUser->getUserId();
-}
+	return socket;
 
+}
 qintptr Client::getSocketDescriptor()
 {
 	return socket->socketDescriptor();
 }
 
-QSslSocket* Client::getSocket()
-{
-	return socket;
-}
-
 User* Client::getUser()
 {
 	return activeUser;
+}
+
+int Client::getUserId()
+{
+	if (activeUser == nullptr)
+		return -1;
+	else return activeUser->getUserId();
 }
 
 QString Client::getUsername()
@@ -56,10 +58,17 @@ void Client::logout()
 	activeUser = nullptr;
 }
 
+bool Client::isLogged()
+{
+	return logged;
+}
+
 bool Client::authentication(QByteArray token)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 
+	// Internally solve the challenge by MD5-hashing the nonce with
+	// the stored user password and compare the results
 	hash.addData(activeUser->getPasswordHash());
 	hash.addData(this->nonce);
 
@@ -78,9 +87,4 @@ QByteArray Client::challenge(User* user)
 	}
 
 	return nonce;
-}
-
-bool Client::isLogged()
-{
-	return logged;
 }

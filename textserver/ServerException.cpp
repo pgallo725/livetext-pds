@@ -7,8 +7,14 @@ ServerException::ServerException(std::string msg)
 }
 
 
-ServerStartException::ServerStartException(std::string msg)
+StartupException::StartupException(std::string msg)
 	: ServerException(msg)
+{
+}
+
+
+SocketException::SocketException(std::string msg) :
+	ServerException(msg)
 {
 }
 
@@ -47,42 +53,3 @@ FileOverwriteException::FileOverwriteException(std::string filePath)
 	: FileException("Unable to overwrite file " + filePath)
 {
 }
-
-MessageException::MessageException(std::string msg) : 
-	ServerException(msg)
-{
-}
-
-MessageUnexpectedTypeException::MessageUnexpectedTypeException(int type) :
-	MessageException("Unknown message type : " + type), errType(type)
-{
-}
-
-int MessageUnexpectedTypeException::getErrType()
-{
-	return errType;
-}
-
-
-SocketException::SocketException(std::string msg) :
-	ServerException(msg)
-{
-}
-
-SocketNullException::SocketNullException(std::string msg) :
-	SocketException(msg)
-{
-}
-
-SocketDuplicateException::SocketDuplicateException(std::string msg):
-	SocketException(msg)
-{
-}
-
-
-UserNotFoundException::UserNotFoundException(std::string msg):
-	ServerException(msg)
-{
-}
-
-

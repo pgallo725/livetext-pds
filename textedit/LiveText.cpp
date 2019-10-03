@@ -41,7 +41,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
-	connect(_client, &Client::documentExitSucced, this, &LiveText::closeDocumentCompleted);
+	connect(_client, &Client::documentExitSuccess, this, &LiveText::closeDocumentCompleted);
 }
 
 LiveText::~LiveText()
@@ -199,8 +199,12 @@ void LiveText::closeDocument()
 	_client->removeFromFile(_user.getUserId());
 }
 
-void LiveText::closeDocumentCompleted()
+void LiveText::closeDocumentCompleted(bool isForced)
 {
+	if (isForced) {
+		_textEdit->forceClosingDocumentError();
+	}
+
 	_textEdit->closeEditor();
 
 	_landingPage->setupFileList(_user.getDocuments());

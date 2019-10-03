@@ -13,6 +13,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QFrame>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
@@ -47,6 +48,7 @@ public:
     QLabel *label_4;
     QLineEdit *lineEdit_editPswConf;
     QSpacerItem *verticalSpacer_14;
+    QFrame *line;
     QVBoxLayout *verticalLayout;
     QSpacerItem *verticalSpacer_2;
     QHBoxLayout *horizontalLayout;
@@ -54,7 +56,6 @@ public:
     QSpacerItem *verticalSpacer_3;
     QLabel *label_3;
     QHBoxLayout *horizontalLayout_14;
-    QSpacerItem *horizontalSpacer_2;
     QLineEdit *lineEdit_UsrIconPath;
     QPushButton *pushButton_browse;
     QSpacerItem *verticalSpacer_4;
@@ -68,7 +69,7 @@ public:
     {
         if (ProfileEditWindow->objectName().isEmpty())
             ProfileEditWindow->setObjectName(QString::fromUtf8("ProfileEditWindow"));
-        ProfileEditWindow->resize(1057, 633);
+        ProfileEditWindow->resize(1471, 629);
         gridLayout_2 = new QGridLayout(ProfileEditWindow);
         gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
         groupBox = new QGroupBox(ProfileEditWindow);
@@ -147,7 +148,7 @@ public:
         sizePolicy.setVerticalStretch(0);
         sizePolicy.setHeightForWidth(lineEdit_editNick->sizePolicy().hasHeightForWidth());
         lineEdit_editNick->setSizePolicy(sizePolicy);
-        lineEdit_editNick->setMaximumSize(QSize(320, 16777215));
+        lineEdit_editNick->setMaximumSize(QSize(16777215, 16777215));
 
         formLayout_2->setWidget(1, QFormLayout::FieldRole, lineEdit_editNick);
 
@@ -160,7 +161,7 @@ public:
         lineEdit_editPsw->setObjectName(QString::fromUtf8("lineEdit_editPsw"));
         sizePolicy.setHeightForWidth(lineEdit_editPsw->sizePolicy().hasHeightForWidth());
         lineEdit_editPsw->setSizePolicy(sizePolicy);
-        lineEdit_editPsw->setMaximumSize(QSize(320, 16777215));
+        lineEdit_editPsw->setMaximumSize(QSize(16777215, 16777215));
         lineEdit_editPsw->setEchoMode(QLineEdit::Password);
 
         formLayout_2->setWidget(2, QFormLayout::FieldRole, lineEdit_editPsw);
@@ -172,7 +173,7 @@ public:
 
         lineEdit_editPswConf = new QLineEdit(groupBox);
         lineEdit_editPswConf->setObjectName(QString::fromUtf8("lineEdit_editPswConf"));
-        lineEdit_editPswConf->setMaximumSize(QSize(320, 16777215));
+        lineEdit_editPswConf->setMaximumSize(QSize(16777215, 16777215));
         lineEdit_editPswConf->setEchoMode(QLineEdit::Password);
 
         formLayout_2->setWidget(3, QFormLayout::FieldRole, lineEdit_editPswConf);
@@ -186,6 +187,13 @@ public:
 
 
         horizontalLayout_11->addLayout(verticalLayout_10);
+
+        line = new QFrame(groupBox);
+        line->setObjectName(QString::fromUtf8("line"));
+        line->setFrameShape(QFrame::VLine);
+        line->setFrameShadow(QFrame::Sunken);
+
+        horizontalLayout_11->addWidget(line);
 
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(6);
@@ -228,10 +236,6 @@ public:
         horizontalLayout_14 = new QHBoxLayout();
         horizontalLayout_14->setSpacing(6);
         horizontalLayout_14->setObjectName(QString::fromUtf8("horizontalLayout_14"));
-        horizontalSpacer_2 = new QSpacerItem(20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum);
-
-        horizontalLayout_14->addItem(horizontalSpacer_2);
-
         lineEdit_UsrIconPath = new QLineEdit(groupBox);
         lineEdit_UsrIconPath->setObjectName(QString::fromUtf8("lineEdit_UsrIconPath"));
 
@@ -309,14 +313,13 @@ public:
         label->setText(QApplication::translate("ProfileEditWindow", "Update the form to edit your profile informations", nullptr));
         label_2->setText(QApplication::translate("ProfileEditWindow", "Username", nullptr));
         label_username->setText(QString());
-        label_5->setText(QApplication::translate("ProfileEditWindow", "Nickname\n"
-"(optional)", nullptr));
+        label_5->setText(QApplication::translate("ProfileEditWindow", "Nickname", nullptr));
         label_11->setText(QApplication::translate("ProfileEditWindow", "New\n"
 "password", nullptr));
         label_4->setText(QApplication::translate("ProfileEditWindow", "Confirm\n"
 "password", nullptr));
         label_UsrIcon->setText(QString());
-        label_3->setText(QApplication::translate("ProfileEditWindow", "Choose your profile icon (optional)", nullptr));
+        label_3->setText(QApplication::translate("ProfileEditWindow", "Choose your profile icon", nullptr));
         pushButton_browse->setText(QApplication::translate("ProfileEditWindow", "Browse...", nullptr));
         label_incorrect_edit->setText(QString());
         pushButton_cancel->setText(QApplication::translate("ProfileEditWindow", "Cancel", nullptr));

@@ -16,10 +16,17 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObjec
 void DocumentEditor::openDocument()
 {
 	QVector<Symbol> document = _document.getContent();
+	QList<TextBlockID> blocks = _document.getBlocksBetween(0, _document.length());
 
 	for (int i = 0; i < document.length() - 1; i++){
 		_textedit->newChar(document[i].getChar(), document[i].getFormat(), i);
 	}
+
+	foreach(TextBlockID id, blocks) {
+		TextBlock& blk = _document.getBlock(id);
+		_textedit->applyBlockFormat(id.getAuthorId(), _document.getBlockPosition(id), blk.getFormat());
+	}
+	
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
 
@@ -76,7 +83,7 @@ void DocumentEditor::generateExtraSelection()
 	selectionDelimiters.first = 0;
 	selectionDelimiters.second = 0;
 
-	for (int i = 0; i < document.length(); i++) {
+	for (int i = 0; i < document.length() - 1; i++) {
 		if (document[i].getAuthorId() != userId) {
 			_textedit->setExtraSelections(userId, selectionDelimiters);
 
@@ -90,15 +97,18 @@ void DocumentEditor::generateExtraSelection()
 }
 
 //Block format
-void DocumentEditor::changeBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
+void DocumentEditor::changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt)
 {
-	QPair<int, int> blockId = _document.getBlockAt(position);
-	_document.formatBlock(blockId, fmt);
-
-	emit blockFormatChanged(blockId, fmt, userId);
+	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
+	
+	
+	foreach(TextBlockID textBlock, blocks) {
+		_document.formatBlock(textBlock, fmt);
+		emit blockFormatChanged(textBlock, fmt, userId);
+	}
 }
 
-void DocumentEditor::applyBlockFormat(QPair<int, int> blockId, QTextBlockFormat fmt, qint32 userId)
+void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId)
 {
 	int position = _document.formatBlock(blockId, fmt);
 	_textedit->applyBlockFormat(userId, position, fmt);

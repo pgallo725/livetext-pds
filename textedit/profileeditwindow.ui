@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
-    <height>633</height>
+    <width>1471</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -170,8 +170,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Nickname
-(optional)</string>
+               <string>Nickname</string>
               </property>
              </widget>
             </item>
@@ -185,7 +184,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>320</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -209,7 +208,7 @@ password</string>
               </property>
               <property name="maximumSize">
                <size>
-                <width>320</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -230,7 +229,7 @@ password</string>
              <widget class="QLineEdit" name="lineEdit_editPswConf">
               <property name="maximumSize">
                <size>
-                <width>320</width>
+                <width>16777215</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -258,6 +257,13 @@ password</string>
            </spacer>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
@@ -340,7 +346,7 @@ password</string>
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Choose your profile icon (optional)</string>
+             <string>Choose your profile icon</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -352,22 +358,6 @@ password</string>
             <property name="spacing">
              <number>6</number>
             </property>
-            <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Preferred</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
             <item>
              <widget class="QLineEdit" name="lineEdit_UsrIconPath"/>
             </item>

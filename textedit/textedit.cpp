@@ -77,6 +77,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateUsersSelections);
 
+
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
 
@@ -131,6 +132,12 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 	//Rende la tastiera attiva sul widget
 	textEdit->setFocus();
+
+	//Setup cursor position
+	_currentCursorPosition = -1;
+
+	//Setup extra cursor
+	_extraCursor = new QTextCursor(textEdit->document());
 }
 
 /*
@@ -478,6 +485,8 @@ void TextEdit::setUser(User* user)
 void TextEdit::accountUpdateSuccessful()
 {
 	ew->updateSuccessful();
+	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
+
 }
 
 
@@ -496,19 +505,19 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	if (onlineUsers.contains(userId)) {
-		Presence* p = onlineUsers.find(userId).value();
+	_extraCursor->setPosition(position);
+	_extraCursor->setBlockFormat(fmt);
 
-		QTextCursor* userCursor = p->cursor();
-		
-		userCursor->setPosition(position);
-		userCursor->setBlockFormat(fmt);
+	alignmentChanged(fmt.alignment());
 
-		alignmentChanged(fmt.alignment());
+	//Setta nel combobox l'heading level corretto
+	comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 
-		//Setta nel combobox l'heading level corretto
-		comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
-	}
+}
+
+void TextEdit::forceClosingDocumentError()
+{
+	QMessageBox::StandardButton error = QMessageBox::critical(this, QCoreApplication::applicationName(), tr("Server encountered an error, the document will be closed"), QMessageBox::Ok);
 }
 
 void TextEdit::setDocumentURI(QString uri)
@@ -597,7 +606,7 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 	cursor->setCharFormat(format);
 
 	cursor->insertText(ch);
-	highlightUsersText();
+	updateUsersSelections();
 }
 
 void TextEdit::removeChar(int position)
@@ -634,9 +643,10 @@ void TextEdit::fileNew(QString name)
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	// Initialize random sequence
-	qsrand(QDateTime::currentMSecsSinceEpoch());
+	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
-	int randomNumber = 7 + (qrand() % 11);
+	//Test with user ID for more separate colors
+	int randomNumber = 7 + (userId*3) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
@@ -651,12 +661,11 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
 	setupOnlineUsersActions();
 
-	emit generateExtraSelection();
-	
-	//emit newCursorPosition(textEdit->textCursor().position());
+	_currentCursorPosition = -1;
 
-	// TODO: reset old cursor position to -1 (or any invalid value) so that it surely gets sent at the next timer tick
-	// even if the user is not moving his cursor
+	updateUsersSelections();
+
+
 }
 
 //Remove presence in document
@@ -954,26 +963,9 @@ void TextEdit::listStyle(int styleIndex)
 
 void TextEdit::textStyle(int styleIndex)
 {
-	
-	const QSignalBlocker blocker(textEdit->document());
-
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
-
-	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
-	cursor.beginEditBlock();
-
-	//Salva il formato del blocco
-	QTextBlockFormat blockFmt = cursor.blockFormat();
-
-	//Se Standard lo stile
-	blockFmt.setObjectIndex(-1); //(?)
-
-	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
 	int headingLevel = styleIndex > 0 ? styleIndex : 0; // H1 to H6, or Standard
-	blockFmt.setHeadingLevel(headingLevel);
-	cursor.setBlockFormat(blockFmt);
-
 	int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
 
 	//Crea formattazione carattere
@@ -988,10 +980,24 @@ void TextEdit::textStyle(int styleIndex)
 	cursor.mergeCharFormat(fmt);
 	textEdit->mergeCurrentCharFormat(fmt);
 
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
+	cursor.beginEditBlock();
+
+	//Salva il formato del blocco
+	QTextBlockFormat blockFmt = cursor.blockFormat();
+
+	//Se Standard lo stile
+	blockFmt.setObjectIndex(-1); //(?)
+
+	//Per evitare tutti gli heading mette che l'index del combobox 9 = H1 , 10 = H2...
+	blockFmt.setHeadingLevel(headingLevel);
+	cursor.setBlockFormat(blockFmt);
+
 	cursor.endEditBlock();
 
-
-	emit blockFormatChanged(_user->getUserId(), cursor.position(), cursor.blockFormat());
+	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::textColor()
@@ -1026,9 +1032,9 @@ void TextEdit::textAlign(QAction* a)
 	else if (a == actionAlignJustify)
 		textEdit->setAlignment(Qt::AlignJustify);
 
+	QTextCursor cursor = textEdit->textCursor();
 
-
-	emit blockFormatChanged(_user->getUserId(), textEdit->textCursor().position(), textEdit->textCursor().blockFormat());
+	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::alignmentChanged(Qt::Alignment a)
@@ -1157,6 +1163,7 @@ void TextEdit::colorChanged(const QColor& c)
 //Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
+
 
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
@@ -1337,6 +1344,11 @@ void TextEdit::handleMultipleSelections()
 		actionHighlightUsers->setChecked(false);
 	}
 
+	if (actionsChecked == onlineUsers.size()) {
+		actionHighlightUsers->setChecked(true);
+	}
+
+
 	textEdit->setExtraSelections(usersSelections);
 }
 
@@ -1349,9 +1361,15 @@ void TextEdit::updateUsersSelections()
 	}
 
 	emit generateExtraSelection();
+
+	handleMultipleSelections();
 }
 
 void TextEdit::timerEvent(QTimerEvent* event)
 {
+	//if (textEdit->textCursor().position() != _currentCursorPosition) {
+	_currentCursorPosition = textEdit->textCursor().position();
 	emit newCursorPosition(textEdit->textCursor().position());
+	//}
+
 }

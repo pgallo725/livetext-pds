@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <User.h>
 
+#include <QLabel>
+
 namespace Ui {
 	class ProfileEditWindow;
 }
@@ -29,8 +31,12 @@ signals:
 	void accountUpdate(QString name, QImage image, QString password);
 
 private:
+	QLabel* loading;
+
 	Ui::ProfileEditWindow* ui;
 	void centerAndResize();
+	void startLoadingAnimation(QString text);
+	void stopLoadingAnimation();
 
 };
 

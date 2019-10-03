@@ -121,6 +121,9 @@ void Client::messageHandler(MessageCapsule message) {
 	case BlockEdit:
 		editBlock(message);
 		break;
+	case DocumentExit:
+		forceDocumentClose();
+		break;
 	default:
 		//throw exception (?)
 		break;
@@ -483,6 +486,11 @@ void Client::deleteDocument(URI URI) {
 
 }
 
+void Client::forceDocumentClose()
+{
+	emit documentExitSuccess(true);
+}
+
 /*--------------------------- CURSOR HANDLER --------------------------------*/
 
 void Client::sendCursor(qint32 userId, qint32 position) {
@@ -515,7 +523,7 @@ void Client::removeChar(QVector<int> position)
 	removeChar->send(socket);
 }
 
-void Client::blockModified(QPair<qint32, qint32> blockId, QTextBlockFormat fmt, qint32 editorId)
+void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
 {
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
 	blockEdit->send(socket);
@@ -536,7 +544,7 @@ void Client::deleteChar(MessageCapsule message) {
 void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockIdPair(), blockedit->getBlockFormat(), blockedit->getAuthorId());
+	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat(), blockedit->getAuthorId());
 }
 
 
@@ -628,7 +636,7 @@ void Client::removeFromFile(qint32 myId) {
 		{
 			socketBuffer.clear();
 			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
-			emit documentExitSucced();
+			emit documentExitSuccess();
 			return;
 		}
 		case DocumentError:

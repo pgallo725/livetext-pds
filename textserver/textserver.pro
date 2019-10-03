@@ -4,12 +4,11 @@
 
 TEMPLATE = app
 TARGET = textserver
-DESTDIR = ../x64/Debug
-QT += core gui network networkauth
+DESTDIR = ./x64/Debug
+QT += core gui network
 CONFIG += debug console
-DEFINES += _UNICODE _ENABLE_EXTENDED_ALIGNED_STORAGE WIN64 QT_DLL QT_NETWORK_LIB QT_NETWORKAUTH_LIB
-INCLUDEPATH += . \
-    ./GeneratedFiles/$(ConfigurationName)
+DEFINES += _UNICODE _ENABLE_EXTENDED_ALIGNED_STORAGE WIN64 QT_DLL QT_NETWORK_LIB
+INCLUDEPATH += ./GeneratedFiles/$(ConfigurationName)
 DEPENDPATH += .
 MOC_DIR += ./GeneratedFiles/$(ConfigurationName)
 OBJECTS_DIR += debug

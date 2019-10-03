@@ -1,10 +1,11 @@
 #include "Document.h"
+#include "SharedException.h"
 
 #include <QDataStream>
 #include <QFile>
 #include <QFileInfo>
+#include <QSaveFile>
 
-#include <iostream>
 
 #define DOCUMENTS_DIRNAME "./Documents/"
 #define URI_FIELD_SEPARATOR '_'
@@ -29,14 +30,14 @@ std::string URI::toStdString()
 	return str.toStdString();
 }
 
-QString URI::getAuthorName()
+QString URI::getAuthorName() const
 {
 	// The first field of the generated URI (fields separated by '_') 
 	// is the name of the user which created the document
 	return str.section(URI_FIELD_SEPARATOR, 0, 0);
 }
 
-QString URI::getDocumentName()
+QString URI::getDocumentName() const
 {
 	// The second field of the generated URI (fields separated by '_') 
 	// is the name of the document (including .extension)
@@ -81,17 +82,20 @@ Document::Document()
 {
 }
 
-Document::Document(URI docURI) :
+Document::Document(URI docURI, qint32 authorId) :
 	uri(docURI), _blockCounter(0)
 {
 	editors << getAuthor();
 
 	// Insert a ParagraphTerminator character inside a default block in the empty document
-	TextBlock defaultBlock = TextBlock(_blockCounter++, -1, QTextBlockFormat());
-	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), -1, QVector<qint32>({ 1000, 1000 }));
-	eof.assignToBlock(defaultBlock);
+	TextBlock defaultBlock = TextBlock(_blockCounter++, authorId, QTextBlockFormat());
+	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(),
+		authorId, QVector<qint32>({ 1000, 1000 }));
+	defaultBlock.setBegin(eof._fPos);
+	defaultBlock.setEnd(eof._fPos);
+	eof.setBlock(defaultBlock.getId());
 
-	_blocks.insert(defaultBlock.getIdPair(), defaultBlock);
+	_blocks.insert(defaultBlock.getId(), defaultBlock);
 	_text.insert(_text.begin(), eof);
 }
 
@@ -136,26 +140,21 @@ void Document::load()
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nLoading document \"" << uri.toStdString() << "\"... ";
-
 		// Load the document content (_text vector<Symbol>) from file
 		// using built-in Qt Vector and StringList deserialization
 		if (!docFileStream.atEnd())
-			docFileStream >> editors >> _text;
+			docFileStream >> editors >> _blockCounter >> _blocks /* >> _lists */ >> _text;
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
-		{
-			// THROW: handle error or throw DocumentLoadException ?
+		{	
+			throw DocumentLoadException(uri.toStdString(), DOCUMENTS_DIRNAME);
 		}
 
 		file.close();
-
-		std::cout << "done" << std::endl;
 	}
 	else
 	{
-		QFileInfo info(file);
-		//throw FileLoadException(info.absolutePath().toStdString());
+		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
 }
 
@@ -163,6 +162,7 @@ void Document::unload()
 {
 	// Unload the Document object contents from memory
 	editors.clear();
+	_blocks.clear();
 	_text.clear();
 	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
 }
@@ -170,41 +170,42 @@ void Document::unload()
 void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
-	QFile file(DOCUMENTS_DIRNAME + ("tmp_" + uri.toString()));
+	QSaveFile file(DOCUMENTS_DIRNAME + uri.toString());
 	if (file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
 
-		std::cout << "\nSaving document \"" << uri.toStdString() << "\"... ";
-
 		// Write the the current document content to file
 		// using built-in Qt Vector and StringList serialization
-		docFileStream << editors << _text;
+		docFileStream << editors << _blockCounter << _blocks /* << _lists */ << _text;
 
-		QFile oldFile(DOCUMENTS_DIRNAME + uri.toString());
-		if (oldFile.exists())
+		if (docFileStream.status() == QDataStream::Status::WriteFailed)
 		{
-			if (oldFile.remove())
-				file.rename(DOCUMENTS_DIRNAME + uri.toString());
-			else
-			{
-				// Remove temporary file if overwriting of the old file failed
-				file.remove();
-				QFileInfo info(oldFile);
-				//throw FileOverwriteException(info.absoluteFilePath().toStdString());
-			}
+			file.cancelWriting();
+			file.commit();
+			throw DocumentWriteException(uri.toStdString(), DOCUMENTS_DIRNAME);
 		}
-		else file.rename(DOCUMENTS_DIRNAME + uri.toString());
 
-		file.close();
-
-		std::cout << "done" << std::endl;
+		file.commit();
 	}
 	else
 	{
-		QFileInfo info(file);
-		//throw FileWriteException(info.absolutePath().toStdString(), info.fileName().toStdString());
+		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
+}
+
+bool Document::exist()
+{
+	return QFileInfo(QFile(DOCUMENTS_DIRNAME+uri.toString())).exists();
+}
+
+
+Symbol& Document::operator[](QVector<qint32> fPos)
+{
+	int pos = binarySearch(fPos);
+	if (pos >= 0 && pos < _text.length())
+		return _text[pos];
+	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
 }
 
 
@@ -217,43 +218,49 @@ int Document::insert(Symbol& s)
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
 		{
-			TextBlock block;
-
-			if (s.getBlockIdentifier() == qMakePair(-1, -1))
+			if (!s.getBlockId())
 			{
 				// Create a new TextBlock with locally-generated ID (symbol received from Qt editor)
-				block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+				TextBlock block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+				s.setBlock(block.getId());
+
+				// Insert the new block in the document
+				_blocks.insert(block.getId(), block);
 			}
 			else
 			{
 				// Create a TextBlock with the ID carried by the symbol itself (received from another client)
-				block = TextBlock(s.getBlockIdentifier(), QTextBlockFormat());
+				_blocks.insert(s.getBlockId(), TextBlock(s.getBlockId(), QTextBlockFormat()));
 
 				_blockCounter++;	// (keep the block counter aligned between clients)
 			}
 
-			// Insert the new block in the document
-			_blocks.insert(block.getIdPair(), block);
+			TextBlock& newBlock = _blocks[s.getBlockId()];
+			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
 
-			QPair<qint32, qint32> prevBlockId = getBlockAt(insertionIndex);
+			// The new block inherits the format from the previous one
+			newBlock.setFormat(prevBlock.getFormat());
+
+			Symbol newSymbol(s);
 
 			// The paragraph delimiter belongs to the block on which it is inserted
-			s.assignToBlock(_blocks[prevBlockId]);
-			_text.insert(_text.begin() + insertionIndex, s);	// (insert the symbol in the vector)
+			addCharToBlock(newSymbol, _blocks[prevBlock]);
+			_text.insert(_text.begin() + insertionIndex, newSymbol);	// (insert the symbol in the vector)
 
 			// And any following symbol of that paragraph is assigned to the new block
-			for (int i = insertionIndex + 1;
-				i < _text.length() && _text[i].getBlockIdentifier() == prevBlockId;
-				i++)
+			for (int i = insertionIndex + 1; i < _text.length(); i++)
 			{
-				_text[i].assignToBlock(block);
+				removeCharFromBlock(_text[i], prevBlock);
+				addCharToBlock(_text[i], newBlock);
+				if (_text[i].getChar() == QChar::ParagraphSeparator)	// stop at the first paragraph separator
+					break;
 			}
 		}
 		else
 		{
 			// Assign the character to the block on which it is inserted
-			QPair<qint32, qint32> blockId = getBlockAt(insertionIndex);
-			s.assignToBlock(_blocks[blockId]);
+			TextBlockID blockId = getBlockAt(insertionIndex);
+			addCharToBlock(s, _blocks[blockId]);
 			_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
 		}
 	}
@@ -271,36 +278,40 @@ int Document::removeAt(QVector<qint32> fPos)
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
 	{
+		Symbol& s = _text[pos];
+
 		// Check if the symbol removal implies the deletion of a paragraph separator
-		if (_text[pos].getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
+		if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
 		{
-			TextBlock mergedBlock = _blocks[_text[pos].getBlockIdentifier()];
+			TextBlock& mergedBlock = _blocks[s.getBlockId()];
 
 			// The paragraph following the deleted ParagraphSeparator will disappear
-			QPair<qint32, qint32> otherBlockId = _text[pos + 1].getBlockIdentifier();
+			TextBlock& olderBlock = _blocks[_text[pos + 1].getBlockId()];
 
-			_text.removeAt(pos);				// Removes the paragraph separator
-			mergedBlock.decrementSymbols();
+			removeCharFromBlock(s, mergedBlock);
+			_text.removeAt(pos);	// Removes the paragraph separator
 
 			// All symbols belonging to the next block will be assigned to the current block
 			for (int i = pos; i < _text.length(); i++)
 			{
-				_text[i].assignToBlock(mergedBlock);
+				removeCharFromBlock(_text[i], olderBlock);
+				addCharToBlock(_text[i], mergedBlock);
 				if (_text[i].getChar() == QChar::ParagraphSeparator)
 					break;
 			}
 
-			_blocks.remove(otherBlockId);		// Delete the (now empty) block from the document
+			if (olderBlock.isEmpty())
+				_blocks.remove(olderBlock.getId());		// Delete the (now empty) block from the document
 		}
 		else if (pos == _text.length() - 1)
 		{
 			// Avoid deleting the last character in the document (pseudo-EOF symbol)
 			// but make sure to reset its format
-			_blocks[_text[pos].getBlockIdentifier()].setFormat(QTextBlockFormat());
+			_blocks[s.getBlockId()].setFormat(QTextBlockFormat());
 		}
 		else
 		{
-			_blocks[_text[pos].getBlockIdentifier()].decrementSymbols();
+			removeCharFromBlock(s, _blocks[s.getBlockId()]);
 			_text.removeAt(pos);	// Remove the symbol from the document
 		}
 	}
@@ -316,7 +327,7 @@ QVector<qint32> Document::removeAtIndex(int index)
 	return position;
 }
 
-int Document::formatBlock(QPair<qint32, qint32> id, QTextBlockFormat fmt)
+int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
 {
 	TextBlock block = _blocks[id];		// find the desired block
 	block.setFormat(fmt);				// change the format
@@ -340,24 +351,79 @@ QString Document::toString()
 }
 
 
-QPair<qint32, qint32> Document::getBlockAt(int index)
+TextBlock& Document::getBlock(TextBlockID id)
 {
-	return _text[index].getBlockIdentifier();
+	return _blocks[id];
 }
 
-int Document::getBlockPosition(QPair<qint32, qint32> blockIdPair)
+int Document::getBlockPosition(TextBlockID blockId)
 {
-	int i = 0;
-	while (i < _text.length())
+	return binarySearch(_blocks[blockId].begin());
+}
+
+TextBlockID Document::getBlockAt(int index)
+{
+	return _text[index].getBlockId();
+}
+
+QList<TextBlockID> Document::getBlocksBetween(int start, int end)
+{
+	QList<TextBlockID> result;
+
+	int n = start;
+	while (n < _text.length())
 	{
-		QPair<qint32, qint32> curBlockId = _text[i].getBlockIdentifier();
-		if (curBlockId == blockIdPair)
-			return i;
-		else i += _blocks[curBlockId].size();
+		TextBlock& block = _blocks[getBlockAt(n)];		// Get the block and add it to the list of results
+		result.push_back(block.getId());
+		n = binarySearch(block.end()) + 1;		// Skip to the beginning of the next block
+		if (n <= 0 || n >= end)
+			break;	
 	}
 
-	return -1;
+	return result;
 }
+
+
+void Document::addCharToBlock(Symbol& s, TextBlock& b)
+{
+	s.setBlock(b.getId());
+
+	if (b.isEmpty())
+	{
+		b.setBegin(s._fPos);
+		b.setEnd(s._fPos);
+	}
+	else if (s._fPos < b.begin()) {
+		b.setBegin(s._fPos);		 // update block begin
+	}
+	else if (s._fPos > b.end()) {
+		b.setEnd(s._fPos);			 // update block end
+	}
+}
+
+void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
+{
+	s.setBlock(nullptr);
+
+	if (s._fPos == b.begin() && s._fPos == b.end())
+	{
+		b.setBegin(QVector<qint32>({ -1, -1 }));	// Reset the block when deleting the last character
+		b.setEnd(QVector<qint32>({ -1, -1 }));
+	}
+	else if (s._fPos == b.begin())
+	{
+		int beginIndex = binarySearch(b.begin());
+		if (beginIndex > 0)
+			b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
+	}
+	else if (s._fPos == b.end())
+	{
+		int endIndex = binarySearch(b.end());
+		if (endIndex > 0)
+			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
+	}
+}
+
 
 
 

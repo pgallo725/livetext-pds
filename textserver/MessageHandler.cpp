@@ -17,7 +17,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 {
 	// Connecting all signals to Workspace slots
 
-	connect(this, &MessageHandler::accountUpdate, w, &WorkSpace::updateAccount, Qt::DirectConnection);
+	connect(this, &MessageHandler::accountUpdate, w, &WorkSpace::handleAccountUpdate, Qt::DirectConnection);
 
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
@@ -152,7 +152,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	case BlockEdit:
 	{
 		BlockEditMessage* blockEditMsg = dynamic_cast<BlockEditMessage*>(message.get());
-		emit blockEdit(blockEditMsg->getBlockIdPair(), blockEditMsg->getBlockFormat());
+		emit blockEdit(blockEditMsg->getBlockId(), blockEditMsg->getBlockFormat());
 
 		// We want to achieve a server-enforced global ordering of format changes, therefore
 		// the BlockEdit message is sent back to all editors by not specifying a sender [nullptr]
