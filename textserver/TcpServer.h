@@ -21,22 +21,26 @@ class TcpServer : public QTcpServer
 	Q_OBJECT
 
 	friend class MessageHandler;
-	QSslConfiguration config;
 
 private:
 
 	QMap<QString, User> users;
-	QMap<URI, QSharedPointer<Document>> documents;
-	QMap<URI, QSharedPointer<WorkSpace>> workspaces;
-	QMap<QSslSocket*, QSharedPointer<Client>> clients;
-	QStringList usersNotAvaiable;
+	QStringList usersNotAvailable;
 	qint32 _userIdCounter;
 	QSaveFile usersFile;
+
+	QMap<URI, QSharedPointer<Document>> documents;
 	QSaveFile docsFile;
 
+	QMap<URI, QSharedPointer<WorkSpace>> workspaces;
+	QMap<QSslSocket*, QSharedPointer<Client>> clients;
+	
 	MessageHandler messageHandler;
 
 	SocketBuffer socketBuffer;
+
+	QSslConfiguration config;
+
 
 	URI generateURI(QString authorName, QString docName) const;
 	bool validateURI(URI uri) const;
@@ -56,29 +60,27 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
-	QSharedPointer<WorkSpace> createWorkspace(QSharedPointer<Document> document, QSharedPointer<Client> client);
+	QSharedPointer<WorkSpace> createWorkspace(QSharedPointer<Document> document);
 	void deleteWorkspace(URI document);
+
+	void incomingConnection(qintptr handle) Q_DECL_OVERRIDE;
+	void sslSocketError(QAbstractSocket::SocketError socketError);
+	void sslSocketReady();
 
 	MessageCapsule serveLoginRequest(QSslSocket* socket, QString username);
 	MessageCapsule authenticateUser(QSslSocket* clientSocket, QByteArray token);
 
 	MessageCapsule createAccount(QSslSocket* clientSocket, QString username, QString nickname, QImage icon, QString password);
 	MessageCapsule updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
-	MessageCapsule accountUpdate(User* user, QString nickname, QImage icon, QString password);
+	void workspaceAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
 
 	MessageCapsule removeDocument(QSslSocket* client, URI docUri);
 	MessageCapsule createDocument(QSslSocket* author, QString docName);
 	MessageCapsule openDocument(QSslSocket* clientSocket, URI docUri);
 
-	void logoutClient(QSslSocket* clientSocket);
 	void receiveClient(QSharedPointer<Client> client);
-	void receiveUpdateAccount(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
-
+	void logoutClient(QSslSocket* clientSocket);
 	void restoreUserAvaiable(QString username);
-
-	void incomingConnection(qintptr handle) Q_DECL_OVERRIDE;
-	void socketErr(QAbstractSocket::SocketError socketError);
-	void ready();
 
 
 signals: void newSocket(qint64 handle);

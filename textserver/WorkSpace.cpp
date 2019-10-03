@@ -102,7 +102,7 @@ void WorkSpace::readMessage()
 		}
 		else
 		{
-			qDebug() << ">> (ERROR) Received unexpected message type: " << mType;
+			qDebug() << ">> (ERROR) Received unexpected message of type: " << mType;
 			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
 		}

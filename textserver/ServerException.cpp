@@ -8,7 +8,7 @@ ServerException::ServerException(std::string msg)
 
 
 StartupException::StartupException(std::string msg)
-	: ServerException(msg)
+	: ServerException("textserver was unable to start...\n" + msg)
 {
 }
 
