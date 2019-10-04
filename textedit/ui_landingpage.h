@@ -767,7 +767,7 @@ public:
 
         verticalLayout_8->addLayout(horizontalLayout_7);
 
-        verticalSpacer_19 = new QSpacerItem(20, 16, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_19 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_19);
 
@@ -777,7 +777,7 @@ public:
 
         verticalLayout_8->addWidget(pushButton_new);
 
-        verticalSpacer_18 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_18 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_18);
 

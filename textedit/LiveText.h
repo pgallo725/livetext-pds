@@ -42,6 +42,7 @@ private slots:
 	void registrationFailed(QString errorType);
 	void loginSuccess(User user);
 	void registrationSuccess(User user);
+	void forceLogout();
 
 
 	//DOCUMENTEDITOR

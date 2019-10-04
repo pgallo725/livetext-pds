@@ -502,10 +502,11 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 
 }
 
-void TextEdit::forceClosingDocumentError()
+void TextEdit::criticalError(QString error)
 {
-	QMessageBox::StandardButton error = QMessageBox::critical(this, QCoreApplication::applicationName(), tr("Server encountered an error, the document will be closed"), QMessageBox::Ok);
+	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error , QMessageBox::Ok);
 }
+
 
 void TextEdit::setDocumentURI(QString uri)
 {

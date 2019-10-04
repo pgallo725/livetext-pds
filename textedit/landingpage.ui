@@ -1259,7 +1259,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>16</height>
+              <height>30</height>
              </size>
             </property>
            </spacer>
@@ -1288,7 +1288,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>40</height>
+              <height>20</height>
              </size>
             </property>
            </spacer>

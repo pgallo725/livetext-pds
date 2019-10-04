@@ -84,6 +84,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->pushButton_remove, &QPushButton::clicked, this, &LandingPage::pushButtonRemoveClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
 	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
+	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::serverLogout);
 	connect(ui->pushButton_editProfile, &QPushButton::clicked, this, &LandingPage::editProfile);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
@@ -286,6 +287,7 @@ void LandingPage::incorrectFileOperation(QString error)
 	}
 	else {
 		ui->label_incorrect_file_operation->setText(error);
+		setupFileList();
 	}
 
 }
@@ -306,9 +308,9 @@ void LandingPage::connectionEstabilished()
 
 void LandingPage::openLoggedPage()
 {
-
 	stopLoadingAnimation();
 
+	setupFileList();
 	updateUserInfo();
 
 	ui->stackedWidget->setCurrentIndex(1);
@@ -396,8 +398,6 @@ void LandingPage::pushButtonBackClicked()
 
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
-
-	emit(serverLogout());
 }
 
 void LandingPage::enablePushButtonOpen()
@@ -416,8 +416,10 @@ void LandingPage::enablePushButtonOpen()
 
 
 
-void LandingPage::setupFileList(QList<URI> documents)
+void LandingPage::setupFileList()
 {
+
+	QList<URI> documents = _user->getDocuments();
 	ui->listWidget->clear();
 
 	QList<URI>::iterator it;

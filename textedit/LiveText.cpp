@@ -34,7 +34,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
 
-	//connect(_client, &Client::abortConnection, );
+	
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
@@ -45,6 +45,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	connect(_client, &Client::documentExitSuccess, this, &LiveText::closeDocumentCompleted);
+	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 }
 
 LiveText::~LiveText()
@@ -79,9 +80,9 @@ void LiveText::loginSuccess(User user)
 {
 	_user = user;
 	_landingPage->setUser(&_user);
-	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 }
+
 
 void LiveText::loginFailed(QString errorType)
 {
@@ -112,6 +113,28 @@ void LiveText::Logout()
 	_client->Disconnect();
 }
 
+
+void LiveText::forceLogout()
+{
+	if (_textEdit != nullptr) {
+		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+
+		_textEdit->closeEditor();
+
+		delete _docEditor;
+		delete _textEdit;
+
+		_docEditor = nullptr;
+		_textEdit = nullptr;
+	}	
+	
+	
+	_landingPage->pushButtonBackClicked();
+	_landingPage->incorrectOperation(tr("Server not responding"));
+	_landingPage->show();
+
+}
+
 //Delete document from list
 void LiveText::removeDocument(int index)
 {
@@ -121,7 +144,7 @@ void LiveText::removeDocument(int index)
 void LiveText::dismissDocumentCompleted(URI URI)
 {
 	_user.removeDocument(URI);
-	_landingPage->setupFileList(_user.getDocuments());
+	_landingPage->setupFileList();
 	_landingPage->documentDismissed();
 
 }
@@ -207,17 +230,19 @@ void LiveText::closeDocument()
 void LiveText::closeDocumentCompleted(bool isForced)
 {
 	if (isForced) {
-		_textEdit->forceClosingDocumentError();
+		_textEdit->criticalError(tr("Server encountered an error, the document will be closed"));
 	}
 
 	_textEdit->closeEditor();
 
-	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
 
 	delete _docEditor;
 	delete _textEdit;
+
+	_docEditor = nullptr;
+	_textEdit = nullptr;
 }
 
 //Send cursor
@@ -253,6 +278,7 @@ void LiveText::accountUpdated(User user)
 
 	_editProfile->updateSuccessful();
 	delete _editProfile;
+	_editProfile = nullptr;
 }
 
 void LiveText::openEditProfile()

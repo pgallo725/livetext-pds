@@ -48,7 +48,7 @@ public:
 	void setExtraSelections(qint32 userId, QPair<int, int> selection);
 	void applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
 
-	void forceClosingDocumentError();
+	void criticalError(QString error);
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
