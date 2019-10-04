@@ -65,6 +65,7 @@ signals:
 
 	void connectionEstablished();
 	void impossibleToConnect();
+	void abortConnection();
 
 	// Login, Logout & Register
 	void loginSuccess(User user);
