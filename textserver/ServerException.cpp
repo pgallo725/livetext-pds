@@ -2,7 +2,7 @@
 
 
 ServerException::ServerException(std::string msg)
-	: std::exception(("SERVER ERROR: " + msg).c_str())
+	: std::exception(("(SERVER ERROR) " + msg).c_str())
 {
 }
 

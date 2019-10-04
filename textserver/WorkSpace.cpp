@@ -68,6 +68,8 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
 
 	editors.insert(socket, client);
+
+	qDebug() << ">> User" << client->getUsername() << "opened the document";
 }
 
 
@@ -164,6 +166,7 @@ void WorkSpace::documentSave()
 	}
 	catch (DocumentException& de) 
 	{
+		qDebug().noquote() << ">" << de.what() << ", fails count =" << nFails ;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Move Workspace clients back to TcpServer
 			for (QSharedPointer<Client> client : editors.values()) {
@@ -222,7 +225,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug() << ">> Client" << client->getUsername() << "closed the document";
+	qDebug() << ">> User" << client->getUsername() << "closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);

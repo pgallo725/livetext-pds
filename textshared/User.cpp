@@ -130,7 +130,7 @@ void User::update(QString nickname, QImage icon, QString password)
 		setPassword(password);
 }
 
-void User::recoverFrom(User& u)
+void User::rollback(User& u)
 {
 	m_nickname = u.getNickname();
 	m_icon = u.getIcon();

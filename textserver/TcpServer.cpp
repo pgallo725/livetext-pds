@@ -26,7 +26,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	qInfo().nospace() << "LiveText Server, version 0.9.0" << endl
+	qInfo().nospace() << "LiveText Server, version 0.9.1" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -145,7 +145,7 @@ void TcpServer::initialize()
 	QFile docsFile(INDEX_FILENAME);
 	if (docsFile.open(QIODevice::ReadWrite| QIODevice::Text))
 	{
-		qDebug() << "> Loading documents index";
+		qDebug() << "> Reading documents index";
 
 		QTextStream docIndexStream(&docsFile);
 
@@ -244,9 +244,11 @@ void TcpServer::clientDisconnection()
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 	QSharedPointer<Client> client = clients.find(socket).value();
 
-	qDebug() << "> Client" << client->getUsername() << "disconnected";
-
-	restoreUserAvaiable(client->getUsername());
+	if (client->isLogged())
+	{
+		qDebug() << "> Client" << client->getUsername() << "disconnected";
+		restoreUserAvaiable(client->getUsername());
+	}
 
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close and destroy the socket */
@@ -296,8 +298,6 @@ void TcpServer::incomingConnection(qintptr socketDescriptor)
 /* Create a new client and send nonce to be solved for authentication */
 MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString username)
 {
-	qDebug() << "> User" << username << "is trying to login";
-
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
  	if (users.contains(username))
@@ -327,6 +327,8 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 
 	if (client->authentication(token))		// verify the user's account credentials
 	{
+		qDebug() << "> User" << client->getUsername() << "logged in";
+
 		usersNotAvailable << client->getUsername();
 		client->login(client->getUser());
 		return MessageFactory::LoginGranted(*client->getUser());
@@ -353,6 +355,8 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	/* check if this username is already used */
 	if (users.contains(username))
 		return MessageFactory::AccountError("That username is already taken");
+
+	qDebug() << "> Creating new user account" << username;
 	
 	User user(username, _userIdCounter++, nickname, password, icon);		/* create a new user		*/
 	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
@@ -364,6 +368,7 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 		saveUsers();
 	}
 	catch (FileException& fe) {
+		qDebug().noquote() << ">" << fe.what();
 		client->logout();
 		users.remove(username);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
@@ -381,14 +386,17 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You are not logged in");
 
+	qDebug() << "> Updating account information of user" << client->getUsername();
+
 	client->getUser()->update(nickname, icon, password);
 	
 	try 
 	{	/* write updated users database to disk */
 		saveUsers();
 	}
-	catch (FileException & fe) {
-		client->getUser()->recoverFrom(backupUser);
+	catch (FileException& fe) {
+		qDebug().noquote() << ">" << fe.what();
+		client->getUser()->rollback(backupUser);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
 	}
 	
@@ -403,21 +411,23 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 
 	if (!client->isLogged())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
-	else
-	{
-		User backupUser = *(client->getUser());
-		client->getUser()->update(nickname, icon, password);
 
-		try
-		{	/* serialize the updated users database on disk */
-			saveUsers();
-		}
-		catch (FileException & fe) {
-			client->getUser()->recoverFrom(backupUser);
-			emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
-		}
-		emit sendAccountUpdate(client, MessageFactory::AccountConfirmed(*client->getUser()));
+	qDebug() << "> Updating account information of user" << client->getUsername() << "(inside Workspace)";
+
+	User backupUser = *(client->getUser());
+	client->getUser()->update(nickname, icon, password);
+
+	try
+	{	/* serialize the updated users database on disk */
+		saveUsers();
 	}
+	catch (FileException& fe) {
+		qDebug().noquote() << ">" << fe.what();
+		client->getUser()->rollback(backupUser);
+		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
+	}
+
+	emit sendAccountUpdate(client, MessageFactory::AccountConfirmed(*client->getUser()));
 
 	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 }
@@ -460,6 +470,8 @@ void TcpServer::logoutClient(QSslSocket* clientSocket)
 	QSharedPointer<Client> c = clients.find(clientSocket).value();
 	c->logout();
 	restoreUserAvaiable(c->getUsername());
+
+	qDebug() << "> User" << c->getUsername() << "logged out";
 }
 
 /* Delete user from unavailable list when they logout or close connection */
@@ -544,68 +556,52 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (documents.contains(docURI))
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
-	QSharedPointer<Document> doc(new Document(docURI, client->getUserId()));
-	documents.insert(doc->getURI(), doc);
-
-	QSharedPointer<WorkSpace> w;
-
-	try
-	{	/* create a new workspace to host the document */
-		w = createWorkspace(doc);
-	}
-	catch (DocumentException & de) {
-		return MessageFactory::DocumentError("Document creation failed, please try again later");
-	}
+	qDebug() << "> Creating new document" << docURI.toString();
 
 	// create a copy of the User object before it gets modified, for rollback support
-	User userBackup = *(client->getUser());
-	
-	/* add to newly created document to those owned by the user */
-	client->getUser()->addDocument(docURI);
+	User* user = client->getUser();
+	User backupUser = *(user);
 
 	try 
-	{
-		/* add the document to the index and save the file */
+	{	
+		/* create and save the new document */
+		QSharedPointer<Document> doc(new Document(docURI, client->getUserId()));
+		documents.insert(doc->getURI(), doc);
+
+		doc->save();	// (creates the document file)
+
+		/* the user becomes the first editor of this document */
+		user->addDocument(doc->getURI());
+		doc->insertNewEditor(user->getUsername());
+
+		/* update documents index */
 		saveDocIndex();
 		saveUsers();
 		docsFile.commit();
 	}
+	catch (DocumentException& de) {
+		qDebug().noquote() << ">" << de.what();
+		documents.remove(docURI);
+		return MessageFactory::DocumentError("Document creation failed, please try again");
+	}
 	catch (FileException& fe) {
+		qDebug().noquote() << ">" << fe.what();
 		docsFile.cancelWriting();
 		docsFile.commit();
-		client->getUser()->recoverFrom(userBackup);
-		documents.remove(doc->getURI());
-		return MessageFactory::DocumentError("Cannot create new document for internal problem, please try later");
+		documents.remove(docURI);
+		user->rollback(backupUser);
+		return MessageFactory::DocumentError("Document creation failed, please try again");
 	}
 
-	/* add this user to the list of document editors */
-	doc->insertNewEditor(client->getUsername());
+	qDebug() << "> (DOCUMENT CREATED)";
 
-	/* this thread will not receives more messages from client */
-	disconnect(author, &QSslSocket::readyRead, this, &TcpServer::readMessage);
-	disconnect(author, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
-	disconnect(author, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
-
-	/* move the socket's affinity to the workspace thread */
-	QSslSocket* s = client->getSocket();
-	s->setParent(nullptr);
-	s->moveToThread(w->thread());
-
-	clients.remove(author);		// remove the Client from the server map
-
-	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
-	emit clientToWorkspace(std::move(client));
-	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
-
-	return MessageCapsule();
+	return openDocument(author, docURI);
 }
 
 /* Open an existing Document */
 MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
-	User recoverFrom = *(client->getUser());
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You are not logged in");
@@ -614,53 +610,46 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	if (!documents.contains(docUri))
 		return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
 
+	// create a copy of the User object before it gets modified, for rollback support
+	User* user = client->getUser();
+	User backupUser = *(user);
+
+	qDebug() << "> User" << user->getUsername() << "requested document" << docUri.toString();
+
 	QSharedPointer<Document> doc = documents.find(docUri).value();
 	QSharedPointer<WorkSpace> w;
 
+	/* check if it's the first time opening this document */
+	if (!user->hasDocument(docUri))
+	{
+		/* add this document to those owned by the user */
+		user->addDocument(docUri);
+
+		/* and add the new editor to the document's list of editors */
+		doc->insertNewEditor(user->getUsername());
+
+		try
+		{	/* update the users database */
+			saveUsers();
+		}
+		catch (FileException & fe) {
+			qDebug().noquote() << ">" << fe.what();
+			client->getUser()->rollback(backupUser);
+			return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
+		}
+	}
+
 	try
 	{
-		// check if the documents exist
-		if (!doc->exist()) {
-			// if the doc doesn't exist docUri is removed from documents map and from user documents
-			documents.remove(docUri);
-			client->getUser()->removeDocument(docUri);
-
-			saveDocIndex();
-			saveUsers();
-			docsFile.commit();
-
-			return MessageFactory::DocumentError("This document doesn't exist");
-		}
-
 		w = workspaces.contains(docUri) ?
 			workspaces.find(docUri).value() :
 			createWorkspace(doc);
 	}
-	catch (FileException & fe) {
-		docsFile.cancelWriting();
-		docsFile.commit();
-		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
-	}
-	catch (DocumentException & de)
+	catch (DocumentException& de)
 	{
-		return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
+		qDebug().noquote() << ">" << de.what();
+		return MessageFactory::DocumentError("Document loading failed, please try again later");
 	}
-
-	User* user = client->getUser();
-
-	/* if it's the first time opening this document, add it to the user's list of documents */	
-	if (!user->hasDocument(docUri)) {
-		user->addDocument(docUri);
-		try {
-			saveUsers();
-		}
-		catch (FileException& fe) {
-			client->getUser()->recoverFrom(recoverFrom);
-			return MessageFactory::DocumentError("Cannot open the document for internal problem, please try later");
-		}
-	}
-	/* and add the new editor to the document's list of editors */
-	doc->insertNewEditor(user->getUsername());
 
 	/* this thread will not recives more messages from client */
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
@@ -693,7 +682,29 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	if (!documents.contains(docUri))
 		return MessageFactory::DocumentError("The specified document does not exist (invalid URI)");
 
-	client->getUser()->removeDocument(docUri);
+	// create a copy of the User object before it gets modified, for rollback support
+	User* user = client->getUser();
+	User backupUser = *(user);
+
+	qDebug() << "> Removing document" << docUri.toString() << "from user" << user->getUsername();
+
+	if (user->hasDocument(docUri))
+	{
+		/* remove this document to those owned by the user */
+		user->removeDocument(docUri);
+
+		try
+		{	/* update the users database */
+			saveUsers();
+		}
+		catch (FileException & fe) {
+			qDebug().noquote() << ">" << fe.what();
+			client->getUser()->rollback(backupUser);
+			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
+		}
+	}
+	else return MessageFactory::DocumentError("You don't have access to that document");
+
 	return MessageFactory::DocumentDismissed();
 }
 
@@ -709,6 +720,7 @@ void TcpServer::deleteWorkspace(URI document)
 	}
 	catch (DocumentException& de)
 	{
+		qDebug().noquote() << ">" << de.what();
 		// TODO: how to handle exception ?
 	}
 }

@@ -15,6 +15,12 @@ public:
 	DocumentOpenException(std::string fileName, std::string path);
 };
 
+class DocumentCreateException : public DocumentException
+{
+public:
+	DocumentCreateException(std::string fileName, std::string path);
+};
+
 class DocumentLoadException : public DocumentException
 {
 public:
