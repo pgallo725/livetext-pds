@@ -48,7 +48,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->tabWidget->setTabIcon(1, QIcon::QIcon(rsrcPath + "/LandingPage/register.png"));
 	ui->tabWidget->setIconSize(QSize(40, 65));
 
-
 	//Icona Browse...
 	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/fileopen.png"));
 
@@ -85,6 +84,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->pushButton_remove, &QPushButton::clicked, this, &LandingPage::pushButtonRemoveClicked);
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
 	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
+	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::serverLogout);
+	connect(ui->pushButton_editProfile, &QPushButton::clicked, this, &LandingPage::editProfile);
 
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
@@ -187,6 +188,20 @@ void LandingPage::confirmOperation()
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
+void LandingPage::updateUserInfo()
+{
+	ui->label_userNick->setText(_user->getNickname());
+	ui->label_userUsername->setText(_user->getUsername());
+
+	int w = ui->label_userProfilePhoto->width();
+	int h = ui->label_userProfilePhoto->height();
+
+	QPixmap userPix;
+
+	userPix.convertFromImage(_user->getIcon());
+	ui->label_userProfilePhoto->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
 void LandingPage::Login()
 {
 	/*
@@ -272,6 +287,7 @@ void LandingPage::incorrectFileOperation(QString error)
 	}
 	else {
 		ui->label_incorrect_file_operation->setText(error);
+		setupFileList();
 	}
 
 }
@@ -293,6 +309,9 @@ void LandingPage::connectionEstabilished()
 void LandingPage::openLoggedPage()
 {
 	stopLoadingAnimation();
+
+	setupFileList();
+	updateUserInfo();
 
 	ui->stackedWidget->setCurrentIndex(1);
 	ui->stackedWidget->show();
@@ -379,8 +398,6 @@ void LandingPage::pushButtonBackClicked()
 
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
-
-	emit(serverLogout());
 }
 
 void LandingPage::enablePushButtonOpen()
@@ -399,8 +416,10 @@ void LandingPage::enablePushButtonOpen()
 
 
 
-void LandingPage::setupFileList(QList<URI> documents)
+void LandingPage::setupFileList()
 {
+
+	QList<URI> documents = _user->getDocuments();
 	ui->listWidget->clear();
 
 	QList<URI>::iterator it;
@@ -508,4 +527,9 @@ void LandingPage::stopLoadingAnimation()
 	QApplication::restoreOverrideCursor();
 	loading->close();
 	setEnabled(true);
+}
+
+void LandingPage::setUser(User* user)
+{
+	_user = user;
 }

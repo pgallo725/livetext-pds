@@ -20,6 +20,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_landingPage, &LandingPage::removeDocument, this, &LiveText::removeDocument);
 	connect(_landingPage, &LandingPage::addDocument, this, &LiveText::addDocument);
 	connect(_landingPage, &LandingPage::openDocument, this, &LiveText::openDocument);
+	connect(_landingPage, &LandingPage::editProfile, this, &LiveText::openEditProfile);
 
 	//LANDINGPAGE - CLIENT
 	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);
@@ -33,7 +34,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
 
-	//connect(_client, &Client::abortConnection, );
+	
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
@@ -44,6 +45,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
 	connect(_client, &Client::documentExitSuccess, this, &LiveText::closeDocumentCompleted);
+	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 }
 
 LiveText::~LiveText()
@@ -77,9 +79,10 @@ void LiveText::Login(QString username, QString password)
 void LiveText::loginSuccess(User user)
 {
 	_user = user;
-	_landingPage->setupFileList(_user.getDocuments());
+	_landingPage->setUser(&_user);
 	_landingPage->openLoggedPage();
 }
+
 
 void LiveText::loginFailed(QString errorType)
 {
@@ -110,6 +113,28 @@ void LiveText::Logout()
 	_client->Disconnect();
 }
 
+
+void LiveText::forceLogout()
+{
+	if (_textEdit != nullptr) {
+		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+
+		_textEdit->closeEditor();
+
+		delete _docEditor;
+		delete _textEdit;
+
+		_docEditor = nullptr;
+		_textEdit = nullptr;
+	}	
+	
+	
+	_landingPage->pushButtonBackClicked();
+	_landingPage->incorrectOperation(tr("Server not responding"));
+	_landingPage->show();
+
+}
+
 //Delete document from list
 void LiveText::removeDocument(int index)
 {
@@ -119,7 +144,7 @@ void LiveText::removeDocument(int index)
 void LiveText::dismissDocumentCompleted(URI URI)
 {
 	_user.removeDocument(URI);
-	_landingPage->setupFileList(_user.getDocuments());
+	_landingPage->setupFileList();
 	_landingPage->documentDismissed();
 
 }
@@ -149,13 +174,14 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
+	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile);
+
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
 	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
-	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);
 	
 	
@@ -204,17 +230,19 @@ void LiveText::closeDocument()
 void LiveText::closeDocumentCompleted(bool isForced)
 {
 	if (isForced) {
-		_textEdit->forceClosingDocumentError();
+		_textEdit->criticalError(tr("Server encountered an error, the document will be closed"));
 	}
 
 	_textEdit->closeEditor();
 
-	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 	_landingPage->show();
 
 	delete _docEditor;
 	delete _textEdit;
+
+	_docEditor = nullptr;
+	_textEdit = nullptr;
 }
 
 //Send cursor
@@ -241,7 +269,26 @@ void LiveText::sendAccountUpdate(QString nickname, QImage image, QString passwor
 void LiveText::accountUpdated(User user)
 {
 	_user = user;
-	_textEdit->accountUpdateSuccessful();
+	if (_textEdit != nullptr) {
+		_textEdit->newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
+	}
+	if (_landingPage->isVisible()) {
+		_landingPage->updateUserInfo();
+	}
+
+	_editProfile->updateSuccessful();
+	delete _editProfile;
+	_editProfile = nullptr;
+}
+
+void LiveText::openEditProfile()
+{
+	_editProfile = new ProfileEditWindow(&_user);
+	
+	connect(_editProfile, &ProfileEditWindow::accountUpdate, this, &LiveText::sendAccountUpdate);
+	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
+
+	_editProfile->exec();
 }
 
 
