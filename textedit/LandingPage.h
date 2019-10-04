@@ -32,6 +32,9 @@ public:
 	void startLoadingAnimation(QString text);
 	void stopLoadingAnimation();
 
+	void setUser(User* user);
+	void updateUserInfo();
+
 private slots:
 	void pushButtonNewClicked();
 	void pushButtonRegisterClicked();
@@ -61,11 +64,12 @@ signals:
 	void serverLogin(QString username, QString password);
 	void serverRegister(QString username, QString password, QString nickname, QImage icon);
 	void serverLogout();
+	void editProfile();
 
 private:
 	Ui::LandingPage* ui;
 	Client* client;
-
+	User* _user;
 	QLabel* loading;
 
 	OpenUriWindow* openURIWindow;

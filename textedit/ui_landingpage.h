@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'landingpage.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -116,6 +116,13 @@ public:
     QPushButton *pushButton_back;
     QSpacerItem *verticalSpacer_16;
     QVBoxLayout *verticalLayout_8;
+    QHBoxLayout *horizontalLayout_7;
+    QSpacerItem *horizontalSpacer_2;
+    QVBoxLayout *verticalLayout_2;
+    QLabel *label_userNick;
+    QLabel *label_userUsername;
+    QPushButton *pushButton_editProfile;
+    QLabel *label_userProfilePhoto;
     QSpacerItem *verticalSpacer_19;
     QPushButton *pushButton_new;
     QSpacerItem *verticalSpacer_18;
@@ -250,6 +257,20 @@ public:
         sizePolicy1.setHeightForWidth(pushButton_register->sizePolicy().hasHeightForWidth());
         pushButton_register->setSizePolicy(sizePolicy1);
         pushButton_register->setMaximumSize(QSize(75, 16777215));
+        QPalette palette;
+        QBrush brush(QColor(0, 0, 0, 255));
+        brush.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        QBrush brush1(QColor(0, 85, 255, 255));
+        brush1.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Active, QPalette::ButtonText, brush1);
+        palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
+        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, brush1);
+        QBrush brush2(QColor(120, 120, 120, 255));
+        brush2.setStyle(Qt::SolidPattern);
+        palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush2);
+        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, brush2);
+        pushButton_register->setPalette(palette);
         QFont font3;
         font3.setPointSize(12);
         font3.setUnderline(true);
@@ -532,15 +553,13 @@ public:
         label_incorrect_operation = new QLabel(groupBox_5);
         label_incorrect_operation->setObjectName(QString::fromUtf8("label_incorrect_operation"));
         label_incorrect_operation->setMinimumSize(QSize(0, 30));
-        QPalette palette;
-        QBrush brush(QColor(255, 0, 0, 255));
-        brush.setStyle(Qt::SolidPattern);
-        palette.setBrush(QPalette::Active, QPalette::WindowText, brush);
-        palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-        QBrush brush1(QColor(120, 120, 120, 255));
-        brush1.setStyle(Qt::SolidPattern);
-        palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        label_incorrect_operation->setPalette(palette);
+        QPalette palette1;
+        QBrush brush3(QColor(255, 0, 0, 255));
+        brush3.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Active, QPalette::WindowText, brush3);
+        palette1.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette1.setBrush(QPalette::Disabled, QPalette::WindowText, brush2);
+        label_incorrect_operation->setPalette(palette1);
         label_incorrect_operation->setAlignment(Qt::AlignCenter);
 
         verticalLayout_15->addWidget(label_incorrect_operation);
@@ -669,7 +688,86 @@ public:
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
         verticalLayout_8->setContentsMargins(20, -1, 40, -1);
-        verticalSpacer_19 = new QSpacerItem(20, 45, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        horizontalLayout_7 = new QHBoxLayout();
+        horizontalLayout_7->setSpacing(6);
+        horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
+        horizontalLayout_7->setContentsMargins(-1, 0, 0, -1);
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout_7->addItem(horizontalSpacer_2);
+
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setSpacing(6);
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(-1, 0, -1, -1);
+        label_userNick = new QLabel(page_open);
+        label_userNick->setObjectName(QString::fromUtf8("label_userNick"));
+        sizePolicy3.setHeightForWidth(label_userNick->sizePolicy().hasHeightForWidth());
+        label_userNick->setSizePolicy(sizePolicy3);
+        QFont font11;
+        font11.setPointSize(11);
+        font11.setBold(true);
+        font11.setWeight(75);
+        label_userNick->setFont(font11);
+        label_userNick->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_2->addWidget(label_userNick);
+
+        label_userUsername = new QLabel(page_open);
+        label_userUsername->setObjectName(QString::fromUtf8("label_userUsername"));
+        QSizePolicy sizePolicy4(QSizePolicy::Preferred, QSizePolicy::Minimum);
+        sizePolicy4.setHorizontalStretch(0);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(label_userUsername->sizePolicy().hasHeightForWidth());
+        label_userUsername->setSizePolicy(sizePolicy4);
+        QFont font12;
+        font12.setPointSize(11);
+        label_userUsername->setFont(font12);
+        label_userUsername->setAlignment(Qt::AlignCenter);
+
+        verticalLayout_2->addWidget(label_userUsername);
+
+        pushButton_editProfile = new QPushButton(page_open);
+        pushButton_editProfile->setObjectName(QString::fromUtf8("pushButton_editProfile"));
+        QSizePolicy sizePolicy5(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        sizePolicy5.setHorizontalStretch(0);
+        sizePolicy5.setVerticalStretch(0);
+        sizePolicy5.setHeightForWidth(pushButton_editProfile->sizePolicy().hasHeightForWidth());
+        pushButton_editProfile->setSizePolicy(sizePolicy5);
+        pushButton_editProfile->setMaximumSize(QSize(16777212, 16777215));
+        QPalette palette2;
+        palette2.setBrush(QPalette::Active, QPalette::ButtonText, brush1);
+        palette2.setBrush(QPalette::Inactive, QPalette::ButtonText, brush1);
+        palette2.setBrush(QPalette::Disabled, QPalette::ButtonText, brush2);
+        pushButton_editProfile->setPalette(palette2);
+        QFont font13;
+        font13.setUnderline(true);
+        pushButton_editProfile->setFont(font13);
+        pushButton_editProfile->setFocusPolicy(Qt::NoFocus);
+        pushButton_editProfile->setFlat(true);
+
+        verticalLayout_2->addWidget(pushButton_editProfile);
+
+
+        horizontalLayout_7->addLayout(verticalLayout_2);
+
+        label_userProfilePhoto = new QLabel(page_open);
+        label_userProfilePhoto->setObjectName(QString::fromUtf8("label_userProfilePhoto"));
+        QSizePolicy sizePolicy6(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        sizePolicy6.setHorizontalStretch(0);
+        sizePolicy6.setVerticalStretch(0);
+        sizePolicy6.setHeightForWidth(label_userProfilePhoto->sizePolicy().hasHeightForWidth());
+        label_userProfilePhoto->setSizePolicy(sizePolicy6);
+        label_userProfilePhoto->setMinimumSize(QSize(80, 80));
+        label_userProfilePhoto->setFrameShape(QFrame::Box);
+        label_userProfilePhoto->setFrameShadow(QFrame::Plain);
+
+        horizontalLayout_7->addWidget(label_userProfilePhoto);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_7);
+
+        verticalSpacer_19 = new QSpacerItem(20, 16, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_19);
 
@@ -696,29 +794,27 @@ public:
         label_incorrect_file_operation = new QLabel(page_open);
         label_incorrect_file_operation->setObjectName(QString::fromUtf8("label_incorrect_file_operation"));
         label_incorrect_file_operation->setMinimumSize(QSize(0, 30));
-        QPalette palette1;
-        palette1.setBrush(QPalette::Active, QPalette::WindowText, brush);
-        QBrush brush2(QColor(0, 0, 0, 255));
-        brush2.setStyle(Qt::SolidPattern);
-        palette1.setBrush(QPalette::Active, QPalette::Text, brush2);
-        QBrush brush3(QColor(255, 0, 0, 128));
-        brush3.setStyle(Qt::SolidPattern);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette::Active, QPalette::PlaceholderText, brush3);
-#endif
-        palette1.setBrush(QPalette::Inactive, QPalette::WindowText, brush);
-        palette1.setBrush(QPalette::Inactive, QPalette::Text, brush2);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette::Inactive, QPalette::PlaceholderText, brush3);
-#endif
-        palette1.setBrush(QPalette::Disabled, QPalette::WindowText, brush1);
-        palette1.setBrush(QPalette::Disabled, QPalette::Text, brush1);
-        QBrush brush4(QColor(0, 0, 0, 128));
+        QPalette palette3;
+        palette3.setBrush(QPalette::Active, QPalette::WindowText, brush3);
+        palette3.setBrush(QPalette::Active, QPalette::Text, brush);
+        QBrush brush4(QColor(255, 0, 0, 128));
         brush4.setStyle(Qt::SolidPattern);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
-        palette1.setBrush(QPalette::Disabled, QPalette::PlaceholderText, brush4);
+        palette3.setBrush(QPalette::Active, QPalette::PlaceholderText, brush4);
 #endif
-        label_incorrect_file_operation->setPalette(palette1);
+        palette3.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette3.setBrush(QPalette::Inactive, QPalette::Text, brush);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette3.setBrush(QPalette::Inactive, QPalette::PlaceholderText, brush4);
+#endif
+        palette3.setBrush(QPalette::Disabled, QPalette::WindowText, brush2);
+        palette3.setBrush(QPalette::Disabled, QPalette::Text, brush2);
+        QBrush brush5(QColor(0, 0, 0, 128));
+        brush5.setStyle(Qt::SolidPattern);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
+        palette3.setBrush(QPalette::Disabled, QPalette::PlaceholderText, brush5);
+#endif
+        label_incorrect_file_operation->setPalette(palette3);
         label_incorrect_file_operation->setTextFormat(Qt::AutoText);
         label_incorrect_file_operation->setAlignment(Qt::AlignCenter);
 
@@ -743,8 +839,8 @@ public:
 
         retranslateUi(LandingPage);
 
-        stackedWidget->setCurrentIndex(0);
-        tabWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(1);
+        tabWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(LandingPage);
@@ -752,39 +848,43 @@ public:
 
     void retranslateUi(QMainWindow *LandingPage)
     {
-        LandingPage->setWindowTitle(QApplication::translate("LandingPage", "LiveText", nullptr));
-        label->setText(QApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
-        label_27->setText(QApplication::translate("LandingPage", "Username", nullptr));
-        label_28->setText(QApplication::translate("LandingPage", "Password", nullptr));
-        checkBox_saveCredential->setText(QApplication::translate("LandingPage", "Save this settings as default", nullptr));
-        label_4->setText(QApplication::translate("LandingPage", "If you don't have an account", nullptr));
-        pushButton_register->setText(QApplication::translate("LandingPage", "Register", nullptr));
+        LandingPage->setWindowTitle(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
+        label->setText(QCoreApplication::translate("LandingPage", "Enter your credentials to login into your account", nullptr));
+        label_27->setText(QCoreApplication::translate("LandingPage", "Username", nullptr));
+        label_28->setText(QCoreApplication::translate("LandingPage", "Password", nullptr));
+        checkBox_saveCredential->setText(QCoreApplication::translate("LandingPage", "Save this settings as default", nullptr));
+        label_4->setText(QCoreApplication::translate("LandingPage", "If you don't have an account", nullptr));
+        pushButton_register->setText(QCoreApplication::translate("LandingPage", "Register", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QString());
-        label_3->setText(QApplication::translate("LandingPage", "Please fill the form with required information to\n"
+        label_3->setText(QCoreApplication::translate("LandingPage", "Please fill the form with required information to\n"
 "create your account", nullptr));
         label_UsrIcon->setText(QString());
-        label_15->setText(QApplication::translate("LandingPage", "Profile icon", nullptr));
-        label_2->setText(QApplication::translate("LandingPage", "Username*", nullptr));
-        label_5->setText(QApplication::translate("LandingPage", "Nickname", nullptr));
-        label_6->setText(QApplication::translate("LandingPage", "Password*", nullptr));
-        label_11->setText(QApplication::translate("LandingPage", "Confirm\n"
+        label_15->setText(QCoreApplication::translate("LandingPage", "Profile icon", nullptr));
+        label_2->setText(QCoreApplication::translate("LandingPage", "Username*", nullptr));
+        label_5->setText(QCoreApplication::translate("LandingPage", "Nickname", nullptr));
+        label_6->setText(QCoreApplication::translate("LandingPage", "Password*", nullptr));
+        label_11->setText(QCoreApplication::translate("LandingPage", "Confirm\n"
 "password*", nullptr));
         pushButton_browse->setText(QString());
-        label_9->setText(QApplication::translate("LandingPage", "* = Required field", nullptr));
+        label_9->setText(QCoreApplication::translate("LandingPage", "* = Required field", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QString());
         label_logo->setText(QString());
-        label_8->setText(QApplication::translate("LandingPage", "LiveText", nullptr));
-        label_7->setText(QApplication::translate("LandingPage", "Politecnico di Torino\n"
+        label_8->setText(QCoreApplication::translate("LandingPage", "LiveText", nullptr));
+        label_7->setText(QCoreApplication::translate("LandingPage", "Politecnico di Torino\n"
 "a.a 2018/2019", nullptr));
-        groupBox_5->setTitle(QApplication::translate("LandingPage", "Server settings", nullptr));
-        label_19->setText(QApplication::translate("LandingPage", "Address", nullptr));
-        label_20->setText(QApplication::translate("LandingPage", "Port", nullptr));
+        groupBox_5->setTitle(QCoreApplication::translate("LandingPage", "Server settings", nullptr));
+        label_19->setText(QCoreApplication::translate("LandingPage", "Address", nullptr));
+        label_20->setText(QCoreApplication::translate("LandingPage", "Port", nullptr));
         label_incorrect_operation->setText(QString());
         pushButton_confirmOperation->setText(QString());
-        groupBox_2->setTitle(QApplication::translate("LandingPage", "Open existing file", nullptr));
-        pushButton_remove->setText(QApplication::translate("LandingPage", "Remove selected", nullptr));
-        pushButton_open->setText(QApplication::translate("LandingPage", "Open selected", nullptr));
-        pushButton_back->setText(QApplication::translate("LandingPage", "Logout", nullptr));
+        groupBox_2->setTitle(QCoreApplication::translate("LandingPage", "Open existing file", nullptr));
+        pushButton_remove->setText(QCoreApplication::translate("LandingPage", "Remove selected", nullptr));
+        pushButton_open->setText(QCoreApplication::translate("LandingPage", "Open selected", nullptr));
+        pushButton_back->setText(QCoreApplication::translate("LandingPage", "Logout", nullptr));
+        label_userNick->setText(QString());
+        label_userUsername->setText(QString());
+        pushButton_editProfile->setText(QCoreApplication::translate("LandingPage", "Edit profile...", nullptr));
+        label_userProfilePhoto->setText(QString());
         pushButton_new->setText(QString());
         pushButton_openuri->setText(QString());
         label_incorrect_file_operation->setText(QString());

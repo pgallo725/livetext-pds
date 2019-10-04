@@ -35,7 +35,7 @@ private slots:
 	void sendCursor(qint32 pos);
 	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void accountUpdated(User user);
-
+	void openEditProfile();
 
 	//LIVETEXT
 	void loginFailed(QString errorType);
@@ -53,6 +53,7 @@ private:
 	Client* _client;
 	TextEdit* _textEdit;
 	DocumentEditor* _docEditor;
+	ProfileEditWindow* _editProfile;
 	User _user;
 };
 

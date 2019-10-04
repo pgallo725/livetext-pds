@@ -31,7 +31,6 @@ public:
 	TextEdit(QWidget* parent = 0);
 
 	void setUser(User* user); //User logged
-	void accountUpdateSuccessful(); //Account updated
 
 
 	//Document
@@ -56,12 +55,12 @@ public slots:
 	void fileNew(QString name);
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
-	void accountUpdateFailed(QString error);
 	void closeDocumentError(QString error);
 
 signals:
 	void closeDocument();
 	void newCursorPosition(qint32 position);
+	void openEditProfile();
 	void accountUpdate(QString nickname, QImage image, QString password);
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
@@ -75,8 +74,6 @@ private slots:
 	void filePrintPdf();
 
 	void fileShare();
-
-	void editProfile();
 
 	void highlightUsersText();
 	void contentsChange(int position, int charsRemoved, int charsAdded);
@@ -132,9 +129,6 @@ private:
 
 	//Logged user
 	User* _user;
-
-	//Edit window
-	ProfileEditWindow* ew;
 
 	//Document
 	QString URI;

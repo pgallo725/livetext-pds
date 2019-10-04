@@ -20,6 +20,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	connect(_landingPage, &LandingPage::removeDocument, this, &LiveText::removeDocument);
 	connect(_landingPage, &LandingPage::addDocument, this, &LiveText::addDocument);
 	connect(_landingPage, &LandingPage::openDocument, this, &LiveText::openDocument);
+	connect(_landingPage, &LandingPage::editProfile, this, &LiveText::openEditProfile);
 
 	//LANDINGPAGE - CLIENT
 	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);
@@ -75,6 +76,7 @@ void LiveText::Login(QString username, QString password)
 void LiveText::loginSuccess(User user)
 {
 	_user = user;
+	_landingPage->setUser(&_user);
 	_landingPage->setupFileList(_user.getDocuments());
 	_landingPage->openLoggedPage();
 }
@@ -147,13 +149,14 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
+	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile);
+
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
 	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
-	connect(_client, &Client::accountModificationFail, _textEdit, &TextEdit::accountUpdateFailed);
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);
 	
 	
@@ -239,7 +242,25 @@ void LiveText::sendAccountUpdate(QString nickname, QImage image, QString passwor
 void LiveText::accountUpdated(User user)
 {
 	_user = user;
-	_textEdit->accountUpdateSuccessful();
+	if (_textEdit != nullptr) {
+		_textEdit->newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
+	}
+	if (_landingPage->isVisible()) {
+		_landingPage->updateUserInfo();
+	}
+
+	_editProfile->updateSuccessful();
+	delete _editProfile;
+}
+
+void LiveText::openEditProfile()
+{
+	_editProfile = new ProfileEditWindow(&_user);
+	
+	connect(_editProfile, &ProfileEditWindow::accountUpdate, this, &LiveText::sendAccountUpdate);
+	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
+
+	_editProfile->exec();
 }
 
 

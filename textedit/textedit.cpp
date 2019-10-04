@@ -192,7 +192,7 @@ void TextEdit::setupUserActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 	const QIcon userIcon(rsrcPath + "/user.png");
-	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
+	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
 	tb->addAction(actionUser);
 
 
@@ -480,19 +480,6 @@ void TextEdit::setUser(User* user)
 	_user = user;
 
 	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
-}
-
-void TextEdit::accountUpdateSuccessful()
-{
-	ew->updateSuccessful();
-	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
-
-}
-
-
-void TextEdit::accountUpdateFailed(QString error)
-{
-	ew->updateFailed(error);
 }
 
 void TextEdit::closeDocumentError(QString error)
@@ -797,16 +784,6 @@ void TextEdit::fileShare()
 	su->exec();
 }
 
-void TextEdit::editProfile()
-{
-	ew = new ProfileEditWindow(_user);
-
-	connect(ew, &ProfileEditWindow::accountUpdate, this, &TextEdit::accountUpdate);
-
-	//Mostra la finestra di mw formata
-	ew->exec();
-}
-
 void TextEdit::textBold()
 {
 	QTextCharFormat fmt;
@@ -850,6 +827,9 @@ void TextEdit::textSize(const QString& p)
 
 void TextEdit::listStyle(int styleIndex)
 {
+
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Formato lista
 	QTextListFormat listFmt;
 
@@ -932,7 +912,7 @@ void TextEdit::listStyle(int styleIndex)
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
 
-		blockFmt.setHeadingLevel(0);
+		//blockFmt.setHeadingLevel(0);
 		cursor.setBlockFormat(blockFmt);
 	}
 	//Indica se il cursore è gia in una lista, se sì ne prende il formato
@@ -976,9 +956,7 @@ void TextEdit::textStyle(int styleIndex)
 	fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
 
 	//Indica l'intera linea su cui sta il cursore
-	cursor.select(QTextCursor::LineUnderCursor);
-	cursor.mergeCharFormat(fmt);
-	textEdit->mergeCurrentCharFormat(fmt);
+	mergeFormatOnWordOrSelection(fmt);
 
 	const QSignalBlocker blocker(textEdit->document());
 
