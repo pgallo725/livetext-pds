@@ -26,7 +26,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	qInfo().nospace() << "LiveText Server, version 0.9.1" << endl
+	qInfo().nospace() << "LiveText Server, version 0.9.2" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -145,7 +145,7 @@ void TcpServer::initialize()
 	QFile docsFile(INDEX_FILENAME);
 	if (docsFile.open(QIODevice::ReadWrite| QIODevice::Text))
 	{
-		qDebug() << "> Reading documents index";
+		qDebug() << "> Reading documents index file";
 
 		QTextStream docIndexStream(&docsFile);
 
@@ -595,53 +595,56 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 
 	qDebug() << "> (DOCUMENT CREATED)";
 
-	return openDocument(author, docURI);
+	return openDocument(author, docURI, true);
 }
 
 /* Open an existing Document */
-MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
+MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, bool docJustCreated)
 {
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	QSharedPointer<WorkSpace> ws;
 
-	if (!client->isLogged())
-		return MessageFactory::DocumentError("You are not logged in");
-
-	/* check if this document doesn't exist */
-	if (!documents.contains(docUri))
-		return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
-
-	// create a copy of the User object before it gets modified, for rollback support
-	User* user = client->getUser();
-	User backupUser = *(user);
-
-	qDebug() << "> User" << user->getUsername() << "requested document" << docUri.toString();
-
-	QSharedPointer<Document> doc = documents.find(docUri).value();
-	QSharedPointer<WorkSpace> w;
-
-	/* check if it's the first time opening this document */
-	if (!user->hasDocument(docUri))
+	if (!docJustCreated)		// Avoid these operations if we're being called by createDocument
 	{
-		/* add this document to those owned by the user */
-		user->addDocument(docUri);
+		if (!client->isLogged())
+			return MessageFactory::DocumentError("You are not logged in");
 
-		/* and add the new editor to the document's list of editors */
-		doc->insertNewEditor(user->getUsername());
+		/* check if this document doesn't exist */
+		if (!documents.contains(docUri))
+			return MessageFactory::DocumentError("The requested document does not exist (invalid URI)");
 
-		try
-		{	/* update the users database */
-			saveUsers();
-		}
-		catch (FileException & fe) {
-			qDebug().noquote() << ">" << fe.what();
-			client->getUser()->rollback(backupUser);
-			return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
+		// create a copy of the User object before it gets modified, for rollback support
+		User* user = client->getUser();
+		User backupUser = *(user);
+
+		qDebug() << "> User" << user->getUsername() << "requested document" << docUri.toString();
+
+		/* check if it's the first time opening this document */
+		if (!user->hasDocument(docUri))
+		{
+			/* add this document to those owned by the user */
+			user->addDocument(docUri);
+
+			/* and add the new editor to the document's list of editors */
+			documents.find(docUri).value()->insertNewEditor(user->getUsername());
+
+			try
+			{	/* update the users database */
+				saveUsers();
+			}
+			catch (FileException & fe) {
+				qDebug().noquote() << ">" << fe.what();
+				client->getUser()->rollback(backupUser);
+				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
+			}
 		}
 	}
-
+	
 	try
 	{
-		w = workspaces.contains(docUri) ?
+		QSharedPointer<Document> doc = documents.find(docUri).value();
+
+		ws = workspaces.contains(docUri) ?
 			workspaces.find(docUri).value() :
 			createWorkspace(doc);
 	}
@@ -659,14 +662,14 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri)
 	/* move the socket's affinity to the workspace thread */
 	QSslSocket* s = client->getSocket();
 	s->setParent(nullptr);
-	s->moveToThread(w->thread());
+	s->moveToThread(ws->thread());
 
 	clients.remove(clientSocket);		// remove the Client from the server map
 
 	/* move the client object from the server to the workspace thread */
-	connect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
+	connect(this, &TcpServer::clientToWorkspace, ws.get(), &WorkSpace::newClient);
 	emit clientToWorkspace(client);
-	disconnect(this, &TcpServer::clientToWorkspace, w.get(), &WorkSpace::newClient);
+	disconnect(this, &TcpServer::clientToWorkspace, ws.get(), &WorkSpace::newClient);
 
 	return MessageCapsule();
 }

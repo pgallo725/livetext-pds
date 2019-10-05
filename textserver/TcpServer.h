@@ -76,7 +76,7 @@ public slots:
 
 	MessageCapsule removeDocument(QSslSocket* client, URI docUri);
 	MessageCapsule createDocument(QSslSocket* author, QString docName);
-	MessageCapsule openDocument(QSslSocket* clientSocket, URI docUri);
+	MessageCapsule openDocument(QSslSocket* clientSocket, URI docUri, bool docJustCreated = false);
 
 	void receiveClient(QSharedPointer<Client> client);
 	void logoutClient(QSslSocket* clientSocket);
