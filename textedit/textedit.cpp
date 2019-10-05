@@ -504,7 +504,7 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 
 void TextEdit::criticalError(QString error)
 {
-	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error , QMessageBox::Ok);
+	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok);
 }
 
 
@@ -634,7 +634,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
 	//Test with user ID for more separate colors
-	int randomNumber = 7 + (userId*3) % 11;
+	int randomNumber = 7 + (userId * 3) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
@@ -837,7 +837,6 @@ void TextEdit::listStyle(int styleIndex)
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
 
-
 	//Salva il formato del blocco		
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
@@ -926,6 +925,7 @@ void TextEdit::listStyle(int styleIndex)
 
 		//Creo la lista indentata correttamente
 		cursor.createList(listFmt);
+
 	}
 	else {
 		//Altrimenti se non sono in una lista indento di +1
@@ -1147,57 +1147,43 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = 0; i < charsRemoved; ++i) {
-			QChar ch = textEdit->document()->characterAt(i);
 			emit charDeleted(position);
 		}
 	}
 
 	if (charsAdded > 0) {
-		//Gestione inserimento carattere
 		QTextCursor cursor = textEdit->textCursor();
 
-		QTextList* list = cursor.currentList();
-		if (list) {
-			for (int i = 0; i < list->count(); ++i) {
-				QTextBlock blk = list->item(i);
-				int start = blk.position();
-				int len = blk.length();
-			}
-		}
-		else {
-			QTextBlock blk = cursor.block();
-			int start = blk.position();
-			int len = blk.length();
-		}
-
 		for (int i = position; i < position + charsAdded; ++i) {
+			//Getting QTextBlockFormat from cursor
+			QTextBlockFormat blockFmt = cursor.blockFormat();
+			
+			//Ricavo il carattere inserito
+			QChar ch = textEdit->document()->characterAt(i);
+			
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
 			//precedente al cursore.
 			cursor.setPosition(i + 1);
-
-			//Ricavo il carattere inserito
-			QChar ch = textEdit->document()->characterAt(i);
-
-			//Ricavo formato carattere inserio
+			
+			//Getting QTextCharFormat from cursor
 			QTextCharFormat fmt = cursor.charFormat();
 
 			if ((i != position + charsAdded - 1) || (i != textEdit->document()->characterCount() - 1) || ch != QChar::ParagraphSeparator) {
 				emit charInserted(ch, fmt, i);
+			}
+			if (ch == QChar::ParagraphSeparator || i == textEdit->document()->characterCount() - 2) {
+				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
 			}
 		}
 	}
 }
 
 /*
-TEST FUNCTION - TODO
 
 Function to handle extra cursors position updates.
 Recomputes all positions based on document scroll positions.
 
 */
-
-
-//Handles users cursor
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
