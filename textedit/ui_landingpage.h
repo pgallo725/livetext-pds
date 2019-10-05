@@ -124,8 +124,10 @@ public:
     QPushButton *pushButton_editProfile;
     QLabel *label_userProfilePhoto;
     QSpacerItem *verticalSpacer_19;
+    QHBoxLayout *horizontalLayout_9;
     QPushButton *pushButton_new;
-    QSpacerItem *verticalSpacer_18;
+    QSpacerItem *verticalSpacer_11;
+    QHBoxLayout *horizontalLayout_8;
     QPushButton *pushButton_openuri;
     QSpacerItem *verticalSpacer_9;
     QLabel *label_incorrect_file_operation;
@@ -136,7 +138,7 @@ public:
     {
         if (LandingPage->objectName().isEmpty())
             LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
-        LandingPage->resize(831, 563);
+        LandingPage->resize(1244, 775);
         LandingPage->setMinimumSize(QSize(0, 0));
         LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -590,13 +592,14 @@ public:
         verticalLayout_9 = new QVBoxLayout();
         verticalLayout_9->setSpacing(6);
         verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
-        verticalLayout_9->setContentsMargins(40, -1, 20, -1);
+        verticalLayout_9->setContentsMargins(80, -1, 40, -1);
         verticalSpacer_17 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_9->addItem(verticalSpacer_17);
 
         groupBox_2 = new QGroupBox(page_open);
         groupBox_2->setObjectName(QString::fromUtf8("groupBox_2"));
+        groupBox_2->setMinimumSize(QSize(500, 0));
         QFont font8;
         font8.setFamily(QString::fromUtf8("Calibri"));
         font8.setPointSize(14);
@@ -687,7 +690,7 @@ public:
         verticalLayout_8 = new QVBoxLayout();
         verticalLayout_8->setSpacing(6);
         verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
-        verticalLayout_8->setContentsMargins(20, -1, 40, -1);
+        verticalLayout_8->setContentsMargins(40, -1, 40, -1);
         horizontalLayout_7 = new QHBoxLayout();
         horizontalLayout_7->setSpacing(6);
         horizontalLayout_7->setObjectName(QString::fromUtf8("horizontalLayout_7"));
@@ -767,27 +770,50 @@ public:
 
         verticalLayout_8->addLayout(horizontalLayout_7);
 
-        verticalSpacer_19 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Preferred);
+        verticalSpacer_19 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_8->addItem(verticalSpacer_19);
 
+        horizontalLayout_9 = new QHBoxLayout();
+        horizontalLayout_9->setSpacing(6);
+        horizontalLayout_9->setObjectName(QString::fromUtf8("horizontalLayout_9"));
+        horizontalLayout_9->setContentsMargins(-1, 0, -1, -1);
         pushButton_new = new QPushButton(page_open);
         pushButton_new->setObjectName(QString::fromUtf8("pushButton_new"));
+        QSizePolicy sizePolicy7(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy7.setHorizontalStretch(0);
+        sizePolicy7.setVerticalStretch(0);
+        sizePolicy7.setHeightForWidth(pushButton_new->sizePolicy().hasHeightForWidth());
+        pushButton_new->setSizePolicy(sizePolicy7);
         pushButton_new->setMinimumSize(QSize(228, 100));
+        pushButton_new->setMaximumSize(QSize(500, 16777215));
 
-        verticalLayout_8->addWidget(pushButton_new);
+        horizontalLayout_9->addWidget(pushButton_new);
 
-        verticalSpacer_18 = new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-        verticalLayout_8->addItem(verticalSpacer_18);
+        verticalLayout_8->addLayout(horizontalLayout_9);
 
+        verticalSpacer_11 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+        verticalLayout_8->addItem(verticalSpacer_11);
+
+        horizontalLayout_8 = new QHBoxLayout();
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setObjectName(QString::fromUtf8("horizontalLayout_8"));
+        horizontalLayout_8->setContentsMargins(-1, 0, -1, -1);
         pushButton_openuri = new QPushButton(page_open);
         pushButton_openuri->setObjectName(QString::fromUtf8("pushButton_openuri"));
+        sizePolicy7.setHeightForWidth(pushButton_openuri->sizePolicy().hasHeightForWidth());
+        pushButton_openuri->setSizePolicy(sizePolicy7);
         pushButton_openuri->setMinimumSize(QSize(228, 100));
+        pushButton_openuri->setMaximumSize(QSize(500, 16777215));
 
-        verticalLayout_8->addWidget(pushButton_openuri);
+        horizontalLayout_8->addWidget(pushButton_openuri);
 
-        verticalSpacer_9 = new QSpacerItem(20, 30, QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+        verticalLayout_8->addLayout(horizontalLayout_8);
+
+        verticalSpacer_9 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Preferred);
 
         verticalLayout_8->addItem(verticalSpacer_9);
 
@@ -820,7 +846,7 @@ public:
 
         verticalLayout_8->addWidget(label_incorrect_file_operation);
 
-        verticalSpacer_20 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+        verticalSpacer_20 = new QSpacerItem(20, 49, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout_8->addItem(verticalSpacer_20);
 

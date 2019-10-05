@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>831</width>
-    <height>563</height>
+    <width>1244</width>
+    <height>775</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -893,10 +893,10 @@ a.a 2018/2019</string>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <property name="leftMargin">
-           <number>40</number>
+           <number>80</number>
           </property>
           <property name="rightMargin">
-           <number>20</number>
+           <number>40</number>
           </property>
           <item>
            <spacer name="verticalSpacer_17">
@@ -913,6 +913,12 @@ a.a 2018/2019</string>
           </item>
           <item>
            <widget class="QGroupBox" name="groupBox_2">
+            <property name="minimumSize">
+             <size>
+              <width>500</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <family>Calibri</family>
@@ -1077,7 +1083,7 @@ a.a 2018/2019</string>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <property name="leftMargin">
-           <number>20</number>
+           <number>40</number>
           </property>
           <property name="rightMargin">
            <number>40</number>
@@ -1254,7 +1260,7 @@ a.a 2018/2019</string>
              <enum>Qt::Vertical</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1265,20 +1271,39 @@ a.a 2018/2019</string>
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_new">
-            <property name="minimumSize">
-             <size>
-              <width>228</width>
-              <height>100</height>
-             </size>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <property name="topMargin">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+            <item>
+             <widget class="QPushButton" name="pushButton_new">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>228</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <spacer name="verticalSpacer_18">
+           <spacer name="verticalSpacer_11">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -1288,23 +1313,42 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>20</height>
+              <height>40</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_openuri">
-            <property name="minimumSize">
-             <size>
-              <width>228</width>
-              <height>100</height>
-             </size>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <property name="topMargin">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
+            <item>
+             <widget class="QPushButton" name="pushButton_openuri">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>228</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>500</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <spacer name="verticalSpacer_9">
@@ -1317,7 +1361,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>30</height>
+              <height>40</height>
              </size>
             </property>
            </spacer>
@@ -1440,7 +1484,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>40</height>
+              <height>49</height>
              </size>
             </property>
            </spacer>

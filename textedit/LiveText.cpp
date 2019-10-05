@@ -4,6 +4,7 @@
 #include <QDesktopWidget>
 #include <QRect>
 #include <QString>
+#include <QMessageBox>
 
 
 LiveText::LiveText(QObject* parent) : QObject(parent)
@@ -116,8 +117,9 @@ void LiveText::Logout()
 
 void LiveText::forceLogout()
 {
+	
 	if (_textEdit != nullptr) {
-		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+		//_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
 
 		_textEdit->closeEditor();
 
@@ -126,7 +128,10 @@ void LiveText::forceLogout()
 
 		_docEditor = nullptr;
 		_textEdit = nullptr;
-	}	
+	}
+	else {
+		QMessageBox::StandardButton msgbox = QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok);
+	}
 	
 	
 	_landingPage->pushButtonBackClicked();
