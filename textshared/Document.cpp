@@ -136,7 +136,7 @@ void Document::load()
 {
 	// Create or overwrite the document file on disk, and write data to it
 	QFile file(DOCUMENTS_DIRNAME + uri.toString());
-	if (file.open(QIODevice::ReadWrite))
+	if (file.open(QIODevice::ReadOnly | QIODevice::ExistingOnly))
 	{
 		QDataStream docFileStream(&file);
 
@@ -190,13 +190,13 @@ void Document::save()
 	}
 	else
 	{
-		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
+		throw DocumentCreateException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
 }
 
-bool Document::exist()
+bool Document::exists()
 {
-	return QFileInfo(QFile(DOCUMENTS_DIRNAME+uri.toString())).exists();
+	return QFileInfo(QFile(DOCUMENTS_DIRNAME + uri.toString())).exists();
 }
 
 

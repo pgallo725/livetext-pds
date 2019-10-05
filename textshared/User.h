@@ -49,7 +49,7 @@ public:
 	void setIcon(QImage newIcon);
 	void setPassword(QString newPassword);
 	void update(QString nickname, QImage icon, QString password);
-	void recoverFrom(User& u);
+	void rollback(User& u);
 };
 
 
