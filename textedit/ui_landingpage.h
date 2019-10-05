@@ -138,7 +138,7 @@ public:
     {
         if (LandingPage->objectName().isEmpty())
             LandingPage->setObjectName(QString::fromUtf8("LandingPage"));
-        LandingPage->resize(1244, 775);
+        LandingPage->resize(1068, 602);
         LandingPage->setMinimumSize(QSize(0, 0));
         LandingPage->setMaximumSize(QSize(16777215, 16777215));
         QFont font;
@@ -718,11 +718,8 @@ public:
 
         label_userUsername = new QLabel(page_open);
         label_userUsername->setObjectName(QString::fromUtf8("label_userUsername"));
-        QSizePolicy sizePolicy4(QSizePolicy::Preferred, QSizePolicy::Minimum);
-        sizePolicy4.setHorizontalStretch(0);
-        sizePolicy4.setVerticalStretch(0);
-        sizePolicy4.setHeightForWidth(label_userUsername->sizePolicy().hasHeightForWidth());
-        label_userUsername->setSizePolicy(sizePolicy4);
+        sizePolicy3.setHeightForWidth(label_userUsername->sizePolicy().hasHeightForWidth());
+        label_userUsername->setSizePolicy(sizePolicy3);
         QFont font12;
         font12.setPointSize(11);
         label_userUsername->setFont(font12);
@@ -732,11 +729,8 @@ public:
 
         pushButton_editProfile = new QPushButton(page_open);
         pushButton_editProfile->setObjectName(QString::fromUtf8("pushButton_editProfile"));
-        QSizePolicy sizePolicy5(QSizePolicy::Minimum, QSizePolicy::Minimum);
-        sizePolicy5.setHorizontalStretch(0);
-        sizePolicy5.setVerticalStretch(0);
-        sizePolicy5.setHeightForWidth(pushButton_editProfile->sizePolicy().hasHeightForWidth());
-        pushButton_editProfile->setSizePolicy(sizePolicy5);
+        sizePolicy3.setHeightForWidth(pushButton_editProfile->sizePolicy().hasHeightForWidth());
+        pushButton_editProfile->setSizePolicy(sizePolicy3);
         pushButton_editProfile->setMaximumSize(QSize(16777212, 16777215));
         QPalette palette2;
         palette2.setBrush(QPalette::Active, QPalette::ButtonText, brush1);
@@ -756,12 +750,9 @@ public:
 
         label_userProfilePhoto = new QLabel(page_open);
         label_userProfilePhoto->setObjectName(QString::fromUtf8("label_userProfilePhoto"));
-        QSizePolicy sizePolicy6(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        sizePolicy6.setHorizontalStretch(0);
-        sizePolicy6.setVerticalStretch(0);
-        sizePolicy6.setHeightForWidth(label_userProfilePhoto->sizePolicy().hasHeightForWidth());
-        label_userProfilePhoto->setSizePolicy(sizePolicy6);
-        label_userProfilePhoto->setMinimumSize(QSize(80, 80));
+        sizePolicy2.setHeightForWidth(label_userProfilePhoto->sizePolicy().hasHeightForWidth());
+        label_userProfilePhoto->setSizePolicy(sizePolicy2);
+        label_userProfilePhoto->setMinimumSize(QSize(70, 70));
         label_userProfilePhoto->setFrameShape(QFrame::Box);
         label_userProfilePhoto->setFrameShadow(QFrame::Plain);
 
@@ -780,11 +771,11 @@ public:
         horizontalLayout_9->setContentsMargins(-1, 0, -1, -1);
         pushButton_new = new QPushButton(page_open);
         pushButton_new->setObjectName(QString::fromUtf8("pushButton_new"));
-        QSizePolicy sizePolicy7(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy7.setHorizontalStretch(0);
-        sizePolicy7.setVerticalStretch(0);
-        sizePolicy7.setHeightForWidth(pushButton_new->sizePolicy().hasHeightForWidth());
-        pushButton_new->setSizePolicy(sizePolicy7);
+        QSizePolicy sizePolicy4(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy4.setHorizontalStretch(0);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(pushButton_new->sizePolicy().hasHeightForWidth());
+        pushButton_new->setSizePolicy(sizePolicy4);
         pushButton_new->setMinimumSize(QSize(228, 100));
         pushButton_new->setMaximumSize(QSize(500, 16777215));
 
@@ -803,8 +794,8 @@ public:
         horizontalLayout_8->setContentsMargins(-1, 0, -1, -1);
         pushButton_openuri = new QPushButton(page_open);
         pushButton_openuri->setObjectName(QString::fromUtf8("pushButton_openuri"));
-        sizePolicy7.setHeightForWidth(pushButton_openuri->sizePolicy().hasHeightForWidth());
-        pushButton_openuri->setSizePolicy(sizePolicy7);
+        sizePolicy4.setHeightForWidth(pushButton_openuri->sizePolicy().hasHeightForWidth());
+        pushButton_openuri->setSizePolicy(sizePolicy4);
         pushButton_openuri->setMinimumSize(QSize(228, 100));
         pushButton_openuri->setMaximumSize(QSize(500, 16777215));
 

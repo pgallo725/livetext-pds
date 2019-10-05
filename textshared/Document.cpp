@@ -413,13 +413,13 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	else if (s._fPos == b.begin())
 	{
 		int beginIndex = binarySearch(b.begin());
-		if (beginIndex > 0)
+		if (beginIndex >= 0)
 			b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
 	}
 	else if (s._fPos == b.end())
 	{
 		int endIndex = binarySearch(b.end());
-		if (endIndex > 0)
+		if (endIndex >= 0)
 			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
 	}
 }

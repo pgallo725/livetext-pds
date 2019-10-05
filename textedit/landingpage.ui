@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1244</width>
-    <height>775</height>
+    <width>1068</width>
+    <height>602</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1140,7 +1140,7 @@ a.a 2018/2019</string>
               <item>
                <widget class="QLabel" name="label_userUsername">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1161,7 +1161,7 @@ a.a 2018/2019</string>
               <item>
                <widget class="QPushButton" name="pushButton_editProfile">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1230,15 +1230,15 @@ a.a 2018/2019</string>
             <item>
              <widget class="QLabel" name="label_userProfilePhoto">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize">
                <size>
-                <width>80</width>
-                <height>80</height>
+                <width>70</width>
+                <height>70</height>
                </size>
               </property>
               <property name="frameShape">
