@@ -101,7 +101,6 @@ void DocumentEditor::changeBlockFormat(qint32 userId, int start, int end, QTextB
 {
 	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
 	
-	
 	foreach(TextBlockID textBlock, blocks) {
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt, userId);
