@@ -756,25 +756,29 @@ void TcpServer::readMessage()
 		
 		try {
 			message->read(dataStream);
+			socketBuffer.clear();
+
+			if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
+				mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+			{
+				messageHandler.process(message, socket);
+			}
+			else
+			{
+				qDebug() << "> (ERROR) Received unexpected message of type: " << mType;
+				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+				message->send(socket);
+			}
 		}
 		catch (MessageReadException& mre) {
 			qDebug().noquote() << ">" << mre.what();
 			socketBuffer.clear();
 			return;
 		}
-		
-		socketBuffer.clear();
-
-		if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
-			mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
-		{
-			messageHandler.process(message, socket);
-		}
-		else
-		{
-			qDebug() << "> (ERROR) Received unexpected message of type: " << mType;
-			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-			message->send(socket);
+		catch (MessageWriteException& mwe) {
+			qDebug().noquote() << ">" << mwe.what();
+			socketBuffer.clear();
+			return;
 		}
 	}
 }

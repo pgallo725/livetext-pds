@@ -35,3 +35,12 @@ MessageReadException::MessageReadException(std::string msg, MessageType m_type)
 {
 }
 
+MessageWriteException::MessageWriteException(std::string msg, MessageType m_type)
+	: MessageException(msg + "(m_type = " + std::to_string(m_type) + ")")
+{
+}
+
+MessageTypeException::MessageTypeException(std::string msg, MessageType m_type)
+	: MessageException(msg + "(m_type = " + std::to_string(m_type) + ")")
+{
+}

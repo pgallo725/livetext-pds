@@ -97,25 +97,29 @@ void WorkSpace::readMessage()
 		
 		try {
 			message->read(dataStream);
+			socketBuffer.clear();
+
+			if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
+			{
+				messageHandler.process(message, socket);
+			}
+			else
+			{
+				qDebug() << ">> (ERROR) Received unexpected message of type: " << mType;
+				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+				message->send(socket);
+			}
 		}
 		catch (MessageReadException& mre) {
 			qDebug().noquote() << ">" << mre.what();
 			socketBuffer.clear();
 			return;
 		}
-
-		socketBuffer.clear();
-
-		if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
-		{
-			messageHandler.process(message, socket);
-		}
-		else
-		{
-			qDebug() << ">> (ERROR) Received unexpected message of type: " << mType;
-			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-			message->send(socket);
-		}
+		catch (MessageWriteException& mwe) {
+			qDebug().noquote() << ">" << mwe.what();
+			socketBuffer.clear();
+			return;
+		}		
 	}
 }
 

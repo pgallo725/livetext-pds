@@ -45,3 +45,15 @@ class MessageReadException : public MessageException
 public:
 	MessageReadException(std::string msg, MessageType m_type);
 };
+
+class MessageWriteException : public MessageException
+{
+public:
+	MessageWriteException(std::string msg, MessageType m_type);
+};
+
+class MessageTypeException : public MessageException
+{
+public:
+	MessageTypeException(std::string msg, MessageType m_type);
+};
