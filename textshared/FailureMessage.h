@@ -19,13 +19,12 @@ protected:
 	FailureMessage(QString description);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~FailureMessage() {};
-
-	void readFrom(QDataStream& stream) override;
-
+	
 	QString getDescription();
 };
 

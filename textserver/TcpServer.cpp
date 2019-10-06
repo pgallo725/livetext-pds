@@ -752,21 +752,34 @@ void TcpServer::readMessage()
 		
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
-		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-		message->readFrom(dataStream);
+		
+		try {
+			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+			message->read(dataStream);
+			socketBuffer.clear();
 
-		socketBuffer.clear();
-
-		if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
-			mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
-		{
-			messageHandler.process(message, socket);
+			if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
+				mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
+			{
+				messageHandler.process(message, socket);
+			}
+			else
+			{
+				qDebug() << "> (ERROR) Received unexpected message of type: " << mType;
+				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+				message->send(socket);
+			}
 		}
-		else
-		{
-			qDebug() << "> (ERROR) Received unexpected message of type: " << mType;
-			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+		catch (MessageTypeException& mte) {
+			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
+			qDebug().noquote() << ">" << mte.what();
+			socketBuffer.clear();
+		}
+		catch (MessageException& mre) {
+			qDebug().noquote() << ">" << mre.what();
+			socketBuffer.clear();
+			return;
 		}
 	}
 }

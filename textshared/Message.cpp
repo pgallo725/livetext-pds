@@ -1,5 +1,5 @@
 #include "Message.h"
-
+#include <SharedException.h>
 
 Message::Message(MessageType type)
 	: m_type(type)
@@ -21,9 +21,24 @@ void Message::send(QSslSocket* socket) const
 	stream.device()->seek(sizeof(MessageType));
 	stream << (quint32)(buffer.size() - sizeof(MessageType) - sizeof(quint32));
 
+	if (stream.status() == QDataStream::WriteFailed) {
+		throw MessageWriteException("Cannot write message on stream", m_type);
+	}
+
 	// Write the buffer on the socket and send it immediately
-	socket->write(buffer);
+	if (socket->write(buffer) < 0) {
+		throw MessageWriteException("Cannot write message on socket", m_type);
+	}
 	socket->flush();
+}
+
+void Message::read(QDataStream& stream)
+{
+	readFrom(stream);
+
+	if (stream.status() != QDataStream::Ok || !stream.atEnd()) {
+		throw MessageReadException("Read corrupted streamData", m_type);
+	}
 }
 
 int Message::getType()

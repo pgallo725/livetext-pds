@@ -21,13 +21,12 @@ protected:
 	CursorMoveMessage(qint32 userId, qint32 newPosition);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~CursorMoveMessage() {};
-
-	void readFrom(QDataStream& stream) override;
-
+	
 	qint32 getUserId() const;
 	qint32 getCursorPosition() const;
 };
@@ -51,12 +50,11 @@ protected:
 	PresenceUpdateMessage(qint32 userId, QString nickname, QImage icon);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~PresenceUpdateMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -82,12 +80,11 @@ protected:
 	PresenceAddMessage(qint32 userId, QString nickname, QImage icon);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~PresenceAddMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	qint32 getUserId() const;
 	QString getNickname() const;
@@ -111,12 +108,11 @@ protected:
 	PresenceRemoveMessage(qint32 userId);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~PresenceRemoveMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	qint32 getUserId() const;
 };

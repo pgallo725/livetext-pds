@@ -20,12 +20,11 @@ protected:
 	DocumentCreateMessage(QString documentName);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentCreateMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getDocumentName() const;
 };
@@ -48,12 +47,11 @@ protected:
 	DocumentRemoveMessage(URI documentURI);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentRemoveMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	URI getDocumentURI() const;
 };
@@ -76,12 +74,11 @@ protected:
 	DocumentOpenMessage(URI documentURI);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentOpenMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	URI getDocumentURI() const;
 };
@@ -100,12 +97,12 @@ protected:
 	DocumentDismissedMessage();
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentDismissedMessage() {};
 
-	void readFrom(QDataStream& stream) override;
 };
 
 
@@ -126,13 +123,12 @@ protected:
 	DocumentReadyMessage(Document doc);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentReadyMessage() {};
-
-	void readFrom(QDataStream& stream) override;
-
+	
 	Document getDocument() const;
 };
 
@@ -149,12 +145,12 @@ protected:
 	DocumentCloseMessage();
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentCloseMessage() {};
 
-	void readFrom(QDataStream& stream) override;
 };
 
 
@@ -170,12 +166,12 @@ protected:
 	DocumentExitMessage();
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentExitMessage() {};
 
-	void readFrom(QDataStream& stream) override;
 };
 
 
@@ -195,12 +191,11 @@ protected:
 	DocumentErrorMessage(QString reason);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~DocumentErrorMessage() {};
-
-	void readFrom(QDataStream& stream) override;
-
+	
 	QString getErrorMessage() const;
 };

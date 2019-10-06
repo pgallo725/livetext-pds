@@ -7,7 +7,7 @@
 #include "TextEditMessage.h"
 #include "PresenceMessage.h"
 #include "FailureMessage.h"
-
+#include <SharedException.h>
 
 
 MessageCapsule MessageFactory::Empty(MessageType type)
@@ -42,7 +42,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::Failure:				return new FailureMessage();
 
 		default:
-			throw 1;	// TODO: add proper exception
+			throw MessageTypeException("Type unknown", type);
 			break;
 	}
 }

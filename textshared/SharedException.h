@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <string>
+#include "Message.h"
 
 class DocumentException : public std::exception
 {
@@ -31,4 +32,28 @@ class DocumentWriteException : public DocumentException
 {
 public:
 	DocumentWriteException(std::string fileName, std::string path);
+};
+
+class MessageException : public std::exception
+{
+protected:
+	MessageException(std::string msg);
+};
+
+class MessageReadException : public MessageException
+{
+public:
+	MessageReadException(std::string msg, MessageType m_type);
+};
+
+class MessageWriteException : public MessageException
+{
+public:
+	MessageWriteException(std::string msg, MessageType m_type);
+};
+
+class MessageTypeException : public MessageException
+{
+public:
+	MessageTypeException(std::string msg, MessageType m_type);
 };
