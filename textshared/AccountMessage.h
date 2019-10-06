@@ -23,12 +23,11 @@ protected:
 	AccountCreateMessage(QString username, QString nickname, QImage icon, QString password);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~AccountCreateMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getUsername() const;
 	QString getNickname() const;
@@ -56,12 +55,10 @@ protected:
 	AccountUpdateMessage(QString nickname, QImage icon, QString password);
 
 	void writeTo(QDataStream& stream) const override;
-
+	void readFrom(QDataStream& stream) override;
 public:
 
 	~AccountUpdateMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getNickname() const;
 	QImage getIcon() const;
@@ -86,12 +83,10 @@ protected:
 	AccountConfirmedMessage(User user);
 
 	void writeTo(QDataStream& stream) const override;
-
+	void readFrom(QDataStream& stream) override;
 public:
 
 	~AccountConfirmedMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	User& getUserObj();
 };
@@ -114,12 +109,10 @@ protected:
 	AccountErrorMessage(QString reason);
 
 	void writeTo(QDataStream& stream) const override;
-
+	void readFrom(QDataStream& stream) override;
 public:
 
 	~AccountErrorMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getErrorMessage() const;
 };

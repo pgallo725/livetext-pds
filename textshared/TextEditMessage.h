@@ -20,12 +20,11 @@ protected:
 	CharInsertMessage(Symbol symbol);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~CharInsertMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	Symbol& getSymbol();
 };
@@ -47,12 +46,11 @@ protected:
 	CharDeleteMessage(QVector<qint32> position);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~CharDeleteMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QVector<qint32> getPosition() const;
 };
@@ -76,12 +74,11 @@ protected:
 	BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~BlockEditMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	qint32 getAuthorId() const;
 	TextBlockID getBlockId() const;

@@ -1,5 +1,5 @@
 #include "Message.h"
-
+#include <SharedException.h>
 
 Message::Message(MessageType type)
 	: m_type(type)
@@ -24,6 +24,15 @@ void Message::send(QSslSocket* socket) const
 	// Write the buffer on the socket and send it immediately
 	socket->write(buffer);
 	socket->flush();
+}
+
+void Message::read(QDataStream& stream)
+{
+	readFrom(stream);
+
+	if (stream.status() != QDataStream::Ok || !stream.atEnd()) {
+		throw MessageReadException("Read corrupted streamData", m_type);
+	}
 }
 
 int Message::getType()

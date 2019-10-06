@@ -94,7 +94,15 @@ void WorkSpace::readMessage()
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
 		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-		message->readFrom(dataStream);
+		
+		try {
+			message->read(dataStream);
+		}
+		catch (MessageReadException& mre) {
+			qDebug().noquote() << ">" << mre.what();
+			socketBuffer.clear();
+			return;
+		}
 
 		socketBuffer.clear();
 

@@ -15,10 +15,10 @@ protected:
 	LogoutMessage();
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LogoutMessage() {};
-
-	void readFrom(QDataStream& stream) override;
+	
 };
