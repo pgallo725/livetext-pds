@@ -93,9 +93,9 @@ void WorkSpace::readMessage()
 	{
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
-		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
 		
 		try {
+			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
 			message->read(dataStream);
 			socketBuffer.clear();
 
@@ -110,16 +110,17 @@ void WorkSpace::readMessage()
 				message->send(socket);
 			}
 		}
-		catch (MessageReadException& mre) {
-			qDebug().noquote() << ">" << mre.what();
+		catch (MessageTypeException& mte) {
+			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+			message->send(socket);
+			qDebug().noquote() << ">>" << mte.what();
+			socketBuffer.clear();
+		}
+		catch (MessageException& mre) {
+			qDebug().noquote() << ">>" << mre.what();
 			socketBuffer.clear();
 			return;
 		}
-		catch (MessageWriteException& mwe) {
-			qDebug().noquote() << ">" << mwe.what();
-			socketBuffer.clear();
-			return;
-		}		
 	}
 }
 
