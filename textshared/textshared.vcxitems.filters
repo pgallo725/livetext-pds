@@ -48,10 +48,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)DocumentMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)DocumentMessage.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)FailureMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)LoginMessage.cpp">
@@ -81,16 +81,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Document.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)FailureMessage.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

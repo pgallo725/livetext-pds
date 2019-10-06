@@ -26,7 +26,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	qInfo().nospace() << "LiveText Server, version 0.9.2" << endl
+	qInfo().nospace() << "LiveText Server (version 0.9.2)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
