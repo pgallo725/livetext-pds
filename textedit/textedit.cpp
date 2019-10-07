@@ -773,14 +773,7 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	QClipboard* clipboard = QApplication::clipboard();
-
-	QString uri = URI;
-
-	clipboard->setText(uri);
-	statusBar()->showMessage(tr("URI copied into clipboards"));
-
-	ShareUriWindow* su = new ShareUriWindow(uri);
+	ShareUriWindow* su = new ShareUriWindow(URI, this);
 	//Mostra la finestra di mw formata
 	su->exec();
 }
