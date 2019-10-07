@@ -112,13 +112,13 @@
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
       <OutputFile>.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
-      <Define>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_UNICODE;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_NETWORKAUTH_LIB;QT_CORE_LIB;QT_GUI_LIB;QT_NETWORK_LIB;%(PreprocessorDefinitions)</Define>
+      <Define>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_NETWORKAUTH_LIB;QT_CORE_LIB;QT_GUI_LIB;QT_NETWORK_LIB;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./GeneratedFiles/$(ConfigurationName)/moc_predefs.h</Include>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <InputFile>%(FullPath)</InputFile>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;./GeneratedFiles/$(ConfigurationName);$(QTDIR)\include;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc;%(AdditionalIncludeDirectories);../textshared;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtNetwork</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc;$(INHERIT);.\..\textshared;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtNetwork</IncludePath>
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,13 +166,13 @@
     <QtMoc>
       <QTDIR>$(QTDIR)</QTDIR>
       <OutputFile>.\GeneratedFiles\moc_%(Filename).cpp</OutputFile>
-      <Define>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_UNICODE;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_NO_DEBUG;QT_NETWORKAUTH_LIB;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_NETWORK_LIB;%(PreprocessorDefinitions)</Define>
+      <Define>_CONSOLE;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;QT_NO_DEBUG;QT_NETWORKAUTH_LIB;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_NETWORK_LIB;%(PreprocessorDefinitions)</Define>
       <CompilerFlavor>msvc</CompilerFlavor>
       <Include>./GeneratedFiles/$(ConfigurationName)/moc_predefs.h</Include>
       <ExecutionDescription>Moc'ing %(Identity)...</ExecutionDescription>
       <InputFile>%(FullPath)</InputFile>
       <DynamicSource>output</DynamicSource>
-      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;./GeneratedFiles/$(ConfigurationName);$(QTDIR)\include;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc;%(AdditionalIncludeDirectories);../textshared;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtNetwork</IncludePath>
+      <IncludePath>.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include;C:\VulkanSDK\1.0.51.0\include;$(QTDIR)\mkspecs\win32-msvc;$(INHERIT);.\..\textshared;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtNetwork</IncludePath>
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -222,7 +222,7 @@
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties Qt5Version_x0020_x64="Qt 5.12.3" />
+      <UserProperties Qt5Version_x0020_x64="msvc2017_64" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

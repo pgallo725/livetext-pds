@@ -29,6 +29,39 @@ Symbol& CharInsertMessage::getSymbol()
 }
 
 
+/*************** CHAR FORMAT MESSAGE ***************/
+
+CharFormatMessage::CharFormatMessage()
+	: Message(CharDelete)
+{
+}
+
+CharFormatMessage::CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt)
+	: Message(CharDelete), m_fPos(position), m_fmt(fmt)
+{
+}
+
+void CharFormatMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_fPos << m_fmt;
+}
+
+void CharFormatMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_fPos >> m_fmt;
+}
+
+QVector<qint32> CharFormatMessage::getPosition() const
+{
+	return m_fPos;
+}
+
+QTextCharFormat CharFormatMessage::getCharFormat() const
+{
+	return m_fmt;
+}
+
+
 /*************** CHAR DELETE MESSAGE ***************/
 
 CharDeleteMessage::CharDeleteMessage()
