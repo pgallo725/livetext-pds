@@ -14,6 +14,9 @@ int main(int argc, char *argv[])
 	{
 		TcpServer server;
 
+		QCoreApplication::setApplicationName("LiveText - Server");
+		QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+		
 		// Possible failures in initialize are handled by throwing StartupException
 		// or a sub-type of FileException with more specific details
 		server.initialize();
