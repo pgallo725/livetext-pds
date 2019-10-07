@@ -26,11 +26,14 @@ public:
 	void openLoggedPage();
 	void incorrectOperation(QString msg);
 	void documentDismissed(); //Remove document
-	void setupFileList(QList<URI> documents); //Document List
+	void setupFileList(); //Document List
 	void closeAll();
 
 	void startLoadingAnimation(QString text);
 	void stopLoadingAnimation();
+
+	void setUser(User* user);
+	void updateUserInfo();
 
 private slots:
 	void pushButtonNewClicked();
@@ -39,18 +42,17 @@ private slots:
 	void pushButtonOpenClicked();
 	void pushButtonRemoveClicked();
 	void pushButtonOpenUriClicked();
-	void pushButtonBackClicked();
 	void enablePushButtonOpen();
 	void currentTabChanged(int index);
 	void showUserIcon(QString path);
 	void confirmOperation();
-	
+
 
 public slots:
 	void connectionEstabilished();
 	void impossibleToConnect();
 	void incorrectFileOperation(QString error);
-
+	void pushButtonBackClicked();
 
 signals:
 	void newDocument(QString name);
@@ -61,11 +63,12 @@ signals:
 	void serverLogin(QString username, QString password);
 	void serverRegister(QString username, QString password, QString nickname, QImage icon);
 	void serverLogout();
+	void editProfile();
 
 private:
 	Ui::LandingPage* ui;
 	Client* client;
-
+	User* _user;
 	QLabel* loading;
 
 	OpenUriWindow* openURIWindow;

@@ -136,7 +136,7 @@ void Document::load()
 {
 	// Create or overwrite the document file on disk, and write data to it
 	QFile file(DOCUMENTS_DIRNAME + uri.toString());
-	if (file.open(QIODevice::ReadWrite))
+	if (file.open(QIODevice::ReadOnly | QIODevice::ExistingOnly))
 	{
 		QDataStream docFileStream(&file);
 
@@ -190,13 +190,13 @@ void Document::save()
 	}
 	else
 	{
-		throw DocumentOpenException(uri.toStdString(), DOCUMENTS_DIRNAME);
+		throw DocumentCreateException(uri.toStdString(), DOCUMENTS_DIRNAME);
 	}
 }
 
-bool Document::exist()
+bool Document::exists()
 {
-	return QFileInfo(QFile(DOCUMENTS_DIRNAME+uri.toString())).exists();
+	return QFileInfo(QFile(DOCUMENTS_DIRNAME + uri.toString())).exists();
 }
 
 
@@ -413,13 +413,13 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	else if (s._fPos == b.begin())
 	{
 		int beginIndex = binarySearch(b.begin());
-		if (beginIndex > 0)
+		if (beginIndex >= 0)
 			b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
 	}
 	else if (s._fPos == b.end())
 	{
 		int endIndex = binarySearch(b.end());
-		if (endIndex > 0)
+		if (endIndex >= 0)
 			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
 	}
 }

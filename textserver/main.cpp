@@ -1,5 +1,7 @@
 #include <QCoreApplication>
 
+#include <QSaveFile>
+
 #include "TcpServer.h"
 #include "ServerException.h"
 
@@ -7,7 +9,7 @@
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-	
+
 	try
 	{
 		TcpServer server;
@@ -20,8 +22,8 @@ int main(int argc, char *argv[])
 	}
 	catch (ServerException& ex) 
 	{
-		qCritical().nospace() << endl << ex.what() << "\ntextserver unable to start... " << endl;
+		qCritical().nospace() << endl << "(ERROR) " << ex.what() << endl;
 		return EXIT_FAILURE;
 	}
-	
+
 }

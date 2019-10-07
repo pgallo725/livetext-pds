@@ -90,7 +90,7 @@ void Client::readBuffer() {
 
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-		message->readFrom(dataStream);
+		message->read(dataStream);
 
 		messageHandler(message);
 
@@ -206,7 +206,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-	message->readFrom(dataStream);
+	message->read(dataStream);
 
 	socketBuffer.clear();
 

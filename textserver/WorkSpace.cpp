@@ -68,6 +68,8 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
 
 	editors.insert(socket, client);
+
+	qDebug() << ">> User" << client->getUsername() << "opened the document";
 }
 
 
@@ -91,20 +93,33 @@ void WorkSpace::readMessage()
 	{
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
-		MessageCapsule message = MessageFactory::Empty((MessageType)mType);
-		message->readFrom(dataStream);
+		
+		try {
+			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+			message->read(dataStream);
+			socketBuffer.clear();
 
-		socketBuffer.clear();
-
-		if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
-		{
-			messageHandler.process(message, socket);
+			if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
+			{
+				messageHandler.process(message, socket);
+			}
+			else
+			{
+				qDebug() << ">> (ERROR) Received unexpected message of type: " << mType;
+				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+				message->send(socket);
+			}
 		}
-		else
-		{
-			qDebug() << ">> (ERROR) Received unexpected message type: " << mType;
-			message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
+		catch (MessageTypeException& mte) {
+			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
+			qDebug().noquote() << ">>" << mte.what();
+			socketBuffer.clear();
+		}
+		catch (MessageException& mre) {
+			qDebug().noquote() << ">>" << mre.what();
+			socketBuffer.clear();
+			return;
 		}
 	}
 }
@@ -164,6 +179,7 @@ void WorkSpace::documentSave()
 	}
 	catch (DocumentException& de) 
 	{
+		qDebug().noquote() << ">" << de.what() << ", fails count =" << nFails ;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Move Workspace clients back to TcpServer
 			for (QSharedPointer<Client> client : editors.values()) {
@@ -222,7 +238,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug() << ">> Client" << client->getUsername() << "closed the document";
+	qDebug() << ">> User" << client->getUsername() << "closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);

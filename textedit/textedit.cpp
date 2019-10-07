@@ -192,7 +192,7 @@ void TextEdit::setupUserActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 	const QIcon userIcon(rsrcPath + "/user.png");
-	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::editProfile);
+	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
 	tb->addAction(actionUser);
 
 
@@ -482,19 +482,6 @@ void TextEdit::setUser(User* user)
 	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
 }
 
-void TextEdit::accountUpdateSuccessful()
-{
-	ew->updateSuccessful();
-	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
-
-}
-
-
-void TextEdit::accountUpdateFailed(QString error)
-{
-	ew->updateFailed(error);
-}
-
 void TextEdit::closeDocumentError(QString error)
 {
 	statusBar()->showMessage(error);
@@ -515,10 +502,11 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 
 }
 
-void TextEdit::forceClosingDocumentError()
+void TextEdit::criticalError(QString error)
 {
-	QMessageBox::StandardButton error = QMessageBox::critical(this, QCoreApplication::applicationName(), tr("Server encountered an error, the document will be closed"), QMessageBox::Ok);
+	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok);
 }
+
 
 void TextEdit::setDocumentURI(QString uri)
 {
@@ -646,7 +634,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
 	//Test with user ID for more separate colors
-	int randomNumber = 7 + (userId*3) % 11;
+	int randomNumber = 7 + (userId * 3) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
@@ -797,16 +785,6 @@ void TextEdit::fileShare()
 	su->exec();
 }
 
-void TextEdit::editProfile()
-{
-	ew = new ProfileEditWindow(_user);
-
-	connect(ew, &ProfileEditWindow::accountUpdate, this, &TextEdit::accountUpdate);
-
-	//Mostra la finestra di mw formata
-	ew->exec();
-}
-
 void TextEdit::textBold()
 {
 	QTextCharFormat fmt;
@@ -850,12 +828,14 @@ void TextEdit::textSize(const QString& p)
 
 void TextEdit::listStyle(int styleIndex)
 {
+
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Formato lista
 	QTextListFormat listFmt;
 
 	//Prendo il cursore
 	QTextCursor cursor = textEdit->textCursor();
-
 
 	//Salva il formato del blocco		
 	QTextBlockFormat blockFmt = cursor.blockFormat();
@@ -932,7 +912,7 @@ void TextEdit::listStyle(int styleIndex)
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
 
-		blockFmt.setHeadingLevel(0);
+		//blockFmt.setHeadingLevel(0);
 		cursor.setBlockFormat(blockFmt);
 	}
 	//Indica se il cursore è gia in una lista, se sì ne prende il formato
@@ -945,6 +925,7 @@ void TextEdit::listStyle(int styleIndex)
 
 		//Creo la lista indentata correttamente
 		cursor.createList(listFmt);
+
 	}
 	else {
 		//Altrimenti se non sono in una lista indento di +1
@@ -976,9 +957,7 @@ void TextEdit::textStyle(int styleIndex)
 	fmt.setProperty(QTextFormat::FontSizeAdjustment, sizeAdjustment);
 
 	//Indica l'intera linea su cui sta il cursore
-	cursor.select(QTextCursor::LineUnderCursor);
-	cursor.mergeCharFormat(fmt);
-	textEdit->mergeCurrentCharFormat(fmt);
+	mergeFormatOnWordOrSelection(fmt);
 
 	const QSignalBlocker blocker(textEdit->document());
 
@@ -1168,57 +1147,46 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	//Gestione cancellazione carattere
 	if (charsRemoved > 0) {
 		for (int i = 0; i < charsRemoved; ++i) {
-			QChar ch = textEdit->document()->characterAt(i);
 			emit charDeleted(position);
 		}
 	}
 
 	if (charsAdded > 0) {
-		//Gestione inserimento carattere
 		QTextCursor cursor = textEdit->textCursor();
-
-		QTextList* list = cursor.currentList();
-		if (list) {
-			for (int i = 0; i < list->count(); ++i) {
-				QTextBlock blk = list->item(i);
-				int start = blk.position();
-				int len = blk.length();
-			}
-		}
-		else {
-			QTextBlock blk = cursor.block();
-			int start = blk.position();
-			int len = blk.length();
-		}
-
-		for (int i = position; i < position + charsAdded; ++i) {
+		QTextBlockFormat blockFmt;
+		int i;
+		
+		for (i = position; i < position + charsAdded; ++i) {
+			//Getting QTextBlockFormat from cursor
+			blockFmt = cursor.blockFormat();
+			
+			//Ricavo il carattere inserito
+			QChar ch = textEdit->document()->characterAt(i);
+			
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
 			//precedente al cursore.
 			cursor.setPosition(i + 1);
-
-			//Ricavo il carattere inserito
-			QChar ch = textEdit->document()->characterAt(i);
-
-			//Ricavo formato carattere inserio
+			
+			//Getting QTextCharFormat from cursor
 			QTextCharFormat fmt = cursor.charFormat();
 
 			if ((i != position + charsAdded - 1) || (i != textEdit->document()->characterCount() - 1) || ch != QChar::ParagraphSeparator) {
 				emit charInserted(ch, fmt, i);
 			}
+			if (ch == QChar::ParagraphSeparator) {
+				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
+			}
+			emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
 		}
 	}
 }
 
 /*
-TEST FUNCTION - TODO
 
 Function to handle extra cursors position updates.
 Recomputes all positions based on document scroll positions.
 
 */
-
-
-//Handles users cursor
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {

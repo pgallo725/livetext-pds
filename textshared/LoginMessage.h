@@ -20,12 +20,11 @@ protected:
 	LoginRequestMessage(QString username);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LoginRequestMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getUsername() const;
 };
@@ -49,12 +48,11 @@ protected:
 	LoginChallengeMessage(QByteArray salt, QByteArray nonce);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LoginChallengeMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QByteArray getSalt() const;
 	QByteArray getNonce() const;
@@ -78,12 +76,11 @@ protected:
 	LoginUnlockMessage(QByteArray token);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LoginUnlockMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QByteArray getToken() const;
 };
@@ -106,12 +103,11 @@ protected:
 	LoginGrantedMessage(User loggedUser);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LoginGrantedMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	User& getLoggedUser();
 };
@@ -134,12 +130,11 @@ protected:
 	LoginErrorMessage(QString reason);
 
 	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
 
 public:
 
 	~LoginErrorMessage() {};
-
-	void readFrom(QDataStream& stream) override;
 
 	QString getErrorMessage() const;
 };

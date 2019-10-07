@@ -44,7 +44,7 @@ signals: MessageCapsule accountCreate(QSslSocket* çlientSocket, QString username
 signals: MessageCapsule accountUpdate(QSslSocket* çlientSocket, QString nickname, QImage icon, QString password);
 
 signals: MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName);
-signals: MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri);
+signals: MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
 signals: MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
 signals: void charInsert(Symbol& s);

@@ -96,19 +96,9 @@ void User::setNickname(QString newNickname)
 	m_nickname = newNickname;
 }
 
-void User::deleteNickname()
-{
-	m_nickname = m_username;
-}
-
 void User::setIcon(QImage newIcon)
 {
 	m_icon = newIcon;
-}
-
-void User::deleteIcon()
-{
-	m_icon = QImage();
 }
 
 void User::setPassword(QString newPassword)
@@ -130,7 +120,17 @@ void User::setPassword(QString newPassword)
 	m_passwd = hash.result();
 }
 
-void User::recoveryUser(User u)
+void User::update(QString nickname, QImage icon, QString password)
+{
+	if (!nickname.isEmpty())
+		setNickname(nickname);
+	if (!icon.isNull())
+		setIcon(icon);
+	if (!password.isEmpty())
+		setPassword(password);
+}
+
+void User::rollback(User& u)
 {
 	m_nickname = u.getNickname();
 	m_icon = u.getIcon();

@@ -32,8 +32,8 @@ public:
 	~User();
 
 	/* getters */
-	QString getUsername();
 	int getUserId();
+	QString getUsername();
 	QString getNickname();
 	QByteArray getPasswordHash();
 	QByteArray getSalt();
@@ -46,11 +46,10 @@ public:
 	void addDocument(URI docUri);
 	void removeDocument(URI uri);
 	void setNickname(QString newNickname);
-	void deleteNickname();
 	void setIcon(QImage newIcon);
-	void deleteIcon();	
 	void setPassword(QString newPassword);
-	void recoveryUser(User u);
+	void update(QString nickname, QImage icon, QString password);
+	void rollback(User& u);
 };
 
 

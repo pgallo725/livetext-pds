@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'newfilewindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.3
+** Created by: Qt User Interface Compiler version 5.13.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -120,9 +120,9 @@ public:
 
     void retranslateUi(QDialog *NewFileWindow)
     {
-        NewFileWindow->setWindowTitle(QApplication::translate("NewFileWindow", "New File", nullptr));
-        label_2->setText(QApplication::translate("NewFileWindow", "Choose filename to create a new document", nullptr));
-        label->setText(QApplication::translate("NewFileWindow", "Filename", nullptr));
+        NewFileWindow->setWindowTitle(QCoreApplication::translate("NewFileWindow", "New File", nullptr));
+        label_2->setText(QCoreApplication::translate("NewFileWindow", "Choose filename to create a new document", nullptr));
+        label->setText(QCoreApplication::translate("NewFileWindow", "Filename", nullptr));
         label_incorrectFilename->setText(QString());
     } // retranslateUi
 
