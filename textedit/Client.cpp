@@ -63,7 +63,6 @@ void Client::serverDisconnection() {
 }
 
 void Client::errorHandler(QAbstractSocket::SocketError socketError) {
-
 	qDebug() << "Socket error raised: " << socketError;
 	socket->abort();
 }
