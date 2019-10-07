@@ -1176,7 +1176,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			if (ch == QChar::ParagraphSeparator) {
 				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
 			}
-			emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
+			if (charsAdded > 1) {
+				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
+			}
 		}
 	}
 }

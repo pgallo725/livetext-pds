@@ -215,6 +215,8 @@ int Document::insert(Symbol& s)
 
 	if (insertionIndex >= 0)
 	{
+		qDebug() << "Inserting character" << s.getChar();
+
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
 		{
@@ -243,14 +245,14 @@ int Document::insert(Symbol& s)
 
 			Symbol newSymbol(s);
 
-			// The paragraph delimiter belongs to the block on which it is inserted
-			addCharToBlock(newSymbol, _blocks[prevBlock]);
+			// The paragraph delimiter belongs to the block on which it is inserted and marks its end
+			newSymbol.setBlock(prevBlock.getId());
+			prevBlock.setEnd(newSymbol._fPos);
 			_text.insert(_text.begin() + insertionIndex, newSymbol);	// (insert the symbol in the vector)
 
 			// And any following symbol of that paragraph is assigned to the new block
 			for (int i = insertionIndex + 1; i < _text.length(); i++)
 			{
-				removeCharFromBlock(_text[i], prevBlock);
 				addCharToBlock(_text[i], newBlock);
 				if (_text[i].getChar() == QChar::ParagraphSeparator)	// stop at the first paragraph separator
 					break;
@@ -279,6 +281,7 @@ int Document::removeAt(QVector<qint32> fPos)
 	if (pos >= 0)
 	{
 		Symbol& s = _text[pos];
+		qDebug() << "Deleting character" << s.getChar();
 
 		// Check if the symbol removal implies the deletion of a paragraph separator
 		if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
@@ -289,19 +292,19 @@ int Document::removeAt(QVector<qint32> fPos)
 			TextBlock& olderBlock = _blocks[_text[pos + 1].getBlockId()];
 
 			removeCharFromBlock(s, mergedBlock);
-			_text.removeAt(pos);	// Removes the paragraph separator
+			_text.removeAt(pos);					// Removes the paragraph separator
+
+			mergedBlock.setEnd(olderBlock.end());
 
 			// All symbols belonging to the next block will be assigned to the current block
 			for (int i = pos; i < _text.length(); i++)
 			{
-				removeCharFromBlock(_text[i], olderBlock);
-				addCharToBlock(_text[i], mergedBlock);
+				_text[i].setBlock(mergedBlock);
 				if (_text[i].getChar() == QChar::ParagraphSeparator)
 					break;
 			}
 
-			if (olderBlock.isEmpty())
-				_blocks.remove(olderBlock.getId());		// Delete the (now empty) block from the document
+			_blocks.remove(olderBlock.getId());		// Delete the (now empty) block from the document
 		}
 		else if (pos == _text.length() - 1)
 		{
