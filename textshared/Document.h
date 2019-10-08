@@ -54,7 +54,6 @@ private:
 
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
-	QMap<qint32, TextList> _lists;
 
 	static const int fPosGapSize = 4;
 
@@ -78,6 +77,7 @@ public:
 	void remove(const Symbol& s);
 	int removeAt(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
+	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 
 	QVector<qint32> fractionalPosBegin();

@@ -3,50 +3,6 @@
 #include <QDataStream>
 
 
-/*************** TEXTLIST CLASS ***************/
-
-
-TextList::TextList()
-	: _listId(-1), _nBlocks(0)
-{
-}
-
-TextList::TextList(qint32 listId, QTextListFormat fmt)
-	: _listId(listId), _format(fmt), _nBlocks(0)
-{
-}
-
-void TextList::setFormat(QTextListFormat fmt)
-{
-	_format = fmt;
-}
-
-void TextList::incrementBlocks(int amount)
-{
-	_nBlocks += amount;
-}
-
-void TextList::decrementBlocks(int amount)
-{
-	_nBlocks -= amount;
-}
-
-qint32 TextList::getId() const
-{
-	return _listId;
-}
-
-QTextListFormat TextList::getFormat() const
-{
-	return _format;
-}
-
-bool TextList::isEmpty() const
-{
-	return _nBlocks == 0;
-}
-
-
 /*************** TEXTBLOCKID CLASS ***************/
 
 
@@ -110,24 +66,29 @@ TextBlockID::operator bool() const noexcept
 
 
 TextBlock::TextBlock()
-	: _blockId(TextBlockID(nullptr)), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 }), _listRef(-1)
+	: _blockId(TextBlockID(nullptr)), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 })
 {
 }
 
-TextBlock::TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat _fmt, qint32 listRef)
-	: _blockId(TextBlockID(blockNum, authorId)), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 }), _listRef(listRef)
+TextBlock::TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat _fmt)
+	: _blockId(TextBlockID(blockNum, authorId)), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 })
 {
 }
 
-TextBlock::TextBlock(TextBlockID blockId, QTextBlockFormat fmt, qint32 listRef)
-	: _blockId(blockId), _format(fmt), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 }), _listRef(listRef)
+TextBlock::TextBlock(TextBlockID blockId, QTextBlockFormat fmt)
+	: _blockId(blockId), _blockFormat(fmt), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 })
+{
+}
+
+TextBlock::TextBlock(TextBlockID blockId, QTextBlockFormat blockFmt, QTextListFormat listFmt)
+	: _blockId(blockId), _blockFormat(blockFmt), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 }), _listFormat(listFmt)
 {
 }
 
 
 void TextBlock::setFormat(QTextBlockFormat fmt)
 {
-	_format = fmt;
+	_blockFormat = fmt;
 }
 
 void TextBlock::setBegin(QVector<qint32> fPosBegin)
@@ -140,9 +101,9 @@ void TextBlock::setEnd(QVector<qint32> fPosEnd)
 	_fPosEnd = fPosEnd;
 }
 
-void TextBlock::setList(qint32 listId)
+void TextBlock::setListFormat(QTextListFormat fmt)
 {
-	_listRef = listId;
+	_listFormat = fmt;
 }
 
 
@@ -166,7 +127,7 @@ TextBlockID TextBlock::getId() const
 
 QTextBlockFormat TextBlock::getFormat() const
 {
-	return _format;
+	return _blockFormat;
 }
 
 QVector<qint32> TextBlock::begin() const
@@ -179,9 +140,9 @@ QVector<qint32> TextBlock::end() const
 	return _fPosEnd;
 }
 
-qint32 TextBlock::getListIdentifier() const
+QTextListFormat TextBlock::getListFormat() const
 {
-	return _listRef;
+	return _listFormat;
 }
 
 bool TextBlock::isEmpty() const
@@ -193,22 +154,6 @@ bool TextBlock::isEmpty() const
 
 /*************** SERIALIZATION OPERATORS ***************/
 
-
-// TextList deserialization operator
-QDataStream& operator>>(QDataStream& in, TextList& lst)
-{
-	in >> lst._listId >> lst._format >> lst._nBlocks;
-
-	return in;
-}
-
-// TextList serialization operator
-QDataStream& operator<<(QDataStream& out, const TextList& lst)
-{
-	out << lst._listId << lst._format << lst._nBlocks;
-
-	return out;
-}
 
 // TextBlockID serialization operator
 QDataStream& operator>>(QDataStream& in, TextBlockID& bid)
@@ -229,7 +174,7 @@ QDataStream& operator<<(QDataStream& out, const TextBlockID& bid)
 // TextBlock deserialization operator
 QDataStream& operator>>(QDataStream& in, TextBlock& blk)
 {
-	in >> blk._blockId >> blk._format >> blk._fPosBegin >> blk._fPosEnd >> blk._listRef;
+	in >> blk._blockId >> blk._blockFormat >> blk._fPosBegin >> blk._fPosEnd >> blk._listFormat;
 
 	return in;
 }
@@ -237,7 +182,7 @@ QDataStream& operator>>(QDataStream& in, TextBlock& blk)
 // TextBlock serialization operator
 QDataStream& operator<<(QDataStream& out, const TextBlock& blk)
 {
-	out << blk._blockId << blk._format << blk._fPosBegin << blk._fPosEnd << blk._listRef;
+	out << blk._blockId << blk._blockFormat << blk._fPosBegin << blk._fPosEnd << blk._listFormat;
 
 	return out;
 }

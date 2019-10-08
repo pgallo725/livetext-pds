@@ -23,8 +23,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[42];
-    char stringdata0[526];
+    QByteArrayData data[44];
+    char stringdata0[561];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -67,14 +67,16 @@ QT_MOC_LITERAL(30, 367, 6), // "symbol"
 QT_MOC_LITERAL(31, 374, 20), // "documentDeleteSymbol"
 QT_MOC_LITERAL(32, 395, 15), // "QVector<qint32>"
 QT_MOC_LITERAL(33, 411, 8), // "position"
-QT_MOC_LITERAL(34, 420, 17), // "documentEditBlock"
-QT_MOC_LITERAL(35, 438, 11), // "TextBlockID"
-QT_MOC_LITERAL(36, 450, 7), // "blockId"
-QT_MOC_LITERAL(37, 458, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(38, 475, 6), // "format"
-QT_MOC_LITERAL(39, 482, 19), // "handleAccountUpdate"
-QT_MOC_LITERAL(40, 502, 19), // "answerAccountUpdate"
-QT_MOC_LITERAL(41, 522, 3) // "msg"
+QT_MOC_LITERAL(34, 420, 18), // "documentEditSymbol"
+QT_MOC_LITERAL(35, 439, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(36, 455, 6), // "format"
+QT_MOC_LITERAL(37, 462, 17), // "documentEditBlock"
+QT_MOC_LITERAL(38, 480, 11), // "TextBlockID"
+QT_MOC_LITERAL(39, 492, 7), // "blockId"
+QT_MOC_LITERAL(40, 500, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(41, 517, 19), // "handleAccountUpdate"
+QT_MOC_LITERAL(42, 537, 19), // "answerAccountUpdate"
+QT_MOC_LITERAL(43, 557, 3) // "msg"
 
     },
     "WorkSpace\0requestAccountUpdate\0\0"
@@ -88,10 +90,10 @@ QT_MOC_LITERAL(41, 522, 3) // "msg"
     "message\0sender\0documentSave\0"
     "documentInsertSymbol\0Symbol&\0symbol\0"
     "documentDeleteSymbol\0QVector<qint32>\0"
-    "position\0documentEditBlock\0TextBlockID\0"
-    "blockId\0QTextBlockFormat\0format\0"
-    "handleAccountUpdate\0answerAccountUpdate\0"
-    "msg"
+    "position\0documentEditSymbol\0QTextCharFormat\0"
+    "format\0documentEditBlock\0TextBlockID\0"
+    "blockId\0QTextBlockFormat\0handleAccountUpdate\0"
+    "answerAccountUpdate\0msg"
 };
 #undef QT_MOC_LITERAL
 
@@ -101,7 +103,7 @@ static const uint qt_meta_data_WorkSpace[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      16,   14, // methods
+      17,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -109,24 +111,25 @@ static const uint qt_meta_data_WorkSpace[] = {
        4,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    4,   94,    2, 0x06 /* Public */,
-       8,    1,  103,    2, 0x06 /* Public */,
-       9,    1,  106,    2, 0x06 /* Public */,
-      11,    1,  109,    2, 0x06 /* Public */,
+       1,    4,   99,    2, 0x06 /* Public */,
+       8,    1,  108,    2, 0x06 /* Public */,
+       9,    1,  111,    2, 0x06 /* Public */,
+      11,    1,  114,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      14,    1,  112,    2, 0x0a /* Public */,
-      15,    0,  115,    2, 0x0a /* Public */,
-      16,    1,  116,    2, 0x0a /* Public */,
-      19,    1,  119,    2, 0x0a /* Public */,
-      22,    0,  122,    2, 0x0a /* Public */,
-      23,    2,  123,    2, 0x0a /* Public */,
-      27,    0,  128,    2, 0x0a /* Public */,
-      28,    1,  129,    2, 0x0a /* Public */,
-      31,    1,  132,    2, 0x0a /* Public */,
-      34,    2,  135,    2, 0x0a /* Public */,
-      39,    4,  140,    2, 0x0a /* Public */,
-      40,    2,  149,    2, 0x0a /* Public */,
+      14,    1,  117,    2, 0x0a /* Public */,
+      15,    0,  120,    2, 0x0a /* Public */,
+      16,    1,  121,    2, 0x0a /* Public */,
+      19,    1,  124,    2, 0x0a /* Public */,
+      22,    0,  127,    2, 0x0a /* Public */,
+      23,    2,  128,    2, 0x0a /* Public */,
+      27,    0,  133,    2, 0x0a /* Public */,
+      28,    1,  134,    2, 0x0a /* Public */,
+      31,    1,  137,    2, 0x0a /* Public */,
+      34,    2,  140,    2, 0x0a /* Public */,
+      37,    2,  145,    2, 0x0a /* Public */,
+      41,    4,  150,    2, 0x0a /* Public */,
+      42,    2,  159,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::QString, QMetaType::QImage, QMetaType::QString,    4,    5,    6,    7,
@@ -144,9 +147,10 @@ static const uint qt_meta_data_WorkSpace[] = {
     QMetaType::Void,
     QMetaType::Void, 0x80000000 | 29,   30,
     QMetaType::Void, 0x80000000 | 32,   33,
-    QMetaType::Void, 0x80000000 | 35, 0x80000000 | 37,   36,   38,
+    QMetaType::Void, 0x80000000 | 32, 0x80000000 | 35,   33,   36,
+    QMetaType::Void, 0x80000000 | 38, 0x80000000 | 40,   39,   36,
     QMetaType::Void, 0x80000000 | 17, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   18,    5,    6,    7,
-    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 24,    4,   41,
+    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 24,    4,   43,
 
        0        // eod
 };
@@ -170,9 +174,10 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 10: _t->documentSave(); break;
         case 11: _t->documentInsertSymbol((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 12: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
-        case 13: _t->documentEditBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
-        case 14: _t->handleAccountUpdate((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4]))); break;
-        case 15: _t->answerAccountUpdate((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1])),(*reinterpret_cast< MessageCapsule(*)>(_a[2]))); break;
+        case 13: _t->documentEditSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
+        case 14: _t->documentEditBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
+        case 15: _t->handleAccountUpdate((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4]))); break;
+        case 16: _t->answerAccountUpdate((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1])),(*reinterpret_cast< MessageCapsule(*)>(_a[2]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -217,10 +222,17 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<qint32> >(); break;
             }
             break;
         case 14:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+            }
+            break;
+        case 15:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -290,13 +302,13 @@ int WorkSpace::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 16)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 17;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 16)
+        if (_id < 17)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 16;
+        _id -= 17;
     }
     return _id;
 }

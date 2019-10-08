@@ -149,6 +149,17 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		break;
 	}
 
+	case CharFormat:
+	{
+		CharFormatMessage* formatMsg = dynamic_cast<CharFormatMessage*>(message.get());
+		emit charFormat(formatMsg->getPosition(), formatMsg->getCharFormat());
+
+		// We want to achieve a server-enforced global ordering of format changes, therefore
+		// the CharFormat message is sent back to all editors by not specifying a sender [nullptr]
+		emit messageDispatch(message, nullptr);
+		break;
+	}
+
 	case BlockEdit:
 	{
 		BlockEditMessage* blockEditMsg = dynamic_cast<BlockEditMessage*>(message.get());

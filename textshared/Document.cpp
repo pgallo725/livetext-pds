@@ -330,6 +330,17 @@ QVector<qint32> Document::removeAtIndex(int index)
 	return position;
 }
 
+int Document::formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt)
+{
+	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
+	if (pos >= 0)
+	{
+		_text[pos].setFormat(fmt);
+	}
+
+	return pos;
+}
+
 int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
 {
 	TextBlock block = _blocks[id];		// find the desired block
@@ -534,7 +545,7 @@ QVector<qint32> Document::fractionalPosEnd()
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks /* >> _lists */ >> doc._text ;
+	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks >> doc._text ;
 
 	return in;
 }
@@ -542,7 +553,7 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks /* << _lists */ << doc._text;
+	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks << doc._text;
 
 	return out;
 }

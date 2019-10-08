@@ -96,6 +96,7 @@ signals:
 	// TextEdit Signals
 	void recivedSymbol(Symbol character);
 	void removeSymbol(QVector<int> position);
+	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
 
 public:
@@ -125,9 +126,11 @@ public slots:
 	void receiveCursor(MessageCapsule message);
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
+	void charModified(QVector<qint32> position, QTextCharFormat fmt);
 	void blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
 	void receiveChar(MessageCapsule message);
 	void deleteChar(MessageCapsule message);
+	void editChar(MessageCapsule message);
 	void editBlock(MessageCapsule message);
 	// Document handler
 	void openDocument(URI URI);

@@ -35,6 +35,7 @@ enum MessageType : quint16
 	// Text-editing messages
 	CharInsert,
 	CharDelete,
+	CharFormat,
 	BlockEdit,
 
 	// Presence messages

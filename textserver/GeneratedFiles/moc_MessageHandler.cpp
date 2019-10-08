@@ -1,12 +1,11 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'MessageHandler.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.13.0)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.12.3)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include <memory>
 #include "../MessageHandler.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
@@ -14,7 +13,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'MessageHandler.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.13.0. It"
+#error "This file was generated using the moc from 5.12.3. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -23,8 +22,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
-    QByteArrayData data[38];
-    char stringdata0[390];
+    QByteArrayData data[40];
+    char stringdata0[417];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -61,16 +60,18 @@ QT_MOC_LITERAL(24, 255, 1), // "s"
 QT_MOC_LITERAL(25, 257, 10), // "charDelete"
 QT_MOC_LITERAL(26, 268, 15), // "QVector<qint32>"
 QT_MOC_LITERAL(27, 284, 3), // "pos"
-QT_MOC_LITERAL(28, 288, 9), // "blockEdit"
-QT_MOC_LITERAL(29, 298, 11), // "TextBlockID"
-QT_MOC_LITERAL(30, 310, 2), // "id"
-QT_MOC_LITERAL(31, 313, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(32, 330, 3), // "fmt"
-QT_MOC_LITERAL(33, 334, 15), // "messageDispatch"
-QT_MOC_LITERAL(34, 350, 7), // "message"
-QT_MOC_LITERAL(35, 358, 6), // "sender"
-QT_MOC_LITERAL(36, 365, 13), // "documentClose"
-QT_MOC_LITERAL(37, 379, 10) // "userLogout"
+QT_MOC_LITERAL(28, 288, 10), // "charFormat"
+QT_MOC_LITERAL(29, 299, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(30, 315, 3), // "fmt"
+QT_MOC_LITERAL(31, 319, 9), // "blockEdit"
+QT_MOC_LITERAL(32, 329, 11), // "TextBlockID"
+QT_MOC_LITERAL(33, 341, 2), // "id"
+QT_MOC_LITERAL(34, 344, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(35, 361, 15), // "messageDispatch"
+QT_MOC_LITERAL(36, 377, 7), // "message"
+QT_MOC_LITERAL(37, 385, 6), // "sender"
+QT_MOC_LITERAL(38, 392, 13), // "documentClose"
+QT_MOC_LITERAL(39, 406, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -80,8 +81,9 @@ QT_MOC_LITERAL(37, 379, 10) // "userLogout"
     "accountUpdate\0documentCreate\0docName\0"
     "documentOpen\0URI\0docUri\0docJustCreated\0"
     "documentRemove\0charInsert\0Symbol&\0s\0"
-    "charDelete\0QVector<qint32>\0pos\0blockEdit\0"
-    "TextBlockID\0id\0QTextBlockFormat\0fmt\0"
+    "charDelete\0QVector<qint32>\0pos\0"
+    "charFormat\0QTextCharFormat\0fmt\0blockEdit\0"
+    "TextBlockID\0id\0QTextBlockFormat\0"
     "messageDispatch\0message\0sender\0"
     "documentClose\0userLogout"
 };
@@ -93,28 +95,29 @@ static const uint qt_meta_data_MessageHandler[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-      14,   14, // methods
+      15,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-      14,       // signalCount
+      15,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    2,   84,    3, 0x06 /* Public */,
-       7,    2,   89,    3, 0x06 /* Public */,
-       9,    5,   94,    3, 0x06 /* Public */,
-      14,    4,  105,    3, 0x06 /* Public */,
-      15,    2,  114,    3, 0x06 /* Public */,
-      17,    3,  119,    3, 0x06 /* Public */,
-      17,    2,  126,    3, 0x26 /* Public | MethodCloned */,
-      21,    2,  131,    3, 0x06 /* Public */,
-      22,    1,  136,    3, 0x06 /* Public */,
-      25,    1,  139,    3, 0x06 /* Public */,
-      28,    2,  142,    3, 0x06 /* Public */,
-      33,    2,  147,    3, 0x06 /* Public */,
-      36,    1,  152,    3, 0x06 /* Public */,
-      37,    1,  155,    3, 0x06 /* Public */,
+       1,    2,   89,    3, 0x06 /* Public */,
+       7,    2,   94,    3, 0x06 /* Public */,
+       9,    5,   99,    3, 0x06 /* Public */,
+      14,    4,  110,    3, 0x06 /* Public */,
+      15,    2,  119,    3, 0x06 /* Public */,
+      17,    3,  124,    3, 0x06 /* Public */,
+      17,    2,  131,    3, 0x26 /* Public | MethodCloned */,
+      21,    2,  136,    3, 0x06 /* Public */,
+      22,    1,  141,    3, 0x06 /* Public */,
+      25,    1,  144,    3, 0x06 /* Public */,
+      28,    2,  147,    3, 0x06 /* Public */,
+      31,    2,  152,    3, 0x06 /* Public */,
+      35,    2,  157,    3, 0x06 /* Public */,
+      38,    1,  162,    3, 0x06 /* Public */,
+      39,    1,  165,    3, 0x06 /* Public */,
 
  // signals: parameters
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
@@ -127,8 +130,9 @@ static const uint qt_meta_data_MessageHandler[] = {
     0x80000000 | 2, 0x80000000 | 4, 0x80000000 | 18,   10,   19,
     QMetaType::Void, 0x80000000 | 23,   24,
     QMetaType::Void, 0x80000000 | 26,   27,
-    QMetaType::Void, 0x80000000 | 29, 0x80000000 | 31,   30,   32,
-    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   34,   35,
+    QMetaType::Void, 0x80000000 | 26, 0x80000000 | 29,   27,   30,
+    QMetaType::Void, 0x80000000 | 32, 0x80000000 | 34,   33,   30,
+    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   36,   37,
     QMetaType::Void, 0x80000000 | 4,    5,
     QMetaType::Void, 0x80000000 | 4,    5,
 
@@ -159,10 +163,11 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             if (_a[0]) *reinterpret_cast< MessageCapsule*>(_a[0]) = std::move(_r); }  break;
         case 8: _t->charInsert((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 9: _t->charDelete((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
-        case 10: _t->blockEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
-        case 11: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
-        case 12: _t->documentClose((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
-        case 13: _t->userLogout((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
+        case 10: _t->charFormat((*reinterpret_cast< QVector<qint32>(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
+        case 11: _t->blockEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
+        case 12: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
+        case 13: _t->documentClose((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
+        case 14: _t->userLogout((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -241,24 +246,31 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<qint32> >(); break;
             }
             break;
         case 11:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+            }
+            break;
+        case 12:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
-        case 12:
+        case 13:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
             }
             break;
-        case 13:
+        case 14:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -332,30 +344,37 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
+            using _t = void (MessageHandler::*)(QVector<qint32> , QTextCharFormat );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::charFormat)) {
+                *result = 10;
+                return;
+            }
+        }
+        {
             using _t = void (MessageHandler::*)(TextBlockID , QTextBlockFormat );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::blockEdit)) {
-                *result = 10;
+                *result = 11;
                 return;
             }
         }
         {
             using _t = void (MessageHandler::*)(MessageCapsule , QSslSocket * );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::messageDispatch)) {
-                *result = 11;
-                return;
-            }
-        }
-        {
-            using _t = void (MessageHandler::*)(QSslSocket * );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::documentClose)) {
                 *result = 12;
                 return;
             }
         }
         {
             using _t = void (MessageHandler::*)(QSslSocket * );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::userLogout)) {
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::documentClose)) {
                 *result = 13;
+                return;
+            }
+        }
+        {
+            using _t = void (MessageHandler::*)(QSslSocket * );
+            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::userLogout)) {
+                *result = 14;
                 return;
             }
         }
@@ -391,13 +410,13 @@ int MessageHandler::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 14)
+        if (_id < 15)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 14;
+        _id -= 15;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 14)
+        if (_id < 15)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 14;
+        _id -= 15;
     }
     return _id;
 }
@@ -406,7 +425,7 @@ int MessageHandler::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 MessageCapsule MessageHandler::loginRequest(QSslSocket * _t1, QString _t2)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
     return _t0;
 }
@@ -415,7 +434,7 @@ MessageCapsule MessageHandler::loginRequest(QSslSocket * _t1, QString _t2)
 MessageCapsule MessageHandler::loginUnlock(QSslSocket * _t1, QByteArray _t2)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
     return _t0;
 }
@@ -424,7 +443,7 @@ MessageCapsule MessageHandler::loginUnlock(QSslSocket * _t1, QByteArray _t2)
 MessageCapsule MessageHandler::accountCreate(QSslSocket * _t1, QString _t2, QString _t3, QImage _t4, QString _t5)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t4))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t5))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)), const_cast<void*>(reinterpret_cast<const void*>(&_t5)) };
     QMetaObject::activate(this, &staticMetaObject, 2, _a);
     return _t0;
 }
@@ -433,7 +452,7 @@ MessageCapsule MessageHandler::accountCreate(QSslSocket * _t1, QString _t2, QStr
 MessageCapsule MessageHandler::accountUpdate(QSslSocket * _t1, QString _t2, QImage _t3, QString _t4)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t4))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)), const_cast<void*>(reinterpret_cast<const void*>(&_t4)) };
     QMetaObject::activate(this, &staticMetaObject, 3, _a);
     return _t0;
 }
@@ -442,7 +461,7 @@ MessageCapsule MessageHandler::accountUpdate(QSslSocket * _t1, QString _t2, QIma
 MessageCapsule MessageHandler::documentCreate(QSslSocket * _t1, QString _t2)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 4, _a);
     return _t0;
 }
@@ -451,7 +470,7 @@ MessageCapsule MessageHandler::documentCreate(QSslSocket * _t1, QString _t2)
 MessageCapsule MessageHandler::documentOpen(QSslSocket * _t1, URI _t2, bool _t3)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
     QMetaObject::activate(this, &staticMetaObject, 5, _a);
     return _t0;
 }
@@ -460,7 +479,7 @@ MessageCapsule MessageHandler::documentOpen(QSslSocket * _t1, URI _t2, bool _t3)
 MessageCapsule MessageHandler::documentRemove(QSslSocket * _t1, URI _t2)
 {
     MessageCapsule _t0{};
-    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t0))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { const_cast<void*>(reinterpret_cast<const void*>(&_t0)), const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 7, _a);
     return _t0;
 }
@@ -468,43 +487,50 @@ MessageCapsule MessageHandler::documentRemove(QSslSocket * _t1, URI _t2)
 // SIGNAL 8
 void MessageHandler::charInsert(Symbol & _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 8, _a);
 }
 
 // SIGNAL 9
 void MessageHandler::charDelete(QVector<qint32> _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 9, _a);
 }
 
 // SIGNAL 10
-void MessageHandler::blockEdit(TextBlockID _t1, QTextBlockFormat _t2)
+void MessageHandler::charFormat(QVector<qint32> _t1, QTextCharFormat _t2)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 10, _a);
 }
 
 // SIGNAL 11
-void MessageHandler::messageDispatch(MessageCapsule _t1, QSslSocket * _t2)
+void MessageHandler::blockEdit(TextBlockID _t1, QTextBlockFormat _t2)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 11, _a);
 }
 
 // SIGNAL 12
-void MessageHandler::documentClose(QSslSocket * _t1)
+void MessageHandler::messageDispatch(MessageCapsule _t1, QSslSocket * _t2)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 12, _a);
 }
 
 // SIGNAL 13
+void MessageHandler::documentClose(QSslSocket * _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 13, _a);
+}
+
+// SIGNAL 14
 void MessageHandler::userLogout(QSslSocket * _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
-    QMetaObject::activate(this, &staticMetaObject, 13, _a);
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 14, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

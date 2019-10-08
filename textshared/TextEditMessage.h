@@ -30,34 +30,6 @@ public:
 };
 
 
-class CharFormatMessage : public Message
-{
-	friend MessageFactory;
-
-private:
-
-	QVector<qint32> m_fPos;
-	QTextCharFormat m_fmt;
-
-protected:
-
-	CharFormatMessage();	// empty constructor
-
-	// Constructor for CharDelete messages, with the fractional position of the symbol to delete
-	CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt);
-
-	void writeTo(QDataStream& stream) const override;
-	void readFrom(QDataStream& stream) override;
-
-public:
-
-	~CharFormatMessage() {};
-
-	QVector<qint32> getPosition() const;
-	QTextCharFormat getCharFormat() const;
-};
-
-
 class CharDeleteMessage : public Message
 {
 	friend MessageFactory;
@@ -82,6 +54,35 @@ public:
 
 	QVector<qint32> getPosition() const;
 };
+
+
+class CharFormatMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QVector<qint32> m_fPos;
+	QTextCharFormat m_charFmt;
+
+protected:
+
+	CharFormatMessage();	// empty constructor
+
+	// Constructor for CharFormat messages, with the fractional position and the new format of the symbol
+	CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt);
+
+	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
+
+public:
+
+	~CharFormatMessage() {};
+
+	QVector<qint32> getPosition() const;
+	QTextCharFormat getCharFormat() const;
+};
+
 
 class BlockEditMessage : public Message
 {

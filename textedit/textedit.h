@@ -9,7 +9,7 @@
 #include "Presence.h"
 #include "ProfileEditWindow.h"
 
-#define CURSOR_SEND_INTERVAL 50
+#define CURSOR_SEND_INTERVAL 100
 
 //Serve per incapsulare tutti i metodi delle classi
 class QAction;

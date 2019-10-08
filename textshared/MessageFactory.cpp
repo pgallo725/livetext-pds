@@ -34,6 +34,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 		case MessageType::DocumentError:		return new DocumentErrorMessage();
 		case MessageType::CharInsert:			return new CharInsertMessage();
 		case MessageType::CharDelete:			return new CharDeleteMessage();
+		case MessageType::CharFormat:			return new CharFormatMessage();
 		case MessageType::BlockEdit:			return new BlockEditMessage();
 		case MessageType::CursorMove:			return new CursorMoveMessage();
 		case MessageType::PresenceUpdate:		return new PresenceUpdateMessage();
@@ -146,6 +147,11 @@ MessageCapsule MessageFactory::CharInsert(Symbol symbol)
 MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)
 {
 	return new CharDeleteMessage(position);
+}
+
+MessageCapsule MessageFactory::CharFormat(QVector<qint32> position, QTextCharFormat fmt)
+{
+	return new CharFormatMessage(position, fmt);
 }
 
 MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)

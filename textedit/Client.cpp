@@ -119,6 +119,9 @@ void Client::messageHandler(MessageCapsule message) {
 	case CharDelete:
 		deleteChar(message);
 		break;
+	case CharFormat:
+		editChar(message);
+		break;
 	case BlockEdit:
 		editBlock(message);
 		break;
@@ -523,6 +526,12 @@ void Client::removeChar(QVector<int> position)
 	removeChar->send(socket);
 }
 
+void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
+{
+	MessageCapsule charFormat = MessageFactory::CharFormat(position, fmt);
+	charFormat->send(socket);
+}
+
 void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
 {
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
@@ -539,6 +548,12 @@ void Client::deleteChar(MessageCapsule message) {
 
 	CharDeleteMessage* deletechar = dynamic_cast<CharDeleteMessage*>(message.get());
 	emit removeSymbol(deletechar->getPosition());
+}
+
+void Client::editChar(MessageCapsule message) {
+
+	CharFormatMessage* charformat = dynamic_cast<CharFormatMessage*>(message.get());
+	emit formatSymbol(charformat->getPosition(), charformat->getCharFormat());
 }
 
 void Client::editBlock(MessageCapsule message) {
