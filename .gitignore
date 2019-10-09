@@ -8,6 +8,10 @@ textedit/userLogin.dat
 textserver/users.dat
 textserver/Documents/
 
+# Qt MOC and build files
+.qmake.stash
+GeneratedFiles/
+
 # User-specific files
 *.rsuser
 *.suo
