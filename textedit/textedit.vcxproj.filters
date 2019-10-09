@@ -114,30 +114,12 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <CustomBuild Include="debug\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    
-    
-    
-    
     <ClInclude Include="ui_landingpage.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -148,9 +130,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_profileeditwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_shareuriwindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

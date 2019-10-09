@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	}
 	catch (ServerException& ex) 
 	{
-		qCritical().nospace() << endl << "(ERROR) " << ex.what() << endl;
+		qCritical().nospace() << endl << ex.what() << endl;
 		return EXIT_FAILURE;
 	}
 
