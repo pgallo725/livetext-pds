@@ -9,8 +9,9 @@ textserver/users.dat
 textserver/Documents/
 
 # Qt MOC and build files
-.qmake.stash
-GeneratedFiles/
+*.qmake.stash
+textedit/GeneratedFiles/
+textserver/GeneratedFiles/
 
 # User-specific files
 *.rsuser
