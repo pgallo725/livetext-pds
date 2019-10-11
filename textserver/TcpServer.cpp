@@ -468,8 +468,8 @@ void TcpServer::saveUsers()
 void TcpServer::logoutClient(QSslSocket* clientSocket)
 {
 	QSharedPointer<Client> c = clients.find(clientSocket).value();
-	c->logout();
 	restoreUserAvaiable(c->getUsername());
+	c->logout();
 
 	qDebug() << "> User" << c->getUsername() << "logged out";
 }
