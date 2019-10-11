@@ -80,17 +80,12 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 	//Assegna il Widget textEdit alla finestra principaòe
 	setCentralWidget(textEdit);
-
-	//Serve su GNOME per far cambiare lo stile dei buttons in relazione all'ambiente in cui sei
-	//setToolButtonStyle(Qt::ToolButtonFollowStyle);
-
 	//Funzioni definite sotto e chiamate nel costruttore
 	setupFileActions();
 	setupEditActions();
 	setupTextActions();
 	setupShareActions();
 	setupUserActions();
-	setupOnlineUsersToolbar();
 
 	//Crea il carattere e lo stile
 	QFont textFont("Helvetica");
@@ -111,13 +106,13 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	connect(textEdit->document(), &QTextDocument::undoAvailable, actionUndo, &QAction::setEnabled);
 	connect(textEdit->document(), &QTextDocument::redoAvailable, actionRedo, &QAction::setEnabled);
 
-	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
-
-
 	//Stesso discorso delle connect ma inizializza
 	setWindowModified(textEdit->document()->isModified());
 	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
 	actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
+
+	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removedè
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Se non ho gli appunti disponibili
 #ifndef QT_NO_CLIPBOARD
@@ -188,7 +183,6 @@ void TextEdit::setupShareActions()
 void TextEdit::setupUserActions()
 {
 	QToolBar* tb = addToolBar(tr("&Account"));
-
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 	const QIcon userIcon(rsrcPath + "/user.png");
@@ -200,6 +194,8 @@ void TextEdit::setupUserActions()
 	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
 	tb->addAction(actioncloseDocument);
 
+	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 }
 
 void TextEdit::setupOnlineUsersActions()
@@ -232,12 +228,6 @@ void TextEdit::setupOnlineUsersActions()
 
 		p->setAction(onlineAction);
 	}
-}
-
-void TextEdit::setupOnlineUsersToolbar()
-{
-	onlineUsersToolbar = new QToolBar(tr("&Online users"));
-	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 }
 
 void TextEdit::askBeforeCloseDocument()
@@ -288,7 +278,7 @@ void TextEdit::setupEditActions()
 	tb->addAction(actionPaste);
 
 	//Controlla se ci sono appunti e abilita il paste solo se ha del testo copiato
-	if (const QMimeData * md = QApplication::clipboard()->mimeData())
+	if (const QMimeData* md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(md->hasText());
 #endif
 }
@@ -471,10 +461,6 @@ void TextEdit::setupTextActions()
 }
 
 
-//Funzione per apertura file
-//Il file viene aperto in sola lettura e viene cambiato il nome del file corrente in quello appena aperto
-//copiandoci il contenuto all'interno
-
 void TextEdit::setUser(User* user)
 {
 	_user = user;
@@ -493,13 +479,24 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 	const QSignalBlocker blocker(textEdit->document());
 
 	_extraCursor->setPosition(position);
-	_extraCursor->setBlockFormat(fmt);
+	_extraCursor->mergeBlockFormat(fmt);
 
 	alignmentChanged(fmt.alignment());
 
 	//Setta nel combobox l'heading level corretto
 	comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 
+}
+
+//Applies symbol format
+void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	_extraCursor->setPosition(position);
+	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
+	_extraCursor->mergeCharFormat(fmt);
+	textEdit->mergeCurrentCharFormat(fmt);
 }
 
 void TextEdit::criticalError(QString error)
@@ -511,54 +508,6 @@ void TextEdit::criticalError(QString error)
 void TextEdit::setDocumentURI(QString uri)
 {
 	URI = uri;
-}
-
-bool TextEdit::load(const QString& f)
-{
-	//Se file non esiste torna false
-	if (!QFile::exists(f))
-		return false;
-
-	//Apre il file in sola lettura
-	QFile file(f);
-	if (!file.open(QFile::ReadOnly))
-		return false;
-
-	//Legge tutto contenuto file
-	QByteArray data = file.readAll();
-
-	//Cerca di interpretare codice html
-	QTextCodec* codec = Qt::codecForHtml(data);
-
-	//Converte i dati i letti in Unicode
-	QString str = codec->toUnicode(data);
-
-	//Se è richText lo setta HTML altrimenti plain text
-	if (Qt::mightBeRichText(str)) {
-		textEdit->setHtml(str);
-	}
-	else {
-		str = QString::fromLocal8Bit(data);
-		textEdit->setPlainText(str);
-	}
-
-
-	return true;
-}
-
-
-void TextEdit::loadDocument(QString text)
-{
-	const QSignalBlocker blocker(textEdit->document());
-
-	if (text.isEmpty()) {
-		textEdit->setHtml("");
-	}
-	else {
-		textEdit->setHtml(text);
-	}
-
-	startCursorTimer();
 }
 
 void TextEdit::startCursorTimer()
@@ -618,14 +567,6 @@ void TextEdit::closeEditor()
 	this->close();
 }
 
-//Nuovo file, se ho modifiche non salvate chiede se salvare
-void TextEdit::fileNew(QString name)
-{
-	//Cancella editor
-	textEdit->clear();
-	//Mette il nuovo file untitled.txt
-	setCurrentFileName(name);
-}
 
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
@@ -666,35 +607,6 @@ void TextEdit::removePresence(qint32 userId)
 	setupOnlineUsersActions();
 
 	delete p;
-}
-
-void TextEdit::fileOpen()
-{
-	//Apre finestra di selezione file con titolo "Open File..."
-	QFileDialog fileDialog(this, tr("Open File..."));
-
-	//Indica che se faccio ok apre
-	fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
-	//Lista tutti i file e no permette di aprire tipo directory
-	fileDialog.setFileMode(QFileDialog::ExistingFile);
-
-	//Permette nel filtro di scegliere tra txt, html... 
-	fileDialog.setMimeTypeFilters(QStringList() << "text/html" << "text/plain");
-
-	// exec() permette di aprire la finestra di dialogo e non la chiude finchè l'utente non fa un'azione
-	// Se chiudo la finestra non fa nulla
-	if (fileDialog.exec() != QDialog::Accepted)
-		return;
-
-	//Sceglie il file selezionato (il primo)
-	const QString fn = fileDialog.selectedFiles().first();
-
-	//Chiama load per caricarlo con messaggio nel caso di successo/errore nella status bar in basso
-	//toNativeSeparators scrive tutto il path fino al file name
-	if (load(fn))
-		statusBar()->showMessage(tr("Opened \"%1\"").arg(QDir::toNativeSeparators(fn)));
-	else
-		statusBar()->showMessage(tr("Could not open \"%1\"").arg(QDir::toNativeSeparators(fn)));
 }
 
 void TextEdit::filePrint()
@@ -780,7 +692,10 @@ void TextEdit::fileShare()
 
 void TextEdit::textBold()
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	QTextCharFormat fmt;
+
 	//Controlla se l'azione TextBold è attivata e imposta il Weight normale/bold
 	fmt.setFontWeight(actionTextBold->isChecked() ? QFont::Bold : QFont::Normal);
 	mergeFormatOnWordOrSelection(fmt);
@@ -788,6 +703,8 @@ void TextEdit::textBold()
 
 void TextEdit::textUnderline()
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	QTextCharFormat fmt;
 	fmt.setFontUnderline(actionTextUnderline->isChecked());
 	mergeFormatOnWordOrSelection(fmt);
@@ -795,6 +712,8 @@ void TextEdit::textUnderline()
 
 void TextEdit::textItalic()
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	QTextCharFormat fmt;
 	fmt.setFontItalic(actionTextItalic->isChecked());
 	mergeFormatOnWordOrSelection(fmt);
@@ -803,6 +722,8 @@ void TextEdit::textItalic()
 //Tipo di carattere (Arial...)
 void TextEdit::textFamily(const QString& f)
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	QTextCharFormat fmt;
 	fmt.setFontFamily(f);
 	mergeFormatOnWordOrSelection(fmt);
@@ -810,6 +731,8 @@ void TextEdit::textFamily(const QString& f)
 
 void TextEdit::textSize(const QString& p)
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Casta a float (?) e imposta la dimensione del carattere
 	qreal pointSize = p.toFloat();
 	if (p.toFloat() > 0) {
@@ -942,6 +865,8 @@ void TextEdit::textStyle(int styleIndex)
 	int headingLevel = styleIndex > 0 ? styleIndex : 0; // H1 to H6, or Standard
 	int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
 
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Crea formattazione carattere
 	QTextCharFormat fmt;
 	//Se ho degli heading mette grassetto
@@ -952,7 +877,6 @@ void TextEdit::textStyle(int styleIndex)
 	//Indica l'intera linea su cui sta il cursore
 	mergeFormatOnWordOrSelection(fmt);
 
-	const QSignalBlocker blocker(textEdit->document());
 
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
@@ -974,6 +898,8 @@ void TextEdit::textStyle(int styleIndex)
 
 void TextEdit::textColor()
 {
+	const QSignalBlocker blocker(textEdit->document());
+
 	//Creo finestra di dialogo per colori
 	QColor col = QColorDialog::getColor(textEdit->textColor(), this);
 
@@ -1091,7 +1017,7 @@ void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
 	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
-	if (const QMimeData * md = QApplication::clipboard()->mimeData())
+	if (const QMimeData* md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(md->hasText());
 #endif
 }
@@ -1100,14 +1026,17 @@ void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat& format)
 {
 	//Chiamato quando devo cambiare il formato se ho una selezione
 	QTextCursor cursor = textEdit->textCursor();
-	if (!cursor.hasSelection())
-		//Se non ho una selezione cambio alla parola in cui sta il cursore
-		cursor.select(QTextCursor::WordUnderCursor);
+	
 
 	//Applico formattazione alla selezione
 	cursor.mergeCharFormat(format);
 	//Applico formattazione anche al documento
 	textEdit->mergeCurrentCharFormat(format);
+
+	for (int i = cursor.selectionStart(); i < cursor.selectionEnd(); ++i) {
+		_extraCursor->setPosition(i + 1);
+		emit symbolFormatChanged(_user->getUserId(), i, _extraCursor->charFormat());
+	}
 }
 
 void TextEdit::fontChanged(const QFont& f)
@@ -1148,18 +1077,18 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 		QTextCursor cursor = textEdit->textCursor();
 		QTextBlockFormat blockFmt;
 		int i;
-		
+
 		for (i = position; i < position + charsAdded; ++i) {
 			//Getting QTextBlockFormat from cursor
 			blockFmt = cursor.blockFormat();
-			
+
 			//Ricavo il carattere inserito
 			QChar ch = textEdit->document()->characterAt(i);
-			
+
 			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
 			//precedente al cursore.
 			cursor.setPosition(i + 1);
-			
+
 			//Getting QTextCharFormat from cursor
 			QTextCharFormat fmt = cursor.charFormat();
 

@@ -35,8 +35,6 @@ public:
 
 	//Document
 	void setDocumentURI(QString uri);
-	bool load(const QString& f);
-	void loadDocument(QString text); //TEST
 	void startCursorTimer();
 	void setCurrentFileName(const QString& fileName);
 
@@ -46,13 +44,17 @@ public:
 	void closeEditor();
 
 	void setExtraSelections(qint32 userId, QPair<int, int> selection);
+	
+	//Block format
 	void applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
+
+	//Symbol format
+	void applyCharFormat(int position, QTextCharFormat fmt);
 
 	void criticalError(QString error);
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
-	void fileNew(QString name);
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
 	void closeDocumentError(QString error);
@@ -66,9 +68,9 @@ signals:
 	void charInserted(QChar ch, QTextCharFormat format, int position);
 	void generateExtraSelection();
 	void blockFormatChanged(qint32 userId, int start, int end, QTextBlockFormat fmt);
+	void symbolFormatChanged(qint32 userId, int position, QTextCharFormat fmt);
 
 private slots:
-	void fileOpen();
 	void filePrint();
 	void filePrintPreview();
 	void filePrintPdf();
@@ -102,7 +104,6 @@ private:
 	void setupShareActions();
 	void setupUserActions();
 	void setupOnlineUsersActions();
-	void setupOnlineUsersToolbar();
 
 	void askBeforeCloseDocument();
 

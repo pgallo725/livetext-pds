@@ -21,6 +21,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::charFormat, w, &WorkSpace::documentEditSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::blockEdit, w, &WorkSpace::documentEditBlock, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 

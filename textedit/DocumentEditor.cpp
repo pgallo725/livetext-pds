@@ -4,13 +4,6 @@
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObject* parent) : QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
 	_textedit->setDocumentURI(doc.getURI().toString());
-
-	//CONNECT
-	connect(_textedit, &TextEdit::charDeleted, this, &DocumentEditor::deleteCharAtIndex);
-	connect(_textedit, &TextEdit::charInserted, this, &DocumentEditor::addCharAtIndex);
-	connect(_textedit, &TextEdit::generateExtraSelection, this, &DocumentEditor::generateExtraSelection);
-	connect(_textedit, &TextEdit::blockFormatChanged, this, &DocumentEditor::changeBlockFormat);
-
 }
 
 void DocumentEditor::openDocument()
@@ -111,4 +104,21 @@ void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt,
 {
 	int position = _document.formatBlock(blockId, fmt);
 	_textedit->applyBlockFormat(userId, position, fmt);
+}
+
+
+
+
+//Symbol format
+void DocumentEditor::changeSymbolFormat(qint32 userId, int position, QTextCharFormat fmt)
+{
+	Symbol s = _document[position];
+	_document.formatSymbol(s._fPos, fmt);
+	emit symbolFormatChanged(s._fPos, fmt);
+}
+
+void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)
+{
+	int pos = _document.formatSymbol(position, fmt);
+	_textedit->applyCharFormat(pos, fmt);
 }
