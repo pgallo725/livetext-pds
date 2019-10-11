@@ -6,8 +6,6 @@ Client::Client(QObject* parent) : QObject(parent)
 	socket = new QSslSocket(this);
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
-	//connect(socket, SIGNAL(encrypted()), this, SLOT(ready()));
-	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
 	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
 	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
@@ -213,6 +211,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
+	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
 		emit connectionEstablished();
@@ -355,7 +354,8 @@ void Client::Logout() {
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->send(socket);
 
-	this->disconnect();
+	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
+	socket->disconnectFromHost();
 
 }
 
