@@ -51,10 +51,6 @@ void Client::serverConnection() {
 	qDebug() << "Connection established";
 }
 
-void Client::ready() {
-	qDebug() << "Encryption ready";
-	emit connectionEstablished();
-}
 
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
@@ -230,34 +226,10 @@ void Client::Disconnect() {
 	qDebug() << "Connection closed by client";
 }
 
-void Client::setUsername(QString username) {
+void Client::Login(QString usr, QString passwd) {
 
-	this->username = username;
-}
-
-void Client::setPassword(QString password) {
-
-	this->password = password;
-}
-
-void Client::setNickname(QString nickname) {
-
-	this->nickname = nickname;
-}
-
-void Client::setImage(QImage image) {
-	this->image = image;
-}
-
-void Client::setLogin(bool flag) {
-	login = flag;
-}
-
-bool Client::getLogin() {
-	return login;
-}
-
-void Client::Login() {
+	this->username = usr;
+	this->password = passwd;
 
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
@@ -334,7 +306,12 @@ void Client::Login() {
 	}
 }
 
-void Client::Register() {
+void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
+
+	this->username = usr;
+	this->password = passwd;
+	this->image = img;
+	this->nickname = nick;
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
@@ -375,6 +352,10 @@ void Client::Logout() {
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->send(socket);
+
+	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
+
+	socket->disconnectFromHost();
 
 }
 

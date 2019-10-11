@@ -71,10 +71,7 @@ void LiveText::connectToServer(QString ipAddress, quint16 port)
 //Login
 void LiveText::Login(QString username, QString password)
 {
-	_client->setUsername(username);
-	_client->setPassword(password);
-
-	_client->Login();
+	_client->Login(username,password);
 }
 
 void LiveText::loginSuccess(User user)
@@ -94,12 +91,7 @@ void LiveText::loginFailed(QString errorType)
 //Registration
 void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
 {
-	_client->setUsername(username);
-	_client->setPassword(password);
-	_client->setNickname(nickname);
-	_client->setImage(icon);
-
-	_client->Register();
+	_client->Register(username,password,nickname,icon);
 }
 
 void LiveText::registrationFailed(QString errorType)
@@ -111,7 +103,7 @@ void LiveText::registrationFailed(QString errorType)
 //Logout
 void LiveText::Logout()
 {
-	_client->Disconnect();
+	_client->Logout();
 }
 
 

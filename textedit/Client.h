@@ -115,11 +115,10 @@ public slots:
 	void serverDisconnection();
 	void errorHandler(QAbstractSocket::SocketError socketError);
 	void writeOnServer();
-	void ready();
 	void handleSslErrors(const QList<QSslError>& sslErrors);
 	// User connection
-	void Login();
-	void Register();
+	void Login(QString usr, QString passwd);
+	void Register(QString usr, QString passwd, QString nick, QImage img);
 	void Logout();
 	// Data Exchange
 	void sendCursor(qint32 userId, qint32 position);
@@ -140,13 +139,6 @@ public slots:
 	// Server connection
 	void Connect(QString ipAddress, quint16 port);
 	void Disconnect();
-	// Setter & Getter
-	void setUsername(QString username);
-	void setPassword(QString password);
-	void setLogin(bool flag);
-	void setNickname(QString nickname);
-	void setImage(QImage image);
-	bool getLogin();
 	// Account handler
 	void newUserPresence(MessageCapsule message);
 	void updateUserPresence(MessageCapsule message);
