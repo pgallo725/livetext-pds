@@ -222,6 +222,8 @@ void Client::Connect(QString ipAddress, quint16 port) {
 }
 
 void Client::Disconnect() {
+
+	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->disconnectFromHost();
 	qDebug() << "Connection closed by client";
 }
@@ -353,9 +355,7 @@ void Client::Logout() {
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->send(socket);
 
-	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-
-	socket->disconnectFromHost();
+	this->disconnect();
 
 }
 
