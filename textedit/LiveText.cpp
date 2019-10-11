@@ -175,6 +175,13 @@ void LiveText::openDocumentCompleted(Document doc)
 	
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
+	//TEXTEDIT - DOCUMENTEDITOR
+	connect(_textEdit, &TextEdit::charDeleted, _docEditor, &DocumentEditor::deleteCharAtIndex);
+	connect(_textEdit, &TextEdit::charInserted, _docEditor, &DocumentEditor::addCharAtIndex);
+	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection);
+	connect(_textEdit, &TextEdit::blockFormatChanged, _docEditor, &DocumentEditor::changeBlockFormat);
+	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
+
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
@@ -201,10 +208,12 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendChar);
 	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::blockModified);
+	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::charModified);
 
 	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat);
+	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat);
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();

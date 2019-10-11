@@ -208,6 +208,13 @@ Symbol& Document::operator[](QVector<qint32> fPos)
 	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
 }
 
+Symbol& Document::operator[](int pos)
+{
+	if (pos >= 0 && pos < _text.length())
+		return _text[pos];
+	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
+}
+
 
 int Document::insert(Symbol& s)
 {

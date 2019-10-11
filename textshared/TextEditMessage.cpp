@@ -60,12 +60,12 @@ QVector<qint32> CharDeleteMessage::getPosition() const
 /*************** CHAR FORMAT MESSAGE ***************/
 
 CharFormatMessage::CharFormatMessage()
-	: Message(CharDelete)
+	: Message(CharFormat)
 {
 }
 
 CharFormatMessage::CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt)
-	: Message(CharDelete), m_fPos(position), m_charFmt(fmt)
+	: Message(CharFormat), m_fPos(position), m_charFmt(fmt)
 {
 }
 

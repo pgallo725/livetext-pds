@@ -16,8 +16,19 @@ public:
 
 public slots:
 	void addSymbol(Symbol s);
+	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
+
 	void removeSymbol(QVector<int> position);
+	void deleteCharAtIndex(int position);
+
+	void changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt);
 	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
+
+	void changeSymbolFormat(qint32 userId, int position, QTextCharFormat fmt);
+	void applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt);
+
+
+	void generateExtraSelection();
 
 
 private:
@@ -26,16 +37,14 @@ private:
 	TextEdit* _textedit;
 
 private slots:
-	void deleteCharAtIndex(int position);
-	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
-	void generateExtraSelection();
-	void changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt);
+
 
 
 signals:
 	void deleteChar(QVector<qint32> fPos);
 	void insertChar(Symbol s);
 	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
+	void symbolFormatChanged(QVector<qint32> position, QTextCharFormat fmt);
 };
 
 

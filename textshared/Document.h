@@ -72,6 +72,7 @@ public:
 	bool exists();
 
 	Symbol& operator[](QVector<qint32> fPos);
+	Symbol& operator[](int pos);
 
 	int insert(Symbol& s);
 	void remove(const Symbol& s);
