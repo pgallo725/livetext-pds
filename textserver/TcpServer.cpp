@@ -468,10 +468,11 @@ void TcpServer::saveUsers()
 void TcpServer::logoutClient(QSslSocket* clientSocket)
 {
 	QSharedPointer<Client> c = clients.find(clientSocket).value();
-	restoreUserAvaiable(c->getUsername());
+	QString username = c->getUsername();
+	restoreUserAvaiable(username);
 	c->logout();
 
-	qDebug() << "> User" << c->getUsername() << "logged out";
+	qDebug() << "> User" << username << "logged out";
 }
 
 /* Delete user from unavailable list when they logout or close connection */
