@@ -38,8 +38,8 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	
 
 	//CLIENT - LIVETEXT
-	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
-	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
+	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed);
+	connect(_client, &Client::registrationFailed, this, &LiveText::operationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess);
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
@@ -68,6 +68,12 @@ void LiveText::connectToServer(QString ipAddress, quint16 port)
 	_client->Connect(ipAddress, port);
 }
 
+void LiveText::operationFailed(QString errorType)
+{
+	_landingPage->incorrectOperation(errorType);
+	_client->Disconnect();
+}
+
 //Login
 void LiveText::Login(QString username, QString password)
 {
@@ -81,23 +87,10 @@ void LiveText::loginSuccess(User user)
 	_landingPage->openLoggedPage();
 }
 
-
-void LiveText::loginFailed(QString errorType)
-{
-	_landingPage->incorrectOperation(errorType);
-	_client->Disconnect();
-}
-
 //Registration
 void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
 {
 	_client->Register(username,password,nickname,icon);
-}
-
-void LiveText::registrationFailed(QString errorType)
-{
-	_landingPage->incorrectOperation(errorType);
-	_client->Disconnect();
 }
 
 //Logout
@@ -109,10 +102,8 @@ void LiveText::Logout()
 
 void LiveText::forceLogout()
 {
-	
 	if (_textEdit != nullptr) {
-		//_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
-
+		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
 		_textEdit->closeEditor();
 
 		delete _docEditor;
@@ -124,7 +115,6 @@ void LiveText::forceLogout()
 	else {
 		QMessageBox::StandardButton msgbox = QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok);
 	}
-	
 	
 	_landingPage->pushButtonBackClicked();
 	_landingPage->incorrectOperation(tr("Server not responding"));
@@ -143,7 +133,6 @@ void LiveText::dismissDocumentCompleted(URI URI)
 	_user.removeDocument(URI);
 	_landingPage->setupFileList();
 	_landingPage->documentDismissed();
-
 }
 
 //Open a new document

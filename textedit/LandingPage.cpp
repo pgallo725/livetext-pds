@@ -114,30 +114,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
-
-
-	//If there's a saved credential it opens it
-	QFile file("userLogin.dat");
-	if (file.open(QIODevice::ReadOnly)) {
-		QTextStream stream(&file);
-		QString line = stream.readLine();
-
-		if (!line.isEmpty()) {
-			ui->checkBox_saveCredential->setChecked(true);
-		}
-
-		ui->lineEdit_usr->setText(line);
-
-		line = stream.readLine();
-		ui->lineEdit_serverIP->setText(line);
-
-		line = stream.readLine();
-		ui->lineEdit_serverPort->setText(line);
-	}
-
-	file.close();
-
-
+	//Loads user infos
+	loadUserLoginInfo();
 
 	/* LOADING GIF */
 	loading = new QLabel(this);
@@ -202,6 +180,17 @@ void LandingPage::updateUserInfo()
 	ui->label_userProfilePhoto->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
+void LandingPage::resetFields()
+{
+	ui->lineEdit_psw->setText("");
+	ui->lineEdit_regUsr->setText("");
+	ui->lineEdit_regNick->setText("");
+	ui->lineEdit_regPsw->setText("");
+	ui->lineEdit_regPswConf->setText("");
+	ui->lineEdit_UsrIconPath->setText("");
+	ui->label_incorrect_operation->setText("");
+}
+
 void LandingPage::Login()
 {
 	/*
@@ -250,18 +239,12 @@ void LandingPage::Register()
 
 void LandingPage::currentTabChanged(int index)
 {
+	resetFields();
 	switch (index) {
 	case 0:
-		ui->lineEdit_regNick->setText("");
-		ui->lineEdit_regUsr->setText("");
-		ui->lineEdit_regPsw->setText("");
-		ui->lineEdit_regPswConf->setText("");
-		ui->lineEdit_UsrIconPath->setText("");
 		ui->pushButton_confirmOperation->setText(tr("Login"));
 		break;
 	case 1:
-		ui->lineEdit_psw->setText("");
-		ui->lineEdit_usr->setText("");
 		ui->pushButton_confirmOperation->setText(tr("Register"));
 		break;
 	}
@@ -325,17 +308,11 @@ void LandingPage::incorrectOperation(QString msg)
 
 void LandingPage::documentDismissed()
 {
-
 	stopLoadingAnimation();
 }
 
 void LandingPage::pushButtonRegisterClicked()
 {
-	//Cancellazione campi login
-	ui->label_incorrect_operation->setText("");
-	ui->lineEdit_psw->setText("");
-	ui->lineEdit_usr->setText("");
-
 	//Switch alla pagina di registrazione
 	ui->tabWidget->setCurrentIndex(1);
 }
@@ -388,15 +365,9 @@ void LandingPage::pushButtonNewClicked()
 
 void LandingPage::pushButtonBackClicked()
 {
-	ui->lineEdit_psw->setText("");
-	ui->lineEdit_regUsr->setText("");
-	ui->lineEdit_regNick->setText("");
-	ui->lineEdit_regPsw->setText("");
-	ui->lineEdit_regPswConf->setText("");
-	ui->lineEdit_UsrIconPath->setText("");
-	ui->label_incorrect_operation->setText("");
-
+	resetFields();
 	ui->stackedWidget->setCurrentIndex(0);
+	ui->tabWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
 }
 
@@ -520,6 +491,8 @@ void LandingPage::startLoadingAnimation(QString text)
 
 	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
+
+	QCoreApplication::processEvents();
 }
 
 void LandingPage::stopLoadingAnimation()
@@ -527,6 +500,30 @@ void LandingPage::stopLoadingAnimation()
 	QApplication::restoreOverrideCursor();
 	loading->close();
 	setEnabled(true);
+}
+
+void LandingPage::loadUserLoginInfo()
+{
+	//If there's a saved credential it opens it
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::ReadOnly)) {
+		QTextStream stream(&file);
+		QString line = stream.readLine();
+
+		if (!line.isEmpty()) {
+			ui->checkBox_saveCredential->setChecked(true);
+		}
+
+		ui->lineEdit_usr->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverIP->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverPort->setText(line);
+	}
+
+	file.close();
 }
 
 void LandingPage::setUser(User* user)

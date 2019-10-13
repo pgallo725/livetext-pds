@@ -180,6 +180,8 @@ void ProfileEditWindow::startLoadingAnimation(QString text)
 
 	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
+
+	QCoreApplication::processEvents();
 }
 
 void ProfileEditWindow::stopLoadingAnimation()
