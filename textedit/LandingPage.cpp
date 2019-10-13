@@ -17,6 +17,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
+#define DEFAULT_IP "127.0.0.1"
+#define DEFAULT_PORT "1500"
 
 const QString rsrcPath = ":/images/win";
 
@@ -115,6 +117,9 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
 	//Loads user infos
+	ui->lineEdit_serverIP->setText(DEFAULT_IP);
+	ui->lineEdit_serverPort->setText(DEFAULT_PORT);
+
 	loadUserLoginInfo();
 
 	/* LOADING GIF */
@@ -189,37 +194,17 @@ void LandingPage::resetFields()
 	ui->lineEdit_regPswConf->setText("");
 	ui->lineEdit_UsrIconPath->setText("");
 	ui->label_incorrect_operation->setText("");
+	ui->label_incorrect_file_operation->setText("");
 }
 
 void LandingPage::Login()
 {
-	/*
-	//Bypass login
-	ui->stackedWidget->setCurrentIndex(1);
-	ui->stackedWidget->show();
-	stopLoadingAnimation();
-	return;
-	*/
-
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
 
 
-	QFile file("userLogin.dat");
-	if (file.open(QIODevice::WriteOnly)) {
-		QTextStream stream(&file);
-		if (ui->checkBox_saveCredential->isChecked()) {
-			stream << username << endl;
-			stream << ui->lineEdit_serverIP->text() << endl;
-			stream << ui->lineEdit_serverPort->text() << endl;
-		}
-		else {
-			stream << "" << endl;
-		}
-	}
-
-	file.close();
+	saveUserLoginInfo(username);
 
 	emit(serverLogin(username, password));
 }
@@ -232,6 +217,8 @@ void LandingPage::Register()
 	QString password = ui->lineEdit_regPsw->text();
 	QString passwordConf = ui->lineEdit_regPswConf->text();
 	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
+
+	saveUserLoginInfo(username);
 
 	emit serverRegister(username, password, nickname, userIcon);
 }
@@ -292,6 +279,8 @@ void LandingPage::connectionEstabilished()
 void LandingPage::openLoggedPage()
 {
 	stopLoadingAnimation();
+
+	resetFields();
 
 	setupFileList();
 	updateUserInfo();
@@ -354,12 +343,16 @@ void LandingPage::pushButtonOpenUriClicked()
 {
 	//Mostra la finestra di mw formata
 	openURIWindow->exec();
+
+	openURIWindow->resetFields();
 }
 
 void LandingPage::pushButtonNewClicked()
 {
 	//Mostra la finestra di mw formata
 	newFileWindow->exec();
+
+	newFileWindow->resetFields();
 }
 
 
@@ -521,6 +514,24 @@ void LandingPage::loadUserLoginInfo()
 
 		line = stream.readLine();
 		ui->lineEdit_serverPort->setText(line);
+	}
+
+	file.close();
+}
+
+void LandingPage::saveUserLoginInfo(QString username)
+{
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::WriteOnly)) {
+		QTextStream stream(&file);
+		if (ui->checkBox_saveCredential->isChecked()) {
+			stream << username << endl;
+			stream << ui->lineEdit_serverIP->text() << endl;
+			stream << ui->lineEdit_serverPort->text() << endl;
+		}
+		else {
+			stream << "" << endl;
+		}
 	}
 
 	file.close();

@@ -19,6 +19,7 @@ public:
 	~NewFileWindow();
 
 	void incorrectOperation(QString error);
+	void resetFields();
 	
 private slots:
 	void acceptClicked();

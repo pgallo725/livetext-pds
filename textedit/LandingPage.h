@@ -33,6 +33,7 @@ public:
 	void stopLoadingAnimation();
 
 	void loadUserLoginInfo();
+	void saveUserLoginInfo(QString username);
 	void setUser(User* user);
 	void updateUserInfo();
 	void resetFields();

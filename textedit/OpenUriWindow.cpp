@@ -30,16 +30,23 @@ void OpenUriWindow::incorrectOperation(QString error)
 	ui->label_incorrectUri->setText(error);
 }
 
+void OpenUriWindow::resetFields()
+{
+	ui->lineEdit_uri->setText("");
+}
+
 void OpenUriWindow::acceptClicked()
 {
 	QString uri = ui->lineEdit_uri->text();
 
 	if (uri.isEmpty()) {
 		incorrectOperation(tr("Please insert a valid URI"));
-		return;
 	}
-
-	emit landingPage->addDocument(uri);
+	else {
+		this->close();
+		landingPage->startLoadingAnimation("Open document from URI...");
+		emit landingPage->addDocument(uri);
+	}
 }
 
 void OpenUriWindow::rejectClicked()
