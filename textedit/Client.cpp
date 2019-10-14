@@ -478,6 +478,7 @@ void Client::deleteDocument(URI URI) {
 
 void Client::forceDocumentClose()
 {
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 	emit documentExitSuccess(true);
 }
 
