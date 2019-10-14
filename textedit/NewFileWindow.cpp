@@ -36,6 +36,11 @@ void NewFileWindow::incorrectOperation(QString error)
 	ui->label_incorrectFilename->setText(error);
 }
 
+void NewFileWindow::resetFields()
+{
+	ui->lineEdit_fileName->setText("");
+}
+
 void NewFileWindow::acceptClicked()
 {
 	QString name = ui->lineEdit_fileName->text();
@@ -44,6 +49,8 @@ void NewFileWindow::acceptClicked()
 		incorrectOperation(tr("Please insert a valid filename"));
 	}
 	else {
+		this->close();
+		landingPage->startLoadingAnimation("Creating new document...");
 		emit landingPage->newDocument(name);
 	}
 }

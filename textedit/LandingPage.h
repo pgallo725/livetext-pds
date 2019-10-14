@@ -32,8 +32,11 @@ public:
 	void startLoadingAnimation(QString text);
 	void stopLoadingAnimation();
 
+	void loadUserLoginInfo();
+	void saveUserLoginInfo(QString username);
 	void setUser(User* user);
 	void updateUserInfo();
+	void resetFields();
 
 private slots:
 	void pushButtonNewClicked();
@@ -58,7 +61,7 @@ signals:
 	void newDocument(QString name);
 	void addDocument(QString URI);
 	void openDocument(int index);
-	void removeDocument(int index); //TODO REMOVE DOCUMENT
+	void removeDocument(int index);
 	void connectToServer(QString ipAddress, quint16 port);
 	void serverLogin(QString username, QString password);
 	void serverRegister(QString username, QString password, QString nickname, QImage icon);

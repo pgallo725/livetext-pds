@@ -38,10 +38,8 @@ private slots:
 	void openEditProfile();
 
 	//LIVETEXT
-	void loginFailed(QString errorType);
-	void registrationFailed(QString errorType);
+	void operationFailed(QString errorType);
 	void loginSuccess(User user);
-	void registrationSuccess(User user);
 	void forceLogout();
 
 
