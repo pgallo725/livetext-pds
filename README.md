@@ -97,7 +97,7 @@ Secondary threads are created when a document is opened, which handle all editin
 University assignment has no security requirements, but security issues are an interesting and important topic nowadays.
 We are concerning in this topics so we want to provide a basic way to exchange data in a safty way.
 
-First of all we set up SSL connections between the server and clients using a self-signed certificate.
+First of all we set up [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) connections between the server and clients using a self-signed certificate.
 In this way all data flow in the network encripted and no one can see what is inside messages despite someone could sniff packets.
 
 If SSL connection is not enough, we provide a simple way to exchange critical data, as passwords, during Registration and Login operations. 
