@@ -17,7 +17,7 @@ void DocumentEditor::openDocument()
 
 	foreach(TextBlockID id, blocks) {
 		TextBlock& blk = _document.getBlock(id);
-		_textedit->applyBlockFormat(id.getAuthorId(), _document.getBlockPosition(id), blk.getFormat());
+		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
 	}
 	
 	_textedit->setCurrentFileName(_document.getName());
@@ -90,20 +90,20 @@ void DocumentEditor::generateExtraSelection()
 }
 
 //Block format
-void DocumentEditor::changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt)
+void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 {
 	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
 	
 	foreach(TextBlockID textBlock, blocks) {
 		_document.formatBlock(textBlock, fmt);
-		emit blockFormatChanged(textBlock, fmt, userId);
+		emit blockFormatChanged(textBlock, fmt);
 	}
 }
 
-void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId)
+void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
 {
 	int position = _document.formatBlock(blockId, fmt);
-	_textedit->applyBlockFormat(userId, position, fmt);
+	_textedit->applyBlockFormat(position, fmt);
 }
 
 

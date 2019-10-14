@@ -90,7 +90,6 @@ class BlockEditMessage : public Message
 
 private:
 
-	qint32 m_editorId;
 	TextBlockID m_blockId;
 	QTextBlockFormat m_blockFmt;
 
@@ -99,7 +98,7 @@ protected:
 	BlockEditMessage();		// empty constructor
 
 	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
-	BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -108,7 +107,6 @@ public:
 
 	~BlockEditMessage() {};
 
-	qint32 getAuthorId() const;
 	TextBlockID getBlockId() const;
 	QTextBlockFormat getBlockFormat() const;
 };

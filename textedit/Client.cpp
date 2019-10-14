@@ -513,9 +513,9 @@ void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
 	charFormat->send(socket);
 }
 
-void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
+void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
 {
-	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
+	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt);
 	blockEdit->send(socket);
 }
 
@@ -540,7 +540,7 @@ void Client::editChar(MessageCapsule message) {
 void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat(), blockedit->getAuthorId());
+	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat());
 }
 
 

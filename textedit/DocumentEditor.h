@@ -21,8 +21,8 @@ public slots:
 	void removeSymbol(QVector<int> position);
 	void deleteCharAtIndex(int position);
 
-	void changeBlockFormat(qint32 userId, int start, int end, QTextBlockFormat fmt);
-	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
+	void changeBlockFormat(int start, int end, QTextBlockFormat fmt);
+	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 
 	void changeSymbolFormat(qint32 userId, int position, QTextCharFormat fmt);
 	void applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt);
@@ -43,7 +43,7 @@ private slots:
 signals:
 	void deleteChar(QVector<qint32> fPos);
 	void insertChar(Symbol s);
-	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt, qint32 userId);
+	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt);
 	void symbolFormatChanged(QVector<qint32> position, QTextCharFormat fmt);
 };
 

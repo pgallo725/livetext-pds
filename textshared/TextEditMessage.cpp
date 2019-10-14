@@ -93,28 +93,23 @@ QTextCharFormat CharFormatMessage::getCharFormat() const
 /*************** BLOCK FORMAT EDIT MESSAGE ***************/
 
 BlockEditMessage::BlockEditMessage()
-	: Message(BlockEdit), m_blockId(TextBlockID(nullptr)), m_editorId(-1)
+	: Message(BlockEdit), m_blockId(TextBlockID(nullptr))
 {
 }
 
-BlockEditMessage::BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
-	: Message(BlockEdit), m_blockId(blockId), m_blockFmt(fmt), m_editorId(editorId)
+BlockEditMessage::BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt)
+	: Message(BlockEdit), m_blockId(blockId), m_blockFmt(fmt)
 {
 }
 
 void BlockEditMessage::writeTo(QDataStream& stream) const
 {
-	stream << m_blockId << m_blockFmt << m_editorId;
+	stream << m_blockId << m_blockFmt;
 }
 
 void BlockEditMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_blockId >> m_blockFmt >> m_editorId;
-}
-
-qint32 BlockEditMessage::getAuthorId() const
-{
-	return m_editorId;
+	stream >> m_blockId >> m_blockFmt;
 }
 
 TextBlockID BlockEditMessage::getBlockId() const
