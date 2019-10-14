@@ -3,29 +3,13 @@
 
 Client::Client(QObject* parent) : QObject(parent)
 {
-	socket = new QSslSocket(this);
-
-	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
-	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
-	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
-
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-		[&](QAbstractSocket::SocketError socketError) {
-			emit impossibleToConnect();						// Error in connection
-			socket->abort();
-		});
+	
 }
 
 
 Client::~Client()
 {
 	// TODO
-}
-
-void Client::writeOnServer()
-{
-
 }
 
 void Client::handleSslErrors(const QList<QSslError>& sslErrors)
@@ -54,12 +38,15 @@ void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 	emit abortConnection();
-	socket->abort();
+	//socket->abort();
+	socket->close();
+	socket->deleteLater();
 }
 
 void Client::errorHandler(QAbstractSocket::SocketError socketError) {
 	qDebug() << "Socket error raised: " << socketError;
-	socket->abort();
+	socket->close();
+	socket->deleteLater();
 }
 
 
@@ -214,6 +201,20 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
+
+	socket = new QSslSocket(this);
+
+	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
+	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
+	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
+	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
+
+	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+		[&](QAbstractSocket::SocketError socketError) {
+			emit impossibleToConnect();						// Error in connection
+			socket->abort();
+		});
+
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
@@ -227,6 +228,7 @@ void Client::Disconnect() {
 
 	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->disconnectFromHost();
+	socket->deleteLater();
 	qDebug() << "Connection closed by client";
 }
 
