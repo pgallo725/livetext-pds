@@ -769,8 +769,7 @@ void TextEdit::textSize(const QString& p)
 
 void TextEdit::listStyle(int styleIndex)
 {
-
-	const QSignalBlocker blocker(textEdit->document());
+	//const QSignalBlocker blocker(textEdit->document());
 
 	//Formato lista
 	QTextListFormat listFmt;
@@ -933,6 +932,7 @@ void TextEdit::listStyle(int styleIndex)
 			listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
 		};
 		break;
+
 	case alphaupper:
 		if (!listAlphaUpper->isChecked()) {
 			listButton->setChecked(false);
@@ -959,6 +959,7 @@ void TextEdit::listStyle(int styleIndex)
 			listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
 		};
 		break;
+
 	case roman:
 		if (!listRoman->isChecked()) {
 			listButton->setChecked(false);
@@ -985,6 +986,7 @@ void TextEdit::listStyle(int styleIndex)
 			listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
 		};
 		break;
+
 	case romanupper:
 		if (!listRomanUpper->isChecked()) {
 			listButton->setChecked(false);
