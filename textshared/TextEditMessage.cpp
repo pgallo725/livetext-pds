@@ -121,3 +121,38 @@ QTextBlockFormat BlockEditMessage::getBlockFormat() const
 {
 	return m_blockFmt;
 }
+
+ListEditMessage::ListEditMessage()
+	: Message(ListEdit), m_blockId(TextBlockID(nullptr)), m_listId(0)
+{
+}
+
+ListEditMessage::ListEditMessage(TextBlockID blockId, quint32 listId, QTextListFormat fmt)
+	: Message(ListEdit), m_blockId(blockId), m_listId(listId), m_listFmt(fmt)
+{
+}
+
+void ListEditMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_blockId << m_listId << m_listFmt;
+}
+
+void ListEditMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_blockId >> m_listId >> m_listFmt;
+}
+
+TextBlockID ListEditMessage::getBlockId() const
+{
+	return m_blockId;
+}
+
+quint32 ListEditMessage::getListId() const
+{
+	return m_listId;
+}
+
+QTextListFormat ListEditMessage::getBlockFormat() const
+{
+	return m_listFmt;
+}

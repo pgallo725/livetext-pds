@@ -159,6 +159,11 @@ MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat f
 	return new BlockEditMessage(blockId, fmt);
 }
 
+MessageCapsule MessageFactory::ListEdit(TextBlockID blockId, quint32 listId, QTextListFormat fmt)
+{
+	return new ListEditMessage(blockId, listId, fmt);
+}
+
 MessageCapsule MessageFactory::CursorMove(qint32 userId, qint32 newPosition)
 {
 	return new CursorMoveMessage(userId, newPosition);
