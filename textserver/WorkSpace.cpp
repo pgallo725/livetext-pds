@@ -210,6 +210,11 @@ void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)
 	doc->formatBlock(blockId, format);
 }
 
+void WorkSpace::documentListBlock(TextBlockID blockId, quint32 listId, QTextListFormat format)
+{
+	//TODO
+}
+
 
 /* Forwards to the main TcpServer the user request for an account update */
 void WorkSpace::handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
