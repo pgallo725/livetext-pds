@@ -61,6 +61,7 @@ void Client::errorHandler(QAbstractSocket::SocketError socketError) {
 	socket->abort();
 }
 
+
 void Client::readBuffer() {
 
 	qDebug() << "Reading socket";
@@ -128,6 +129,7 @@ void Client::messageHandler(MessageCapsule message) {
 	}
 
 }
+
 
 MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 {
@@ -368,6 +370,8 @@ void Client::openDocument(URI URI) {
 
 	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
+
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->send(socket);
 
@@ -404,6 +408,8 @@ void Client::createDocument(QString name) {
 	MessageCapsule incomingMessage;
 
 	socket->readAll();		// Dirty fix for pending messages received after closing another document
+
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->send(socket);
