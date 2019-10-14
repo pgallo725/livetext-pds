@@ -93,28 +93,23 @@ QTextCharFormat CharFormatMessage::getCharFormat() const
 /*************** BLOCK FORMAT EDIT MESSAGE ***************/
 
 BlockEditMessage::BlockEditMessage()
-	: Message(BlockEdit), m_blockId(TextBlockID(nullptr)), m_editorId(-1)
+	: Message(BlockEdit), m_blockId(TextBlockID(nullptr))
 {
 }
 
-BlockEditMessage::BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
-	: Message(BlockEdit), m_blockId(blockId), m_blockFmt(fmt), m_editorId(editorId)
+BlockEditMessage::BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt)
+	: Message(BlockEdit), m_blockId(blockId), m_blockFmt(fmt)
 {
 }
 
 void BlockEditMessage::writeTo(QDataStream& stream) const
 {
-	stream << m_blockId << m_blockFmt << m_editorId;
+	stream << m_blockId << m_blockFmt;
 }
 
 void BlockEditMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_blockId >> m_blockFmt >> m_editorId;
-}
-
-qint32 BlockEditMessage::getAuthorId() const
-{
-	return m_editorId;
+	stream >> m_blockId >> m_blockFmt;
 }
 
 TextBlockID BlockEditMessage::getBlockId() const
@@ -125,4 +120,39 @@ TextBlockID BlockEditMessage::getBlockId() const
 QTextBlockFormat BlockEditMessage::getBlockFormat() const
 {
 	return m_blockFmt;
+}
+
+ListEditMessage::ListEditMessage()
+	: Message(ListEdit), m_blockId(TextBlockID(nullptr)), m_listId(0)
+{
+}
+
+ListEditMessage::ListEditMessage(TextBlockID blockId, quint32 listId, QTextListFormat fmt)
+	: Message(ListEdit), m_blockId(blockId), m_listId(listId), m_listFmt(fmt)
+{
+}
+
+void ListEditMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_blockId << m_listId << m_listFmt;
+}
+
+void ListEditMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_blockId >> m_listId >> m_listFmt;
+}
+
+TextBlockID ListEditMessage::getBlockId() const
+{
+	return m_blockId;
+}
+
+quint32 ListEditMessage::getListId() const
+{
+	return m_listId;
+}
+
+QTextListFormat ListEditMessage::getBlockFormat() const
+{
+	return m_listFmt;
 }

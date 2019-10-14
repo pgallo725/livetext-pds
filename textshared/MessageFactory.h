@@ -38,7 +38,8 @@ public:
 	static MessageCapsule CharInsert(Symbol symbol);
 	static MessageCapsule CharDelete(QVector<qint32> position);
 	static MessageCapsule CharFormat(QVector<qint32> position, QTextCharFormat fmt);
-	static MessageCapsule BlockEdit(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	static MessageCapsule BlockEdit(TextBlockID blockId, QTextBlockFormat fmt);
+	static MessageCapsule ListEdit(TextBlockID blockId, quint32 listId, QTextListFormat fmt);
 
 	static MessageCapsule CursorMove(qint32 userId, qint32 newPosition);
 	static MessageCapsule PresenceUpdate(qint32 userId, QString nickname, QImage icon);

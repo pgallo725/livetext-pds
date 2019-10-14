@@ -499,7 +499,7 @@ void TextEdit::closeDocumentError(QString error)
 }
 
 //Apply changes to blocks
-void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt)
+void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
@@ -1091,7 +1091,7 @@ void TextEdit::textStyle(int styleIndex)
 
 	cursor.endEditBlock();
 
-	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::textColor()
@@ -1130,7 +1130,7 @@ void TextEdit::textAlign(QAction* a)
 
 	QTextCursor cursor = textEdit->textCursor();
 
-	emit blockFormatChanged(_user->getUserId(), cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::alignmentChanged(Qt::Alignment a)
@@ -1302,10 +1302,10 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 				emit charInserted(ch, fmt, i);
 			}
 			if (ch == QChar::ParagraphSeparator) {
-				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
+				emit blockFormatChanged(i, i, blockFmt);
 			}
 			if (charsAdded > 1) {
-				emit blockFormatChanged(_user->getUserId(), i, i, blockFmt);
+				emit blockFormatChanged(i, i, blockFmt);
 			}
 		}
 	}
