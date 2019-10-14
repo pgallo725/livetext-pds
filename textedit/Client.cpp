@@ -52,6 +52,7 @@ void Client::serverConnection() {
 
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 	emit abortConnection();
 	socket->abort();
 }
