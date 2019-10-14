@@ -122,8 +122,9 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	loadUserLoginInfo();
 
-	/* LOADING GIF */
-	loading = new QLabel(this);
+	//Setup loading message Label
+	setupLoadingMessage();
+	
 }
 
 LandingPage::~LandingPage()
@@ -170,6 +171,7 @@ void LandingPage::confirmOperation()
 
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
+
 
 void LandingPage::updateUserInfo()
 {
@@ -461,28 +463,41 @@ void LandingPage::centerAndResize() {
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }
 
-void LandingPage::startLoadingAnimation(QString text)
+void LandingPage::setupLoadingMessage()
 {
-
-	//loading->setMovie(movie);
-	loading->setText(text);
-	QFont font = loading->font();
-	font.setPointSize(25);
-
-	loading->setAlignment(Qt::AlignCenter);
-
-	loading->setFont(font);
+	loading = new QLabel(this);
 
 	//Center and resize
-	loading->resize(QSize(512, 128));
+	int labelW = width() / 2;
+	int labelH = height() / 5;
 
-	loading->move(width() / 2 - 256, height() / 2 - 64);
+	loading->resize(labelW, labelH);
+	loading->move(width() / 2 - labelW / 2, height() / 2 - labelH / 2);
 
+	loading->setAutoFillBackground(true); // IMPORTANT!
+	QPalette pal = loading->palette();
+	pal.setColor(QPalette::Window, QColor(Qt::white));
+	loading->setPalette(pal);
+
+	loading->setFrameShape(QFrame::WinPanel);
+
+	QFont font = loading->font();
+	font.setPointSize(25);
+	loading->setAlignment(Qt::AlignCenter);
+	loading->setFont(font);
+
+	loading->close();
+}
+
+void LandingPage::startLoadingAnimation(QString text)
+{
+	
+	loading->setText(text);
+	
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	loading->show();
 
-	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
 
 	QCoreApplication::processEvents();

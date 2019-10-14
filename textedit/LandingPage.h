@@ -49,6 +49,7 @@ private slots:
 	void currentTabChanged(int index);
 	void showUserIcon(QString path);
 	void confirmOperation();
+	void setupLoadingMessage();
 
 
 public slots:

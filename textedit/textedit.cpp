@@ -504,7 +504,7 @@ void TextEdit::applyBlockFormat(qint32 userId, int position, QTextBlockFormat fm
 	const QSignalBlocker blocker(textEdit->document());
 
 	_extraCursor->setPosition(position);
-	_extraCursor->mergeBlockFormat(fmt);
+	_extraCursor->setBlockFormat(fmt);
 
 	alignmentChanged(fmt.alignment());
 
@@ -1053,6 +1053,7 @@ void TextEdit::listStyle(int styleIndex)
 		cursor.createList(listFmt);
 	}
 	cursor.endEditBlock();
+
 }
 
 void TextEdit::textStyle(int styleIndex)
