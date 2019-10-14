@@ -149,6 +149,17 @@ private:
 	QAction* actionHighlightUsers;
 	QAction* actioncloseDocument;
 
+	//Lists actions
+	QAction* listStandard;
+	QAction* listDisc;
+	QAction* listCircle;
+	QAction* listSquare;
+	QAction* listDecimal;
+	QAction* listAlpha;
+	QAction* listAlphaUpper;
+	QAction* listRoman;
+	QAction* listRomanUpper;
+
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;
 	QAction* actionCopy;
