@@ -49,7 +49,7 @@ ProfileEditWindow::ProfileEditWindow(User* user, QWidget* parent) : QDialog(pare
 	ui->label_username->setText(user->getUsername());
 	ui->lineEdit_editNick->setText(user->getNickname());
 
-	loading = new QLabel(this);
+	setupLoadingMessage();
 }
 
 ProfileEditWindow::~ProfileEditWindow()
@@ -109,6 +109,32 @@ void ProfileEditWindow::showUserIcon(QString path)
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
+void ProfileEditWindow::setupLoadingMessage()
+{
+	loading = new QLabel(this);
+
+	//Center and resize
+	int labelW = width() / 2;
+	int labelH = height() / 5;
+
+	loading->resize(labelW, labelH);
+	loading->move(width() / 2 - labelW / 2, height() / 2 - labelH / 2);
+
+	loading->setAutoFillBackground(true); // IMPORTANT!
+	QPalette pal = loading->palette();
+	pal.setColor(QPalette::Window, QColor(Qt::white));
+	loading->setPalette(pal);
+
+	loading->setFrameShape(QFrame::WinPanel);
+
+	QFont font = loading->font();
+	font.setPointSize(25);
+	loading->setAlignment(Qt::AlignCenter);
+	loading->setFont(font);
+
+	loading->close();
+}
+
 
 void ProfileEditWindow::pushButtonUpdateClicked()
 {
@@ -155,31 +181,21 @@ void ProfileEditWindow::centerAndResize() {
 
 	//Crea il nuovo rettangolo su cui aprire la finestra
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
+
+
 }
 
 void ProfileEditWindow::startLoadingAnimation(QString text)
 {
-
-	//loading->setMovie(movie);
 	loading->setText(text);
-	QFont font = loading->font();
-	font.setPointSize(25);
-
-	loading->setAlignment(Qt::AlignCenter);
-
-	loading->setFont(font);
-
-	//Center and resize
-	loading->resize(QSize(512, 128));
-
-	loading->move(width() / 2 - 256, height() / 2 - 64);
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	loading->show();
 
-	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
+
+	QCoreApplication::processEvents();
 }
 
 void ProfileEditWindow::stopLoadingAnimation()

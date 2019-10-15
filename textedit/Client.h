@@ -97,7 +97,7 @@ signals:
 	void recivedSymbol(Symbol character);
 	void removeSymbol(QVector<int> position);
 	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
-	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
 
 public:
 
@@ -114,7 +114,6 @@ public slots:
 	void readBuffer();
 	void serverDisconnection();
 	void errorHandler(QAbstractSocket::SocketError socketError);
-	void writeOnServer();
 	void handleSslErrors(const QList<QSslError>& sslErrors);
 	// User connection
 	void Login(QString usr, QString passwd);
@@ -126,7 +125,7 @@ public slots:
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
 	void charModified(QVector<qint32> position, QTextCharFormat fmt);
-	void blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);
 	void receiveChar(MessageCapsule message);
 	void deleteChar(MessageCapsule message);
 	void editChar(MessageCapsule message);

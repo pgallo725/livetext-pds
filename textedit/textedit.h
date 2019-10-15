@@ -46,7 +46,7 @@ public:
 	void setExtraSelections(qint32 userId, QPair<int, int> selection);
 	
 	//Block format
-	void applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
+	void applyBlockFormat(int position, QTextBlockFormat fmt);
 
 	//Symbol format
 	void applyCharFormat(int position, QTextCharFormat fmt);
@@ -67,7 +67,7 @@ signals:
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
 	void generateExtraSelection();
-	void blockFormatChanged(qint32 userId, int start, int end, QTextBlockFormat fmt);
+	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
 	void symbolFormatChanged(qint32 userId, int position, QTextCharFormat fmt);
 
 private slots:
@@ -148,6 +148,17 @@ private:
 	QAction* actionUser;
 	QAction* actionHighlightUsers;
 	QAction* actioncloseDocument;
+
+	//Lists actions
+	QAction* listStandard;
+	QAction* listDisc;
+	QAction* listCircle;
+	QAction* listSquare;
+	QAction* listDecimal;
+	QAction* listAlpha;
+	QAction* listAlphaUpper;
+	QAction* listRoman;
+	QAction* listRomanUpper;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;

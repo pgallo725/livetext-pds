@@ -302,6 +302,8 @@ int Document::removeAt(QVector<qint32> fPos)
 			_text.removeAt(pos);					// Removes the paragraph separator
 
 			mergedBlock.setEnd(olderBlock.end());
+			if (mergedBlock.begin() == QVector<qint32>({ -1, -1 }))		// If the previous block is now empty
+				mergedBlock.setBegin(olderBlock.begin());
 
 			// All symbols belonging to the next block will be assigned to the current block
 			for (int i = pos; i < _text.length(); i++)

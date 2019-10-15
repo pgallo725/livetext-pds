@@ -17,6 +17,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
+#define DEFAULT_IP "127.0.0.1"
+#define DEFAULT_PORT "1500"
 
 const QString rsrcPath = ":/images/win";
 
@@ -114,33 +116,15 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Validator per non inserire lettere nei campi server/port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
+	//Loads user infos
+	ui->lineEdit_serverIP->setText(DEFAULT_IP);
+	ui->lineEdit_serverPort->setText(DEFAULT_PORT);
 
+	loadUserLoginInfo();
 
-	//If there's a saved credential it opens it
-	QFile file("userLogin.dat");
-	if (file.open(QIODevice::ReadOnly)) {
-		QTextStream stream(&file);
-		QString line = stream.readLine();
-
-		if (!line.isEmpty()) {
-			ui->checkBox_saveCredential->setChecked(true);
-		}
-
-		ui->lineEdit_usr->setText(line);
-
-		line = stream.readLine();
-		ui->lineEdit_serverIP->setText(line);
-
-		line = stream.readLine();
-		ui->lineEdit_serverPort->setText(line);
-	}
-
-	file.close();
-
-
-
-	/* LOADING GIF */
-	loading = new QLabel(this);
+	//Setup loading message Label
+	setupLoadingMessage();
+	
 }
 
 LandingPage::~LandingPage()
@@ -188,6 +172,7 @@ void LandingPage::confirmOperation()
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
+
 void LandingPage::updateUserInfo()
 {
 	ui->label_userNick->setText(_user->getNickname());
@@ -202,35 +187,26 @@ void LandingPage::updateUserInfo()
 	ui->label_userProfilePhoto->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
+void LandingPage::resetFields()
+{
+	ui->lineEdit_psw->setText("");
+	ui->lineEdit_regUsr->setText("");
+	ui->lineEdit_regNick->setText("");
+	ui->lineEdit_regPsw->setText("");
+	ui->lineEdit_regPswConf->setText("");
+	ui->lineEdit_UsrIconPath->setText("");
+	ui->label_incorrect_operation->setText("");
+	ui->label_incorrect_file_operation->setText("");
+}
+
 void LandingPage::Login()
 {
-	/*
-	//Bypass login
-	ui->stackedWidget->setCurrentIndex(1);
-	ui->stackedWidget->show();
-	stopLoadingAnimation();
-	return;
-	*/
-
 	//Prende i dati dalle caselle Login e Password
 	QString username = ui->lineEdit_usr->text();
 	QString password = ui->lineEdit_psw->text();
 
 
-	QFile file("userLogin.dat");
-	if (file.open(QIODevice::WriteOnly)) {
-		QTextStream stream(&file);
-		if (ui->checkBox_saveCredential->isChecked()) {
-			stream << username << endl;
-			stream << ui->lineEdit_serverIP->text() << endl;
-			stream << ui->lineEdit_serverPort->text() << endl;
-		}
-		else {
-			stream << "" << endl;
-		}
-	}
-
-	file.close();
+	saveUserLoginInfo(username);
 
 	emit(serverLogin(username, password));
 }
@@ -244,24 +220,20 @@ void LandingPage::Register()
 	QString passwordConf = ui->lineEdit_regPswConf->text();
 	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
 
+	saveUserLoginInfo(username);
+
 	emit serverRegister(username, password, nickname, userIcon);
 }
 
 
 void LandingPage::currentTabChanged(int index)
 {
+	resetFields();
 	switch (index) {
 	case 0:
-		ui->lineEdit_regNick->setText("");
-		ui->lineEdit_regUsr->setText("");
-		ui->lineEdit_regPsw->setText("");
-		ui->lineEdit_regPswConf->setText("");
-		ui->lineEdit_UsrIconPath->setText("");
 		ui->pushButton_confirmOperation->setText(tr("Login"));
 		break;
 	case 1:
-		ui->lineEdit_psw->setText("");
-		ui->lineEdit_usr->setText("");
 		ui->pushButton_confirmOperation->setText(tr("Register"));
 		break;
 	}
@@ -310,6 +282,8 @@ void LandingPage::openLoggedPage()
 {
 	stopLoadingAnimation();
 
+	resetFields();
+
 	setupFileList();
 	updateUserInfo();
 
@@ -325,17 +299,11 @@ void LandingPage::incorrectOperation(QString msg)
 
 void LandingPage::documentDismissed()
 {
-
 	stopLoadingAnimation();
 }
 
 void LandingPage::pushButtonRegisterClicked()
 {
-	//Cancellazione campi login
-	ui->label_incorrect_operation->setText("");
-	ui->lineEdit_psw->setText("");
-	ui->lineEdit_usr->setText("");
-
 	//Switch alla pagina di registrazione
 	ui->tabWidget->setCurrentIndex(1);
 }
@@ -377,26 +345,24 @@ void LandingPage::pushButtonOpenUriClicked()
 {
 	//Mostra la finestra di mw formata
 	openURIWindow->exec();
+
+	openURIWindow->resetFields();
 }
 
 void LandingPage::pushButtonNewClicked()
 {
 	//Mostra la finestra di mw formata
 	newFileWindow->exec();
+
+	newFileWindow->resetFields();
 }
 
 
 void LandingPage::pushButtonBackClicked()
 {
-	ui->lineEdit_psw->setText("");
-	ui->lineEdit_regUsr->setText("");
-	ui->lineEdit_regNick->setText("");
-	ui->lineEdit_regPsw->setText("");
-	ui->lineEdit_regPswConf->setText("");
-	ui->lineEdit_UsrIconPath->setText("");
-	ui->label_incorrect_operation->setText("");
-
+	resetFields();
 	ui->stackedWidget->setCurrentIndex(0);
+	ui->tabWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
 }
 
@@ -497,29 +463,44 @@ void LandingPage::centerAndResize() {
 	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }
 
-void LandingPage::startLoadingAnimation(QString text)
+void LandingPage::setupLoadingMessage()
 {
-
-	//loading->setMovie(movie);
-	loading->setText(text);
-	QFont font = loading->font();
-	font.setPointSize(25);
-
-	loading->setAlignment(Qt::AlignCenter);
-
-	loading->setFont(font);
+	loading = new QLabel(this);
 
 	//Center and resize
-	loading->resize(QSize(512, 128));
+	int labelW = width() / 2;
+	int labelH = height() / 5;
 
-	loading->move(width() / 2 - 256, height() / 2 - 64);
+	loading->resize(labelW, labelH);
+	loading->move(width() / 2 - labelW / 2, height() / 2 - labelH / 2);
 
+	loading->setAutoFillBackground(true); // IMPORTANT!
+	QPalette pal = loading->palette();
+	pal.setColor(QPalette::Window, QColor(Qt::white));
+	loading->setPalette(pal);
+
+	loading->setFrameShape(QFrame::WinPanel);
+
+	QFont font = loading->font();
+	font.setPointSize(25);
+	loading->setAlignment(Qt::AlignCenter);
+	loading->setFont(font);
+
+	loading->close();
+}
+
+void LandingPage::startLoadingAnimation(QString text)
+{
+	
+	loading->setText(text);
+	
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	loading->show();
 
-	//Disable main window until client->Connect(...)return the result of the connection
 	setEnabled(false);
+
+	QCoreApplication::processEvents();
 }
 
 void LandingPage::stopLoadingAnimation()
@@ -527,6 +508,48 @@ void LandingPage::stopLoadingAnimation()
 	QApplication::restoreOverrideCursor();
 	loading->close();
 	setEnabled(true);
+}
+
+void LandingPage::loadUserLoginInfo()
+{
+	//If there's a saved credential it opens it
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::ReadOnly)) {
+		QTextStream stream(&file);
+		QString line = stream.readLine();
+
+		if (!line.isEmpty()) {
+			ui->checkBox_saveCredential->setChecked(true);
+		}
+
+		ui->lineEdit_usr->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverIP->setText(line);
+
+		line = stream.readLine();
+		ui->lineEdit_serverPort->setText(line);
+	}
+
+	file.close();
+}
+
+void LandingPage::saveUserLoginInfo(QString username)
+{
+	QFile file("userLogin.dat");
+	if (file.open(QIODevice::WriteOnly)) {
+		QTextStream stream(&file);
+		if (ui->checkBox_saveCredential->isChecked()) {
+			stream << username << endl;
+			stream << ui->lineEdit_serverIP->text() << endl;
+			stream << ui->lineEdit_serverPort->text() << endl;
+		}
+		else {
+			stream << "" << endl;
+		}
+	}
+
+	file.close();
 }
 
 void LandingPage::setUser(User* user)

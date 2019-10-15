@@ -19,7 +19,8 @@ Click below to download server and client exe:
 4. [Architecture](#Architecture)
    - [Server](#Server)
    - [Client](#Client)
-4. [Main functions code](#Main-functions-code)
+5. [Security](#Security)
+6. [Main functions code](#Main-functions-code)
 
 # What is a real-time text editor?
 In a simple text editor there is one user who edits the document, but what if we want more users editing the same document at the same time?
@@ -90,5 +91,19 @@ Secondary threads are created when a document is opened, which handle all editin
 
 ## Client
 //TODO
+
+# Security
+
+University assignment has no security requirements, but security issues are an interesting and important topic nowadays.
+We are concerning in this topics so we want to provide a basic way to exchange data in a safty way.
+
+First of all we set up [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) connections between the server and clients using a self-signed certificate.
+In this way all data flow in the network encripted and no one can see what is inside messages despite someone could sniff packets.
+
+If SSL connection is not enough, we provide a simple way to exchange critical data, as passwords, during Registration and Login operations. 
+We send to clients a random "nonce" within they hashed the password and sand back to the server.
+
+User DataBase is also a critical point under security view, so we save all the password hashed with a "salt", which is also store in the DataBase.
+
 # Main functions code
 //TODO

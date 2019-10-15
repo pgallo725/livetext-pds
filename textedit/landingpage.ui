@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1244</width>
+    <width>1781</width>
     <height>775</height>
    </rect>
   </property>
@@ -64,7 +64,7 @@
            <enum>QTabWidget::West</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -172,6 +172,9 @@
              <widget class="QCheckBox" name="checkBox_saveCredential">
               <property name="text">
                <string>Save this settings as default</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -853,6 +856,9 @@ a.a 2018/2019</string>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
                </property>
+               <property name="wordWrap">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>
@@ -1103,19 +1109,6 @@ a.a 2018/2019</string>
              <number>0</number>
             </property>
             <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
              <layout class="QVBoxLayout" name="verticalLayout_2">
               <property name="topMargin">
                <number>0</number>
@@ -1139,7 +1132,7 @@ a.a 2018/2019</string>
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -1160,11 +1153,11 @@ a.a 2018/2019</string>
                  <string/>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
-              <item>
+              <item alignment="Qt::AlignRight">
                <widget class="QPushButton" name="pushButton_editProfile">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1479,6 +1472,9 @@ a.a 2018/2019</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
