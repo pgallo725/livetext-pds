@@ -8,7 +8,9 @@
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QDir>
+#include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QsqlError>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
@@ -21,7 +23,7 @@
 /* Server costructor */
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0), 
-	usersFile(QSaveFile(USERS_FILENAME)), docsFile(QSaveFile(INDEX_FILENAME))
+	usersFile(QSaveFile(USERS_FILENAME)), docsFile(QSaveFile(INDEX_FILENAME)), db(ServerDatabase())
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
 	qRegisterMetaType<URI>("URI");
@@ -104,21 +106,11 @@ void TcpServer::initialize()
 	if (!QFileInfo(QFile("server.pem")).exists()) {
 		throw StartupException("Cannot find local certificate file: 'server.pem'");
 	}
-
-
 	// Create a connection to the server's database
 	qDebug() << "> Opening connection to server database";
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-	db.setDatabaseName("livetext.db3");
-	bool ok = db.open();
-	if (!ok)
-	{
-		throw StartupException("Impossible to connect to the database");
-	}
+	db.initialized("livetext.db3");
+	qDebug() << "> (COMPLETED)";
 
-
-	/* -- TEST -- SELECT QUERY FROM THE SQLITE DB */
-	/*
 	qDebug() << "> Loading documents index";
 
 	QSqlQuery query;
@@ -140,37 +132,8 @@ void TcpServer::initialize()
 	{
 		throw StartupException("Can't access documents table in database");
 	}
-	*/
-	/* -- TEST CODE END -- */
-	
-	
-	// Open the file and read the users database
-	QFile usersFile(USERS_FILENAME);
-	if (usersFile.open(QIODevice::ReadWrite))
-	{
-		qDebug() << "> Loading users database";
+	qDebug() << "> (COMPLETED)";
 
-		QDataStream usersDbStream(&(usersFile));
-
-		// Load the users database in the server's memory
-		// using built-in Qt Map deserialization
-		usersDbStream >> users;
-
-		if (usersDbStream.status() == QTextStream::ReadCorruptData)
-		{
-			throw FileLoadException(USERS_FILENAME);
-		}
-
-		usersFile.close();
-		qDebug() << "> (COMPLETED)";
-	}
-	else
-	{
-		throw FileOpenException(USERS_FILENAME, QDir::currentPath().toStdString());
-	}
-
-	/* -- TEST -- Load the users list from the database */
-	/*
 	qDebug() << "> Loading users database";
 
 	if (query.exec("SELECT * FROM Users") && query.isActive())
@@ -219,9 +182,7 @@ void TcpServer::initialize()
 	{
 		throw StartupException("Cannot read users data from the database");
 	}
-	*/
-	/* -- TEST CODE END -- */
-
+	qDebug() << "> (COMPLETED)";
 
 	// Initialize the counter to assign user IDs
 	_userIdCounter = users.size();
@@ -233,42 +194,6 @@ void TcpServer::initialize()
 		if (!QDir().mkdir("Documents")) {
 			throw StartupException("Cannot create 'Documents' folder");
 		}
-	}
-
-	
-	// Read the documents index file
-	QFile docsFile(INDEX_FILENAME);
-	if (docsFile.open(QIODevice::ReadWrite| QIODevice::Text))
-	{
-		qDebug() << "> Reading documents index file";
-
-		QTextStream docIndexStream(&docsFile);
-
-		// Load the document index in the server's memory
-		while (!docIndexStream.atEnd())
-		{
-			QString docURI;
-
-			docIndexStream >> docURI;
-
-			if (docIndexStream.status() == QTextStream::ReadCorruptData)
-			{
-				throw FileLoadException(INDEX_FILENAME);
-			}
-			if (!docURI.isEmpty())
-			{
-				if (validateURI(docURI))
-					documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
-				else qDebug() << "> Invalid URI" << docURI << "skipped";
-			}
-		}
-
-		docsFile.close();
-		qDebug() << "> (COMPLETED)";
-	}
-	else
-	{
-		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
 	}
 
 	qDebug() << "> (INITIALIZATION COMPLETE)" << endl;
@@ -458,37 +383,15 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	client->login(&(*i));		// client is automatically logged in as the new user
 
-
-	/* -- TEST -- INSERTION QUERY IN THE SQLITE DB */
-	QSqlQuery query;
-	query.prepare("INSERT INTO Users (Username, UserID, Nickname, PassHash, Salt, Icon) "
-		"VALUES (:username, :id, :nickname, :passhash, :salt, :icon)");
-	query.bindValue(":username", user.getUsername());
-	query.bindValue(":id", user.getUserId());
-	query.bindValue(":nickname", user.getNickname());
-	query.bindValue(":passhash", user.getPasswordHash());
-	query.bindValue(":salt", user.getSalt());
-
 	QByteArray ba;
 	QBuffer buffer(&ba);
 	buffer.open(QIODevice::WriteOnly);
 	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	query.bindValue(":icon", ba);
-	if (!query.exec())
+	if (!db.inserNewUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
+		user.getPasswordHash(), user.getSalt(), ba))
 	{
-		client->logout();
-		users.remove(username);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}
-	/* -- TEST CODE END -- */
-
-	try 
-	{	/* write users database to disk */
-		saveUsers();
-	}
-	catch (FileException& fe) {
-		qDebug().noquote() << ">" << fe.what();
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
 		client->logout();
 		users.remove(username);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
@@ -511,34 +414,15 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	/* -- TEST -- UPDATE QUERY IN THE SQLITE DB */
-	QSqlQuery query;
-	query.prepare("UPDATE Users SET Nickname = :nickname, PassHash = :passhash, Salt = :salt, Icon = :icon "
-		"WHERE Username = :username");
-	query.bindValue(":username", user->getUsername());
-	query.bindValue(":nickname", user->getNickname());
-	query.bindValue(":passhash", user->getPasswordHash());
-	query.bindValue(":salt", user->getSalt());
-
 	QByteArray ba;
 	QBuffer buffer(&ba);
 	buffer.open(QIODevice::WriteOnly);
 	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	query.bindValue(":icon", ba);
-	if (!query.exec())
+	if (!db.updateUser(user->getUsername(), user->getNickname(), 
+		user->getPasswordHash(), user->getSalt(), ba))
 	{
-		client->getUser()->rollback(backupUser);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}
-	/* -- TEST CODE END -- */
-	
-	try 
-	{	/* write updated users database to disk */
-		saveUsers();
-	}
-	catch (FileException& fe) {
-		qDebug().noquote() << ">" << fe.what();
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
 	}
@@ -561,34 +445,15 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	/* -- TEST -- UPDATE QUERY IN THE SQLITE DB */
-	QSqlQuery query;
-	query.prepare("UPDATE Users SET Nickname = :nickname, PassHash = :passhash, Salt = :salt, Icon = :icon "
-		"WHERE Username = :username");
-	query.bindValue(":username", user->getUsername());
-	query.bindValue(":nickname", user->getNickname());
-	query.bindValue(":passhash", user->getPasswordHash());
-	query.bindValue(":salt", user->getSalt());
-
 	QByteArray ba;
 	QBuffer buffer(&ba);
 	buffer.open(QIODevice::WriteOnly);
 	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	query.bindValue(":icon", ba);
-	if (!query.exec())
+	if (!db.updateUser(user->getUsername(), user->getNickname(),
+		user->getPasswordHash(), user->getSalt(), ba))
 	{
-		client->getUser()->rollback(backupUser);
-		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
-	}
-	/* -- TEST CODE END -- */
-
-	try
-	{	/* serialize the updated users database on disk */
-		saveUsers();
-	}
-	catch (FileException& fe) {
-		qDebug().noquote() << ">" << fe.what();
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
 	}
@@ -728,49 +593,28 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	// create a copy of the User object before it gets modified, for rollback support
 	User* user = client->getUser();
 	User backupUser = *(user);
-
-
-	/* -- TEST -- INSERTION QUERY IN THE SQLITE DB */
-	QSqlQuery query;
-	query.prepare("INSERT INTO DocEditors (UserID, DocURI) VALUES (:id, :uri)");
-	query.bindValue(":id", user->getUserId());
-	query.bindValue(":uri", docURI.toString());
-
-	if (!query.exec())
-	{
-		return MessageFactory::DocumentError("Document creation failed, please try again");
-	}
-	/* -- TEST CODE END -- */
-
+	QSharedPointer<Document> doc;
 
 	try 
 	{	
 		/* create and save the new document */
-		QSharedPointer<Document> doc(new Document(docURI, client->getUserId()));
-		documents.insert(doc->getURI(), doc);
-
+		doc = QSharedPointer<Document>(new Document(docURI, client->getUserId()));
 		doc->save();	// (creates the document file)
 
 		/* the user becomes the first editor of this document */
+		documents.insert(doc->getURI(), doc);
 		user->addDocument(doc->getURI());
 		doc->insertNewEditor(user->getUsername());
 
-		/* update documents index */
-		saveDocIndex();
-		saveUsers();
-		docsFile.commit();
-	}
-	catch (DocumentException& de) {
-		qDebug().noquote() << ">" << de.what();
-		documents.remove(docURI);
-		return MessageFactory::DocumentError("Document creation failed, please try again");
+		if (!db.insertNewDocToUser(user->getUsername(), docURI.toString()))
+		{
+			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
+			doc->remove();
+			return MessageFactory::DocumentError("Document creation failed, please try again");
+		}
 	}
 	catch (FileException& fe) {
-		qDebug().noquote() << ">" << fe.what();
-		docsFile.cancelWriting();
-		docsFile.commit();
-		documents.remove(docURI);
-		user->rollback(backupUser);
+		doc->remove();
 		return MessageFactory::DocumentError("Document creation failed, please try again");
 	}
 
@@ -809,25 +653,9 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 			/* and add the new editor to the document's list of editors */
 			documents.find(docUri).value()->insertNewEditor(user->getUsername());
 
-			/* -- TEST -- INSERTION QUERY IN THE SQLITE DB */
-			QSqlQuery query;
-			query.prepare("INSERT INTO DocEditors (UserID, DocURI) VALUES (:id, :uri)");
-			query.bindValue(":id", user->getUserId());
-			query.bindValue(":uri", docUri.toString());
-
-			if (!query.exec())
+			if (!db.insertNewDocToUser(user->getUsername(), docUri.toString()))
 			{
-				client->getUser()->rollback(backupUser);
-				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
-			}
-			/* -- TEST CODE END -- */
-
-			try
-			{	/* update the users database */
-				saveUsers();
-			}
-			catch (FileException & fe) {
-				qDebug().noquote() << ">" << fe.what();
+				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
 				client->getUser()->rollback(backupUser);
 				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
 			}
@@ -890,47 +718,17 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		/* remove this document to those owned by the user */
 		user->removeDocument(docUri);
 
-		/* -- TEST -- INSERTION QUERY IN THE SQLITE DB */
-		QSqlQuery query;
-		query.prepare("DELETE FROM DocEditors WHERE UserID = :id AND DocURI = :uri");
-		query.bindValue(":id", user->getUserId());
-		query.bindValue(":uri", docUri.toString());
-
-		if (!query.exec())
+		if (!db.removeNewDocFromUser(user->getUsername(), docUri.toString()))
 		{
+			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
 			client->getUser()->rollback(backupUser);
 			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
 		}
-		/* -- TEST CODE END -- */
-
-		try
-		{	/* update the users database */
-			saveUsers();
-		}
-		catch (FileException & fe) {
-			qDebug().noquote() << ">" << fe.what();
-			client->getUser()->rollback(backupUser);
-			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
-		}
-
-		/*
-		query.prepare("SELECT COUNT(*) FROM DocEditors WHERE DocURI = :uri");
-		query.bindValue(":uri", docUri.toString());
-
-		if (query.exec() && query.isActive())
-		{
-			query.next();
-			int n = query.value(0).toInt();
-			if (n == 0)
-			{
-				// Delete the document file because it has reached 0 active editors
-				documents.remove(docUri);
-				QFile docFile("./Documents/" + docUri.toString());
-				docFile.remove();
-			}
-		}*/
 	}
-	else return MessageFactory::DocumentError("You don't have access to that document");
+	else 
+		return MessageFactory::DocumentError("You don't have access to that document");
+
+	//TODO: If no one use this document --> erase it
 
 	return MessageFactory::DocumentDismissed();
 }

@@ -149,7 +149,7 @@ QDataStream& operator>>(QDataStream& in, User& user)
 		>> user.m_passwd
 		>> user.m_salt
 		>> user.m_icon
-		>> user.m_documents;		
+		>> user.m_documents;	
 
 	return in;
 }

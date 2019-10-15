@@ -194,6 +194,11 @@ void Document::save()
 	}
 }
 
+void Document::remove()
+{
+	QFile(DOCUMENTS_DIRNAME + uri.toString()).remove();
+}
+
 bool Document::exists()
 {
 	return QFileInfo(QFile(DOCUMENTS_DIRNAME + uri.toString())).exists();
