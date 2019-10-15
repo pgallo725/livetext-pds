@@ -2,7 +2,7 @@
 #include "SharedException.h"
 
 #include <QDataStream>
-#include <QFile>
+#include <QMap>
 #include <QFileInfo>
 #include <QSaveFile>
 
@@ -358,6 +358,16 @@ int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
 	return getBlockPosition(id);
 }
 
+int Document::formatList(TextListID id, QTextListFormat fmt)
+{
+	TextList list = _lists[id];
+	list.setFormat(fmt);
+
+	_lists.insert(id, list);		// and replace its entry with the updated one
+
+	return getListPosition(id);
+}
+
 
 QString Document::toString()
 {
@@ -404,6 +414,27 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	return result;
 }
 
+int Document::getListPosition(TextListID listId)
+{
+	// returns the position of one random block in the list
+	return getBlockPosition(_lists[listId].getBlocks().first());
+}
+
+QList<TextBlockID> Document::getListBlocks(TextListID listId)
+{
+	QMap<QVector<qint32>, TextBlockID> ordered_blocks;
+
+	// Build an ordered map of the list blocks (sorted by their position in the document)
+	// in order to obtain an ordered list of blockIDs by calling .values()
+	foreach(TextBlockID blockId, _lists[listId].getBlocks())
+	{
+		TextBlock& block = _blocks[blockId];
+		ordered_blocks.insert(block.begin(), blockId);
+	}
+
+	return ordered_blocks.values();
+}
+
 
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
@@ -443,6 +474,18 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 		if (endIndex >= 0)
 			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
 	}
+}
+
+void Document::addBlockToList(TextBlock& b, TextList& l)
+{
+	b.setList(l.getId());
+	l.addBlock(b.getId());
+}
+
+void Document::removeBlockFromList(TextBlock& b, TextList& l)
+{
+	b.setList(nullptr);
+	l.removeBlock(b.getId());
 }
 
 
@@ -552,7 +595,8 @@ QVector<qint32> Document::fractionalPosEnd()
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks >> doc._text ;
+	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks 
+		>> doc._listCounter >> doc._lists >> doc._text ;
 
 	return in;
 }
@@ -560,7 +604,8 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks << doc._text;
+	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks 
+		<< doc._listCounter << doc._lists << doc._text;
 
 	return out;
 }

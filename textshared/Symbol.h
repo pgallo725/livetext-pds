@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QVector>
 #include <QChar>
 #include <QTextCharFormat>
 #include "TextBlock.h"

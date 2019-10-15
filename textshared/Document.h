@@ -4,7 +4,7 @@
 
 #include "Symbol.h"
 #include "TextBlock.h"
-//#include "TextList.h"
+#include "TextList.h"
 
 
 class URI
@@ -55,6 +55,9 @@ private:
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
 
+	qint32 _listCounter;
+	QMap<TextListID, TextList> _lists;
+
 	static const int fPosGapSize = 4;
 
 protected:
@@ -80,6 +83,7 @@ public:
 	QVector<qint32> removeAtIndex(int index);
 	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
+	int formatList(TextListID id, QTextListFormat fmt);
 
 	QVector<qint32> fractionalPosBegin();
 	QVector<qint32> fractionalPosEnd();
@@ -101,6 +105,9 @@ public:
 	TextBlockID getBlockAt(int index);
 	QList<TextBlockID> getBlocksBetween(int start, int end);
 
+	int getListPosition(TextListID listId);
+	QList<TextBlockID> getListBlocks(TextListID listId);
+
 	void insertNewEditor(QString editor);
 
 private:
@@ -109,5 +116,8 @@ private:
 
 	void addCharToBlock(Symbol& s, TextBlock& b);
 	void removeCharFromBlock(Symbol& s, TextBlock& b);
+
+	void addBlockToList(TextBlock& b, TextList& l);
+	void removeBlockFromList(TextBlock& b, TextList& l);
 };
 
