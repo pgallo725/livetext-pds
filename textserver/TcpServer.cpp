@@ -100,61 +100,46 @@ void TcpServer::initialize()
 	qDebug() << "> BEGIN SERVER INITIALIZATION PROCEDURE...";
 	qDebug() << "> Checking SSL resources availability";
 
+
 	if (!QFileInfo(QFile("server.key")).exists()) {
 		throw StartupException("Cannot find private key file: 'server.key'");
 	}
 	if (!QFileInfo(QFile("server.pem")).exists()) {
 		throw StartupException("Cannot find local certificate file: 'server.pem'");
 	}
+
 	// Create a connection to the server's database
 	qDebug() << "> Opening connection to server database";
-	db.initialized("livetext.db3");
+	db.initialize("livetext.db3");
 	qDebug() << "> (COMPLETED)";
 
+
+	// Loading the documents index in the server memory
 	qDebug() << "> Loading documents index";
-
-	QSqlQuery query;
-	if (query.exec("SELECT DISTINCT DocURI FROM DocEditors") && query.isActive())
+	foreach(QString docURI, db.readDocumentURIs())
 	{
-		// Load the document index in the server's memory
-		query.next();
-		while (query.isValid())
-		{
-			QString docURI = query.value(0).toString();
-			if (validateURI(docURI))
-				documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
-			else qDebug() << "> Invalid URI" << docURI << "skipped";
-
-			query.next();
-		}
-	}
-	else
-	{
-		throw StartupException("Can't access documents table in database");
+		if (validateURI(docURI))
+			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
+		else qDebug() << "> Invalid URI" << docURI << "skipped";
 	}
 	qDebug() << "> (COMPLETED)";
+
 
 	qDebug() << "> Loading users database";
 
+	QSqlQuery query;
 	if (query.exec("SELECT * FROM Users") && query.isActive())
 	{
 		// Read all the users' information from the database and load them in memory
 		query.next();
 		while (query.isValid())
 		{
-			QByteArray buffer;
-			QDataStream stream(&buffer, QIODevice::ReadWrite);
-
-			stream << query.value(0).toString() << query.value(1).toInt() 
-				<< query.value(2).toString()
-				<< query.value(3).toByteArray()
-				<< query.value(4).toByteArray()
-				<< query.value(5).toByteArray();
-
-			User user;			// NOTE: the deserialization operator will try to read the list of documents and therefore
-			stream >> user;		// it will ReadPastEnd but it should still load all the other fields correctly
-
-			users.insert(user.getUsername(), user);
+			User user(query.value("Username").toString(), 
+				query.value("UserID").toInt(), 
+				query.value("Nickname").toString(),
+				query.value("PassHash").toByteArray(), 
+				query.value("Salt").toByteArray(),
+				QImage::fromData(query.value("Icon").toByteArray()));
 
 			// Build for each user the list of documents that they can access
 			QSqlQuery docQuery;
@@ -175,6 +160,8 @@ void TcpServer::initialize()
 				throw StartupException("Cannot read users data from the database");
 			}
 
+			users.insert(user.getUsername(), user);
+
 			query.next();
 		}
 	}
@@ -185,7 +172,7 @@ void TcpServer::initialize()
 	qDebug() << "> (COMPLETED)";
 
 	// Initialize the counter to assign user IDs
-	_userIdCounter = users.size();
+	_userIdCounter = db.getMaxUserID();
 
 	// Check existence of (or create) the Documents folder
 	if (!QDir("Documents").exists()) 
@@ -388,7 +375,7 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	buffer.open(QIODevice::WriteOnly);
 	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	if (!db.inserNewUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
+	if (!db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
 		user.getPasswordHash(), user.getSalt(), ba))
 	{
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
@@ -606,7 +593,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		user->addDocument(doc->getURI());
 		doc->insertNewEditor(user->getUsername());
 
-		if (!db.insertNewDocToUser(user->getUsername(), docURI.toString()))
+		if (!db.addDocToUser(user->getUsername(), docURI.toString()))
 		{
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
 			doc->remove();
@@ -653,7 +640,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 			/* and add the new editor to the document's list of editors */
 			documents.find(docUri).value()->insertNewEditor(user->getUsername());
 
-			if (!db.insertNewDocToUser(user->getUsername(), docUri.toString()))
+			if (!db.addDocToUser(user->getUsername(), docUri.toString()))
 			{
 				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
 				client->getUser()->rollback(backupUser);
@@ -718,7 +705,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		/* remove this document to those owned by the user */
 		user->removeDocument(docUri);
 
-		if (!db.removeNewDocFromUser(user->getUsername(), docUri.toString()))
+		if (!db.removeDocFromUser(user->getUsername(), docUri.toString()))
 		{
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
 			client->getUser()->rollback(backupUser);
@@ -729,6 +716,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		return MessageFactory::DocumentError("You don't have access to that document");
 
 	//TODO: If no one use this document --> erase it
+	// db.countDocEditors(docUri.toString())
 
 	return MessageFactory::DocumentDismissed();
 }

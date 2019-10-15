@@ -14,6 +14,9 @@ private:
 	QSqlQuery qUpdateUser;
 	QSqlQuery qInsertNewDocToUser;
 	QSqlQuery qRemoveDocFromUser;
+	QSqlQuery qSelectDocuments;
+	QSqlQuery qCountDocumentEditors;
+	QSqlQuery qSelectMaxUserID;
 
 public:
 
@@ -21,15 +24,19 @@ public:
 
 	~ServerDatabase();
 
-	void initialized(QString dbName);
+	// Database connection and initialization
 
-	// queries exec
+	void initialize(QString dbName);
 
-	bool inserNewUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	// Queries
+
+	bool insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
 	bool updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	bool insertNewDocToUser(QString username, QString uri);
-	bool removeNewDocFromUser(QString username, QString uri);
+	bool addDocToUser(QString username, QString uri);
+	bool removeDocFromUser(QString username, QString uri);
 
-	// connect
-	// queries
+	int getMaxUserID();
+	QList<QString> readDocumentURIs();
+	int countDocEditors(QString docURI);
+
 };

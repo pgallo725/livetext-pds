@@ -30,6 +30,11 @@ User::User(QString username, int userId, QString nickname, QString passwd, QImag
 	m_passwd = hash.result();
 }
 
+User::User(QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QImage icon)
+	: m_username(username), m_userId(userId), m_nickname(nickname), m_passwd(passhash), m_salt(salt), m_icon(icon)
+{
+}
+
 User::~User()
 {
 	// NOTHING

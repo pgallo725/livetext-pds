@@ -28,6 +28,7 @@ public:
 	User();	 // Use this to construct an empty user and populate the fields later
 
 	User(QString username, int userId, QString nickname, QString passwd, QImage icon = QImage());
+	User(QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QImage icon);
 
 	~User();
 
