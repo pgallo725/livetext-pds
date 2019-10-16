@@ -452,9 +452,17 @@ void LandingPage::centerAndResize() {
 	int width = availableSize.width();
 	int height = availableSize.height();
 
-	//Proporzionamento
-	width *= 0.7;
-	height *= 0.8;
+
+	//Fix for lower resolutions 
+	if (width <= 1366) {
+		//Aspect-ratio
+		width *= 0.7;
+		height *= 0.8;
+	}
+	else {
+		width *= 0.55;
+		height *= 0.65;
+	}
 
 	//Le dimensioni vengono fissate per rendere la finestra non resizable
 	setMaximumHeight(height);
@@ -486,6 +494,7 @@ void LandingPage::setupLoadingMessage()
 	loading->setPalette(pal);
 
 	loading->setFrameShape(QFrame::WinPanel);
+	loading->setWordWrap(true);
 
 	QFont font = loading->font();
 	font.setPointSize(25);

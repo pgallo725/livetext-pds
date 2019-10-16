@@ -616,7 +616,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
 
 	//Test with user ID for more separate colors
-	int randomNumber = 7 + (userId * 3) % 11;
+	int randomNumber = 7 + (userId) % 11;
 
 	//Choose a random color from Qt colors
 	QColor color = (Qt::GlobalColor) (randomNumber);
