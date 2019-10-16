@@ -92,6 +92,12 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Connect tra le lineEdit di user/password e tasto invio per premere bottone di login
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
 	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_serverIP, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_serverPort, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_regNick, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_regPsw, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_regPswConf, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
+	connect(ui->lineEdit_regUsr, &QLineEdit::returnPressed, this, &LandingPage::confirmOperation);
 
 	//Connect lista file (QListWidget)
 	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &LandingPage::pushButtonOpenClicked);
