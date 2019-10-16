@@ -157,7 +157,7 @@ void TcpServer::initialize()
 			}
 			else
 			{
-				throw StartupException("Cannot read users data from the database");
+				throw DataBaseReadTableException(docQuery.lastQuery().toStdString());
 			}
 
 			users.insert(user.getUsername(), user);
@@ -167,7 +167,7 @@ void TcpServer::initialize()
 	}
 	else
 	{
-		throw StartupException("Cannot read users data from the database");
+		 throw DataBaseReadTableException(query.lastQuery().toStdString());
 	}
 	qDebug() << "> (COMPLETED)";
 

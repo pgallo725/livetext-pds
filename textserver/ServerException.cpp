@@ -53,3 +53,13 @@ FileOverwriteException::FileOverwriteException(std::string filePath)
 	: FileException("Unable to overwrite file " + filePath)
 {
 }
+
+DataBaseException::DataBaseException(std::string msg)
+	: ServerException(msg)
+{
+}
+
+DataBaseReadTableException::DataBaseReadTableException(std::string query)
+	: DataBaseException("Unable to exec this query: " + query)
+{
+}

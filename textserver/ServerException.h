@@ -83,3 +83,15 @@ public:
 
 	FileOverwriteException(std::string filePath);
 };
+
+class DataBaseException : public ServerException
+{
+protected:
+	DataBaseException(std::string msg);
+};
+
+class DataBaseReadTableException : public DataBaseException
+{
+public:
+	DataBaseReadTableException(std::string query);
+};

@@ -99,7 +99,7 @@ int ServerDatabase::getMaxUserID()
 	}
 	else 
 	{
-		throw StartupException("Can't read users IDs from the database");
+		throw DataBaseReadTableException(qSelectMaxUserID.lastQuery().toStdString());
 	}
 
 	return 0;
@@ -121,7 +121,7 @@ QList<QString> ServerDatabase::readDocumentURIs()
 	}
 	else
 	{
-		throw StartupException("Can't access documents table in database");
+		throw DataBaseReadTableException(qSelectDocuments.lastQuery().toStdString());
 	}
 
 	return documents;
@@ -138,6 +138,6 @@ int ServerDatabase::countDocEditors(QString docURI)
 	}
 	else
 	{
-		throw StartupException("Can't access documents table in database");
+		throw DataBaseReadTableException(qCountDocumentEditors.lastQuery().toStdString());
 	}
 }
