@@ -504,7 +504,10 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	const QSignalBlocker blocker(textEdit->document());
 
 	_extraCursor->setPosition(position);
+	_extraCursor->beginEditBlock();
 	_extraCursor->setBlockFormat(fmt);
+
+	_extraCursor->endEditBlock();
 
 	alignmentChanged(fmt.alignment());
 
@@ -520,8 +523,13 @@ void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 
 	_extraCursor->setPosition(position);
 	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
+
+	_extraCursor->beginEditBlock();
+
 	_extraCursor->mergeCharFormat(fmt);
 	textEdit->mergeCurrentCharFormat(fmt);
+
+	_extraCursor->endEditBlock();
 }
 
 void TextEdit::criticalError(QString error)
@@ -560,14 +568,19 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 		cursor = p->cursor();
 	}
 	else {
-		cursor = new QTextCursor(textEdit->document());
+		cursor = _extraCursor;
 	}
+
 
 	cursor->setPosition(position);
 
-	cursor->setCharFormat(format);
+	cursor->beginEditBlock();
 
+	cursor->setCharFormat(format);
 	cursor->insertText(ch);
+
+	cursor->endEditBlock();
+
 	updateUsersSelections();
 }
 
@@ -575,10 +588,13 @@ void TextEdit::removeChar(int position)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	QTextCursor* cursor = new QTextCursor(textEdit->document());
-	cursor->setPosition(position);
+	_extraCursor->setPosition(position);
 
-	cursor->deleteChar();
+	_extraCursor->beginEditBlock();
+
+	_extraCursor->deleteChar();
+
+	_extraCursor->endEditBlock();
 }
 
 void TextEdit::closeEditor()
@@ -618,8 +634,6 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	_currentCursorPosition = -1;
 
 	updateUsersSelections();
-
-
 }
 
 //Remove presence in document
@@ -632,6 +646,7 @@ void TextEdit::removePresence(qint32 userId)
 	setupOnlineUsersActions();
 
 	delete p;
+	p = nullptr;
 }
 
 void TextEdit::filePrint()
@@ -769,7 +784,7 @@ void TextEdit::textSize(const QString& p)
 
 void TextEdit::listStyle(int styleIndex)
 {
-	//const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(textEdit->document());
 
 	//Formato lista
 	QTextListFormat listFmt;
@@ -1017,11 +1032,18 @@ void TextEdit::listStyle(int styleIndex)
 		break;
 	}
 
+
+	listFmt.setStyle(style);
+	emit toggleList(cursor.selectionStart(), cursor.selectionEnd(), listFmt);
+
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
 
 	if (style == QTextListFormat::ListStyleUndefined) {
+		//QTextList* list = cursor.currentList();
+		//list->remove(cursor.block());
+
 		//Se Standard lo stile
 		blockFmt.setObjectIndex(-1); //(?)
 
@@ -1042,11 +1064,11 @@ void TextEdit::listStyle(int styleIndex)
 	}
 	else {
 		//Altrimenti se non sono in una lista indento di +1
-		listFmt.setIndent(blockFmt.indent() + 1);
-		blockFmt.setIndent(0);
+		listFmt.setIndent(1);
+		//blockFmt.setIndent(0);
 
 		//Setto il formato del blocco
-		cursor.setBlockFormat(blockFmt);
+		//cursor.setBlockFormat(blockFmt);
 
 		listFmt.setStyle(style);
 
@@ -1055,6 +1077,74 @@ void TextEdit::listStyle(int styleIndex)
 	cursor.endEditBlock();
 
 }
+
+void TextEdit::createList(int position, QTextListFormat fmt)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Setting list indentation to 1 step
+	fmt.setIndent(1);
+
+	//Moving to desired position to create the list
+	_extraCursor->setPosition(position);
+
+	//Starting undo/redo block
+	_extraCursor->beginEditBlock();
+
+	//Creating list with given format
+	_extraCursor->createList(fmt);
+
+	//Ending undo/redo block
+	_extraCursor->endEditBlock();
+}
+
+void TextEdit::removeBlockFromList(int blockPosition)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Moving to target block
+	_extraCursor->setPosition(blockPosition);
+
+	//Getting current list
+	QTextList* currentList = _extraCursor->currentList();
+
+	//Getting current block
+	QTextBlock blk = _extraCursor->block();
+
+	//Getting current block format
+	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
+
+	_extraCursor->beginEditBlock();
+
+	//Remove target bock from list
+	currentList->remove(blk);
+
+	//Makes the index of the blockFormat object -1 --> Reset block format to default
+	blkFormat.setObjectIndex(-1);
+
+	//Apply new format
+	_extraCursor->setBlockFormat(blkFormat);
+
+	_extraCursor->endEditBlock();
+}
+
+void TextEdit::addBlockToList(int listPosition, int blockPosition)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	_extraCursor->setPosition(listPosition);
+	QTextList* currentList = _extraCursor->currentList();
+
+	_extraCursor->setPosition(blockPosition);
+	QTextBlock blk = _extraCursor->block();
+
+	_extraCursor->beginEditBlock();
+
+	currentList->add(blk);
+
+	_extraCursor->endEditBlock();
+}
+
 
 void TextEdit::textStyle(int styleIndex)
 {
@@ -1241,7 +1331,7 @@ void TextEdit::mergeFormatOnWordOrSelection(const QTextCharFormat& format)
 
 	for (int i = cursor.selectionStart(); i < cursor.selectionEnd(); ++i) {
 		_extraCursor->setPosition(i + 1);
-		emit symbolFormatChanged(_user->getUserId(), i, _extraCursor->charFormat());
+		emit symbolFormatChanged(i, _extraCursor->charFormat());
 	}
 }
 
@@ -1303,6 +1393,21 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 			}
 			if (ch == QChar::ParagraphSeparator) {
 				emit blockFormatChanged(i, i, blockFmt);
+
+				//Check if current block is in a list
+				cursor.setPosition(i);
+
+				QTextList* textList = cursor.currentList();
+
+				if (textList) {
+					QTextBlock currentBlock = cursor.block();
+					QTextBlock firstListBlock = textList->item(0);
+
+					if (currentBlock == firstListBlock)
+						emit createList(currentBlock.position(), textList->format());
+					else
+						emit assignBlockList(currentBlock.position(), firstListBlock.position());
+				}
 			}
 			if (charsAdded > 1) {
 				emit blockFormatChanged(i, i, blockFmt);

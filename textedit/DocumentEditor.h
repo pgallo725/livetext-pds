@@ -11,7 +11,7 @@ class DocumentEditor : public QObject
 	Q_OBJECT
 
 public:
-	DocumentEditor(Document doc, TextEdit* editor, User user, QObject* parent = nullptr);
+	DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent = nullptr);
 	void openDocument();
 
 public slots:
@@ -24,16 +24,15 @@ public slots:
 	void changeBlockFormat(int start, int end, QTextBlockFormat fmt);
 	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 
-	void changeSymbolFormat(qint32 userId, int position, QTextCharFormat fmt);
+	void changeSymbolFormat(int position, QTextCharFormat fmt);
 	void applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt);
-
 
 	void generateExtraSelection();
 
 
 private:
 	Document _document;
-	User _user;
+	User& _user;
 	TextEdit* _textedit;
 
 private slots:

@@ -51,6 +51,11 @@ public:
 	//Symbol format
 	void applyCharFormat(int position, QTextCharFormat fmt);
 
+	//List management
+	void createList(int position, QTextListFormat fmt);
+	void removeBlockFromList(int blockPosition);
+	void addBlockToList(int listPosition, int blockPosition);
+
 	void criticalError(QString error);
 
 public slots:
@@ -68,7 +73,11 @@ signals:
 	void charInserted(QChar ch, QTextCharFormat format, int position);
 	void generateExtraSelection();
 	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
-	void symbolFormatChanged(qint32 userId, int position, QTextCharFormat fmt);
+	void symbolFormatChanged(int position, QTextCharFormat fmt);
+
+	void toggleList(int start, int end, QTextListFormat fmt);
+	void createList(int position, QTextListFormat fmt);
+	void assignBlockList(int blockPosition, int listPosition);
 
 private slots:
 	void filePrint();

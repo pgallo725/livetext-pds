@@ -1,7 +1,7 @@
 #include "DocumentEditor.h"
 #include <Symbol.h>
 
-DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User user, QObject* parent) : QObject(parent), _document(doc), _textedit(editor), _user(user)
+DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent) : QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
 	_textedit->setDocumentURI(doc.getURI().toString());
 }
@@ -110,7 +110,7 @@ void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
 
 
 //Symbol format
-void DocumentEditor::changeSymbolFormat(qint32 userId, int position, QTextCharFormat fmt)
+void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)
 {
 	Symbol s = _document[position];
 	_document.formatSymbol(s._fPos, fmt);
