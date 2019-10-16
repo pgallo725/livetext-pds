@@ -49,8 +49,6 @@ private:
 	URI generateURI(QString authorName, QString docName) const;
 	bool validateURI(URI uri) const;
 
-	void TcpServer::saveDocIndex();
-
 public:
 
 	TcpServer(QObject *parent = 0);
@@ -60,7 +58,6 @@ public:
 
 public slots:
 
-	void saveUsers();
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();

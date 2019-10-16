@@ -450,37 +450,6 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	disconnect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 }
 
-/* Save users list on persistent storage */
-void TcpServer::saveUsers()
-{
-	// Create the new users database file and write the data to it
-	if (usersFile.open(QIODevice::WriteOnly))
-	{
-		QDataStream usersDb(&usersFile);
-
-		qDebug() << "> Saving users database";
-
-		// Write the the current users informations to file
-		// using built-in Qt Map serialization
-		usersDb << users;
-
-		// Check datastream status
-		if (usersDb.status() == QTextStream::Status::WriteFailed)
-		{
-			usersFile.cancelWriting();
-			usersFile.commit();
-			throw FileWriteException(USERS_FILENAME, QDir::currentPath().toStdString());
-		}
-
-		usersFile.commit();
-		qDebug() << "> (COMPLETED)";
-	}
-	else
-	{
-		throw FileCreateException(USERS_FILENAME, QDir::currentPath().toStdString());
-	}
-}
-
 
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QSslSocket* clientSocket)
@@ -517,34 +486,6 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 
 
 /****************************** DOCUMENT METHODS ******************************/
-
-
-/* Save the documents index file */
-void TcpServer::saveDocIndex()
-{
-	if (docsFile.open(QIODevice::WriteOnly | QIODevice::Text))
-	{
-		QTextStream indexFileStream(&docsFile);
-
-		for (URI uri : documents.keys())
-			indexFileStream << uri.toString() << endl;
-		
-		if (indexFileStream.status() == QTextStream::Status::WriteFailed)
-		{
-			docsFile.cancelWriting();
-			docsFile.commit();
-			throw FileWriteException(INDEX_FILENAME, QDir::currentPath().toStdString());
-		}
-
-		// No commit here in case of successful save because we may still
-		// have to rollback changes if the users database update fails
-	}
-	else
-	{
-		throw FileOpenException(INDEX_FILENAME, QDir::currentPath().toStdString());
-	}
-}
-
 
 /* Create a new worskpace for a document */
 QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document)
@@ -600,7 +541,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 			return MessageFactory::DocumentError("Document creation failed, please try again");
 		}
 	}
-	catch (FileException& fe) {
+	catch (DocumentException& de) {
 		doc->remove();
 		return MessageFactory::DocumentError("Document creation failed, please try again");
 	}
