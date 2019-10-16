@@ -1404,7 +1404,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 					QTextBlock firstListBlock = textList->item(0);
 
 					if (currentBlock == firstListBlock)
-						emit createList(currentBlock.position(), textList->format());
+						emit createNewList(currentBlock.position(), textList->format());
 					else
 						emit assignBlockList(currentBlock.position(), firstListBlock.position());
 				}

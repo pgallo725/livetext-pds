@@ -76,7 +76,7 @@ signals:
 	void symbolFormatChanged(int position, QTextCharFormat fmt);
 
 	void toggleList(int start, int end, QTextListFormat fmt);
-	void createList(int position, QTextListFormat fmt);
+	void createNewList(int position, QTextListFormat fmt);
 	void assignBlockList(int blockPosition, int listPosition);
 
 private slots:
