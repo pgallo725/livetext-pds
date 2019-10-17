@@ -23,8 +23,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
-    QByteArrayData data[44];
-    char stringdata0[457];
+    QByteArrayData data[45];
+    char stringdata0[468];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -70,13 +70,14 @@ QT_MOC_LITERAL(33, 341, 2), // "id"
 QT_MOC_LITERAL(34, 344, 16), // "QTextBlockFormat"
 QT_MOC_LITERAL(35, 361, 8), // "listEdit"
 QT_MOC_LITERAL(36, 370, 7), // "blockId"
-QT_MOC_LITERAL(37, 378, 6), // "listId"
-QT_MOC_LITERAL(38, 385, 15), // "QTextListFormat"
-QT_MOC_LITERAL(39, 401, 15), // "messageDispatch"
-QT_MOC_LITERAL(40, 417, 7), // "message"
-QT_MOC_LITERAL(41, 425, 6), // "sender"
-QT_MOC_LITERAL(42, 432, 13), // "documentClose"
-QT_MOC_LITERAL(43, 446, 10) // "userLogout"
+QT_MOC_LITERAL(37, 378, 10), // "TextListID"
+QT_MOC_LITERAL(38, 389, 6), // "listId"
+QT_MOC_LITERAL(39, 396, 15), // "QTextListFormat"
+QT_MOC_LITERAL(40, 412, 15), // "messageDispatch"
+QT_MOC_LITERAL(41, 428, 7), // "message"
+QT_MOC_LITERAL(42, 436, 6), // "sender"
+QT_MOC_LITERAL(43, 443, 13), // "documentClose"
+QT_MOC_LITERAL(44, 457, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -89,9 +90,9 @@ QT_MOC_LITERAL(43, 446, 10) // "userLogout"
     "charDelete\0QVector<qint32>\0pos\0"
     "charFormat\0QTextCharFormat\0fmt\0blockEdit\0"
     "TextBlockID\0id\0QTextBlockFormat\0"
-    "listEdit\0blockId\0listId\0QTextListFormat\0"
-    "messageDispatch\0message\0sender\0"
-    "documentClose\0userLogout"
+    "listEdit\0blockId\0TextListID\0listId\0"
+    "QTextListFormat\0messageDispatch\0message\0"
+    "sender\0documentClose\0userLogout"
 };
 #undef QT_MOC_LITERAL
 
@@ -122,9 +123,9 @@ static const uint qt_meta_data_MessageHandler[] = {
       28,    2,  152,    3, 0x06 /* Public */,
       31,    2,  157,    3, 0x06 /* Public */,
       35,    3,  162,    3, 0x06 /* Public */,
-      39,    2,  169,    3, 0x06 /* Public */,
-      42,    1,  174,    3, 0x06 /* Public */,
-      43,    1,  177,    3, 0x06 /* Public */,
+      40,    2,  169,    3, 0x06 /* Public */,
+      43,    1,  174,    3, 0x06 /* Public */,
+      44,    1,  177,    3, 0x06 /* Public */,
 
  // signals: parameters
     0x80000000 | 2, 0x80000000 | 4, QMetaType::QString,    5,    6,
@@ -139,8 +140,8 @@ static const uint qt_meta_data_MessageHandler[] = {
     QMetaType::Void, 0x80000000 | 26,   27,
     QMetaType::Void, 0x80000000 | 26, 0x80000000 | 29,   27,   30,
     QMetaType::Void, 0x80000000 | 32, 0x80000000 | 34,   33,   30,
-    QMetaType::Void, 0x80000000 | 32, QMetaType::UInt, 0x80000000 | 38,   36,   37,   30,
-    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   40,   41,
+    QMetaType::Void, 0x80000000 | 32, 0x80000000 | 37, 0x80000000 | 39,   36,   38,   30,
+    QMetaType::Void, 0x80000000 | 2, 0x80000000 | 4,   41,   42,
     QMetaType::Void, 0x80000000 | 4,    5,
     QMetaType::Void, 0x80000000 | 4,    5,
 
@@ -173,7 +174,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 9: _t->charDelete((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
         case 10: _t->charFormat((*reinterpret_cast< QVector<qint32>(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
         case 11: _t->blockEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
-        case 12: _t->listEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< quint32(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
+        case 12: _t->listEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< TextListID(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
         case 13: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
         case 14: _t->documentClose((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
         case 15: _t->userLogout((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
@@ -270,6 +271,8 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+            case 1:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextListID >(); break;
             }
             break;
         case 13:
@@ -374,7 +377,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = void (MessageHandler::*)(TextBlockID , quint32 , QTextListFormat );
+            using _t = void (MessageHandler::*)(TextBlockID , TextListID , QTextListFormat );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::listEdit)) {
                 *result = 12;
                 return;
@@ -536,7 +539,7 @@ void MessageHandler::blockEdit(TextBlockID _t1, QTextBlockFormat _t2)
 }
 
 // SIGNAL 12
-void MessageHandler::listEdit(TextBlockID _t1, quint32 _t2, QTextListFormat _t3)
+void MessageHandler::listEdit(TextBlockID _t1, TextListID _t2, QTextListFormat _t3)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))) };
     QMetaObject::activate(this, &staticMetaObject, 12, _a);

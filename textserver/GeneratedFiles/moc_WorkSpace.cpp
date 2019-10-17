@@ -24,8 +24,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[47];
-    char stringdata0[602];
+    QByteArrayData data[48];
+    char stringdata0[612];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -75,12 +75,13 @@ QT_MOC_LITERAL(37, 462, 17), // "documentEditBlock"
 QT_MOC_LITERAL(38, 480, 11), // "TextBlockID"
 QT_MOC_LITERAL(39, 492, 7), // "blockId"
 QT_MOC_LITERAL(40, 500, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(41, 517, 17), // "documentListBlock"
-QT_MOC_LITERAL(42, 535, 6), // "listId"
-QT_MOC_LITERAL(43, 542, 15), // "QTextListFormat"
-QT_MOC_LITERAL(44, 558, 19), // "handleAccountUpdate"
-QT_MOC_LITERAL(45, 578, 19), // "answerAccountUpdate"
-QT_MOC_LITERAL(46, 598, 3) // "msg"
+QT_MOC_LITERAL(41, 517, 16), // "documentEditList"
+QT_MOC_LITERAL(42, 534, 10), // "TextListID"
+QT_MOC_LITERAL(43, 545, 6), // "listId"
+QT_MOC_LITERAL(44, 552, 15), // "QTextListFormat"
+QT_MOC_LITERAL(45, 568, 19), // "handleAccountUpdate"
+QT_MOC_LITERAL(46, 588, 19), // "answerAccountUpdate"
+QT_MOC_LITERAL(47, 608, 3) // "msg"
 
     },
     "WorkSpace\0requestAccountUpdate\0\0"
@@ -96,9 +97,10 @@ QT_MOC_LITERAL(46, 598, 3) // "msg"
     "documentDeleteSymbol\0QVector<qint32>\0"
     "position\0documentEditSymbol\0QTextCharFormat\0"
     "format\0documentEditBlock\0TextBlockID\0"
-    "blockId\0QTextBlockFormat\0documentListBlock\0"
-    "listId\0QTextListFormat\0handleAccountUpdate\0"
-    "answerAccountUpdate\0msg"
+    "blockId\0QTextBlockFormat\0documentEditList\0"
+    "TextListID\0listId\0QTextListFormat\0"
+    "handleAccountUpdate\0answerAccountUpdate\0"
+    "msg"
 };
 #undef QT_MOC_LITERAL
 
@@ -134,8 +136,8 @@ static const uint qt_meta_data_WorkSpace[] = {
       34,    2,  145,    2, 0x0a /* Public */,
       37,    2,  150,    2, 0x0a /* Public */,
       41,    3,  155,    2, 0x0a /* Public */,
-      44,    4,  162,    2, 0x0a /* Public */,
-      45,    2,  171,    2, 0x0a /* Public */,
+      45,    4,  162,    2, 0x0a /* Public */,
+      46,    2,  171,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::QString, QMetaType::QImage, QMetaType::QString,    4,    5,    6,    7,
@@ -155,9 +157,9 @@ static const uint qt_meta_data_WorkSpace[] = {
     QMetaType::Void, 0x80000000 | 32,   33,
     QMetaType::Void, 0x80000000 | 32, 0x80000000 | 35,   33,   36,
     QMetaType::Void, 0x80000000 | 38, 0x80000000 | 40,   39,   36,
-    QMetaType::Void, 0x80000000 | 38, QMetaType::UInt, 0x80000000 | 43,   39,   42,   36,
+    QMetaType::Void, 0x80000000 | 38, 0x80000000 | 42, 0x80000000 | 44,   39,   43,   36,
     QMetaType::Void, 0x80000000 | 17, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   18,    5,    6,    7,
-    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 24,    4,   46,
+    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 24,    4,   47,
 
        0        // eod
 };
@@ -183,7 +185,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 12: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
         case 13: _t->documentEditSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
         case 14: _t->documentEditBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
-        case 15: _t->documentListBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< quint32(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
+        case 15: _t->documentEditList((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< TextListID(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
         case 16: _t->handleAccountUpdate((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4]))); break;
         case 17: _t->answerAccountUpdate((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1])),(*reinterpret_cast< MessageCapsule(*)>(_a[2]))); break;
         default: ;
@@ -245,6 +247,8 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
+            case 1:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextListID >(); break;
             }
             break;
         case 16:

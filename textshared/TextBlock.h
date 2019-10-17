@@ -55,11 +55,10 @@ private:
 
 public:
 
-	TextBlock();		// Empty constructor, to use before populating fields with deserialization
+	TextBlock();		// Empty constructor, to use with deserialization
 
 	TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat fmt);
 	TextBlock(TextBlockID blockId, QTextBlockFormat fmt);
-	TextBlock(TextBlockID blockId, QTextBlockFormat blockFmt, QTextListFormat listFmt);
 
 	/* setters */
 	void setFormat(QTextBlockFormat fmt);

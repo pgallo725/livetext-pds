@@ -197,7 +197,7 @@ void WorkSpace::documentInsertSymbol(Symbol& symbol)
 
 void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 {
-	doc->removeAt(position);
+	doc->remove(position);
 }
 
 void WorkSpace::documentEditSymbol(QVector<qint32> position, QTextCharFormat format)
@@ -210,9 +210,9 @@ void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)
 	doc->formatBlock(blockId, format);
 }
 
-void WorkSpace::documentListBlock(TextBlockID blockId, quint32 listId, QTextListFormat format)
+void WorkSpace::documentEditList(TextBlockID blockId, TextListID listId, QTextListFormat format)
 {
-	//TODO
+	doc->editBlockList(blockId, listId, format);
 }
 
 

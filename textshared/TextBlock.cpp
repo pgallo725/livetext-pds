@@ -80,12 +80,6 @@ TextBlock::TextBlock(TextBlockID blockId, QTextBlockFormat fmt)
 {
 }
 
-TextBlock::TextBlock(TextBlockID blockId, QTextBlockFormat blockFmt, QTextListFormat listFmt)
-	: _blockId(blockId), _blockFormat(blockFmt), _fPosBegin({ -1, -1 }), _fPosEnd({ -1, -1 })
-{
-}
-
-
 void TextBlock::setFormat(QTextBlockFormat fmt)
 {
 	_blockFormat = fmt;

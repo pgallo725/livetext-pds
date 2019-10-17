@@ -127,7 +127,7 @@ ListEditMessage::ListEditMessage()
 {
 }
 
-ListEditMessage::ListEditMessage(TextBlockID blockId, quint32 listId, QTextListFormat fmt)
+ListEditMessage::ListEditMessage(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
 	: Message(ListEdit), m_blockId(blockId), m_listId(listId), m_listFmt(fmt)
 {
 }
@@ -147,12 +147,12 @@ TextBlockID ListEditMessage::getBlockId() const
 	return m_blockId;
 }
 
-quint32 ListEditMessage::getListId() const
+TextListID ListEditMessage::getListId() const
 {
 	return m_listId;
 }
 
-QTextListFormat ListEditMessage::getBlockFormat() const
+QTextListFormat ListEditMessage::getListFormat() const
 {
 	return m_listFmt;
 }

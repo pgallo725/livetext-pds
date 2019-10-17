@@ -65,6 +65,21 @@ TextListID::operator bool() const noexcept
 
 /*************** TEXTLIST CLASS ***************/
 
+TextList::TextList()
+	: _listId(TextListID(nullptr))
+{
+}
+
+TextList::TextList(qint32 listNum, qint32 authorId, QTextListFormat fmt)
+	: _listId(TextListID(listNum, authorId)), _listFormat(fmt)
+{
+}
+
+TextList::TextList(TextListID listId, QTextListFormat fmt)
+	: _listId(listId), _listFormat(fmt)
+{
+}
+
 
 void TextList::addBlock(TextBlockID id)
 {
@@ -95,6 +110,11 @@ QTextListFormat TextList::getFormat() const
 QList<TextBlockID> TextList::getBlocks() const
 {
 	return _blocks;
+}
+
+bool TextList::isEmpty() const
+{
+	return _blocks.count() == 0;
 }
 
 

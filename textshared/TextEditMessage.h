@@ -97,7 +97,7 @@ protected:
 
 	BlockEditMessage();		// empty constructor
 
-	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
+	// Constructor for BlockEdit messages
 	BlockEditMessage(TextBlockID blockId, QTextBlockFormat fmt);
 
 	void writeTo(QDataStream& stream) const override;
@@ -119,15 +119,15 @@ class ListEditMessage : public Message
 private:
 
 	TextBlockID m_blockId;
-	quint32 m_listId;
+	TextListID m_listId;
 	QTextListFormat m_listFmt;
 
 protected:
 
 	ListEditMessage();		// empty constructor
 
-	// Constructor for BlockEdit messages, editorId is useful to identify the author of the change
-	ListEditMessage(TextBlockID blockId, quint32 listId, QTextListFormat fmt);
+	// Constructor for ListEdit messages, used for add/remove/create
+	ListEditMessage(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -137,6 +137,6 @@ public:
 	~ListEditMessage() {};
 
 	TextBlockID getBlockId() const;
-	quint32 getListId() const;
-	QTextListFormat getBlockFormat() const;
+	TextListID getListId() const;
+	QTextListFormat getListFormat() const;
 };

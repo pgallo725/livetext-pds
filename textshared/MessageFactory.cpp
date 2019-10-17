@@ -159,7 +159,7 @@ MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat f
 	return new BlockEditMessage(blockId, fmt);
 }
 
-MessageCapsule MessageFactory::ListEdit(TextBlockID blockId, quint32 listId, QTextListFormat fmt)
+MessageCapsule MessageFactory::ListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
 {
 	return new ListEditMessage(blockId, listId, fmt);
 }

@@ -1406,7 +1406,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 					if (currentBlock == firstListBlock)
 						emit createNewList(currentBlock.position(), textList->format());
 					else
-						emit assignBlockList(currentBlock.position(), firstListBlock.position());
+						emit assignBlockToList(currentBlock.position(), firstListBlock.position());
 				}
 			}
 			if (charsAdded > 1) {

@@ -23,7 +23,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charFormat, w, &WorkSpace::documentEditSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::blockEdit, w, &WorkSpace::documentEditBlock, Qt::DirectConnection);
-	connect(this, &MessageHandler::listEdit, w, &WorkSpace::documentListBlock, Qt::DirectConnection);
+	connect(this, &MessageHandler::listEdit, w, &WorkSpace::documentEditList, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
 
 	connect(this, &MessageHandler::documentClose, w, &WorkSpace::clientQuit, Qt::DirectConnection);
@@ -176,7 +176,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 	case ListEdit:
 	{
 		ListEditMessage* listEditMsg = dynamic_cast<ListEditMessage*>(message.get());
-		emit listEdit(listEditMsg->getBlockId(), listEditMsg->getListId(), listEditMsg->getBlockFormat());
+		emit listEdit(listEditMsg->getBlockId(), listEditMsg->getListId(), listEditMsg->getListFormat());
 
 		// We want to achieve a server-enforced global ordering of format changes, therefore
 		// the ListEdit message is sent back to all editors by not specifying a sender [nullptr]

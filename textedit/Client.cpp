@@ -108,6 +108,9 @@ void Client::messageHandler(MessageCapsule message) {
 	case BlockEdit:
 		editBlock(message);
 		break;
+	case ListEdit:
+		editList(message);
+		break;
 	case DocumentExit:
 		forceDocumentClose();
 		break;
@@ -529,6 +532,12 @@ void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
 	blockEdit->send(socket);
 }
 
+void Client::listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
+{
+	MessageCapsule listEdit = MessageFactory::ListEdit(blockId, listId, fmt);
+	listEdit->send(socket);
+}
+
 void Client::receiveChar(MessageCapsule message) {
 
 	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(message.get());
@@ -551,6 +560,12 @@ void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
 	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat());
+}
+
+void Client::editList(MessageCapsule message)
+{
+	ListEditMessage* listedit = dynamic_cast<ListEditMessage*>(message.get());
+	emit listEditBlock(listedit->getBlockId(), listedit->getListId(), listedit->getListFormat());
 }
 
 

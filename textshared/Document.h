@@ -40,6 +40,7 @@ Q_DECLARE_METATYPE(URI);
 
 class Document
 {
+	friend class DocumentEditor;
 	friend class DocumentReadyMessage;
 
 	/* Operators for QDataStream serialization and deserialization */
@@ -79,9 +80,9 @@ public:
 	Symbol& operator[](int pos);
 
 	int insert(Symbol& s);
-	void remove(const Symbol& s);
-	int removeAt(QVector<qint32> fPos);
+	int remove(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
+	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);	// adds or removes the block from the list (creating it if new)
 	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 	int formatList(TextListID id, QTextListFormat fmt);
@@ -97,7 +98,6 @@ public:
 	QString getAuthor();
 
 	int length();
-
 	QVector<Symbol> getContent();
 	QString toString();				// returns a printable representation of the document's contents
 
@@ -106,7 +106,9 @@ public:
 	TextBlockID getBlockAt(int index);
 	QList<TextBlockID> getBlocksBetween(int start, int end);
 
+	TextList& getList(TextListID id);
 	int getListPosition(TextListID listId);
+	TextListID getListAt(int index);
 	QList<TextBlockID> getListBlocks(TextListID listId);
 
 	void insertNewEditor(QString editor);

@@ -53,7 +53,10 @@ private:
 
 public:
 
-	// TODO: Add constructors
+	TextList();			// Empty constructor, to use with deserialization
+
+	TextList(qint32 listNum, qint32 authorId, QTextListFormat fmt);
+	TextList(TextListID listId, QTextListFormat fmt);
 
 	void addBlock(TextBlockID id);
 	void removeBlock(TextBlockID id);
@@ -63,6 +66,7 @@ public:
 	TextListID getId() const;
 	QTextListFormat getFormat() const;
 	QList<TextBlockID> getBlocks() const;
+	bool isEmpty() const;
 
 };
 
