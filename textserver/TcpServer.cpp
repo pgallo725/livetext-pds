@@ -656,8 +656,11 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	else 
 		return MessageFactory::DocumentError("You don't have access to that document");
 
-	//TODO: If no one use this document --> erase it
-	// db.countDocEditors(docUri.toString())
+	if (!db.countDocEditors(docUri.toString())) {
+		// no one has access to this document --> must be erased
+		documents.find(docUri).value()->remove();
+		documents.remove(docUri);
+	}
 
 	return MessageFactory::DocumentDismissed();
 }
