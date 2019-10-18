@@ -8,8 +8,6 @@ Client::Client(QObject* parent) : QObject(parent)
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
 	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
-	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
-
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
 		[&](QAbstractSocket::SocketError socketError) {
 			emit impossibleToConnect();						// Error in connection
@@ -21,11 +19,6 @@ Client::Client(QObject* parent) : QObject(parent)
 Client::~Client()
 {
 	// TODO
-}
-
-void Client::writeOnServer()
-{
-
 }
 
 void Client::handleSslErrors(const QList<QSslError>& sslErrors)
@@ -53,11 +46,6 @@ void Client::serverConnection() {
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
 	emit abortConnection();
-	socket->abort();
-}
-
-void Client::errorHandler(QAbstractSocket::SocketError socketError) {
-	qDebug() << "Socket error raised: " << socketError;
 	socket->abort();
 }
 
@@ -256,6 +244,7 @@ void Client::Login(QString usr, QString passwd) {
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
+		emit loginFailed(tr("Default paht followed for Login"));
 		return;
 	}
 
@@ -303,6 +292,7 @@ void Client::Login(QString usr, QString passwd) {
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
+		emit loginFailed(tr("Default path followed for Login"));
 		return;
 	}
 }
@@ -340,16 +330,13 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 	}
 	default:
 		//throw MessageUnknownTypeException();
-		// EMIT?
+		//EMIT ?
+		emit registrationFailed(tr("Default path followed for Register"));
 		return;
 	}
 }
 
 void Client::Logout() {
-
-	/*quint16 typeOfMessage;
-	QDataStream in(socket);
-	MessageCapsule incomingMessage;*/
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
 	logoutRequest->send(socket);
@@ -366,8 +353,6 @@ void Client::openDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	socket->readAll();		// Dirty fix for pending messages received after closing another document
-
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->send(socket);
 
@@ -382,6 +367,8 @@ void Client::openDocument(URI URI) {
 		// Open Succeded
 		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		if (socket->encryptedBytesAvailable() > 0) 
+			readBuffer();	//simulate the signal due to some byte arrived between Login and bind of the handler
 		emit openFileCompleted(documentOpened->getDocument());
 		return;
 	}
@@ -394,6 +381,7 @@ void Client::openDocument(URI URI) {
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
+		emit openFileFailed(tr("Default path followed for OpenFile"));
 		return;
 	}
 }
@@ -402,8 +390,6 @@ void Client::createDocument(QString name) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
-
-	socket->readAll();		// Dirty fix for pending messages received after closing another document
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->send(socket);
@@ -419,6 +405,8 @@ void Client::createDocument(QString name) {
 		//Document successfully opened
 		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+		if (socket->encryptedBytesAvailable() > 0)
+			readBuffer();	//simulate the signal due to some byte arrived between Login and bind of the handler
 		emit openFileCompleted(documentOpened->getDocument());
 		return;
 	}
@@ -431,6 +419,7 @@ void Client::createDocument(QString name) {
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
+		emit openFileFailed(tr("Default path followed for OpenFile"));
 		return;
 	}
 
@@ -441,8 +430,6 @@ void Client::deleteDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	socket->readAll();		// Dirty fix for pending messages received after closing another document 
-
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->send(socket);
 
@@ -452,12 +439,12 @@ void Client::deleteDocument(URI URI) {
 
 	switch (incomingMessage->getType()) {
 	case DocumentDismissed: {
-		//Document successfully opened
+		//Document successfully removed
 		emit documentDismissed(URI);
 		return;
 	}
 	case DocumentError: {
-		// impossible to open the document
+		// impossible to remove the document
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 		emit removeFileFailed(documentError->getErrorMessage());
 		return;
@@ -465,6 +452,7 @@ void Client::deleteDocument(URI URI) {
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
+		emit removeFileFailed(tr("Default choise selected for RemoveFile"));
 		return;
 	}
 

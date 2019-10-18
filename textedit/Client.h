@@ -63,6 +63,7 @@ private:
 
 signals:
 
+	// Connection Signal
 	void connectionEstablished();
 	void impossibleToConnect();
 	void abortConnection();
@@ -103,9 +104,36 @@ public:
 
 	Client(QObject* parent = 0);
 	~Client();
-
+	
+	// Message handler
 	void messageHandler(MessageCapsule message);
 	MessageCapsule readMessage(QDataStream& stream, qint16 typeOfMessage);
+
+	// User connection
+	void Login(QString usr, QString passwd);
+	void Register(QString usr, QString passwd, QString nick, QImage img);
+	void Logout();
+
+	// Data Exchange
+	void sendCursor(qint32 userId, qint32 position);
+	void sendChar(Symbol character);
+	void removeChar(QVector<int> position);
+	void charModified(QVector<qint32> position, QTextCharFormat fmt);
+	void blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+
+	// Document handler
+	void openDocument(URI URI);
+	void createDocument(QString name);
+	void deleteDocument(URI URI);
+	void forceDocumentClose();
+
+	// Server connection
+	void Connect(QString ipAddress, quint16 port);
+	void Disconnect();
+
+	// Account handler
+	void removeFromFile(qint32 myId); 
+	void sendAccountUpdate(QString nickname, QImage image, QString password);
 
 public slots:
 
@@ -113,37 +141,19 @@ public slots:
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
-	void errorHandler(QAbstractSocket::SocketError socketError);
-	void writeOnServer();
 	void handleSslErrors(const QList<QSslError>& sslErrors);
-	// User connection
-	void Login(QString usr, QString passwd);
-	void Register(QString usr, QString passwd, QString nick, QImage img);
-	void Logout();
+
 	// Data Exchange
-	void sendCursor(qint32 userId, qint32 position);
 	void receiveCursor(MessageCapsule message);
-	void sendChar(Symbol character);
-	void removeChar(QVector<int> position);
-	void charModified(QVector<qint32> position, QTextCharFormat fmt);
-	void blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
 	void receiveChar(MessageCapsule message);
 	void deleteChar(MessageCapsule message);
 	void editChar(MessageCapsule message);
 	void editBlock(MessageCapsule message);
-	// Document handler
-	void openDocument(URI URI);
-	void createDocument(QString name);
-	void deleteDocument(URI URI);
-	void forceDocumentClose();
-	// Server connection
-	void Connect(QString ipAddress, quint16 port);
-	void Disconnect();
+
 	// Account handler
 	void newUserPresence(MessageCapsule message);
 	void updateUserPresence(MessageCapsule message);
-	void sendAccountUpdate(QString nickname, QImage image, QString password);
 	void deleteUserPresence(MessageCapsule message);
-	void removeFromFile(qint32 myId);
+	
 };
 
