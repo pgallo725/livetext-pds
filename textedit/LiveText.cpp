@@ -170,7 +170,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection);
 	connect(_textEdit, &TextEdit::blockFormatChanged, _docEditor, &DocumentEditor::changeBlockFormat);
 	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
-	//connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
+	connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);

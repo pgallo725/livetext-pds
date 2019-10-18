@@ -1,7 +1,7 @@
 #include "DocumentEditor.h"
 
 
-DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent) 
+DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
 	_textedit->setDocumentURI(doc.getURI().toString());
@@ -9,18 +9,29 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 
 void DocumentEditor::openDocument()
 {
-	QVector<Symbol> document = _document.getContent();
-	QList<TextBlockID> blocks = _document.getBlocksBetween(0, _document.length());
-
-	for (int i = 0; i < document.length() - 1; i++){
-		_textedit->newChar(document[i].getChar(), document[i].getFormat(), i);
+	for (int i = 0; i < _document.length() - 1; i++) {
+		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
 	}
 
-	foreach(TextBlockID id, blocks) {
+	foreach(TextBlockID id, _document._blocks) {
 		TextBlock& blk = _document.getBlock(id);
 		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
 	}
-	
+
+	foreach(TextListID id, _document._lists) {
+		TextList& lst = _document.getList(id);
+		QList<TextBlockID> blocks = lst.getBlocks();
+
+		int firstListBlockPosition = _document.getBlockPosition(blocks.first());
+
+		_textedit->createList(firstListBlockPosition, lst.getFormat());
+		blocks.removeFirst();
+
+		foreach(TextBlockID id, blocks) {
+			_textedit->addBlockToList(firstListBlockPosition, _document.getBlockPosition(id));
+		}
+	}
+
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
 
@@ -93,7 +104,7 @@ void DocumentEditor::generateExtraSelection()
 void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 {
 	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
-	
+
 	foreach(TextBlockID textBlock, blocks) {
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt);
@@ -171,7 +182,7 @@ void DocumentEditor::createList(int position, QTextListFormat fmt)
 
 
 // Called by textedit when assigning a recently inserted block to a list
-void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)	
+void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)
 {
 	// Get the specified block and the list
 	TextBlockID blockId = _document.getBlockAt(blockPosition);
@@ -284,8 +295,6 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 		foreach(TextBlockID blockId, selectedBlocks)
 		{
 			TextBlock& block = _document.getBlock(blockId);
-			_document.addBlockToList(block, list);
-
 			if (list.isEmpty())
 			{
 				// The first block will take care of creating the list in the Qt editor as well
@@ -294,8 +303,10 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 			else
 			{
 				// Following blocks will be appended to the list
-				_textedit->addBlockToList(_document.getBlockPosition(blockId), _document.getListPosition(newListId));
+				_textedit->addBlockToList(_document.getListPosition(newListId), _document.getBlockPosition(blockId));
 			}
+			
+			_document.addBlockToList(block, list);
 
 			// Send for each block the message for adding it to the new list
 			emit blockListChanged(blockId, newListId, fmt);

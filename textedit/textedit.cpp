@@ -1032,11 +1032,12 @@ void TextEdit::listStyle(int styleIndex)
 		break;
 	}
 
-
+	cursor.beginEditBlock();
 	listFmt.setStyle(style);
 	emit toggleList(cursor.selectionStart(), cursor.selectionEnd(), listFmt);
+	cursor.endEditBlock();
 
-	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
+	/*//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
 
 
@@ -1075,6 +1076,7 @@ void TextEdit::listStyle(int styleIndex)
 		cursor.createList(listFmt);
 	}
 	cursor.endEditBlock();
+	*/
 
 }
 
@@ -1258,16 +1260,19 @@ void TextEdit::cursorPositionChanged()
 		case QTextListFormat::ListDisc:
 			listButton->setChecked(true);
 			listDisc->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
 			break;
 		case QTextListFormat::ListCircle:
 			listButton->setChecked(true);
 			listCircle->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/circle.png"));
 			break;
 		case QTextListFormat::ListSquare:
 			listButton->setChecked(true);
 			listSquare->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/square.png"));
 			break;
 		case QTextListFormat::ListDecimal:
@@ -1278,21 +1283,25 @@ void TextEdit::cursorPositionChanged()
 		case QTextListFormat::ListLowerAlpha:
 			listButton->setChecked(true);
 			listAlpha->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
 			break;
 		case QTextListFormat::ListUpperAlpha:
 			listButton->setChecked(true);
+			listStandard->setChecked(false);
 			listAlphaUpper->setChecked(true);
 			listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
 			break;
 		case QTextListFormat::ListLowerRoman:
 			listButton->setChecked(true);
 			listRoman->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
 			break;
 		case QTextListFormat::ListUpperRoman:
 			listButton->setChecked(true);
 			listRomanUpper->setChecked(true);
+			listStandard->setChecked(false);
 			listButton->setIcon(QIcon(rsrcPath + "/romanupper.png"));
 			break;
 		default:
@@ -1301,6 +1310,7 @@ void TextEdit::cursorPositionChanged()
 	}
 	else {
 		listButton->setChecked(false);
+		listStandard->setChecked(true);
 		listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	}
 
