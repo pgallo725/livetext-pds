@@ -236,11 +236,25 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 				if (selectedBlocks.contains(blockId))
 				{
 					selectionBegun = true;
+
+					// If the selected blocks are being removed from their lists
+					if (fmt.style() == QTextListFormat::ListStyleUndefined)
+					{
+						// Notify both the editor and other clients of the removal
+						_textedit->removeBlockFromList(_document.getBlockPosition(blockId));
+						emit blockListChanged(blockId, TextListID(nullptr), fmt);
+					}
 					_document.removeBlockFromList(block, oldList);
 				}
 			}
 			else if (selectionBegun && !selectionEnded)		// the block among those selected
 			{
+				if (fmt.style() == QTextListFormat::ListStyleUndefined)
+				{
+					// Remove the block from its list in the local editor and notify server/clients
+					_textedit->removeBlockFromList(_document.getBlockPosition(blockId));
+					emit blockListChanged(blockId, TextListID(nullptr), fmt);
+				}
 				_document.removeBlockFromList(block, oldList);	// selected blocks are removed from their previous list
 
 				if (!selectedBlocks.contains(blockId))
@@ -276,16 +290,8 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 	}
 
 
-	// If the selected blocks are being removed from their lists
-	if (fmt.style() == QTextListFormat::ListStyleUndefined)
-	{
-		foreach(TextBlockID blockId, selectedBlocks)
-		{
-			// Send for each block a message of it being removed from the list
-			emit blockListChanged(blockId, TextListID(nullptr), fmt);
-		}
-	}
-	else	// If a new list format was applied to the blocks
+	// If a new list format was applied to the blocks
+	if (fmt.style() != QTextListFormat::ListStyleUndefined)
 	{
 		// Create a new TextList that will contain all the selected blocks
 		TextListID newListId(_document._listCounter++, _user.getUserId());
