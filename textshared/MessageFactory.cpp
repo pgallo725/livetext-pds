@@ -14,37 +14,38 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 {
 	switch (type)
 	{
-		case MessageType::LoginRequest:			return new LoginRequestMessage();
-		case MessageType::LoginChallenge:		return new LoginChallengeMessage();
-		case MessageType::LoginUnlock:			return new LoginUnlockMessage();
-		case MessageType::LoginGranted:			return new LoginGrantedMessage();
-		case MessageType::LoginError:			return new LoginErrorMessage();
-		case MessageType::AccountCreate:		return new AccountCreateMessage();
-		case MessageType::AccountUpdate:		return new AccountUpdateMessage();
-		case MessageType::AccountConfirmed:		return new AccountConfirmedMessage();
-		case MessageType::AccountError:			return new AccountErrorMessage();
-		case MessageType::Logout:				return new LogoutMessage();
-		case MessageType::DocumentCreate:		return new DocumentCreateMessage();
-		case MessageType::DocumentRemove:		return new DocumentRemoveMessage();
-		case MessageType::DocumentDismissed:	return new DocumentDismissedMessage();
-		case MessageType::DocumentOpen:			return new DocumentOpenMessage();
-		case MessageType::DocumentReady:		return new DocumentReadyMessage();
-		case MessageType::DocumentClose:		return new DocumentCloseMessage();
-		case MessageType::DocumentExit:			return new DocumentExitMessage();
-		case MessageType::DocumentError:		return new DocumentErrorMessage();
-		case MessageType::CharInsert:			return new CharInsertMessage();
-		case MessageType::CharDelete:			return new CharDeleteMessage();
-		case MessageType::CharFormat:			return new CharFormatMessage();
-		case MessageType::BlockEdit:			return new BlockEditMessage();
-		case MessageType::CursorMove:			return new CursorMoveMessage();
-		case MessageType::PresenceUpdate:		return new PresenceUpdateMessage();
-		case MessageType::PresenceAdd:			return new PresenceAddMessage();
-		case MessageType::PresenceRemove:		return new PresenceRemoveMessage();
-		case MessageType::Failure:				return new FailureMessage();
+	case MessageType::LoginRequest:			return new LoginRequestMessage();
+	case MessageType::LoginChallenge:		return new LoginChallengeMessage();
+	case MessageType::LoginUnlock:			return new LoginUnlockMessage();
+	case MessageType::LoginGranted:			return new LoginGrantedMessage();
+	case MessageType::LoginError:			return new LoginErrorMessage();
+	case MessageType::AccountCreate:		return new AccountCreateMessage();
+	case MessageType::AccountUpdate:		return new AccountUpdateMessage();
+	case MessageType::AccountConfirmed:		return new AccountConfirmedMessage();
+	case MessageType::AccountError:			return new AccountErrorMessage();
+	case MessageType::Logout:				return new LogoutMessage();
+	case MessageType::DocumentCreate:		return new DocumentCreateMessage();
+	case MessageType::DocumentRemove:		return new DocumentRemoveMessage();
+	case MessageType::DocumentDismissed:	return new DocumentDismissedMessage();
+	case MessageType::DocumentOpen:			return new DocumentOpenMessage();
+	case MessageType::DocumentReady:		return new DocumentReadyMessage();
+	case MessageType::DocumentClose:		return new DocumentCloseMessage();
+	case MessageType::DocumentExit:			return new DocumentExitMessage();
+	case MessageType::DocumentError:		return new DocumentErrorMessage();
+	case MessageType::CharInsert:			return new CharInsertMessage();
+	case MessageType::CharDelete:			return new CharDeleteMessage();
+	case MessageType::CharFormat:			return new CharFormatMessage();
+	case MessageType::BlockEdit:			return new BlockEditMessage();
+	case MessageType::ListEdit:				return new ListEditMessage();
+	case MessageType::CursorMove:			return new CursorMoveMessage();
+	case MessageType::PresenceUpdate:		return new PresenceUpdateMessage();
+	case MessageType::PresenceAdd:			return new PresenceAddMessage();
+	case MessageType::PresenceRemove:		return new PresenceRemoveMessage();
+	case MessageType::Failure:				return new FailureMessage();
 
-		default:
-			throw MessageTypeException("Type unknown", type);
-			break;
+	default:
+		throw MessageTypeException("Type unknown", type);
+		break;
 	}
 }
 

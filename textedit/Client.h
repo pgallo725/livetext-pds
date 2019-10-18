@@ -37,7 +37,7 @@
 #include <Document.h>
 
 
-#define READYREAD_TIMEOUT 100000
+#define READYREAD_TIMEOUT 10000
 
 class Client : public QObject
 {
