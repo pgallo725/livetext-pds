@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QTextBlockFormat>
-#include <QTextListFormat>
+#include "TextList.h"
 
 class TextBlockID;
 class TextBlock;
@@ -42,37 +42,36 @@ Q_DECLARE_METATYPE(TextBlockID);
 class TextBlock
 {
 	/* Operators for QDataStream serialization and deserialization */
-	friend QDataStream& operator>>(QDataStream& in, TextBlock& sym);			// Input
-	friend QDataStream& operator<<(QDataStream& out, const TextBlock& sym);		// Output
+	friend QDataStream& operator>>(QDataStream& in, TextBlock& blk);			// Input
+	friend QDataStream& operator<<(QDataStream& out, const TextBlock& blk);		// Output
 
 private:
 
 	TextBlockID _blockId;
 	QTextBlockFormat _blockFormat;
-	QTextListFormat _listFormat;
+	TextListID _listId;
 	QVector<qint32> _fPosBegin;
 	QVector<qint32> _fPosEnd;
 
 public:
 
-	TextBlock();		// Empty constructor, to use before populating fields with deserialization
+	TextBlock();		// Empty constructor, to use with deserialization
 
 	TextBlock(qint32 blockNum, qint32 authorId, QTextBlockFormat fmt);
 	TextBlock(TextBlockID blockId, QTextBlockFormat fmt);
-	TextBlock(TextBlockID blockId, QTextBlockFormat blockFmt, QTextListFormat listFmt);
 
 	/* setters */
 	void setFormat(QTextBlockFormat fmt);
+	void setList(TextListID id);
 	void setBegin(QVector<qint32> fPosBegin);
 	void setEnd(QVector<qint32> fPosEnd);
-	void setListFormat(QTextListFormat fmt);
 
 	/* getters */
 	TextBlockID getId() const;
 	QTextBlockFormat getFormat() const;
+	TextListID getListId() const;
 	QVector<qint32> begin() const;
 	QVector<qint32> end() const;
-	QTextListFormat getListFormat() const;
 	bool isEmpty() const;
 
 };

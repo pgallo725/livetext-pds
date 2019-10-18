@@ -35,11 +35,11 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
 
-	
+
 
 	//CLIENT - LIVETEXT
-	connect(_client, &Client::loginFailed, this, &LiveText::loginFailed);
-	connect(_client, &Client::registrationFailed, this, &LiveText::registrationFailed);
+	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed);
+	connect(_client, &Client::registrationFailed, this, &LiveText::operationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess);
 	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
@@ -68,10 +68,16 @@ void LiveText::connectToServer(QString ipAddress, quint16 port)
 	_client->Connect(ipAddress, port);
 }
 
+void LiveText::operationFailed(QString errorType)
+{
+	_landingPage->incorrectOperation(errorType);
+	_client->Disconnect();
+}
+
 //Login
 void LiveText::Login(QString username, QString password)
 {
-	_client->Login(username,password);
+	_client->Login(username, password);
 }
 
 void LiveText::loginSuccess(User user)
@@ -81,23 +87,10 @@ void LiveText::loginSuccess(User user)
 	_landingPage->openLoggedPage();
 }
 
-
-void LiveText::loginFailed(QString errorType)
-{
-	_landingPage->incorrectOperation(errorType);
-	_client->Disconnect();
-}
-
 //Registration
 void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
 {
-	_client->Register(username,password,nickname,icon);
-}
-
-void LiveText::registrationFailed(QString errorType)
-{
-	_landingPage->incorrectOperation(errorType);
-	_client->Disconnect();
+	_client->Register(username, password, nickname, icon);
 }
 
 //Logout
@@ -109,14 +102,20 @@ void LiveText::Logout()
 
 void LiveText::forceLogout()
 {
-	
-	if (_textEdit != nullptr) {
-		//_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+	if (_editProfile != nullptr) {
+		_editProfile->close();
 
+		delete _editProfile;
+		_editProfile = nullptr;
+	}
+
+	if (_textEdit != nullptr) {
+		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
 		_textEdit->closeEditor();
 
 		delete _docEditor;
 		delete _textEdit;
+
 
 		_docEditor = nullptr;
 		_textEdit = nullptr;
@@ -124,8 +123,7 @@ void LiveText::forceLogout()
 	else {
 		QMessageBox::StandardButton msgbox = QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok);
 	}
-	
-	
+
 	_landingPage->pushButtonBackClicked();
 	_landingPage->incorrectOperation(tr("Server not responding"));
 	_landingPage->show();
@@ -143,7 +141,6 @@ void LiveText::dismissDocumentCompleted(URI URI)
 	_user.removeDocument(URI);
 	_landingPage->setupFileList();
 	_landingPage->documentDismissed();
-
 }
 
 //Open a new document
@@ -164,7 +161,7 @@ void LiveText::openDocumentCompleted(Document doc)
 
 	_textEdit = new TextEdit();
 	_textEdit->setUser(&_user);
-	
+
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
 	//TEXTEDIT - DOCUMENTEDITOR
@@ -173,6 +170,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection);
 	connect(_textEdit, &TextEdit::blockFormatChanged, _docEditor, &DocumentEditor::changeBlockFormat);
 	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
+	//connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
@@ -187,25 +185,27 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);
-	
-	
+
+
 	if (!_user.getDocuments().contains(doc.getURI())) {
 		_user.addDocument(doc.getURI());
 	}
-	
+
 	_docEditor->openDocument();
-	
-	
+
+
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
 	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendChar);
 	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::blockModified);
 	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::charModified);
+	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::listModified);
 
 	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat);
 	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat);
+	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock);
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();
@@ -217,19 +217,20 @@ void LiveText::openEditor()
 	//Chiude finestra attuale
 	_landingPage->closeAll();
 
-	//Dimensione finestra
+	/*//Dimensione finestra
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
 
 	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
 	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
+	*/
 
-	_textEdit->show();
+	_textEdit->showMaximized();
 }
 
 //Close editor
 void LiveText::closeDocument()
-{	
+{
 	_client->removeFromFile(_user.getUserId());
 }
 
@@ -290,7 +291,7 @@ void LiveText::accountUpdated(User user)
 void LiveText::openEditProfile()
 {
 	_editProfile = new ProfileEditWindow(&_user);
-	
+
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, this, &LiveText::sendAccountUpdate);
 	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
 

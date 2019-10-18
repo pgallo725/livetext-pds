@@ -4,7 +4,7 @@
 
 #include "Symbol.h"
 #include "TextBlock.h"
-//#include "TextList.h"
+#include "TextList.h"
 
 
 class URI
@@ -40,6 +40,7 @@ Q_DECLARE_METATYPE(URI);
 
 class Document
 {
+	friend class DocumentEditor;
 	friend class DocumentReadyMessage;
 
 	/* Operators for QDataStream serialization and deserialization */
@@ -55,6 +56,9 @@ private:
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
 
+	qint32 _listCounter;
+	QMap<TextListID, TextList> _lists;
+
 	static const int fPosGapSize = 4;
 
 protected:
@@ -69,17 +73,19 @@ public:
 	void load();
 	void unload();
 	void save();
+	void remove();
 	bool exists();
 
 	Symbol& operator[](QVector<qint32> fPos);
 	Symbol& operator[](int pos);
 
 	int insert(Symbol& s);
-	void remove(const Symbol& s);
-	int removeAt(QVector<qint32> fPos);
+	int remove(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
+	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);	// adds or removes the block from the list (creating it if new)
 	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
+	int formatList(TextListID id, QTextListFormat fmt);
 
 	QVector<qint32> fractionalPosBegin();
 	QVector<qint32> fractionalPosEnd();
@@ -92,7 +98,6 @@ public:
 	QString getAuthor();
 
 	int length();
-
 	QVector<Symbol> getContent();
 	QString toString();				// returns a printable representation of the document's contents
 
@@ -100,6 +105,11 @@ public:
 	int getBlockPosition(TextBlockID blockId);
 	TextBlockID getBlockAt(int index);
 	QList<TextBlockID> getBlocksBetween(int start, int end);
+
+	TextList& getList(TextListID id);
+	int getListPosition(TextListID listId);
+	TextListID getListAt(int index);
+	QList<TextBlockID> getListBlocks(TextListID listId);
 
 	void insertNewEditor(QString editor);
 
@@ -109,5 +119,8 @@ private:
 
 	void addCharToBlock(Symbol& s, TextBlock& b);
 	void removeCharFromBlock(Symbol& s, TextBlock& b);
+
+	void addBlockToList(TextBlock& b, TextList& l);
+	void removeBlockFromList(TextBlock& b, TextList& l);
 };
 

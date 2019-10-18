@@ -46,10 +46,15 @@ public:
 	void setExtraSelections(qint32 userId, QPair<int, int> selection);
 	
 	//Block format
-	void applyBlockFormat(qint32 userId, int position, QTextBlockFormat fmt);
+	void applyBlockFormat(int position, QTextBlockFormat fmt);
 
 	//Symbol format
 	void applyCharFormat(int position, QTextCharFormat fmt);
+
+	//List management
+	void createList(int position, QTextListFormat fmt);
+	void removeBlockFromList(int blockPosition);
+	void addBlockToList(int listPosition, int blockPosition);
 
 	void criticalError(QString error);
 
@@ -67,8 +72,12 @@ signals:
 	void charDeleted(int position);
 	void charInserted(QChar ch, QTextCharFormat format, int position);
 	void generateExtraSelection();
-	void blockFormatChanged(qint32 userId, int start, int end, QTextBlockFormat fmt);
-	void symbolFormatChanged(qint32 userId, int position, QTextCharFormat fmt);
+	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
+	void symbolFormatChanged(int position, QTextCharFormat fmt);
+
+	void toggleList(int start, int end, QTextListFormat fmt);
+	void createNewList(int position, QTextListFormat fmt);
+	void assignBlockToList(int blockPosition, int listPosition);
 
 private slots:
 	void filePrint();
@@ -148,6 +157,17 @@ private:
 	QAction* actionUser;
 	QAction* actionHighlightUsers;
 	QAction* actioncloseDocument;
+
+	//Lists actions
+	QAction* listStandard;
+	QAction* listDisc;
+	QAction* listCircle;
+	QAction* listSquare;
+	QAction* listDecimal;
+	QAction* listAlpha;
+	QAction* listAlphaUpper;
+	QAction* listRoman;
+	QAction* listRomanUpper;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;

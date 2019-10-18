@@ -63,7 +63,7 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <QtInstall>Qt 5.13</QtInstall>
-    <QtModules>core;network;gui</QtModules>
+    <QtModules>core;network;gui;sql</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -181,6 +181,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="GeneratedFiles\moc_WorkSpace.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
+    <ClCompile Include="ServerDatabase.cpp" />
     <ClCompile Include="ServerException.cpp" />
     <ClCompile Include="TcpServer.cpp" />
     <ClCompile Include="WorkSpace.cpp" />
@@ -192,6 +193,7 @@
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DynamicSource>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DynamicSource>
     </QtMoc>
+    <ClInclude Include="ServerDatabase.h" />
     <ClInclude Include="ServerException.h" />
     <QtMoc Include="TcpServer.h">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DynamicSource>

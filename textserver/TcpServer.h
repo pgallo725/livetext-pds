@@ -5,11 +5,13 @@
 #include <QSslSocket>
 #include <QSslConfiguration>
 #include <QSaveFile>
+#include <QSqlDatabase>
 
 #include <User.h>
 #include "Client.h"
 #include <Document.h>
 #include "WorkSpace.h"
+#include "ServerDatabase.h"
 #include <Message.h>
 #include "MessageHandler.h"
 #include "SocketBuffer.h"
@@ -23,6 +25,8 @@ class TcpServer : public QTcpServer
 	friend class MessageHandler;
 
 private:
+
+	ServerDatabase db;
 
 	QMap<QString, User> users;
 	QStringList usersNotAvailable;
@@ -45,8 +49,6 @@ private:
 	URI generateURI(QString authorName, QString docName) const;
 	bool validateURI(URI uri) const;
 
-	void TcpServer::saveDocIndex();
-
 public:
 
 	TcpServer(QObject *parent = 0);
@@ -56,7 +58,6 @@ public:
 
 public slots:
 
-	void saveUsers();
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();

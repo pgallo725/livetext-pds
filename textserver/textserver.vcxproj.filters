@@ -48,6 +48,9 @@
     <ClCompile Include="GeneratedFiles\moc_WorkSpace.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ServerDatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -65,6 +68,9 @@
     <QtMoc Include="WorkSpace.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <ClInclude Include="ServerDatabase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\moc_MessageHandler.cpp">

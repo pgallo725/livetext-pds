@@ -184,8 +184,12 @@
     <QtRcc>
       <InitFuncName>textedit</InitFuncName>
       <Compression>default</Compression>
+      <QtRccDir>.\GeneratedFiles</QtRccDir>
     </QtRcc>
     <QtUic>
+    </QtUic>
+    <QtUic>
+      <QtUicDir>.\GeneratedFiles</QtUicDir>
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>

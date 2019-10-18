@@ -2,7 +2,7 @@
 #include "SharedException.h"
 
 #include <QDataStream>
-#include <QFile>
+#include <QMap>
 #include <QFileInfo>
 #include <QSaveFile>
 
@@ -194,6 +194,11 @@ void Document::save()
 	}
 }
 
+void Document::remove()
+{
+	QFile(DOCUMENTS_DIRNAME + uri.toString()).remove();
+}
+
 bool Document::exists()
 {
 	return QFileInfo(QFile(DOCUMENTS_DIRNAME + uri.toString())).exists();
@@ -277,12 +282,7 @@ int Document::insert(Symbol& s)
 	return insertionIndex;
 }
 
-void Document::remove(const Symbol& s)
-{
-	this->removeAt(s._fPos);
-}
-
-int Document::removeAt(QVector<qint32> fPos)
+int Document::remove(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
 	if (pos >= 0)
@@ -302,6 +302,8 @@ int Document::removeAt(QVector<qint32> fPos)
 			_text.removeAt(pos);					// Removes the paragraph separator
 
 			mergedBlock.setEnd(olderBlock.end());
+			if (mergedBlock.begin() == QVector<qint32>({ -1, -1 }))		// If the previous block is now empty
+				mergedBlock.setBegin(olderBlock.begin());
 
 			// All symbols belonging to the next block will be assigned to the current block
 			for (int i = pos; i < _text.length(); i++)
@@ -311,7 +313,13 @@ int Document::removeAt(QVector<qint32> fPos)
 					break;
 			}
 
-			_blocks.remove(olderBlock.getId());		// Delete the (now empty) block from the document
+			TextListID listId = olderBlock.getListId();
+			_blocks.remove(olderBlock.getId());			// Delete the (now empty) block from the document
+			if (listId)
+			{
+				if (_lists[listId].isEmpty())
+					_lists.remove(listId);		// Delete the list if that was the last block
+			}
 		}
 		else if (pos == _text.length() - 1)
 		{
@@ -333,8 +341,32 @@ QVector<qint32> Document::removeAtIndex(int index)
 {
 	QVector<qint32> position = _text[index]._fPos;
 	
-	removeAt(position);
+	remove(position);
 	return position;
+}
+
+int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
+{
+	TextBlock& block = _blocks[blockId];
+
+	if (listId && !_lists.contains(listId))
+	{
+		// Create the list if the id is unknown
+		_lists.insert(listId, TextList(listId, fmt));
+		_listCounter++;									// keep the list counters aligned
+	}
+	TextList& list = _lists[listId];
+
+	if (!listId) {
+		// Remove the block from the list
+		removeBlockFromList(block, list);
+	}
+	else {
+		// Add the block to the list
+		addBlockToList(block, list);
+	}
+
+	return getBlockPosition(blockId);
 }
 
 int Document::formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt)
@@ -358,6 +390,21 @@ int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
 	return getBlockPosition(id);
 }
 
+int Document::formatList(TextListID id, QTextListFormat fmt)
+{
+	TextList list = _lists[id];
+	list.setFormat(fmt);
+
+	_lists.insert(id, list);		// and replace its entry with the updated one
+
+	return getListPosition(id);
+}
+
+
+int Document::length()
+{
+	return _text.length();
+}
 
 QString Document::toString()
 {
@@ -404,6 +451,38 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	return result;
 }
 
+TextList& Document::getList(TextListID id)
+{
+	return _lists[id];
+}
+
+int Document::getListPosition(TextListID listId)
+{
+	// returns the position of one random block in the list
+	return getBlockPosition(_lists[listId].getBlocks().first());
+}
+
+TextListID Document::getListAt(int index)
+{
+	TextBlockID b = getBlockAt(index);
+	return _blocks[b].getListId();
+}
+
+QList<TextBlockID> Document::getListBlocks(TextListID listId)
+{
+	QMap<QVector<qint32>, TextBlockID> ordered_blocks;
+
+	// Build an ordered map of the list blocks (sorted by their position in the document)
+	// in order to obtain an ordered list of blockIDs by calling .values()
+	foreach(TextBlockID blockId, _lists[listId].getBlocks())
+	{
+		TextBlock& block = _blocks[blockId];
+		ordered_blocks.insert(block.begin(), blockId);
+	}
+
+	return ordered_blocks.values();
+}
+
 
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
@@ -445,6 +524,23 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	}
 }
 
+void Document::addBlockToList(TextBlock& b, TextList& l)
+{
+	b.setList(l.getId());
+	l.addBlock(b.getId());
+}
+
+void Document::removeBlockFromList(TextBlock& b, TextList& l)
+{
+	b.setList(nullptr);
+	l.removeBlock(b.getId());
+
+	if (l.isEmpty())
+	{
+		// Delete the list when it's empty
+		_lists.remove(l.getId());
+	}
+}
 
 
 
@@ -511,11 +607,6 @@ QVector<qint32> Document::fractionalPosAtIndex(int index)
 	return fractionalPosBetween(index - 1, index);
 }
 
-int Document::length()
-{
-	return _text.length();
-}
-
 QVector<qint32> Document::fractionalPosBegin()
 {
 	QVector<qint32> result;
@@ -552,7 +643,8 @@ QVector<qint32> Document::fractionalPosEnd()
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks >> doc._text ;
+	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks 
+		>> doc._listCounter >> doc._lists >> doc._text ;
 
 	return in;
 }
@@ -560,7 +652,8 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks << doc._text;
+	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks 
+		<< doc._listCounter << doc._lists << doc._text;
 
 	return out;
 }

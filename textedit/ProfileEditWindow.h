@@ -26,6 +26,7 @@ private slots:
 	void pushButtonBrowseClicked();
 	void pushButtonCancelClicked();
 	void showUserIcon(QString path);
+	void setupLoadingMessage();
 
 signals:
 	void accountUpdate(QString name, QImage image, QString password);
