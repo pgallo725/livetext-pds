@@ -98,7 +98,9 @@ signals:
 	void recivedSymbol(Symbol character);
 	void removeSymbol(QVector<int> position);
 	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
-	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
+	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
+
 
 public:
 
@@ -119,7 +121,9 @@ public:
 	void sendChar(Symbol character);
 	void removeChar(QVector<int> position);
 	void charModified(QVector<qint32> position, QTextCharFormat fmt);
-	void blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId);
+	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);
+	void listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
+	void editList(MessageCapsule message);
 
 	// Document handler
 	void openDocument(URI URI);

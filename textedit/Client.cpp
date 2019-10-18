@@ -3,16 +3,6 @@
 
 Client::Client(QObject* parent) : QObject(parent)
 {
-	socket = new QSslSocket(this);
-
-	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
-	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-		[&](QAbstractSocket::SocketError socketError) {
-			emit impossibleToConnect();						// Error in connection
-			socket->abort();
-		});
 }
 
 
@@ -199,6 +189,20 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 }
 
 void Client::Connect(QString ipAddress, quint16 port) {
+
+	socket = new QSslSocket(this);
+
+	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
+	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
+	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
+	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::socketErr);
+
+	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+		[&](QAbstractSocket::SocketError socketError) {
+			emit impossibleToConnect();						// Error in connection
+			socket->abort();
+		});
+
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
@@ -353,6 +357,8 @@ void Client::openDocument(URI URI) {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
+
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	openDocument->send(socket);
 
@@ -390,6 +396,8 @@ void Client::createDocument(QString name) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
 	newDocument->send(socket);
@@ -429,6 +437,8 @@ void Client::deleteDocument(URI URI) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->send(socket);
@@ -501,11 +511,18 @@ void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
 	charFormat->send(socket);
 }
 
-void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt, qint32 editorId)
+void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
 {
-	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt, editorId);
+	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt);
 	blockEdit->send(socket);
 }
+
+void Client::listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
+{
+	MessageCapsule listEdit = MessageFactory::ListEdit(blockId, listId, fmt);
+	listEdit->send(socket);
+}
+
 
 void Client::receiveChar(MessageCapsule message) {
 
@@ -528,8 +545,15 @@ void Client::editChar(MessageCapsule message) {
 void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat(), blockedit->getAuthorId());
+	emit formatBlock(blockedit->getBlockId(),blockedit->getBlockFormat());
 }
+
+void Client::editList(MessageCapsule message)
+{
+	ListEditMessage* listedit = dynamic_cast<ListEditMessage*>(message.get());
+	emit listEditBlock(listedit->getBlockId(), listedit->getListId(), listedit->getListFormat());
+}
+
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
