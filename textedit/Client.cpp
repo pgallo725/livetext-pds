@@ -36,7 +36,9 @@ void Client::serverConnection() {
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
 	emit abortConnection();
-	socket->abort();
+	//socket->abort();
+	socket->close();
+	socket->deleteLater();
 }
 
 void Client::readBuffer() {
@@ -210,7 +212,6 @@ void Client::Connect(QString ipAddress, quint16 port) {
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
 		emit connectionEstablished();
-		//ready();		// TODO EDO: si potrebbe eliminare lo slot "ready()" e mettere le istruzioni direttamente qua?
 	else
 		emit impossibleToConnect();
 }
