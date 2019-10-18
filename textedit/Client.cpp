@@ -97,6 +97,9 @@ void Client::messageHandler(MessageCapsule message) {
 	case BlockEdit:
 		editBlock(message);
 		break;
+	case ListEdit:
+		editList(message);
+		break;
 	case DocumentExit:
 		forceDocumentClose();
 		break;
