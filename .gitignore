@@ -6,7 +6,7 @@
 # Application generated files
 textedit/userLogin.dat
 textserver/Documents/
-*.db3
+textserver/livetext.db3
 
 # Qt MOC and build files
 *.qmake.stash
