@@ -249,14 +249,6 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 			}
 			else if (selectionBegun && !selectionEnded)		// the block among those selected
 			{
-				if (fmt.style() == QTextListFormat::ListStyleUndefined)
-				{
-					// Remove the block from its list in the local editor and notify server/clients
-					_textedit->removeBlockFromList(_document.getBlockPosition(blockId));
-					emit blockListChanged(blockId, TextListID(nullptr), fmt);
-				}
-				_document.removeBlockFromList(block, oldList);	// selected blocks are removed from their previous list
-
 				if (!selectedBlocks.contains(blockId))
 				{
 					selectionEnded = true;
@@ -273,6 +265,16 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 					// Apply changes to the editor and notify others
 					_textedit->createList(_document.getBlockPosition(blockId), oldList.getFormat());
 					emit blockListChanged(blockId, newListId, oldList.getFormat());
+				}
+				else
+				{
+					if (fmt.style() == QTextListFormat::ListStyleUndefined)
+					{
+						// Remove the block from its list in the local editor and notify server/clients
+						_textedit->removeBlockFromList(_document.getBlockPosition(blockId));
+						emit blockListChanged(blockId, TextListID(nullptr), fmt);
+					}
+					_document.removeBlockFromList(block, oldList);	// selected blocks are removed from their previous list
 				}
 			}
 			else	// the block belongs to the list but is after the end of the selection

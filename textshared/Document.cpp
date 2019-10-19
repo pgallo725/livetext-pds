@@ -315,13 +315,12 @@ int Document::remove(QVector<qint32> fPos)
 					break;
 			}
 
-			TextListID listId = olderBlock.getListId();
-			_blocks.remove(olderBlock.getId());			// Delete the (now empty) block from the document
-			if (listId)
+			if (olderBlock.getListId())		// Remove the block from the list (if it was in one)
 			{
-				if (_lists[listId].isEmpty())
-					_lists.remove(listId);		// Delete the list if that was the last block
+				TextList& list = _lists[olderBlock.getListId()];
+				removeBlockFromList(olderBlock, list);	
 			}
+			_blocks.remove(olderBlock.getId());			// Delete the (now empty) block from the document
 		}
 		else if (pos == _text.length() - 1)
 		{
@@ -528,6 +527,12 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 
 void Document::addBlockToList(TextBlock& b, TextList& l)
 {
+	if (b.getListId())	
+	{
+		// Remove the block from any previous list it's in
+		removeBlockFromList(b, _lists[b.getListId()]);
+	}
+
 	b.setList(l.getId());
 	l.addBlock(b.getId());
 }
