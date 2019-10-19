@@ -502,24 +502,31 @@ void TextEdit::closeDocumentError(QString error)
 void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+	
 
 	_extraCursor->setPosition(position);
-	_extraCursor->beginEditBlock();
+	//_extraCursor->beginEditBlock();
 	_extraCursor->setBlockFormat(fmt);
 
-	_extraCursor->endEditBlock();
+	//_extraCursor->endEditBlock();
 
 	alignmentChanged(fmt.alignment());
 
 	//Setta nel combobox l'heading level corretto
 	comboStyle->setCurrentIndex(fmt.headingLevel() ? fmt.headingLevel() : 0);
 
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 //Applies symbol format
 void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 {
+	textEdit->document()->setUndoRedoEnabled(false);
+
 	const QSignalBlocker blocker(textEdit->document());
+
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	_extraCursor->setPosition(position);
 	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
@@ -530,6 +537,11 @@ void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 	textEdit->mergeCurrentCharFormat(fmt);
 
 	_extraCursor->endEditBlock();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
+	textEdit->document()->setUndoRedoEnabled(true);
+
 }
 
 void TextEdit::criticalError(QString error)
@@ -561,6 +573,8 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 	QTextCursor* cursor;
 
 	if (user != -1) {
@@ -574,38 +588,47 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 
 	cursor->setPosition(position);
 
-	cursor->beginEditBlock();
+	//cursor->beginEditBlock();
 
 	cursor->setCharFormat(format);
 	cursor->insertText(ch);
 
-	cursor->endEditBlock();
+	//cursor->endEditBlock();
 
 	updateUsersSelections();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::removeChar(int position)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	_extraCursor->setPosition(position);
 
-	_extraCursor->beginEditBlock();
+	//_extraCursor->beginEditBlock();
 
 	_extraCursor->deleteChar();
 
-	_extraCursor->endEditBlock();
+	//_extraCursor->endEditBlock();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::closeEditor()
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 	onlineUsers.clear();
 	textEdit->document()->clear();
 	if (timerId > 0)
 		killTimer(timerId);
 	this->close();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 
@@ -734,29 +757,39 @@ void TextEdit::textBold()
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 	QTextCharFormat fmt;
 
 	//Controlla se l'azione TextBold è attivata e imposta il Weight normale/bold
 	fmt.setFontWeight(actionTextBold->isChecked() ? QFont::Bold : QFont::Normal);
 	mergeFormatOnWordOrSelection(fmt);
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::textUnderline()
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	QTextCharFormat fmt;
 	fmt.setFontUnderline(actionTextUnderline->isChecked());
 	mergeFormatOnWordOrSelection(fmt);
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::textItalic()
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	QTextCharFormat fmt;
 	fmt.setFontItalic(actionTextItalic->isChecked());
 	mergeFormatOnWordOrSelection(fmt);
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 //Tipo di carattere (Arial...)
@@ -764,14 +797,19 @@ void TextEdit::textFamily(const QString& f)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 	QTextCharFormat fmt;
 	fmt.setFontFamily(f);
 	mergeFormatOnWordOrSelection(fmt);
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::textSize(const QString& p)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Casta a float (?) e imposta la dimensione del carattere
 	qreal pointSize = p.toFloat();
@@ -780,11 +818,14 @@ void TextEdit::textSize(const QString& p)
 		fmt.setFontPointSize(pointSize);
 		mergeFormatOnWordOrSelection(fmt);
 	}
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::listStyle(int styleIndex)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Formato lista
 	QTextListFormat listFmt;
@@ -1036,6 +1077,9 @@ void TextEdit::listStyle(int styleIndex)
 	listFmt.setStyle(style);
 	emit toggleList(cursor.selectionStart(), cursor.selectionEnd(), listFmt);
 	cursor.endEditBlock();
+	
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	/*//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
 	cursor.beginEditBlock();
@@ -1083,6 +1127,7 @@ void TextEdit::listStyle(int styleIndex)
 void TextEdit::createList(int position, QTextListFormat fmt)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Setting list indentation to 1 step
 	fmt.setIndent(1);
@@ -1091,18 +1136,21 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	_extraCursor->setPosition(position);
 
 	//Starting undo/redo block
-	_extraCursor->beginEditBlock();
+//	_extraCursor->beginEditBlock();
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
 	//Ending undo/redo block
-	_extraCursor->endEditBlock();
+//	_extraCursor->endEditBlock();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Moving to target block
 	_extraCursor->setPosition(blockPosition);
@@ -1116,7 +1164,7 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Getting current block format
 	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
 
-	_extraCursor->beginEditBlock();
+	//_extraCursor->beginEditBlock();
 
 	//Remove target bock from list
 	currentList->remove(blk);
@@ -1127,12 +1175,15 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Apply new format
 	_extraCursor->setBlockFormat(blkFormat);
 
-	_extraCursor->endEditBlock();
+	//_extraCursor->endEditBlock();
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::addBlockToList(int listPosition, int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	_extraCursor->setPosition(listPosition);
 	QTextList* currentList = _extraCursor->currentList();
@@ -1140,11 +1191,13 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 	_extraCursor->setPosition(blockPosition);
 	QTextBlock blk = _extraCursor->block();
 
-	_extraCursor->beginEditBlock();
+	//_extraCursor->beginEditBlock();
 
 	currentList->add(blk);
 
-	_extraCursor->endEditBlock();
+	//_extraCursor->endEditBlock();
+	
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 
@@ -1156,6 +1209,7 @@ void TextEdit::textStyle(int styleIndex)
 	int sizeAdjustment = headingLevel ? 4 - headingLevel : 0; // H1 to H6: +3 to -2
 
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Crea formattazione carattere
 	QTextCharFormat fmt;
@@ -1169,7 +1223,7 @@ void TextEdit::textStyle(int styleIndex)
 
 
 	//Indica l'inizio dell'editing a cui si appoggi l'undo/redo
-	cursor.beginEditBlock();
+	//cursor.beginEditBlock();
 
 	//Salva il formato del blocco
 	QTextBlockFormat blockFmt = cursor.blockFormat();
@@ -1181,14 +1235,18 @@ void TextEdit::textStyle(int styleIndex)
 	blockFmt.setHeadingLevel(headingLevel);
 	cursor.setBlockFormat(blockFmt);
 
-	cursor.endEditBlock();
-
+	//cursor.endEditBlock();	
+	
 	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::textColor()
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
 
 	//Creo finestra di dialogo per colori
 	QColor col = QColorDialog::getColor(textEdit->textColor(), this);
@@ -1202,6 +1260,8 @@ void TextEdit::textColor()
 
 	//Se cambia colore cambio icona colore
 	colorChanged(col);
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 //Funzione chiamata con il bind di triggered del gruppo di pulsanti di allineamento
@@ -1209,6 +1269,7 @@ void TextEdit::textColor()
 void TextEdit::textAlign(QAction* a)
 {
 	const QSignalBlocker blocker(textEdit->document());
+	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Applico gli allineamenti
 	if (a == actionAlignLeft)
@@ -1223,6 +1284,9 @@ void TextEdit::textAlign(QAction* a)
 	QTextCursor cursor = textEdit->textCursor();
 
 	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+
+
+	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
 void TextEdit::alignmentChanged(Qt::Alignment a)
