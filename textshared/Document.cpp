@@ -78,12 +78,12 @@ QDataStream& operator<<(QDataStream& out, const URI& uri)
 
 
 Document::Document()
-	: _blockCounter(0)
+	: _blockCounter(0), _listCounter(0)
 {
 }
 
 Document::Document(URI docURI, qint32 authorId) :
-	uri(docURI), _blockCounter(0)
+	uri(docURI), _blockCounter(0), _listCounter(0)
 {
 	editors << getAuthor();
 
