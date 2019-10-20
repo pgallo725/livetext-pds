@@ -229,8 +229,6 @@ int Document::insert(Symbol& s)
 
 	if (insertionIndex >= 0)
 	{
-		qDebug() << "Inserting character" << s.getChar();
-
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
 		{
@@ -290,7 +288,6 @@ int Document::remove(QVector<qint32> fPos)
 	if (pos >= 0)
 	{
 		Symbol& s = _text[pos];
-		qDebug() << "Deleting character" << s.getChar();
 
 		// Check if the symbol removal implies the deletion of a paragraph separator
 		if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
@@ -442,8 +439,9 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	int n = start;
 	while (n < _text.length())
 	{
-		TextBlock& block = _blocks[getBlockAt(n)];		// Get the block and add it to the list of results
-		result.push_back(block.getId());
+		TextBlockID blockId = getBlockAt(n);
+		TextBlock& block = _blocks[blockId];	// Get the block and add it to the list of results
+		result.append(blockId);
 		n = binarySearch(block.end()) + 1;		// Skip to the beginning of the next block
 		if (n <= 0 || n >= end)
 			break;	

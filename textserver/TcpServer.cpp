@@ -16,14 +16,11 @@
 #include "ServerException.h"
 #include "SharedException.h"
 
-#define INDEX_FILENAME "./Documents/documents.dat"
-#define USERS_FILENAME "users.dat"
 
 
 /* Server costructor */
 TcpServer::TcpServer(QObject* parent)
-	: QTcpServer(parent), messageHandler(this), _userIdCounter(0), 
-	usersFile(QSaveFile(USERS_FILENAME)), docsFile(QSaveFile(INDEX_FILENAME)), db(ServerDatabase())
+	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {
 	qRegisterMetaType<QSharedPointer<Client>>("QSharedPointer<Client>");
 	qRegisterMetaType<URI>("URI");
@@ -656,11 +653,21 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	else 
 		return MessageFactory::DocumentError("You don't have access to that document");
 
-	if (!db.countDocEditors(docUri.toString())) {
-		// no one has access to this document --> must be erased
-		documents.find(docUri).value()->remove();
-		documents.remove(docUri);
+	try 
+	{
+		if (!db.countDocEditors(docUri.toString())) {
+			// no one has access to this document --> must be erased
+			documents.find(docUri).value()->remove();
+			documents.remove(docUri);
+
+			qDebug() << "> Permanently deleted document" << docUri.toString() << "file from disk";
+		}
 	}
+	catch (DataBaseException & de)
+	{
+		qDebug().noquote() << ">" << de.what();
+	}
+	
 
 	return MessageFactory::DocumentDismissed();
 }
