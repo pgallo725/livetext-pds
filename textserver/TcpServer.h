@@ -4,8 +4,6 @@
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslConfiguration>
-#include <QSaveFile>
-#include <QSqlDatabase>
 
 #include <User.h>
 #include "Client.h"
@@ -31,11 +29,8 @@ private:
 	QMap<QString, User> users;
 	QStringList usersNotAvailable;
 	qint32 _userIdCounter;
-	QSaveFile usersFile;
 
 	QMap<URI, QSharedPointer<Document>> documents;
-	QSaveFile docsFile;
-
 	QMap<URI, QSharedPointer<WorkSpace>> workspaces;
 	QMap<QSslSocket*, QSharedPointer<Client>> clients;
 	

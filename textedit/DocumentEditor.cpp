@@ -1,5 +1,7 @@
 #include "DocumentEditor.h"
 
+#include <QDebug>
+
 
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
@@ -42,12 +44,14 @@ void DocumentEditor::openDocument()
 //From Server to Client
 void DocumentEditor::addSymbol(Symbol s)
 {
+	qDebug().nospace() << "Remote char insertion: " << s.getChar();
 	int position = _document.insert(s);
 	_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
 }
 
 void DocumentEditor::removeSymbol(QVector<int> position)
 {
+	qDebug().nospace() << "Remote char deletion: " << _document[position].getChar();
 	int pos = _document.remove(position);
 	_textedit->removeChar(pos);
 }
@@ -55,6 +59,7 @@ void DocumentEditor::removeSymbol(QVector<int> position)
 //From Client to Server
 void DocumentEditor::deleteCharAtIndex(int position)
 {
+	qDebug().nospace() << "Local char deletion: " << _document[position].getChar();
 	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
 	emit deleteChar(fractionalPosition);
 }
@@ -71,6 +76,8 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 	else {
 		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
 	}
+
+	qDebug().nospace() << "Local char insertion: " << s.getChar();
 
 	_document.insert(s);
 	emit insertChar(s);
@@ -106,6 +113,9 @@ void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
 
 	foreach(TextBlockID textBlock, blocks) {
+		qDebug().nospace() << "Local format change of block {" << textBlock.getBlockNumber()
+			<< ", " << textBlock.getAuthorId() << "}";
+
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt);
 	}
@@ -113,6 +123,9 @@ void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 
 void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
 {
+	qDebug().nospace() << "Remote format change of block {" << blockId.getBlockNumber()
+		<< ", " << blockId.getAuthorId() << "}";
+
 	int position = _document.formatBlock(blockId, fmt);
 	_textedit->applyBlockFormat(position, fmt);
 }
@@ -122,12 +135,17 @@ void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
 void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)
 {
 	Symbol s = _document[position];
+
+	qDebug().nospace() << "Local format change of character: " << s.getChar();
+
 	_document.formatSymbol(s._fPos, fmt);
 	emit symbolFormatChanged(s._fPos, fmt);
 }
 
 void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)
 {
+	qDebug().nospace() << "Remote format change of character: " << _document[position].getChar();
+
 	int pos = _document.formatSymbol(position, fmt);
 	_textedit->applyCharFormat(pos, fmt);
 }
@@ -140,6 +158,10 @@ void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QText
 	// Early out if the local state is already aligned with the server's
 	if (_document.getBlock(blockId).getListId() == listId)
 		return;
+
+	qDebug().nospace() << "Remote assignment of block {" << blockId.getBlockNumber()
+		<< ", " << blockId.getAuthorId() << "} to list {" << listId.getListNumber()
+		<< ", " << listId.getAuthorId() << "}";;
 
 	int blockPos = _document.getBlockPosition(blockId);
 
@@ -174,6 +196,9 @@ void DocumentEditor::createList(int position, QTextListFormat fmt)
 	TextList& list = _document.getList(newListId);
 	TextBlock& block = _document.getBlock(_document.getBlockAt(position));
 
+	qDebug().nospace() << "Local list creation for block {" << block.getId().getBlockNumber()
+		<< ", " << block.getId().getAuthorId() << "}";
+
 	_document.addBlockToList(block, list);
 
 	// Notify other clients
@@ -187,6 +212,10 @@ void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)
 	// Get the specified block and the list
 	TextBlockID blockId = _document.getBlockAt(blockPosition);
 	TextListID listId = _document.getListAt(listPosition);
+
+	qDebug().nospace() << "Local addition of block {" << blockId.getBlockNumber()
+		<< ", " << blockId.getAuthorId() << "} to list {" << listId.getListNumber()
+		<< ", " << listId.getAuthorId() << "}";
 
 	if (listId)
 	{
