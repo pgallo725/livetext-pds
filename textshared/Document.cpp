@@ -229,7 +229,7 @@ int Document::insert(Symbol& s)
 
 	if (insertionIndex >= 0)
 	{
-		qDebug() << "Inserting character" << s.getChar();
+		//qDebug() << "Inserting character" << s.getChar();
 
 		// Check if the inserted symbol implies the creation of a new block
 		if (s.getChar() == QChar::ParagraphSeparator)
@@ -290,7 +290,7 @@ int Document::remove(QVector<qint32> fPos)
 	if (pos >= 0)
 	{
 		Symbol& s = _text[pos];
-		qDebug() << "Deleting character" << s.getChar();
+		//qDebug() << "Deleting character" << s.getChar();
 
 		// Check if the symbol removal implies the deletion of a paragraph separator
 		if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
