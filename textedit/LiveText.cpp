@@ -13,7 +13,6 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	_client = new Client();
 
 	//LANDINGPAGE - LIVETEXT
-	//connect(_landingPage, &LandingPage::openEditor, this, &LiveText::openEditor); //Open editor
 	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
 	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
 	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
@@ -219,13 +218,13 @@ void LiveText::openEditor()
 	//Chiude finestra attuale
 	_landingPage->closeAll();
 
-	/*//Dimensione finestra
+	//Dimensione finestra
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
 
 	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
 	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
-	*/
+	
 
 	_textEdit->showMaximized();
 }

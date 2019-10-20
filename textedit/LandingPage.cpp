@@ -123,14 +123,22 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
 
 	//Loads user infos
-	ui->lineEdit_serverIP->setText(DEFAULT_IP);
-	ui->lineEdit_serverPort->setText(DEFAULT_PORT);
-
 	loadUserLoginInfo();
+
+	if (ui->lineEdit_serverIP->text().isEmpty()) {
+		ui->lineEdit_serverIP->setText(DEFAULT_IP);
+		ui->lineEdit_serverPort->setText(DEFAULT_PORT);
+	}
+
+	if (ui->lineEdit_usr->text().isEmpty())
+		ui->lineEdit_usr->setFocus();
+	else
+		ui->lineEdit_psw->setFocus();
+
 
 	//Setup loading message Label
 	setupLoadingMessage();
-	
+
 }
 
 LandingPage::~LandingPage()
@@ -370,6 +378,8 @@ void LandingPage::pushButtonBackClicked()
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->tabWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
+
+	ui->lineEdit_psw->setFocus();
 }
 
 void LandingPage::enablePushButtonOpen()
@@ -506,9 +516,9 @@ void LandingPage::setupLoadingMessage()
 
 void LandingPage::startLoadingAnimation(QString text)
 {
-	
+
 	loading->setText(text);
-	
+
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	loading->show();

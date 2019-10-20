@@ -1123,10 +1123,8 @@ void TextEdit::removeBlockFromList(int blockPosition)
 
 	_extraCursor->endEditBlock();
 
-	//Apply block format on all clients
-	textEdit->document()->undo();
-	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
+	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 }
 
 void TextEdit::addBlockToList(int listPosition, int blockPosition)
@@ -1182,12 +1180,8 @@ void TextEdit::textAlign(QAction* a)
 		textEdit->setAlignment(Qt::AlignJustify);
 
 	QTextCursor cursor = textEdit->textCursor();
-	QTextBlockFormat blkFormat = cursor.blockFormat();
 
-	textEdit->document()->undo();
-
-	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), blkFormat);
-
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
 }
 
 void TextEdit::alignmentChanged(Qt::Alignment a)
