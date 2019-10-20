@@ -57,6 +57,7 @@ public:
 	void addBlockToList(int listPosition, int blockPosition);
 
 	void criticalError(QString error);
+	void resetUndoRedo();
 
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
@@ -95,7 +96,6 @@ private slots:
 	void textFamily(const QString& f);
 	void textSize(const QString& p);
 	void listStyle(int styleIndex);
-	void textStyle(int styleIndex);
 	void textColor();
 	void textAlign(QAction* a);
 
@@ -175,7 +175,6 @@ private:
 	QAction* actionPaste;
 #endif
 
-	QComboBox* comboStyle;
 	QFontComboBox* comboFont;
 	QComboBox* comboSize;
 
