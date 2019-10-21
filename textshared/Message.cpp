@@ -41,7 +41,7 @@ void Message::read(QDataStream& stream)
 	}
 }
 
-int Message::getType()
+MessageType Message::getType()
 {
 	return m_type;
 }
