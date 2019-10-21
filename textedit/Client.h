@@ -53,14 +53,6 @@ private:
 	QImage image;
 	bool login;
 
-	enum qint16{
-		LoginMessage,
-		RegisterMessage,
-		OpenFileMessage,
-		CreateFileMessage,
-		DeleteMessage
-	};
-
 signals:
 
 	// Connection Signal
@@ -87,9 +79,8 @@ signals:
 	void accountModificationFail(QString error);
 	
 	// Document Signals
-	void removeFileFailed(QString errorType);
 	void openFileCompleted(Document document);
-	void openFileFailed(QString error);
+	void fileOperationFailed(QString errorType);
 	void documentDismissed(URI URI);
 	void documentExitSuccess(bool isForced = false);
 	void documentExitFailed(QString errorType);
@@ -101,6 +92,8 @@ signals:
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
+	// Generic Signals
+	void failureSignal(QString errorType);
 
 public:
 
@@ -109,7 +102,7 @@ public:
 	
 	// Message handler
 	void messageHandler(MessageCapsule message);
-	MessageCapsule readMessage(QDataStream& stream, qint16 typeOfMessage);
+	MessageCapsule readMessage(QDataStream& stream);
 
 	// User connection
 	void Login(QString usr, QString passwd);

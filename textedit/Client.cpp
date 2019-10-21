@@ -36,8 +36,7 @@ void Client::serverConnection() {
 void Client::serverDisconnection() {
 	qDebug() << "Server closed the connection";
 	emit abortConnection();
-	//socket->abort();
-	socket->close();
+	socket->abort();
 	socket->deleteLater();
 }
 
@@ -112,7 +111,7 @@ void Client::messageHandler(MessageCapsule message) {
 
 }
 
-MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
+MessageCapsule Client::readMessage(QDataStream& stream)
 {
 	QByteArray dataBuffer;
 
@@ -121,7 +120,9 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
-		switch (typeOfMessage)
+		emit failureSignal(tr("Server not responding"));
+
+		/*switch (typeOfMessage)
 		{
 		case LoginMessage:
 			emit loginFailed(tr("Server not responding"));
@@ -137,7 +138,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 			break;
 		default:
 			break;
-		}
+		}*/
 
 		socketBuffer.clear();
 		return MessageCapsule();
@@ -154,7 +155,9 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 
 		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
-			switch (typeOfMessage)
+			emit failureSignal(tr("Server not responding"));
+
+			/*switch (typeOfMessage)
 			{
 			case LoginMessage:
 				emit loginFailed(tr("Server not responding"));
@@ -170,7 +173,7 @@ MessageCapsule Client::readMessage(QDataStream& stream, qint16 typeOfMessage)
 				emit accountModificationFail(tr("Server not responding"));
 			default:
 				break;
-			}
+			}*/
 
 			socketBuffer.clear();
 			return MessageCapsule();
@@ -234,7 +237,11 @@ void Client::Login(QString usr, QString passwd) {
 	loginRequest->send(socket);
 
 	QDataStream in(socket);
-	incomingMessage = readMessage(in, LoginMessage);
+
+	connect(this, &Client::failureSignal, this, &Client::loginFailed);
+	incomingMessage = readMessage(in);
+	//disconnect(this, &Client::failureSignal, this, &Client::loginFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -281,7 +288,10 @@ void Client::Login(QString usr, QString passwd) {
 
 	loginUnlock->send(socket);
 
-	incomingMessage = readMessage(in, LoginMessage);
+	//connect(this, &Client::failureSignal, this, &Client::loginFailed);
+	incomingMessage = readMessage(in);
+	disconnect(this, &Client::failureSignal, this, &Client::loginFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -320,7 +330,10 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 	accountCreate->send(socket);
 
 	//wait the response from the server
-	incomingMessage = readMessage(in, RegisterMessage);
+	connect(this, &Client::failureSignal, this, &Client::registrationFailed);
+	incomingMessage = readMessage(in);
+	disconnect(this, &Client::failureSignal, this, &Client::registrationFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -368,7 +381,10 @@ void Client::openDocument(URI URI) {
 
 	//wait the response from the server
 
-	incomingMessage = readMessage(in, OpenFileMessage);
+	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+	incomingMessage = readMessage(in);
+	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -385,13 +401,13 @@ void Client::openDocument(URI URI) {
 	case DocumentError: {
 		// impossible to open the Document
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-		emit openFileFailed(documentError->getErrorMessage());
+		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
-		emit openFileFailed(tr("Default path followed for OpenFile"));
+		emit fileOperationFailed(tr("Default path followed for OpenFile"));
 		return;
 	}
 }
@@ -408,7 +424,10 @@ void Client::createDocument(QString name) {
 
 	//wait the response from the server
 
-	incomingMessage = readMessage(in, CreateFileMessage);
+	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+	incomingMessage = readMessage(in);
+	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -425,13 +444,13 @@ void Client::createDocument(QString name) {
 	case DocumentError: {
 		// impossible to open the document
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-		emit openFileFailed(documentError->getErrorMessage());
+		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
-		emit openFileFailed(tr("Default path followed for OpenFile"));
+		emit fileOperationFailed(tr("Default path followed for OpenFile"));
 		return;
 	}
 
@@ -447,7 +466,10 @@ void Client::deleteDocument(URI URI) {
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
 	removeDocument->send(socket);
 
-	incomingMessage = readMessage(in, DeleteMessage);
+	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+	incomingMessage = readMessage(in);
+	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+
 	if (!incomingMessage)
 		return;
 
@@ -460,13 +482,13 @@ void Client::deleteDocument(URI URI) {
 	case DocumentError: {
 		// impossible to remove the document
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-		emit removeFileFailed(documentError->getErrorMessage());
+		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	default:
 		//throw MessageUnknownTypeException();
 		//EMIT ?
-		emit removeFileFailed(tr("Default choise selected for RemoveFile"));
+		emit fileOperationFailed(tr("Default choise selected for RemoveFile"));
 		return;
 	}
 
@@ -576,7 +598,10 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 	while (true) {
 
-		incomingMessage = readMessage(in, (qint16) AccountUpdate);
+		connect(this, &Client::failureSignal, this, &Client::accountModificationFail);
+		incomingMessage = readMessage(in);
+		disconnect(this, &Client::failureSignal, this, &Client::accountModificationFail);
+
 		if (!incomingMessage)
 			return;
 
@@ -639,7 +664,9 @@ void Client::removeFromFile(qint32 myId) {
 
 	while (true) {
 
-		incomingMessage = readMessage(in, DeleteMessage);
+		connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+		incomingMessage = readMessage(in);
+		connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
 		if (!incomingMessage)
 			return;
 
@@ -665,6 +692,4 @@ void Client::removeFromFile(qint32 myId) {
 
 		socketBuffer.clear();
 	}
-
-	
 }
