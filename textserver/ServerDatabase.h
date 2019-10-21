@@ -4,6 +4,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QImage>
+#include <QStringList>
 #include "User.h"
 
 class ServerDatabase
@@ -17,6 +18,7 @@ private:
 	QSqlQuery qSelectDocuments;
 	QSqlQuery qCountDocumentEditors;
 	QSqlQuery qSelectMaxUserID;
+	QSqlQuery qSelectDocsUsers;
 
 public:
 
@@ -36,7 +38,9 @@ public:
 	bool removeDocFromUser(QString username, QString uri);
 
 	int getMaxUserID();
-	QList<QString> readDocumentURIs();
+	QList<User> readUsersList();
+	QStringList readUserDocuments(QString username);
+	QStringList readDocumentURIs();
 	int countDocEditors(QString docURI);
 
 };

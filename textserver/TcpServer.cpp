@@ -121,51 +121,20 @@ void TcpServer::initialize()
 	}
 	qDebug() << "> (COMPLETED)";
 
-
 	qDebug() << "> Loading users database";
 
-	QSqlQuery query;
-	if (query.exec("SELECT * FROM Users") && query.isActive())
+	for each (User user in db.readUsersList())
 	{
-		// Read all the users' information from the database and load them in memory
-		query.next();
-		while (query.isValid())
+		for each (URI docUri in db.readUserDocuments(user.getUsername()))
 		{
-			User user(query.value("Username").toString(), 
-				query.value("UserID").toInt(), 
-				query.value("Nickname").toString(),
-				query.value("PassHash").toByteArray(), 
-				query.value("Salt").toByteArray(),
-				QImage::fromData(query.value("Icon").toByteArray()));
-
-			// Build for each user the list of documents that they can access
-			QSqlQuery docQuery;
-			docQuery.prepare("SELECT DocURI FROM DocEditors WHERE Username = :username");
-			docQuery.bindValue(":username", user.getUsername());
-
-			if (docQuery.exec() && docQuery.isActive())
-			{
-				docQuery.next();
-				while (docQuery.isValid())
-				{
-					user.addDocument(docQuery.value(0).toString());
-					docQuery.next();
-				}
-			}
+			if (validateURI(docUri))
+				user.addDocument(docUri);
 			else
-			{
-				throw DataBaseReadTableException(docQuery.lastQuery().toStdString());
-			}
-
-			users.insert(user.getUsername(), user);
-
-			query.next();
+				qDebug() << "> ignored invalid uri:" << docUri.getDocumentName();
 		}
+		users.insert(user.getUsername(), user);
 	}
-	else
-	{
-		 throw DataBaseReadTableException(query.lastQuery().toStdString());
-	}
+
 	qDebug() << "> (COMPLETED)";
 
 	// Initialize the counter to assign user IDs

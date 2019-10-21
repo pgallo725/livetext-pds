@@ -31,6 +31,7 @@ void ServerDatabase::initialize(QString dbName)
 	qSelectDocuments = QSqlQuery(db);
 	qCountDocumentEditors = QSqlQuery(db);
 	qSelectMaxUserID = QSqlQuery(db);
+	qSelectDocsUsers = QSqlQuery(db);
 
 	qInsertNewUser.prepare("INSERT INTO Users (Username, UserID, Nickname, PassHash, Salt, Icon) "
 		"VALUES (:username, :id, :nickname, :passhash, :salt, :icon)");
@@ -47,6 +48,8 @@ void ServerDatabase::initialize(QString dbName)
 	qCountDocumentEditors.prepare("SELECT COUNT(*) FROM DocEditors WHERE DocURI = :uri");
 
 	qSelectMaxUserID.prepare("SELECT MAX(UserID) FROM Users");
+
+	qSelectDocsUsers.prepare("SELECT DocURI FROM DocEditors WHERE Username = :username");
 }
 
 bool ServerDatabase::insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon)
@@ -105,7 +108,57 @@ int ServerDatabase::getMaxUserID()
 	return 0;
 }
 
-QList<QString> ServerDatabase::readDocumentURIs()
+QList<User> ServerDatabase::readUsersList()
+{
+	QList<User> users;
+	QSqlQuery query;
+	if (query.exec("SELECT * FROM Users") && query.isActive()) {
+		// Read all the users' information from the database and load them in memory
+		query.next();
+		while (query.isValid())
+		{
+			User user(query.value("Username").toString(),
+				query.value("UserID").toInt(),
+				query.value("Nickname").toString(),
+				query.value("PassHash").toByteArray(),
+				query.value("Salt").toByteArray(),
+				QImage::fromData(query.value("Icon").toByteArray()));
+
+			users.append(user);
+
+			query.next();
+		}
+	}
+	else {
+		throw DataBaseReadTableException(query.lastQuery().toStdString());
+	}
+
+	return users;
+}
+
+QStringList ServerDatabase::readUserDocuments(QString username)
+{
+	QStringList docs;
+	qSelectDocsUsers.bindValue(":username", username);
+	
+	if (qSelectDocsUsers.exec() && qSelectDocsUsers.isActive())
+	{
+		qSelectDocsUsers.next();
+		while (qSelectDocsUsers.isValid())
+		{
+			docs << qSelectDocsUsers.value(0).toString();
+			qSelectDocsUsers.next();
+		}
+	}
+	else
+	{
+		throw DataBaseReadTableException(qSelectDocsUsers.lastQuery().toStdString());
+	}
+
+	return docs;
+}
+
+QStringList ServerDatabase::readDocumentURIs()
 {
 	QList<QString> documents;
 
