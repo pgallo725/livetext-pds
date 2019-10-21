@@ -507,22 +507,6 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 }
 
-//Applies symbol format
-void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
-{
-	const QSignalBlocker blocker(textEdit->document());
-
-	_extraCursor->setPosition(position);
-	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
-
-	//_extraCursor->beginEditBlock();
-
-	_extraCursor->mergeCharFormat(fmt);
-
-	//_extraCursor->endEditBlock();
-
-}
-
 void TextEdit::criticalError(QString error)
 {
 	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok);
@@ -1024,7 +1008,7 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 *	Change text color
 *	Change text alignment
 *	Merge format on selection (if present)
-*
+*	Apply remote char format
 */
 
 void TextEdit::textBold()
@@ -1152,6 +1136,21 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 		_extraCursor->setPosition(i + 1);
 		emit symbolFormatChanged(i, _extraCursor->charFormat());
 	}
+}
+
+
+void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	_extraCursor->setPosition(position);
+	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
+
+	//Apply char format to text
+	_extraCursor->setCharFormat(fmt);
+
+	//Update GUI buttons according to new format
+	currentCharFormatChanged(textEdit->textCursor().charFormat());
 }
 
 
