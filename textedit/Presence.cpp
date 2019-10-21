@@ -47,7 +47,7 @@ QList<QTextEdit::ExtraSelection> Presence::userText()
 	return _userText;
 }
 
-QAction* Presence::action()
+QAction* Presence::actionHighlightText()
 {
 	return _iconPressedAction;
 }

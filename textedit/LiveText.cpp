@@ -28,13 +28,10 @@ LiveText::LiveText(QObject* parent) : QObject(parent)
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
-	connect(_client, &Client::openFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
-	connect(_client, &Client::removeFileFailed, _landingPage, &LandingPage::incorrectFileOperation);
+	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation);
 
 	//connect(_client, &Client::logoutCompleted, _landingPage, );
 	//connect(_client, &Client::logoutFailed, _landingPage, );
-
-
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed);

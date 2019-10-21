@@ -59,6 +59,9 @@ public:
 	void criticalError(QString error);
 	void resetUndoRedo();
 
+	//Extra selections
+	void updateUsersSelections();
+
 public slots:
 	void userCursorPositionChanged(qint32 position, qint32 user);
 	void newPresence(qint32 userId, QString username, QImage image);
@@ -121,10 +124,14 @@ private:
 	void colorChanged(const QColor& c);
 	void alignmentChanged(Qt::Alignment a);
 
-	//Extra selections and multiple cursors
-	void handleUsersCursors();
+	//Extra selections
 	void handleMultipleSelections();
-	void updateUsersSelections();
+
+
+	//Graphic cursors
+	void redrawAllCursors();
+	void drawGraphicCursor(Presence* p);
+
 
 	//List type
 	QToolButton* listButton;

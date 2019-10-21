@@ -4,6 +4,7 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QImage>
+#include <QStringList>
 #include "User.h"
 
 class ServerDatabase
@@ -14,9 +15,11 @@ private:
 	QSqlQuery qUpdateUser;
 	QSqlQuery qInsertNewDocToUser;
 	QSqlQuery qRemoveDocFromUser;
+	QSqlQuery qRemoveDoc;
 	QSqlQuery qSelectDocuments;
 	QSqlQuery qCountDocumentEditors;
 	QSqlQuery qSelectMaxUserID;
+	QSqlQuery qSelectDocsUsers;
 
 public:
 
@@ -30,13 +33,16 @@ public:
 
 	// Queries
 
-	bool insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	bool updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	bool addDocToUser(QString username, QString uri);
-	bool removeDocFromUser(QString username, QString uri);
+	void insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	void updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	void addDocToUser(QString username, QString uri);
+	void removeDocFromUser(QString username, QString uri);
+	void removeDoc(QString uri);
 
 	int getMaxUserID();
-	QList<QString> readDocumentURIs();
+	QList<User> readUsersList();
+	QStringList readUserDocuments(QString username);
+	QStringList readDocumentURIs();
 	int countDocEditors(QString docURI);
 
 };
