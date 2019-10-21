@@ -15,6 +15,7 @@ private:
 	QSqlQuery qUpdateUser;
 	QSqlQuery qInsertNewDocToUser;
 	QSqlQuery qRemoveDocFromUser;
+	QSqlQuery qRemoveDoc;
 	QSqlQuery qSelectDocuments;
 	QSqlQuery qCountDocumentEditors;
 	QSqlQuery qSelectMaxUserID;
@@ -36,6 +37,7 @@ public:
 	bool updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
 	bool addDocToUser(QString username, QString uri);
 	bool removeDocFromUser(QString username, QString uri);
+	bool removeDoc(QString uri);
 
 	int getMaxUserID();
 	QList<User> readUsersList();

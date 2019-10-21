@@ -117,7 +117,10 @@ void TcpServer::initialize()
 	{
 		if (validateURI(docURI))
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
-		else qDebug() << "> Invalid URI" << docURI << "skipped";
+		else {
+			db.removeDoc(docURI);
+			qDebug() << "> Invalid URI" << docURI << "skipped and removed";
+		}
 	}
 	qDebug() << "> (COMPLETED)";
 
@@ -127,10 +130,7 @@ void TcpServer::initialize()
 	{
 		for each (URI docUri in db.readUserDocuments(user.getUsername()))
 		{
-			if (validateURI(docUri))
-				user.addDocument(docUri);
-			else
-				qDebug() << "> ignored invalid uri:" << docUri.getDocumentName();
+			user.addDocument(docUri);
 		}
 		users.insert(user.getUsername(), user);
 	}

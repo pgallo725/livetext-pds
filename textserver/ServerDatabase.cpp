@@ -28,6 +28,7 @@ void ServerDatabase::initialize(QString dbName)
 	qUpdateUser = QSqlQuery(db);
 	qInsertNewDocToUser = QSqlQuery(db);
 	qRemoveDocFromUser = QSqlQuery(db);
+	qRemoveDoc = QSqlQuery(db);
 	qSelectDocuments = QSqlQuery(db);
 	qCountDocumentEditors = QSqlQuery(db);
 	qSelectMaxUserID = QSqlQuery(db);
@@ -42,6 +43,8 @@ void ServerDatabase::initialize(QString dbName)
 	qInsertNewDocToUser.prepare("INSERT INTO DocEditors (Username, DocURI) VALUES (:username, :uri)");
 
 	qRemoveDocFromUser.prepare("DELETE FROM DocEditors WHERE Username = :username AND DocURI = :uri");
+
+	qRemoveDoc.prepare("DELETE FROM DocEditors WHERE DocURI = :uri");
 
 	qSelectDocuments.prepare("SELECT DISTINCT DocURI FROM DocEditors");
 
@@ -89,6 +92,13 @@ bool ServerDatabase::removeDocFromUser(QString username, QString uri)
 	qRemoveDocFromUser.bindValue(":uri", uri);
 
 	return qRemoveDocFromUser.exec();
+}
+
+bool ServerDatabase::removeDoc(QString uri)
+{
+	qRemoveDoc.bindValue(":uri", uri);
+
+	return qRemoveDoc.exec();
 }
 
 
