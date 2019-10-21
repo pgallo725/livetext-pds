@@ -234,7 +234,8 @@ void TcpServer::clientDisconnection()
 
 void TcpServer::sslSocketError(QAbstractSocket::SocketError error)
 {
-	qDebug() << "> (ERROR) SslSocket error: " << error ;
+	if (error != QAbstractSocket::RemoteHostClosedError)
+		qDebug() << "> (ERROR) SslSocket error: " << error ;
 }
 
 void TcpServer::sslSocketReady()
