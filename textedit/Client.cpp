@@ -42,8 +42,6 @@ void Client::serverDisconnection() {
 
 void Client::readBuffer() {
 
-	qDebug() << "Reading socket";
-
 	QByteArray dataBuffer;
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	QDataStream in(socket);
