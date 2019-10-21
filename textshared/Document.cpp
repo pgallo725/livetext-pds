@@ -229,7 +229,7 @@ int Document::insert(Symbol& s)
 	assert(insertionIndex >= 0);					// should be a negative index (for a non-existing Symbol)
 
 	// Check if the inserted symbol implies the creation of a new block
-	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertionIndex < _text.length()-1))
+	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertionIndex < _text.length()))
 	{
 		if (!s.getBlockId())	// (symbol received from Qt editor)
 		{
@@ -274,7 +274,7 @@ int Document::insert(Symbol& s)
 			_text.insert(_text.begin() + insertionIndex, s);	// Insert the symbol in the vector
 		}
 	}
-	else if (s.getChar() == QChar::ParagraphSeparator && insertionIndex == _text.length() - 1)
+	else if (s.getChar() == QChar::ParagraphSeparator && insertionIndex == _text.length())
 	{
 		TextBlockID blockId = getBlockAt(insertionIndex - 1);
 		addCharToBlock(s, _blocks[blockId]);

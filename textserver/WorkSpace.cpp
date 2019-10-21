@@ -162,7 +162,8 @@ void WorkSpace::clientDisconnection()
 
 void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
-	qDebug() << ">> (ERROR) Socket error: " << socketError;
+	if (socketError != QAbstractSocket::RemoteHostClosedError)
+		qDebug() << ">> (ERROR) Socket error: " << socketError;
 }
 
 
