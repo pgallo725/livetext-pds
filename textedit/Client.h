@@ -46,12 +46,7 @@ class Client : public QObject
 private:
 
 	QSslSocket* socket;
-	QString username;
-	QString nickname;
-	QString password;
 	SocketBuffer socketBuffer;
-	QImage image;
-	bool login;
 
 signals:
 

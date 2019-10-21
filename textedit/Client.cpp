@@ -228,11 +228,8 @@ void Client::Disconnect() {
 
 void Client::Login(QString usr, QString passwd) {
 
-	this->username = usr;
-	this->password = passwd;
-
 	MessageCapsule incomingMessage;
-	MessageCapsule loginRequest = MessageFactory::LoginRequest(username);
+	MessageCapsule loginRequest = MessageFactory::LoginRequest(usr);
 
 	loginRequest->send(socket);
 
@@ -278,7 +275,7 @@ void Client::Login(QString usr, QString passwd) {
 	QCryptographicHash hash1(QCryptographicHash::Md5);
 	QCryptographicHash hash2(QCryptographicHash::Md5);
 
-	hash1.addData(password.toUtf8());
+	hash1.addData(passwd.toUtf8());
 	hash1.addData(salt);
 
 	hash2.addData(hash1.result());
@@ -317,16 +314,11 @@ void Client::Login(QString usr, QString passwd) {
 
 void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 
-	this->username = usr;
-	this->password = passwd;
-	this->image = img;
-	this->nickname = nick;
-
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 	// Link the stream to the socke and send the byte
 
-	MessageCapsule accountCreate = MessageFactory::AccountCreate(username, nickname, image, password);
+	MessageCapsule accountCreate = MessageFactory::AccountCreate(usr, nick, img, passwd);
 	accountCreate->send(socket);
 
 	//wait the response from the server
