@@ -1,10 +1,24 @@
 #include "Presence.h"
 
-Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _name(name), _nickname(nickname), _profilePicture(profilePic)
+#include <QPainter>
+
+Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _name(name), _nickname(nickname), _color(color)
 {
-	_color = color;
 	_userCursor = new QTextCursor(textedit->document());
 	_label = new QLabel(textedit);
+
+	//Setting up user icon
+	QPixmap background(32, 32);
+	background.fill(_color);
+
+	//Setting-up background
+	QPainter painter(&background);
+
+	//Build user-icon with colored frame
+	painter.drawPixmap(3, 3, 26, 26, profilePic.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	painter.end();
+
+	_profilePicture = background;
 }
 
 Presence::~Presence()

@@ -34,9 +34,8 @@ public:
 
 
 	//Document
-	void setDocumentURI(QString uri);
 	void startCursorTimer();
-	void setCurrentFileName(const QString& fileName);
+	void setCurrentFileName(QString fileName, QString uri);
 
 	void newChar(QChar ch, QTextCharFormat format, int position, qint32 user = -1);
 	void removeChar(int position);
@@ -160,10 +159,7 @@ private:
 	QAction* actionAlignJustify;
 	QAction* actionUndo;
 	QAction* actionRedo;
-	QAction* actionShare;
-	QAction* actionUser;
 	QAction* actionHighlightUsers;
-	QAction* actioncloseDocument;
 
 	//Lists actions
 	QAction* listStandard;

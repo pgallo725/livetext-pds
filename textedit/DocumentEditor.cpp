@@ -6,7 +6,6 @@
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
-	_textedit->setDocumentURI(doc.getURI().toString());
 }
 
 void DocumentEditor::openDocument()
@@ -35,7 +34,7 @@ void DocumentEditor::openDocument()
 	}
 
 	_textedit->resetUndoRedo();
-	_textedit->setCurrentFileName(_document.getName());
+	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());
 	_textedit->startCursorTimer();
 	_textedit->updateUsersSelections();
 }

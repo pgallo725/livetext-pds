@@ -130,10 +130,12 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
 	actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
 
+#ifndef QT_NO_CLIPBOARD
 	//Initialize copy/cut/paste actions
 	actionCut->setEnabled(false);
 	actionCopy->setEnabled(false);
 	actionPaste->setEnabled(false);
+#endif
 
 	//Makes keyboard focused on text editor
 	textEdit->setFocus();
@@ -142,30 +144,38 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	_currentCursorPosition = -1;
 }
 
+/**************************** GUI SETUP ****************************/
 /*
-	Queste funzioni generano il menu di File Modifica ...
+*	This functions configure all Menu entries
+*	File (Export PDF, Print)
+*	Share document
+*	Edit (Undo, Redo, Cut, Copy, Paste)
+*	Text (TextFormat, Lists, Alignment)
+*	Account actions (Edit profile, Close document)
 */
 void TextEdit::setupFileActions()
 {
-	//Creo una toolbar
+	//New toolbar
 	QToolBar* tb = addToolBar(tr("File Actions"));
 
-	//Creo il menu File
+	//New menu
 	QMenu* menu = menuBar()->addMenu(tr("&File"));
 
-
+	//If the print plugin is enabled
 #ifndef QT_NO_PRINTER
-	const QIcon exportPdfIcon = QIcon::fromTheme("exportpdf", QIcon(rsrcPath + "/exportpdf.png"));
+
+	//Export document in PDF
+	const QIcon exportPdfIcon = QIcon(rsrcPath + "/exportpdf.png");
 	QAction* a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
 	a->setPriority(QAction::LowPriority);
 	a->setShortcut(Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
 
-	const QIcon filePrintIcon = QIcon::fromTheme("fileprint", QIcon(rsrcPath + "/fileprint.png"));
+	//Print document
+	const QIcon filePrintIcon = QIcon(rsrcPath + "/fileprint.png");
 	menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
 
-	const QIcon printIcon = QIcon::fromTheme("document-print", QIcon(rsrcPath + "/fileprint.png"));
-	a = menu->addAction(printIcon, tr("&Print..."), this, &TextEdit::filePrint);
+	a = menu->addAction(filePrintIcon, tr("&Print..."), this, &TextEdit::filePrint);
 	a->setPriority(QAction::LowPriority);
 	a->setShortcut(QKeySequence::Print);
 	tb->addAction(a);
@@ -179,70 +189,11 @@ void TextEdit::setupShareActions()
 	QToolBar* tb = addToolBar(tr("Share"));
 	QMenu* menu = menuBar()->addMenu(tr("&Share"));
 
-	const QIcon shareIcon = QIcon::fromTheme("share", QIcon(rsrcPath + "/share.png"));
-	actionShare = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
-	tb->addAction(actionShare);
+	//Share URI, opens a box with URI pasted inside
+	const QIcon shareIcon = QIcon(rsrcPath + "/share.png");
+	QAction* a = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
+	tb->addAction(a);
 }
-
-void TextEdit::setupUserActions()
-{
-	QToolBar* tb = addToolBar(tr("&Account"));
-	QMenu* menu = menuBar()->addMenu(tr("&Account"));
-
-	const QIcon userIcon(rsrcPath + "/user.png");
-	actionUser = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
-	tb->addAction(actionUser);
-
-
-	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
-	actioncloseDocument = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
-	tb->addAction(actioncloseDocument);
-
-	onlineUsersToolbar = new QToolBar(tr("&Online users"));
-	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
-}
-
-void TextEdit::setupOnlineUsersActions()
-{
-	QMap<qint32, Presence*>::iterator it;
-
-	onlineUsersToolbar->clear();
-
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence* p = it.value();
-
-		QPixmap background(32, 32);
-
-		QColor color = p->color();
-		background.fill(color);
-
-		QPainter painter(&background);
-		QPixmap userIcon(p->profilePicture());
-
-		painter.drawPixmap(3, 3, 26, 26, userIcon.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-		painter.end();
-
-		const QIcon users(background);
-
-		QAction* onlineAction = new QAction(users, p->name().toStdString().c_str(), this);
-
-		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
-		onlineAction->setCheckable(true);
-		onlineUsersToolbar->addAction(onlineAction);
-
-		p->setAction(onlineAction);
-	}
-}
-
-void TextEdit::askBeforeCloseDocument()
-{
-	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
-	if (reply == QMessageBox::Yes) {
-		killTimer(timerId);
-		emit closeDocument();
-	}
-}
-
 
 
 void TextEdit::setupEditActions()
@@ -250,41 +201,46 @@ void TextEdit::setupEditActions()
 	QToolBar* tb = addToolBar(tr("Edit Actions"));
 	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
 
+	//Undo
 	const QIcon undoIcon = QIcon::fromTheme("edit-undo", QIcon(rsrcPath + "/editundo.png"));
 	actionUndo = menu->addAction(undoIcon, tr("&Undo"), textEdit, &QTextEdit::undo);
 	actionUndo->setShortcut(QKeySequence::Undo);
 	tb->addAction(actionUndo);
 
+	//Redo
 	const QIcon redoIcon = QIcon::fromTheme("edit-redo", QIcon(rsrcPath + "/editredo.png"));
 	actionRedo = menu->addAction(redoIcon, tr("&Redo"), textEdit, &QTextEdit::redo);
 	actionRedo->setPriority(QAction::LowPriority);
 	actionRedo->setShortcut(QKeySequence::Redo);
 	tb->addAction(actionRedo);
+	
 	menu->addSeparator();
 
 
 #ifndef QT_NO_CLIPBOARD
+	//Cut
 	const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(rsrcPath + "/editcut.png"));
 	actionCut = menu->addAction(cutIcon, tr("Cu&t"), textEdit, &QTextEdit::cut);
 	actionCut->setPriority(QAction::LowPriority);
 	actionCut->setShortcut(QKeySequence::Cut);
 	tb->addAction(actionCut);
 
+	//Copy
 	const QIcon copyIcon = QIcon::fromTheme("edit-copy", QIcon(rsrcPath + "/editcopy.png"));
 	actionCopy = menu->addAction(copyIcon, tr("&Copy"), textEdit, &QTextEdit::copy);
 	actionCopy->setPriority(QAction::LowPriority);
 	actionCopy->setShortcut(QKeySequence::Copy);
 	tb->addAction(actionCopy);
 
+	//Paste
 	const QIcon pasteIcon = QIcon::fromTheme("edit-paste", QIcon(rsrcPath + "/editpaste.png"));
 	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), textEdit, &QTextEdit::paste);
 	actionPaste->setPriority(QAction::LowPriority);
 	actionPaste->setShortcut(QKeySequence::Paste);
 	tb->addAction(actionPaste);
 
-	//Controlla se ci sono appunti e abilita il paste solo se ha del testo copiato
-	if (const QMimeData* md = QApplication::clipboard()->mimeData())
-		actionPaste->setEnabled(md->hasText());
+	//Checks if there's some items in the clipboards
+	clipboardDataChanged();
 #endif
 }
 
@@ -293,71 +249,90 @@ void TextEdit::setupTextActions()
 	QToolBar* tb = addToolBar(tr("Format Actions"));
 	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
 
-
-
+	//Bold
 	const QIcon boldIcon = QIcon::fromTheme("format-text-bold", QIcon(rsrcPath + "/textbold.png"));
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
+	
+	//Checkable
+	actionTextBold->setCheckable(true);
 
+	//Sets menu entry style
 	QFont bold;
 	bold.setBold(true);
-	actionTextBold->setFont(bold); //Modifico il carattere del menu in Bold
-	tb->addAction(actionTextBold);
-	actionTextBold->setCheckable(true); //Checkable indica on/off quindi bold/non-bold
+	actionTextBold->setFont(bold);
 
+	//Add action to toolbar
+	tb->addAction(actionTextBold);
+	
+
+	//Italic
 	const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
 	actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
 	actionTextItalic->setPriority(QAction::LowPriority);
 	actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
+	actionTextItalic->setCheckable(true);
+
 	QFont italic;
 	italic.setItalic(true);
 	actionTextItalic->setFont(italic);
-	tb->addAction(actionTextItalic);
-	actionTextItalic->setCheckable(true);
 
+	tb->addAction(actionTextItalic);
+	
+
+	//Underline
 	const QIcon underlineIcon = QIcon::fromTheme("format-text-underline", QIcon(rsrcPath + "/textunder.png"));
 	actionTextUnderline = menu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
 	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
 	actionTextUnderline->setPriority(QAction::LowPriority);
+	actionTextUnderline->setCheckable(true);
+	
 	QFont underline;
 	underline.setUnderline(true);
 	actionTextUnderline->setFont(underline);
+	
 	tb->addAction(actionTextUnderline);
-	actionTextUnderline->setCheckable(true);
-
+	
 	menu->addSeparator();
 	tb->addSeparator();
 
+
+	//Alignment
+	
+	//Left
 	const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 	actionAlignLeft->setPriority(QAction::LowPriority);
 
+	//Center
 	const QIcon centerIcon = QIcon::fromTheme("format-justify-center", QIcon(rsrcPath + "/textcenter.png"));
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 	actionAlignCenter->setPriority(QAction::LowPriority);
 
+	//Right
 	const QIcon rightIcon = QIcon::fromTheme("format-justify-right", QIcon(rsrcPath + "/textright.png"));
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 	actionAlignRight->setPriority(QAction::LowPriority);
 
+	//Justify
 	const QIcon fillIcon = QIcon::fromTheme("format-justify-fill", QIcon(rsrcPath + "/textjustify.png"));
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
 	actionAlignJustify->setCheckable(true);
 	actionAlignJustify->setPriority(QAction::LowPriority);
 
-	// Make sure the alignLeft is always left of the alignRight
+	//Creating a new QActionGroup
 	QActionGroup* alignGroup = new QActionGroup(this);
 	connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
 
-	//Se sei un arabo che hai il testo al contrario l'ordine dei pulsanti di allineamento è al contrario
+	//Mantain user local settings for alignment
 	if (QApplication::isLeftToRight()) {
 		alignGroup->addAction(actionAlignLeft);
 		alignGroup->addAction(actionAlignCenter);
@@ -370,13 +345,13 @@ void TextEdit::setupTextActions()
 	}
 	alignGroup->addAction(actionAlignJustify);
 
-	//Per l'allineamento si aggiunge l'intero gruppo al menu, per gestire ordinamento
+	//Add all actions to toolbar
 	tb->addActions(alignGroup->actions());
 	menu->addActions(alignGroup->actions());
 
-	//Lists
 	tb->addSeparator();
-
+	
+	//Lists
 	QMenu* menuList = new QMenu("List menu");
 	listStandard = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
 	listStandard->setCheckable(true);
@@ -415,6 +390,7 @@ void TextEdit::setupTextActions()
 	listRomanUpper->setChecked(false);
 
 
+	//Setup ToolButton
 	listButton = new QToolButton();
 	listButton->setMenu(menuList);
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -424,117 +400,190 @@ void TextEdit::setupTextActions()
 
 	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	tb->addWidget(listButton);
-
-
-	//Gestione colore del testo
+	
 	menu->addSeparator();
 	tb->addSeparator();
 
-	//QPixMap crea l'icona colorata a seconda del colore che selezioniamo
+	//Color
 	QPixmap pix(rsrcPath + "/textcolor.png");
 	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
 
-	//Evidenzia con colore diverso il testo inserito da altri utenti
 	menu->addSeparator();
 	tb->addSeparator();
 
+	//Highlight user text
 	const QIcon HighlightUsersIcon(rsrcPath + "/highlightusers.png");
 	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
 	tb->addAction(actionHighlightUsers);
-	//Checkable
 	actionHighlightUsers->setCheckable(true);
 
 
-	//Aggiungo la toolbar all'editor-
+	//Font and Size
 	tb = addToolBar(tr("Font and Size"));
 	tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	addToolBarBreak(Qt::TopToolBarArea);
 	addToolBar(tb);
 
-
-	//Formattazione carattere
+	//Combobox setup
 	comboFont = new QFontComboBox(tb);
 	tb->addWidget(comboFont);
 	connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
-
-	//Dimensione
+	
+	//Size combobox
 	comboSize = new QComboBox(tb);
 	comboSize->setObjectName("comboSize");
 	tb->addWidget(comboSize);
 	comboSize->setEditable(true); //Permetto di modificare direttamente la dimensione senza scegliere nel combobox
 
-	//Aggiungo le dimensioni standard dei caratteri prese da QFontDatabase
+	//Adding standard sizes to combobox
 	const QList<int> standardSizes = QFontDatabase::standardSizes();
 	foreach(int size, standardSizes)
 		comboSize->addItem(QString::number(size));
 
-	//Setta come dimensione di default la dimensione del testo appena viene caricata QApplication
+	//Update current index according to format
 	comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
 	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
 }
 
+void TextEdit::setupUserActions()
+{
+	QToolBar* tb = addToolBar(tr("&Account"));
+	QMenu* menu = menuBar()->addMenu(tr("&Account"));
+
+	//Edit profile
+	const QIcon userIcon(rsrcPath + "/user.png");
+	QAction* a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
+	tb->addAction(a);
+
+	//Close document
+	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
+	a = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
+	tb->addAction(a);
+
+	//Online users toolbar
+	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
+}
+
+
+/**************************** ONLINE USERS ****************************/
+/*
+*	Setup Online users toolbar
+*	Setup current user
+*	Add presence to editor
+*	Remove presence from editor
+*/
+
+void TextEdit::setupOnlineUsersActions()
+{
+	QMap<qint32, Presence*>::iterator it;
+
+	//Clear online users toolbar
+	onlineUsersToolbar->clear();
+
+	//Generate user toolbar for every user logged
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		Presence* p = it.value();
+
+		QAction* onlineAction = new QAction(QIcon(p->profilePicture()), p->name().toStdString().c_str(), this);
+		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
+
+		onlineAction->setCheckable(true);
+		onlineUsersToolbar->addAction(onlineAction);
+
+		p->setAction(onlineAction);
+	}
+}
+
 
 void TextEdit::setUser(User* user)
 {
+	//Set current user
 	_user = user;
 
+	//Set user on online users toolbar
 	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
 }
+
+
+//Slot to add a Presence in the editor
+void TextEdit::newPresence(qint32 userId, QString username, QImage image)
+{
+	//Init a random value for new user color
+	int randomNumber = 7 + (userId) % 11;
+
+	//Pick a color
+	QColor color = (Qt::GlobalColor) (randomNumber);
+
+	//Getting user image
+	QPixmap userPic;
+	userPic.convertFromImage(image);
+
+	//Remove presence if already present
+	if (onlineUsers.contains(userId)) {
+		removePresence(userId);
+	}
+	
+	//Insert presence in editor
+	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
+	
+	//Redraw of the onlineUsers toolbar
+	setupOnlineUsersActions();
+
+	//Reset cursor postion to send to the new user current cursor position
+	_currentCursorPosition = -1;
+	
+	//Recompute text highlighting
+	updateUsersSelections();
+}
+
+//Remove presence in the document
+void TextEdit::removePresence(qint32 userId)
+{
+	Presence* p = onlineUsers.find(userId).value();
+
+	//Hide user cursor
+	p->label()->clear();
+
+	//Remove frome editor
+	onlineUsers.remove(userId);
+
+	//Redraw of the onlineUsers toolbar
+	setupOnlineUsersActions();
+
+	//Clean pointers
+	delete p;
+	p = nullptr;
+}
+
+/**************************** EDITOR UI/UX ****************************/
+/*
+*	Close document msgbox
+*	Close editor
+*	Error messages
+*	Reset Undo/Redo
+*	Start timer
+*	Setting document filename, URI
+*	File print, Print Preview
+*	Save as PDF
+*	Share document URI
+*/
+
+void TextEdit::askBeforeCloseDocument()
+{
+	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	if (reply == QMessageBox::Yes) {
+		killTimer(timerId);
+		emit closeDocument();
+	}
+}
+
 
 void TextEdit::closeDocumentError(QString error)
 {
 	statusBar()->showMessage(error);
-}
-
-//Apply changes to blocks
-void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
-{
-	//const QSignalBlocker blocker(textEdit->document());
-	disconnect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
-
-	_extraCursor->beginEditBlock();
-
-	_extraCursor->setPosition(position);
-	_extraCursor->setBlockFormat(fmt);
-
-	_extraCursor->endEditBlock();
-
-	alignmentChanged(fmt.alignment());
-
-
-	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
-}
-
-void TextEdit::criticalError(QString error)
-{
-	QMessageBox::StandardButton msgbox = QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok);
-}
-
-void TextEdit::resetUndoRedo()
-{
-	textEdit->document()->clearUndoRedoStacks();
-}
-
-
-void TextEdit::setDocumentURI(QString uri)
-{
-	URI = uri;
-}
-
-void TextEdit::startCursorTimer()
-{
-	timerId = startTimer(CURSOR_SEND_INTERVAL);
-	qDebug() << "Started timer with ID = " << timerId;
-}
-
-void TextEdit::setCurrentFileName(const QString& fileName)
-{
-	this->fileName = fileName;
-
-	//Sulla finestra appare nomeFile - nomeApplicazione
-	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 }
 
 
@@ -542,86 +591,95 @@ void TextEdit::closeEditor()
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	//Clear all users
 	onlineUsers.clear();
+
+	//Clear document (editor one, which allow user to write in)
 	textEdit->document()->clear();
+
+	//Kill timer
 	if (timerId > 0)
 		killTimer(timerId);
+
+	//Close window
 	this->close();
-
 }
 
 
-//Slot to add a Presence in the editor
-void TextEdit::newPresence(qint32 userId, QString username, QImage image)
+void TextEdit::criticalError(QString error)
 {
-	// Initialize random sequence
-	//qsrand(QDateTime::currentMSecsSinceEpoch()*3);
-
-	//Test with user ID for more separate colors
-	int randomNumber = 7 + (userId) % 11;
-
-	//Choose a random color from Qt colors
-	QColor color = (Qt::GlobalColor) (randomNumber);
-	QPixmap userPic;
-
-	userPic.convertFromImage(image);
-
-	if (onlineUsers.contains(userId)) {
-		removePresence(userId);
-	}
-
-	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
-	setupOnlineUsersActions();
-
-	_currentCursorPosition = -1;
-
-	updateUsersSelections();
+	QMessageBox::StandardButton(QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok));
 }
 
-//Remove presence in document
-void TextEdit::removePresence(qint32 userId)
+
+void TextEdit::resetUndoRedo()
 {
-	Presence* p = onlineUsers.find(userId).value();
-
-	p->label()->clear();
-	onlineUsers.remove(userId);
-	setupOnlineUsersActions();
-
-	delete p;
-	p = nullptr;
+	textEdit->document()->clearUndoRedoStacks();
 }
+
+//	Handle timer event to send cursor position to the server
+void TextEdit::startCursorTimer()
+{
+	timerId = startTimer(CURSOR_SEND_INTERVAL);
+	qDebug() << "Started timer with ID = " << timerId;
+}
+
+//TODO: Uncomment before release
+void TextEdit::timerEvent(QTimerEvent* event)
+{
+	//Sends cursor position only if it's different from previous sent position
+	//if (textEdit->textCursor().position() != _currentCursorPosition) {
+	_currentCursorPosition = textEdit->textCursor().position();
+	emit newCursorPosition(textEdit->textCursor().position());
+	//}
+}
+
+
+void TextEdit::setCurrentFileName(QString fileName, QString uri)
+{
+	this->fileName = fileName;
+	this->URI = uri;
+
+	//Sulla finestra appare nomeFile - nomeApplicazione
+	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
+}
+
 
 void TextEdit::filePrint()
 {
 #if QT_CONFIG(printdialog)
-	//Crea oggetto classe stampante che permette di stampare
+	//Create printer object
 	QPrinter printer(QPrinter::HighResolution);
 
-	//Apre dialogo di stampa
+	//Open print dialog
 	QPrintDialog* dlg = new QPrintDialog(&printer, this);
 
-	//Se il cursore ha una selezione permette di stampare solo la selezione (?)
+	//Enable option to print only selection
 	if (textEdit->textCursor().hasSelection())
 		dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
 
-	//Apre la finestra di stampa con "Print Document"
+	//Open print document window
 	dlg->setWindowTitle(tr("Print Document"));
 	if (dlg->exec() == QDialog::Accepted)
-		//Stampa se accetta
+		//If answer is yes, start printing
 		textEdit->print(&printer);
 	delete dlg;
 #endif
 }
 
+//Print preview
 void TextEdit::filePrintPreview()
 {
 #if QT_CONFIG(printpreviewdialog)
+	//Create printer
 	QPrinter printer(QPrinter::HighResolution);
-	//Crea finestra dialogo di anteprima di stampa
+	
+	//Print preview window
 	QPrintPreviewDialog preview(&printer, this);
-	//Se chiamo stampa dall'anteprima chiama print preview
+
+	//Connect to print function
 	connect(&preview, &QPrintPreviewDialog::paintRequested, this, &TextEdit::printPreview);
-	//Apre finestra anteprima di stampa
+	
 	preview.exec();
 #endif
 }
@@ -631,36 +689,40 @@ void TextEdit::printPreview(QPrinter* printer)
 #ifdef QT_NO_PRINTER
 	Q_UNUSED(printer);
 #else
-	//Stampa direttamente
+	//Print from print preview
 	textEdit->print(printer);
 #endif
 }
 
+//Save as PDF File
 void TextEdit::filePrintPdf()
 {
 #ifndef QT_NO_PRINTER
-	//Apre finestra dialogo come Save As... ma con titolo Export PDF
+	//Open Save As... window for saving PDF
 	QFileDialog fileDialog(this, tr("Export PDF"));
 	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 
-	//Mostra solo file PDF
+	//Show only PDF files
 	fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
 
+	//Append pdf suffix to file
 	fileDialog.setDefaultSuffix("pdf");
+
+	//If answer is not Accept it closes
 	if (fileDialog.exec() != QDialog::Accepted)
 		return;
 
 	QString fileName = fileDialog.selectedFiles().first();
 
-	//Richiama classe di stampa, ma forza output come PdfFormat e con il nome fie scelto dalla finestra
+	//Open print window but with PDF settings
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
 	printer.setOutputFileName(fileName);
 
-	//Stampa direttamente il documento
+	//Print document
 	textEdit->document()->print(&printer);
 
-	//Mostra nella status bar "Exported PATH"
+	//Show in status bar outcome of operation ("Exported path/to/file.pdf")
 	statusBar()->showMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)));
 #endif
 }
@@ -668,7 +730,8 @@ void TextEdit::filePrintPdf()
 void TextEdit::fileShare()
 {
 	ShareUriWindow* su = new ShareUriWindow(URI, this);
-	//Mostra la finestra di mw formata
+	
+	//Show created window
 	su->exec();
 }
 
@@ -684,19 +747,17 @@ void TextEdit::listStyle(int styleIndex)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	//Formato lista
+	//New list format
 	QTextListFormat listFmt;
 
-	//Prendo il cursore
+	//Getting document cursor
 	QTextCursor cursor = textEdit->textCursor();
 
-	//Salva il formato del blocco		
-	QTextBlockFormat blockFmt = cursor.blockFormat();
 
-	//Creo un oggetto stile carattere come undefined (Standard)
+	//Create standard style (undefined)
 	QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
 
-	//A seconda del combobox sovrascrivo stile
+	//Switch between list styles
 	switch (styleIndex) {
 	case standard:
 		listStandard->setChecked(true);
@@ -998,6 +1059,26 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 	//Add block to list
 	currentList->add(blk);
 }
+
+
+/**************************** BLOCK FORMAT ****************************/
+/*
+*	Apply remote block format
+*/
+
+void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	_extraCursor->setPosition(position);
+
+	//Sets block format in current block
+	_extraCursor->setBlockFormat(fmt);
+
+	//Call alignment changed for update GUI
+	alignmentChanged(fmt.alignment());
+}
+
 
 
 /**************************** CHANGE TEXT FORMAT ****************************/
@@ -1534,16 +1615,4 @@ void TextEdit::updateUsersSelections()
 	emit generateExtraSelection();
 
 	handleMultipleSelections();
-}
-
-/*	TIMER EVENT
-*
-*	Handle timer event to send cursor position to the server
-*/
-void TextEdit::timerEvent(QTimerEvent* event)
-{
-	//if (textEdit->textCursor().position() != _currentCursorPosition) {
-	_currentCursorPosition = textEdit->textCursor().position();
-	emit newCursorPosition(textEdit->textCursor().position());
-	//}
 }
