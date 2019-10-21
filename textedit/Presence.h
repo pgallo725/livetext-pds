@@ -33,7 +33,7 @@ public:
 	QTextCursor* cursor();
 	QLabel* label();
 	QList<QTextEdit::ExtraSelection> userText();
-	QAction* action();
+	QAction* actionHighlightText();
 	
 
 
