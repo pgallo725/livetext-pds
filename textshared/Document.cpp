@@ -274,7 +274,7 @@ int Document::insert(Symbol& s)
 			_text.insert(_text.begin() + insertionIndex, s);	// Insert the symbol in the vector
 		}
 	}
-	else if (s.getChar() == QChar::ParagraphSeparator && insertionIndex == _text.length())
+	else if (insertionIndex == _text.length())
 	{
 		TextBlockID blockId = getBlockAt(insertionIndex - 1);
 		addCharToBlock(s, _blocks[blockId]);
