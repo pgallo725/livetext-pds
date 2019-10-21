@@ -203,7 +203,7 @@
     <ClCompile Include="ProfileEditWindow.cpp" />
     <ClCompile Include="ShareUriWindow.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="textedit.cpp" />
+    <ClCompile Include="TextEdit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Client.h">
@@ -222,7 +222,7 @@
     </QtMoc>
     <QtMoc Include="ShareUriWindow.h">
     </QtMoc>
-    <QtMoc Include="textedit.h">
+    <QtMoc Include="TextEdit.h">
     </QtMoc>
   </ItemGroup>
   <ItemGroup>

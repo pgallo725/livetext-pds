@@ -77,7 +77,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="textedit.cpp">
+    <ClCompile Include="TextEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -109,7 +109,7 @@
     <QtMoc Include="ShareUriWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="textedit.h">
+    <QtMoc Include="TextEdit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
