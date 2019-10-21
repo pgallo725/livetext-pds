@@ -13,12 +13,22 @@ StartupException::StartupException(std::string msg)
 }
 
 
-DataBaseException::DataBaseException(std::string msg)
+DataBaseException::DataBaseException(std::string msg, QSqlError err)
 	: ServerException(msg)
 {
 }
 
-DataBaseReadTableException::DataBaseReadTableException(std::string query)
-	: DataBaseException("Unable to exec this query: " + query)
+QSqlError DataBaseException::getSqlError()
+{
+	return err;
+}
+
+DataBaseReadTableException::DataBaseReadTableException(std::string query, QSqlError err)
+	: DataBaseException("Unable to exec this query: " + query, err)
+{
+}
+
+DataBaseWriteRecordException::DataBaseWriteRecordException(std::string query, QSqlError err)
+	: DataBaseException("Unable to exec this query: " + query, err)
 {
 }

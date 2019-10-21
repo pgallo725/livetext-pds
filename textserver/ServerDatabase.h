@@ -33,11 +33,11 @@ public:
 
 	// Queries
 
-	bool insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	bool updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	bool addDocToUser(QString username, QString uri);
-	bool removeDocFromUser(QString username, QString uri);
-	bool removeDoc(QString uri);
+	void insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	void updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	void addDocToUser(QString username, QString uri);
+	void removeDocFromUser(QString username, QString uri);
+	void removeDoc(QString uri);
 
 	int getMaxUserID();
 	QList<User> readUsersList();

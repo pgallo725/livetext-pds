@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <string>
+#include <QSqlError>
 
 
 class ServerException : public std::exception
@@ -25,12 +26,22 @@ public:
 
 class DataBaseException : public ServerException
 {
+private:
+	QSqlError err;
 protected:
-	DataBaseException(std::string msg);
+	DataBaseException(std::string msg, QSqlError err);
+public:
+	QSqlError getSqlError();
 };
 
 class DataBaseReadTableException : public DataBaseException
 {
 public:
-	DataBaseReadTableException(std::string query);
+	DataBaseReadTableException(std::string query, QSqlError err);
+};
+
+class DataBaseWriteRecordException : public DataBaseException
+{
+public:
+	DataBaseWriteRecordException(std::string query, QSqlError err);
 };
