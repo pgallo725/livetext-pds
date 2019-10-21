@@ -37,8 +37,7 @@ void DocumentEditor::openDocument()
 	_textedit->resetUndoRedo();
 	_textedit->setCurrentFileName(_document.getName());
 	_textedit->startCursorTimer();
-
-	generateExtraSelection();
+	_textedit->updateUsersSelections();
 }
 
 
@@ -48,6 +47,7 @@ void DocumentEditor::addSymbol(Symbol s)
 	qDebug().nospace() << "Remote char insertion: " << s.getChar();
 	int position = _document.insert(s);
 	_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
+	_textedit->updateUsersSelections();
 }
 
 void DocumentEditor::removeSymbol(QVector<int> position)
@@ -55,6 +55,7 @@ void DocumentEditor::removeSymbol(QVector<int> position)
 	qDebug().nospace() << "Remote char deletion: " << _document[position].getChar();
 	int pos = _document.remove(position);
 	_textedit->removeChar(pos);
+	_textedit->updateUsersSelections();
 }
 
 //From Client to Server
@@ -89,22 +90,24 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 void DocumentEditor::generateExtraSelection()
 {
 	QPair<int, int> selectionDelimiters;
-	QVector<Symbol> document = _document.getContent();
 
-	qint32 userId = document.first().getAuthorId();
+	//Get firs character author
+	qint32 userId = _document[0].getAuthorId();
 	selectionDelimiters.first = 0;
 	selectionDelimiters.second = 0;
 
-	for (int i = 0; i < document.length() - 1; i++) {
-		if (document[i].getAuthorId() != userId) {
+	//Increment selection upper limit until we reach end of document or a character inserted by another user
+	for (int i = 0; i < _document.length() - 1; i++) {
+		if (_document[i].getAuthorId() != userId) {
 			_textedit->setExtraSelections(userId, selectionDelimiters);
 
-			userId = document[i].getAuthorId();
+			userId = _document[i].getAuthorId();
 			selectionDelimiters.first = i;
 			selectionDelimiters.second = i;
 		}
 		selectionDelimiters.second++;
 	}
+
 	_textedit->setExtraSelections(userId, selectionDelimiters);
 }
 

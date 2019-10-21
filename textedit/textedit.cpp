@@ -65,10 +65,10 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 
 	//Gestione automatica della posizione del cursore degli altri utenti quando cambia la visualizzazione
-	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleUsersCursors);
-	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::handleUsersCursors);
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleUsersCursors);
-	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::handleUsersCursors);
+	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
+	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
+	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
+	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::redrawAllCursors);
 
 
 	//Gestione automatica della posizione delle selezioni degli altri utenti quando cambia la visualizzazione
@@ -554,28 +554,14 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 us
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-
-	QTextCursor* cursor;
-
-	if (user != -1) {
-		Presence* p = onlineUsers.find(user).value();
-		cursor = p->cursor();
-	}
-	else {
-		cursor = _extraCursor;
-	}
-
-
-	cursor->setPosition(position);
+	_extraCursor->setPosition(position);
 
 	//cursor->beginEditBlock();
 
-	cursor->setCharFormat(format);
-	cursor->insertText(ch);
+	_extraCursor->setCharFormat(format);
+	_extraCursor->insertText(ch);
 
 	//cursor->endEditBlock();
-
-	updateUsersSelections();
 }
 
 void TextEdit::removeChar(int position)
@@ -1319,98 +1305,93 @@ void TextEdit::colorChanged(const QColor& c)
 	actionTextColor->setIcon(pix);
 }
 
-//Questa funzione viene chiamata ogni volta che vengono effettuate modifiche al testo.
+/*
+
+This function handles the character insertion/deletion of the document.
+It's also intercepts all list/block modifications, copy/paste actions, and sets the correct formats.
+
+*/
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 
+	//Handle character deletion
+	for (int i = 0; i < charsRemoved; ++i) {
+		emit charDeleted(position);
+	}
 
-	//Gestione cancellazione carattere
-	if (charsRemoved > 0) {
-		for (int i = 0; i < charsRemoved; ++i) {
-			emit charDeleted(position);
+
+	QTextBlockFormat blockFmt;
+
+	for (int i = position; i < position + charsAdded; ++i) {
+		//Getting QTextBlockFormat from cursor
+		blockFmt = _extraCursor->blockFormat();
+
+		//Ricavo il carattere inserito
+		QChar ch = textEdit->document()->characterAt(i);
+
+		//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
+		//precedente al cursore.
+		_extraCursor->setPosition(i + 1);
+
+		//Getting QTextCharFormat from cursor
+		QTextCharFormat fmt = _extraCursor->charFormat();
+
+		//Emit signal to DocumentEditor to insert a character
+		emit charInserted(ch, fmt, i);
+
+		if (ch == QChar::ParagraphSeparator) {
+			emit blockFormatChanged(i, i, blockFmt);
+
+			//Check if current block is in a list
+			_extraCursor->setPosition(i);
+
+			//Getting current list (if present)
+			QTextList* textList = _extraCursor->currentList();
+
+			if (textList) {
+				//Getting current block
+				QTextBlock currentBlock = _extraCursor->block();
+
+				//Getting first block of the list
+				QTextBlock firstListBlock = textList->item(0);
+
+				//If current block is the beginning of its list emit the signal to create a new list
+				if (currentBlock == firstListBlock)
+					emit createNewList(currentBlock.position(), textList->format());
+				//Else assign current block to his proper list
+				else
+					emit assignBlockToList(currentBlock.position(), firstListBlock.position());
+			}
 		}
 	}
 
-	if (charsAdded > 0) {
-		QTextBlockFormat blockFmt;
-
-		for (int i = position; i < position + charsAdded; ++i) {
-			//Getting QTextBlockFormat from cursor
-			blockFmt = _extraCursor->blockFormat();
-
-			//Ricavo il carattere inserito
-			QChar ch = textEdit->document()->characterAt(i);
-
-			//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
-			//precedente al cursore.
-			_extraCursor->setPosition(i + 1);
-
-			//Getting QTextCharFormat from cursor
-			QTextCharFormat fmt = _extraCursor->charFormat();
-
-			if ((i != position + charsAdded - 1) || (i != textEdit->document()->characterCount() - 1) || ch != QChar::ParagraphSeparator) {
-				emit charInserted(ch, fmt, i);
-			}
-			if (ch == QChar::ParagraphSeparator) {
-				emit blockFormatChanged(i, i, blockFmt);
-
-				//Check if current block is in a list
-				_extraCursor->setPosition(i);
-
-				QTextList* textList = _extraCursor->currentList();
-
-				if (textList) {
-					QTextBlock currentBlock = _extraCursor->block();
-					QTextBlock firstListBlock = textList->item(0);
-
-					if (currentBlock == firstListBlock)
-						emit createNewList(currentBlock.position(), textList->format());
-					else
-						emit assignBlockToList(currentBlock.position(), firstListBlock.position());
-				}
-			}
-		}
-		if (charsAdded > 1) {
-			emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
-		}
+	//If in my insertion there's not a 8233 (\n), i apply the correct block format
+	if (charsAdded > 1) {
+		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
 	}
+
 }
 
-/*
-
-Function to handle extra cursors position updates.
-Recomputes all positions based on document scroll positions.
-
+/*	EXTRA CURSORS
+*
+*	Functions to handle extra cursors position updates.
+*	Recomputes all positions based on document scroll positions.
+*	Handle all user's cursor movements
 */
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
-	//To change with unique id
+	//Finds the Presence
 	Presence* p = onlineUsers.find(user).value();
-	QTextCursor* cursor = p->cursor();
-	QLabel* userCursorLabel = p->label();
 
-	//Hide label to move it
-	userCursorLabel->close();
+	//Change user's cursor position
+	p->cursor()->setPosition(position);
 
-	//Change usercursor position
-	cursor->setPosition(position);
-
-	//Draw cursor
-	const QRect qRect = textEdit->cursorRect(*cursor);
-
-	QPixmap pix(qRect.width() * 2.5, qRect.height());
-	pix.fill(p->color());
-	userCursorLabel->setPixmap(pix);
-
-	//Show moved label
-	userCursorLabel->move(qRect.left(), qRect.top());
-	userCursorLabel->show();
-
+	drawGraphicCursor(p);
 }
 
-
-void TextEdit::handleUsersCursors() {
+//Redraw all cursor in case of window update (scroll, resize...)
+void TextEdit::redrawAllCursors() {
 
 	QMap<qint32, Presence*>::iterator it;
 
@@ -1419,90 +1400,107 @@ void TextEdit::handleUsersCursors() {
 
 			Presence* p = it.value();
 
-			QTextCursor* cursor = p->cursor();
-			QLabel* cursorLabel = p->label();
-
-			cursorLabel->close();
-
-			const QRect qRect = textEdit->cursorRect(*cursor);
-
-			QPixmap pix(qRect.width() * 2.5, qRect.height());
-			pix.fill(p->color());
-			cursorLabel->setPixmap(pix);
-
-			cursorLabel->move(qRect.left(), qRect.top());
-			cursorLabel->show();
+			drawGraphicCursor(p);
 		}
 	}
 }
 
+void TextEdit::drawGraphicCursor(Presence* p)
+{
+	//Getting Presence's cursor
+	QTextCursor* cursor = p->cursor();
+	//Getting Presence's QLabel (to draw the graphic cursor on the editor)
+	QLabel* userCursorLabel = p->label();
 
-//Handle different users selections
+	//Hide label to move it
+	userCursorLabel->close();
+
+	//Getting cursor rectangle (x,y) position of the window
+	const QRect qRect = textEdit->cursorRect(*cursor);
+
+	//Draw the cursor (Pixmap)
+	QPixmap pix(qRect.width() * 2.5, qRect.height());
+	pix.fill(p->color());
+
+	//Set the graphic cursor to the label
+	userCursorLabel->setPixmap(pix);
+
+	//Move label to the right coordinates
+	userCursorLabel->move(qRect.left(), qRect.top());
+
+	//Show the moved label
+	userCursorLabel->show();
+}
+
+
+/*	USER'S TEXT SELECTION
+*
+*
+*
+*/
+
 void TextEdit::highlightUsersText()
 {
-	if (actionHighlightUsers->isChecked()) {
-		QMap<qint32, Presence*>::iterator it;
 
-		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-			Presence* p = it.value();
+	QMap<qint32, Presence*>::iterator it;
 
-			p->action()->setChecked(true);
-		}
+	//For every user it's check/uncheck his selection to be displayed
+	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
+		Presence* p = it.value();
 
-		handleMultipleSelections();
+		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 	}
-	else {
-		QList<QTextEdit::ExtraSelection> emptySelection;
-		textEdit->setExtraSelections(emptySelection);
 
-		QMap<qint32, Presence*>::iterator it;
-
-		for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-			Presence* p = it.value();
-
-			p->action()->setChecked(false);
-		}
-	}
+	handleMultipleSelections();
 }
 
+//Sets and save all extra selections in the document
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
-		QTextCursor* cursor = p->cursor();
+		QTextCursor cursor(textEdit->document());
 
-		cursor->setPosition(selection.first);
-		cursor->setPosition(selection.second, QTextCursor::KeepAnchor);
+		//Text selection
+		cursor.setPosition(selection.first);
+		cursor.setPosition(selection.second, QTextCursor::KeepAnchor);
 
 		QTextEdit::ExtraSelection userText;
 
+		//Sets format of extra selection
 		QColor color = p->color();
 		color.setAlpha(70);
 		userText.format.setBackground(color);
-		userText.cursor = *cursor;
+		userText.cursor = cursor;
 
+		//Add extra selection to Presence
 		p->addUserText(userText);
 	}
 }
 
+//Sets extra selection in the editor based on what user is checked
 void TextEdit::handleMultipleSelections()
 {
+	//Clear all extra selections
 	QList<QTextEdit::ExtraSelection> usersSelections;
 	textEdit->setExtraSelections(usersSelections);
 
 	QMap<qint32, Presence*>::iterator it;
 
+	//To check if all actions are checked
 	int actionsChecked = 0;
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
 		Presence* p = it.value();
 
-		if (p->action()->isChecked()) {
+		if (p->actionHighlightText()->isChecked()) {
+			//Append to list current Presence selection
 			usersSelections.append(p->userText());
 			actionsChecked++;
 		}
 	}
 
+	//Check/Uncheck of actionHighlightUsers based on single highlight checked
 	if (actionsChecked == 0) {
 		actionHighlightUsers->setChecked(false);
 	}
@@ -1511,13 +1509,14 @@ void TextEdit::handleMultipleSelections()
 		actionHighlightUsers->setChecked(true);
 	}
 
-
+	//Sets the formatted selections in the editor
 	textEdit->setExtraSelections(usersSelections);
 }
 
 
 void TextEdit::updateUsersSelections()
 {
+	//Clear all selections and recompute new ones
 	QMap<qint32, Presence*>::iterator it;
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
 		it.value()->clearSelections();
@@ -1528,11 +1527,11 @@ void TextEdit::updateUsersSelections()
 	handleMultipleSelections();
 }
 
+//Timer event to handle usercursor sending event to the server
 void TextEdit::timerEvent(QTimerEvent* event)
 {
 	//if (textEdit->textCursor().position() != _currentCursorPosition) {
 	_currentCursorPosition = textEdit->textCursor().position();
 	emit newCursorPosition(textEdit->textCursor().position());
 	//}
-
 }
