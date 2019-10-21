@@ -73,7 +73,7 @@ public:
 	void read(QDataStream& stream);
 	
 	/* getter */
-	int getType();
+	MessageType getType();
 
 protected:
 

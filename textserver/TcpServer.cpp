@@ -117,55 +117,24 @@ void TcpServer::initialize()
 	{
 		if (validateURI(docURI))
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
-		else qDebug() << "> Invalid URI" << docURI << "skipped";
+		else {
+			db.removeDoc(docURI);
+			qDebug() << "> Invalid URI" << docURI << "skipped and removed";
+		}
 	}
 	qDebug() << "> (COMPLETED)";
 
-
 	qDebug() << "> Loading users database";
 
-	QSqlQuery query;
-	if (query.exec("SELECT * FROM Users") && query.isActive())
+	for each (User user in db.readUsersList())
 	{
-		// Read all the users' information from the database and load them in memory
-		query.next();
-		while (query.isValid())
+		for each (URI docUri in db.readUserDocuments(user.getUsername()))
 		{
-			User user(query.value("Username").toString(), 
-				query.value("UserID").toInt(), 
-				query.value("Nickname").toString(),
-				query.value("PassHash").toByteArray(), 
-				query.value("Salt").toByteArray(),
-				QImage::fromData(query.value("Icon").toByteArray()));
-
-			// Build for each user the list of documents that they can access
-			QSqlQuery docQuery;
-			docQuery.prepare("SELECT DocURI FROM DocEditors WHERE Username = :username");
-			docQuery.bindValue(":username", user.getUsername());
-
-			if (docQuery.exec() && docQuery.isActive())
-			{
-				docQuery.next();
-				while (docQuery.isValid())
-				{
-					user.addDocument(docQuery.value(0).toString());
-					docQuery.next();
-				}
-			}
-			else
-			{
-				throw DataBaseReadTableException(docQuery.lastQuery().toStdString());
-			}
-
-			users.insert(user.getUsername(), user);
-
-			query.next();
+			user.addDocument(docUri);
 		}
+		users.insert(user.getUsername(), user);
 	}
-	else
-	{
-		 throw DataBaseReadTableException(query.lastQuery().toStdString());
-	}
+
 	qDebug() << "> (COMPLETED)";
 
 	// Initialize the counter to assign user IDs
@@ -372,14 +341,25 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	buffer.open(QIODevice::WriteOnly);
 	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	if (!db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
+	try {
+		db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(),
+			user.getPasswordHash(), user.getSalt(), ba);
+	}
+	catch (DataBaseException & dbe) {
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
+		client->logout();
+		users.remove(username);
+		return MessageFactory::AccountError("Users database update failed, please try again later");
+	}
+
+	/*if (!db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
 		user.getPasswordHash(), user.getSalt(), ba))
 	{
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
 		client->logout();
 		users.remove(username);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}
+	}*/
 	
 	return MessageFactory::AccountConfirmed(user);
 }
@@ -403,13 +383,24 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	buffer.open(QIODevice::WriteOnly);
 	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	if (!db.updateUser(user->getUsername(), user->getNickname(), 
+	try {
+		db.updateUser(user->getUsername(), user->getNickname(),
+			user->getPasswordHash(), user->getSalt(), ba);
+	}
+	catch (DataBaseException & dbe) {
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
+		client->getUser()->rollback(backupUser);
+		return MessageFactory::AccountError("Users database update failed, please try again later");
+	}
+
+
+	/*if (!db.updateUser(user->getUsername(), user->getNickname(), 
 		user->getPasswordHash(), user->getSalt(), ba))
 	{
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}
+	}*/
 	
 	return MessageFactory::AccountConfirmed(*client->getUser());
 }
@@ -434,13 +425,24 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	buffer.open(QIODevice::WriteOnly);
 	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
 
-	if (!db.updateUser(user->getUsername(), user->getNickname(),
+	try {
+		db.updateUser(user->getUsername(), user->getNickname(),
+			user->getPasswordHash(), user->getSalt(), ba);
+	}
+	catch (DataBaseException & dbe) {
+		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
+		client->getUser()->rollback(backupUser);
+		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
+	}
+
+
+	/*if (!db.updateUser(user->getUsername(), user->getNickname(),
 		user->getPasswordHash(), user->getSalt(), ba))
 	{
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
-	}
+	}*/
 
 	emit sendAccountUpdate(client, MessageFactory::AccountConfirmed(*client->getUser()));
 
@@ -531,12 +533,21 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		user->addDocument(doc->getURI());
 		doc->insertNewEditor(user->getUsername());
 
-		if (!db.addDocToUser(user->getUsername(), docURI.toString()))
-		{
+		try {
+			db.addDocToUser(user->getUsername(), docURI.toString());
+		}
+		catch (DataBaseException & dbe) {
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
 			doc->remove();
 			return MessageFactory::DocumentError("Document creation failed, please try again");
 		}
+
+		/*if (!db.addDocToUser(user->getUsername(), docURI.toString()))
+		{
+			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
+			doc->remove();
+			return MessageFactory::DocumentError("Document creation failed, please try again");
+		}*/
 	}
 	catch (DocumentException& de) {
 		doc->remove();
@@ -578,12 +589,22 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 			/* and add the new editor to the document's list of editors */
 			documents.find(docUri).value()->insertNewEditor(user->getUsername());
 
-			if (!db.addDocToUser(user->getUsername(), docUri.toString()))
-			{
+			try {
+				db.addDocToUser(user->getUsername(), docUri.toString());
+			}
+			catch (DataBaseException & dbe) {
 				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
 				client->getUser()->rollback(backupUser);
 				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
 			}
+
+
+			/*if (!db.addDocToUser(user->getUsername(), docUri.toString()))
+			{
+				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
+				client->getUser()->rollback(backupUser);
+				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
+			}*/
 		}
 	}
 	
@@ -643,12 +664,22 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		/* remove this document to those owned by the user */
 		user->removeDocument(docUri);
 
-		if (!db.removeDocFromUser(user->getUsername(), docUri.toString()))
-		{
+		try {
+			db.removeDocFromUser(user->getUsername(), docUri.toString());
+		}
+		catch (DataBaseException & dbe) {
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
 			client->getUser()->rollback(backupUser);
 			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
 		}
+
+
+		/*if (!db.removeDocFromUser(user->getUsername(), docUri.toString()))
+		{
+			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
+			client->getUser()->rollback(backupUser);
+			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
+		}*/
 	}
 	else 
 		return MessageFactory::DocumentError("You don't have access to that document");

@@ -225,37 +225,35 @@ Symbol& Document::operator[](int pos)
 
 int Document::insert(Symbol& s)
 {
-	int insertionIndex = -binarySearch(s._fPos);	// should be a negative position index (for a non-existing Symbol)
+	int insertionIndex = -binarySearch(s._fPos);	// Search for the insertion position
+	assert(insertionIndex >= 0);					// should be a negative index (for a non-existing Symbol)
 
-	if (insertionIndex >= 0)
+	// Check if the inserted symbol implies the creation of a new block
+	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertionIndex < _text.length()-1))
 	{
-		// Check if the inserted symbol implies the creation of a new block
-		if (s.getChar() == QChar::ParagraphSeparator)
+		if (!s.getBlockId())	// (symbol received from Qt editor)
 		{
-			if (!s.getBlockId())
-			{
-				// Create a new TextBlock with locally-generated ID (symbol received from Qt editor)
-				TextBlock block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
-				s.setBlock(block.getId());
+			// Create a new TextBlock with locally-generated ID
+			TextBlock block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
+			s.setBlock(block.getId());
 
-				// Insert the new block in the document
-				_blocks.insert(block.getId(), block);
-			}
-			else
-			{
-				// Create a TextBlock with the ID carried by the symbol itself (received from another client)
-				_blocks.insert(s.getBlockId(), TextBlock(s.getBlockId(), QTextBlockFormat()));
+			// Insert the new block in the document
+			_blocks.insert(block.getId(), block);
+		}
+		else	// (symbol received from the server)
+		{
+			// Create a TextBlock with the ID carried by the symbol itself (received from another client)
+			_blocks.insert(s.getBlockId(), TextBlock(s.getBlockId(), QTextBlockFormat()));
 
-				_blockCounter++;	// (keep the block counter aligned between clients)
-			}
+			_blockCounter++;	// (keep the block counter aligned between clients)
+		}
 
-			TextBlock& newBlock = _blocks[s.getBlockId()];
+		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty())
+		{
+			TextBlock& block = _blocks[s.getBlockId()];
 			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
 
-			// The new block inherits the format from the previous one
-			newBlock.setFormat(prevBlock.getFormat());
-
-			Symbol newSymbol(s);
+			Symbol newSymbol(s);	// Create a copy of the symbol to avoid modifying the original one
 
 			// The paragraph delimiter belongs to the block on which it is inserted and marks its end
 			newSymbol.setBlock(prevBlock.getId());
@@ -265,18 +263,29 @@ int Document::insert(Symbol& s)
 			// And any following symbol of that paragraph is assigned to the new block
 			for (int i = insertionIndex + 1; i < _text.length(); i++)
 			{
-				addCharToBlock(_text[i], newBlock);
+				addCharToBlock(_text[i], block);
 				if (_text[i].getChar() == QChar::ParagraphSeparator)	// stop at the first paragraph separator
 					break;
 			}
 		}
 		else
 		{
-			// Assign the character to the block on which it is inserted
-			TextBlockID blockId = getBlockAt(insertionIndex);
-			addCharToBlock(s, _blocks[blockId]);
-			_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
+			addCharToBlock(s, _blocks[s.getBlockId()]);
+			_text.insert(_text.begin() + insertionIndex, s);	// Insert the symbol in the vector
 		}
+	}
+	else if (s.getChar() == QChar::ParagraphSeparator && insertionIndex == _text.length() - 1)
+	{
+		TextBlockID blockId = getBlockAt(insertionIndex - 1);
+		addCharToBlock(s, _blocks[blockId]);
+		_text.insert(_text.begin() + insertionIndex, s);	// add the symbol to the vector
+	}
+	else	// Regular symbol insertion
+	{
+		// Assign the character to the block on which it is inserted
+		TextBlockID blockId = getBlockAt(insertionIndex);
+		addCharToBlock(s, _blocks[blockId]);
+		_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
 	}
 
 	return insertionIndex;
@@ -285,52 +294,37 @@ int Document::insert(Symbol& s)
 int Document::remove(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
-	if (pos >= 0)
+	assert(pos >= 0);
+
+	Symbol& s = _text[pos];
+	TextBlock& block = _blocks[s.getBlockId()];
+
+	// Check if the symbol removal implies the merging of two blocks
+	if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length() - 1 &&
+		!(block.begin() == block.end()))
 	{
-		Symbol& s = _text[pos];
+		// The paragraph following the deleted ParagraphSeparator will disappear
+		TextBlock& nextBlock = _blocks[_text[pos + 1].getBlockId()];
 
-		// Check if the symbol removal implies the deletion of a paragraph separator
-		if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length()-1)
+		// All symbols belonging to the next block will be assigned to the current block
+		for (int i = pos; i < _text.length(); i++)
 		{
-			TextBlock& mergedBlock = _blocks[s.getBlockId()];
-
-			// The paragraph following the deleted ParagraphSeparator will disappear
-			TextBlock& olderBlock = _blocks[_text[pos + 1].getBlockId()];
-
-			removeCharFromBlock(s, mergedBlock);
-			_text.removeAt(pos);					// Removes the paragraph separator
-
-			mergedBlock.setEnd(olderBlock.end());
-			if (mergedBlock.begin() == QVector<qint32>({ -1, -1 }))		// If the previous block is now empty
-				mergedBlock.setBegin(olderBlock.begin());
-
-			// All symbols belonging to the next block will be assigned to the current block
-			for (int i = pos; i < _text.length(); i++)
-			{
-				_text[i].setBlock(mergedBlock);
-				if (_text[i].getChar() == QChar::ParagraphSeparator)
-					break;
-			}
-
-			if (olderBlock.getListId())		// Remove the block from the list (if it was in one)
-			{
-				TextList& list = _lists[olderBlock.getListId()];
-				removeBlockFromList(olderBlock, list);	
-			}
-			_blocks.remove(olderBlock.getId());			// Delete the (now empty) block from the document
+			_text[i].setBlock(block);
+			if (_text[i].getChar() == QChar::ParagraphSeparator)
+				break;
 		}
-		else if (pos == _text.length() - 1)
+
+		if (nextBlock.getListId())		// Remove the next block from the list (if it was in one)
 		{
-			// Avoid deleting the last character in the document (pseudo-EOF symbol)
-			// but make sure to reset its format
-			_blocks[s.getBlockId()].setFormat(QTextBlockFormat());
+			TextList& list = _lists[nextBlock.getListId()];
+			removeBlockFromList(nextBlock, list);
 		}
-		else
-		{
-			removeCharFromBlock(s, _blocks[s.getBlockId()]);
-			_text.removeAt(pos);	// Remove the symbol from the document
-		}
+		_blocks.remove(nextBlock.getId());			// Delete the (now empty) block from the document
 	}
+
+	// Remove the symbol from the document
+	removeCharFromBlock(s, _blocks[s.getBlockId()]);
+	_text.removeAt(pos);
 
 	return pos;
 }
@@ -485,6 +479,12 @@ QList<TextBlockID> Document::getListBlocks(TextListID listId)
 
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
+	if (s.getBlockId() && s.getBlockId() != b.getId())		
+	{
+		// Remove the char from any previous block it's in
+		removeCharFromBlock(s, _blocks[s.getBlockId()]);
+	}
+
 	s.setBlock(b.getId());
 
 	if (b.isEmpty())
@@ -506,8 +506,13 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 
 	if (s._fPos == b.begin() && s._fPos == b.end())
 	{
-		b.setBegin(QVector<qint32>({ -1, -1 }));	// Reset the block when deleting the last character
-		b.setEnd(QVector<qint32>({ -1, -1 }));
+		// Completely remove the block when it's empty
+		if (b.getListId())
+		{
+			TextList& list = _lists[b.getListId()];
+			removeBlockFromList(b, list);
+		}
+		_blocks.remove(b.getId());
 	}
 	else if (s._fPos == b.begin())
 	{
