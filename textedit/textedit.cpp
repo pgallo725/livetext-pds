@@ -65,6 +65,15 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	//Assign textEdit as the central widget
 	setCentralWidget(textEdit);
 
+	/**************************** GUI SETUP ****************************/
+
+	setupFileActions();
+	setupEditActions();
+	setupTextActions();
+	setupShareActions();
+	setupUserActions();
+
+
 	/**************************** CONNECTS ****************************/
 
 	//GUI update in case of format change or cursor position changed
@@ -93,6 +102,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
 	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
+
 	//If i can use clipboard setup connects from QTextEdit of cut/copy and clipboard management
 #ifndef QT_NO_CLIPBOARD
 	connect(textEdit, &QTextEdit::copyAvailable, actionCut, &QAction::setEnabled);
@@ -103,14 +113,7 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 	//Setup extra cursor
 	_extraCursor = new QTextCursor(textEdit->document());
 
-	/**************************** GUI INITIALIZATION ****************************/
-
-	//Setup all GUI actions
-	setupFileActions();
-	setupEditActions();
-	setupTextActions();
-	setupShareActions();
-	setupUserActions();
+	/**************************** EDITOR INITIALIZATION ****************************/
 
 	//Set default character and size
 	QFont textFont("Helvetica");
