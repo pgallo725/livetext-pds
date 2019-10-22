@@ -1401,6 +1401,11 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 	QTextBlockFormat blockFmt;
 
 	for (int i = position; i < position + charsAdded; ++i) {
+		_extraCursor->setPosition(i);
+
+		//Getting QTextBlockFormat from cursor
+		blockFmt = _extraCursor->blockFormat();
+
 		//Ricavo il carattere inserito
 		QChar ch = textEdit->document()->characterAt(i);
 
@@ -1415,13 +1420,10 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 		emit charInserted(ch, fmt, i);
 
 		if (ch == QChar::ParagraphSeparator) {
+			emit blockFormatChanged(i, i, blockFmt);
+
 			//Check if current block is in a list
 			_extraCursor->setPosition(i);
-			
-			//Getting QTextBlockFormat from cursor
-			blockFmt = _extraCursor->blockFormat();
-
-			emit blockFormatChanged(i, i, blockFmt);
 
 			//Getting current list (if present)
 			QTextList* textList = _extraCursor->currentList();
