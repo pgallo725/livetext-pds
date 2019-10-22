@@ -15,12 +15,12 @@ CharInsertMessage::CharInsertMessage(Symbol symbol, bool isLast)
 
 void CharInsertMessage::writeTo(QDataStream& stream) const
 {
-	stream << m_symbol;
+	stream << m_symbol << m_flag;
 }
 
 void CharInsertMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_symbol;
+	stream >> m_symbol >> m_flag;
 }
 
 Symbol& CharInsertMessage::getSymbol()
