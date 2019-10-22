@@ -28,7 +28,6 @@ WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	workThread->start();
 }
 
-
 WorkSpace::~WorkSpace()
 {
 	timer.stop();			// Stop timer which is periodically saving the doc
@@ -43,7 +42,9 @@ WorkSpace::~WorkSpace()
 	qDebug() << ">> (COMPLETED)" << endl;
 }
 
+/****************************** CLIENT METHODS ******************************/
 
+/* TcpServer send to Workspace a new client to edit the document */
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
 	/* Get the active socket from the Client object */
@@ -72,8 +73,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	qDebug() << ">> User" << client->getUsername() << "opened the document";
 }
 
-
-// Read an incoming message on the workspace socket and process it
+/* Read an incoming message on the workspace socket and process it */
 void WorkSpace::readMessage()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
@@ -124,8 +124,7 @@ void WorkSpace::readMessage()
 	}
 }
 
-
-// Send the specified message to all clients except the one from which it was received
+/* Send the specified message to all clients except the one from which it was received (sender) */
 void WorkSpace::dispatchMessage(MessageCapsule message, QSslSocket* sender)
 {
 	for (auto target = editors.keyBegin(); target != editors.keyEnd(); ++target)
@@ -136,7 +135,7 @@ void WorkSpace::dispatchMessage(MessageCapsule message, QSslSocket* sender)
 	}
 }
 
-
+/* Handle client disconnection */
 void WorkSpace::clientDisconnection()
 {
 	/* Close the socket where the signal was sent */
@@ -159,14 +158,16 @@ void WorkSpace::clientDisconnection()
 		emit noEditors(doc->getURI());
 }
 
-
+/* Print socket errors */
 void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	if (socketError != QAbstractSocket::RemoteHostClosedError)
 		qDebug() << ">> (ERROR) Socket error: " << socketError;
 }
 
+/****************************** DOCUMENT METHODS ******************************/
 
+/* Save document, if something went wrong thows exception after #fails */
 void WorkSpace::documentSave()
 {
 	try
@@ -216,6 +217,7 @@ void WorkSpace::documentEditList(TextBlockID blockId, TextListID listId, QTextLi
 	doc->editBlockList(blockId, listId, format);
 }
 
+/****************************** ACCOUNT METHODS ******************************/
 
 /* Forwards to the main TcpServer the user request for an account update */
 void WorkSpace::handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
@@ -242,7 +244,7 @@ void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsul
 		msg->send(clientSocket);
 }
 
-
+/* Client close the document, must be re-send to TcpServer */
 void WorkSpace::clientQuit(QSslSocket* clientSocket)
 {
 	QSharedPointer<Client> client = editors.find(clientSocket).value();

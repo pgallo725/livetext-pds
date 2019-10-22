@@ -16,8 +16,6 @@
 #include "ServerException.h"
 #include "SharedException.h"
 
-
-
 /* Server costructor */
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
@@ -152,7 +150,6 @@ void TcpServer::initialize()
 	qDebug() << "> (INITIALIZATION COMPLETE)" << endl;
 }
 
-
 /* Generate the URI for a document */
 URI TcpServer::generateURI(QString authorName, QString docName) const
 {
@@ -187,7 +184,6 @@ bool TcpServer::validateURI(URI uri) const
 	// Check the correctness of the trailing hash sequence
 	return uri == generateURI(uri.getAuthorName(), uri.getDocumentName());
 }
-
 
 /* Handle a new connection from a client */
 void TcpServer::newClientConnection()
@@ -352,15 +348,6 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 		users.remove(username);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
 	}
-
-	/*if (!db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(), 
-		user.getPasswordHash(), user.getSalt(), ba))
-	{
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
-		client->logout();
-		users.remove(username);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}*/
 	
 	return MessageFactory::AccountConfirmed(user);
 }
@@ -393,15 +380,6 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 		client->getUser()->rollback(backupUser);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
 	}
-
-
-	/*if (!db.updateUser(user->getUsername(), user->getNickname(), 
-		user->getPasswordHash(), user->getSalt(), ba))
-	{
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
-		client->getUser()->rollback(backupUser);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
-	}*/
 	
 	return MessageFactory::AccountConfirmed(*client->getUser());
 }
@@ -435,15 +413,6 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 		client->getUser()->rollback(backupUser);
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
 	}
-
-
-	/*if (!db.updateUser(user->getUsername(), user->getNickname(),
-		user->getPasswordHash(), user->getSalt(), ba))
-	{
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
-		client->getUser()->rollback(backupUser);
-		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
-	}*/
 
 	emit sendAccountUpdate(client, MessageFactory::AccountConfirmed(*client->getUser()));
 
@@ -480,8 +449,6 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 	/* reconnect socket signals to slots in order to read and handle messages */
 	connect(socket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	connect(socket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
-
-	socket->readAll();
 }
 
 
@@ -542,13 +509,6 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 			doc->remove();
 			return MessageFactory::DocumentError("Document creation failed, please try again");
 		}
-
-		/*if (!db.addDocToUser(user->getUsername(), docURI.toString()))
-		{
-			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
-			doc->remove();
-			return MessageFactory::DocumentError("Document creation failed, please try again");
-		}*/
 	}
 	catch (DocumentException& de) {
 		doc->remove();
@@ -598,14 +558,6 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 				client->getUser()->rollback(backupUser);
 				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
 			}
-
-
-			/*if (!db.addDocToUser(user->getUsername(), docUri.toString()))
-			{
-				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
-				client->getUser()->rollback(backupUser);
-				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
-			}*/
 		}
 	}
 	
@@ -673,14 +625,6 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 			client->getUser()->rollback(backupUser);
 			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
 		}
-
-
-		/*if (!db.removeDocFromUser(user->getUsername(), docUri.toString()))
-		{
-			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
-			client->getUser()->rollback(backupUser);
-			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
-		}*/
 	}
 	else 
 		return MessageFactory::DocumentError("You don't have access to that document");
@@ -704,7 +648,6 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	return MessageFactory::DocumentDismissed();
 }
 
-
 /* Release all resources owned by workspace and delete it */
 void TcpServer::deleteWorkspace(URI document)
 {
@@ -717,7 +660,6 @@ void TcpServer::deleteWorkspace(URI document)
 	catch (DocumentException& de)
 	{
 		qDebug().noquote() << ">" << de.what();
-		// TODO: how to handle exception ?
 	}
 }
 
