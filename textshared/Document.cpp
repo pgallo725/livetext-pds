@@ -256,8 +256,8 @@ int Document::insert(Symbol& s)
 
 	// Check if the inserted symbol implies the creation of a new block
 	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertionIndex < _text.length())
-		|| (insertionIndex == _text.length() && _text[insertionIndex-1].getChar() == QChar::ParagraphSeparator)
-		&& s.getChar() != QChar::Null)
+		|| (insertionIndex == _text.length() && _text[insertionIndex-1].getChar() == QChar::ParagraphSeparator
+		&& s.getChar() != QChar::Null))
 	{
 		if (!s.getBlockId())	// (symbol received from Qt editor)
 		{
