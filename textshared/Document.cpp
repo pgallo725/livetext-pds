@@ -276,7 +276,7 @@ int Document::insert(Symbol& s)
 		}
 
 		// Check if it's needed to split blocks
-		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty())
+		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertionIndex != _text.length())
 		{
 			TextBlock& block = _blocks[s.getBlockId()];
 			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
