@@ -109,7 +109,7 @@ public:
 	TextList& getList(TextListID id);
 	int getListPosition(TextListID listId);
 	TextListID getListAt(int index);
-	QList<TextBlockID> getListBlocks(TextListID listId);
+	QList<TextBlockID> getListBlocksInOrder(TextListID listId);
 
 	void insertNewEditor(QString editor);
 

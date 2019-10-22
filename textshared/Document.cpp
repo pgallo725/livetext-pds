@@ -125,11 +125,33 @@ QVector<Symbol> Document::getContent()
 	return _text;
 }
 
+int Document::length()
+{
+	return _text.length();
+}
+
+QString Document::toString()
+{
+	QString text;
+
+	for (Symbol* i = _text.begin(); i != _text.end(); i++)
+	{
+		text.append(i->getChar());
+	}
+
+	return text;
+}
+
+
 void Document::insertNewEditor(QString edit)
 {
 	if (!editors.contains(edit))
 		editors << edit;
 }
+
+
+
+/************* DOCUMENT FILE METHODS *************/
 
 
 void Document::load()
@@ -219,8 +241,12 @@ Symbol& Document::operator[](int pos)
 {
 	if (pos >= 0 && pos < _text.length())
 		return _text[pos];
-	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
+	else throw std::out_of_range("The document doesn't contain any symbol with that index");
 }
+
+
+
+/************ EDITING OPERATIONS ***********/
 
 
 int Document::insert(Symbol& s)
@@ -234,11 +260,10 @@ int Document::insert(Symbol& s)
 		if (!s.getBlockId())	// (symbol received from Qt editor)
 		{
 			// Create a new TextBlock with locally-generated ID
-			TextBlock block = TextBlock(_blockCounter++, s.getAuthorId(), QTextBlockFormat());
-			s.setBlock(block.getId());
+			TextBlockID blockId(_blockCounter++, s.getAuthorId());
+			_blocks.insert(blockId, TextBlock(blockId, QTextBlockFormat()));
 
-			// Insert the new block in the document
-			_blocks.insert(block.getId(), block);
+			s.setBlock(blockId);
 		}
 		else	// (symbol received from the server)
 		{
@@ -248,44 +273,43 @@ int Document::insert(Symbol& s)
 			_blockCounter++;	// (keep the block counter aligned between clients)
 		}
 
+		// Check if it's needed to split blocks
 		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty())
 		{
 			TextBlock& block = _blocks[s.getBlockId()];
 			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
 
-			Symbol newSymbol(s);	// Create a copy of the symbol to avoid modifying the original one
+			Symbol s2(s);	// Copy the symbol to avoid modifying the original one (which has the block ID)
 
-			// The paragraph delimiter belongs to the block on which it is inserted and marks its end
-			newSymbol.setBlock(prevBlock.getId());
-			prevBlock.setEnd(newSymbol._fPos);
-			_text.insert(_text.begin() + insertionIndex, newSymbol);	// (insert the symbol in the vector)
+			// The paragraph delimiter belongs to the previous block
+			s2.setBlock(nullptr);
+			addCharToBlock(s2, prevBlock);
+			_text.insert(_text.begin() + insertionIndex, s2);
 
-			// And any following symbol of that paragraph is assigned to the new block
-			for (int i = insertionIndex + 1; i < _text.length(); i++)
-			{
+			// All the following symbols of that paragraph are assigned to the new block
+			for (int i = binarySearch(prevBlock.end()); i > insertionIndex; i--) {
 				addCharToBlock(_text[i], block);
-				if (_text[i].getChar() == QChar::ParagraphSeparator)	// stop at the first paragraph separator
-					break;
 			}
 		}
 		else
 		{
+			// Insert the symbol in the document
 			addCharToBlock(s, _blocks[s.getBlockId()]);
-			_text.insert(_text.begin() + insertionIndex, s);	// Insert the symbol in the vector
+			_text.insert(_text.begin() + insertionIndex, s);
 		}
 	}
-	else if (insertionIndex == _text.length())
+	else if (insertionIndex == _text.length())	  // Inserting a symbol at the last position in the document
 	{
-		TextBlockID blockId = getBlockAt(insertionIndex - 1);
+		TextBlockID blockId = getBlockAt(insertionIndex - 1);	// inherit the block ID from the previous char
 		addCharToBlock(s, _blocks[blockId]);
-		_text.insert(_text.begin() + insertionIndex, s);	// add the symbol to the vector
+		_text.insert(_text.begin() + insertionIndex, s);
 	}
 	else	// Regular symbol insertion
 	{
 		// Assign the character to the block on which it is inserted
 		TextBlockID blockId = getBlockAt(insertionIndex);
 		addCharToBlock(s, _blocks[blockId]);
-		_text.insert(_text.begin() + insertionIndex, s);	// place the symbol in the vector
+		_text.insert(_text.begin() + insertionIndex, s);
 	}
 
 	return insertionIndex;
@@ -294,7 +318,7 @@ int Document::insert(Symbol& s)
 int Document::remove(QVector<qint32> fPos)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
-	assert(pos >= 0);
+	assert(pos >= 0);				// must be a positive position (for existing symbol)
 
 	Symbol& s = _text[pos];
 	TextBlock& block = _blocks[s.getBlockId()];
@@ -303,27 +327,17 @@ int Document::remove(QVector<qint32> fPos)
 	if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length() - 1 &&
 		!(block.begin() == block.end()))
 	{
-		// The paragraph following the deleted ParagraphSeparator will disappear
-		TextBlock& nextBlock = _blocks[_text[pos + 1].getBlockId()];
-
 		// All symbols belonging to the next block will be assigned to the current block
-		for (int i = pos; i < _text.length(); i++)
+		for (int i = pos + 1; i < _text.length(); i++)
 		{
-			_text[i].setBlock(block);
+			addCharToBlock(_text[i], block);
 			if (_text[i].getChar() == QChar::ParagraphSeparator)
 				break;
 		}
-
-		if (nextBlock.getListId())		// Remove the next block from the list (if it was in one)
-		{
-			TextList& list = _lists[nextBlock.getListId()];
-			removeBlockFromList(nextBlock, list);
-		}
-		_blocks.remove(nextBlock.getId());			// Delete the (now empty) block from the document
 	}
 
 	// Remove the symbol from the document
-	removeCharFromBlock(s, _blocks[s.getBlockId()]);
+	removeCharFromBlock(s, block);
 	_text.removeAt(pos);
 
 	return pos;
@@ -337,6 +351,8 @@ QVector<qint32> Document::removeAtIndex(int index)
 	return position;
 }
 
+
+// TODO: check if correct
 int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
 {
 	TextBlock& block = _blocks[blockId];
@@ -364,51 +380,34 @@ int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFor
 int Document::formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt)
 {
 	int pos = binarySearch(fPos);	// looks for the symbol with that fractional position
-	if (pos >= 0)
-	{
-		_text[pos].setFormat(fmt);
-	}
+	assert(pos >= 0);
+
+	_text[pos].setFormat(fmt);	 // and change its format
 
 	return pos;
 }
 
 int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
 {
-	TextBlock block = _blocks[id];		// find the desired block
-	block.setFormat(fmt);				// change the format
-
-	_blocks.insert(id, block);		// and replace its entry with the updated one
+	assert(_blocks.contains(id));
+	TextBlock& block = _blocks[id];		// find the desired block
+	block.setFormat(fmt);				// and update the format
 
 	return getBlockPosition(id);
 }
 
 int Document::formatList(TextListID id, QTextListFormat fmt)
 {
-	TextList list = _lists[id];
+	assert(_lists.contains(id));
+	TextList& list = _lists[id];
 	list.setFormat(fmt);
-
-	_lists.insert(id, list);		// and replace its entry with the updated one
 
 	return getListPosition(id);
 }
 
 
-int Document::length()
-{
-	return _text.length();
-}
 
-QString Document::toString()
-{
-	QString text;
-
-	for (Symbol* i = _text.begin(); i != _text.end(); i++)
-	{
-		text.append(i->getChar());
-	}
-
-	return text;
-}
+/*********** BLOCK METHODS **********/
 
 
 TextBlock& Document::getBlock(TextBlockID id)
@@ -444,42 +443,10 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	return result;
 }
 
-TextList& Document::getList(TextListID id)
-{
-	return _lists[id];
-}
-
-int Document::getListPosition(TextListID listId)
-{
-	// returns the position of one random block in the list
-	return getBlockPosition(_lists[listId].getBlocks().first());
-}
-
-TextListID Document::getListAt(int index)
-{
-	TextBlockID b = getBlockAt(index);
-	return _blocks[b].getListId();
-}
-
-QList<TextBlockID> Document::getListBlocks(TextListID listId)
-{
-	QMap<QVector<qint32>, TextBlockID> ordered_blocks;
-
-	// Build an ordered map of the list blocks (sorted by their position in the document)
-	// in order to obtain an ordered list of blockIDs by calling .values()
-	foreach(TextBlockID blockId, _lists[listId].getBlocks())
-	{
-		TextBlock& block = _blocks[blockId];
-		ordered_blocks.insert(block.begin(), blockId);
-	}
-
-	return ordered_blocks.values();
-}
-
 
 void Document::addCharToBlock(Symbol& s, TextBlock& b)
 {
-	if (s.getBlockId() && s.getBlockId() != b.getId())		
+	if (s.getBlockId() && s.getBlockId() != b.getId())
 	{
 		// Remove the char from any previous block it's in
 		removeCharFromBlock(s, _blocks[s.getBlockId()]);
@@ -489,7 +456,7 @@ void Document::addCharToBlock(Symbol& s, TextBlock& b)
 
 	if (b.isEmpty())
 	{
-		b.setBegin(s._fPos);
+		b.setBegin(s._fPos);	// set block delimiters
 		b.setEnd(s._fPos);
 	}
 	else if (s._fPos < b.begin()) {
@@ -507,8 +474,7 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	if (s._fPos == b.begin() && s._fPos == b.end())
 	{
 		// Completely remove the block when it's empty
-		if (b.getListId())
-		{
+		if (b.getListId()) {
 			TextList& list = _lists[b.getListId()];
 			removeBlockFromList(b, list);
 		}
@@ -517,20 +483,59 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	else if (s._fPos == b.begin())
 	{
 		int beginIndex = binarySearch(b.begin());
-		if (beginIndex >= 0)
-			b.setBegin(_text[beginIndex + 1]._fPos);	// update block begin
+		assert(beginIndex >= 0);
+
+		b.setBegin(_text[beginIndex + 1]._fPos);
 	}
 	else if (s._fPos == b.end())
 	{
 		int endIndex = binarySearch(b.end());
-		if (endIndex >= 0)
-			b.setEnd(_text[endIndex - 1]._fPos);	// update block begin
+		assert(endIndex >= 0);
+
+		b.setEnd(_text[endIndex - 1]._fPos);
 	}
 }
 
+
+
+/********** LIST METHODS **********/
+
+
+TextList& Document::getList(TextListID id)
+{
+	return _lists[id];
+}
+
+int Document::getListPosition(TextListID listId)
+{
+	// returns the position of one random block in the list
+	return getBlockPosition(_lists[listId].getBlocks().first());
+}
+
+TextListID Document::getListAt(int index)
+{
+	return _blocks[getBlockAt(index)].getListId();
+}
+
+QList<TextBlockID> Document::getListBlocksInOrder(TextListID listId)
+{
+	QMap<QVector<qint32>, TextBlockID> ordered_blocks;
+
+	// Build an ordered map of the list blocks (sorted by their position in the document)
+	// in order to obtain an ordered list of blockIDs by calling .values()
+	foreach(TextBlockID blockId, _lists[listId].getBlocks())
+	{
+		TextBlock& block = _blocks[blockId];
+		ordered_blocks.insert(block.begin(), blockId);
+	}
+
+	return ordered_blocks.values();
+}
+
+
 void Document::addBlockToList(TextBlock& b, TextList& l)
 {
-	if (b.getListId())	
+	if (b.getListId() && b.getListId() != l.getId())	
 	{
 		// Remove the block from any previous list it's in
 		removeBlockFromList(b, _lists[b.getListId()]);
@@ -552,6 +557,9 @@ void Document::removeBlockFromList(TextBlock& b, TextList& l)
 	}
 }
 
+
+
+/************ BINARY SEARCH METHOD *************/
 
 
 // Binary search algorithm, returns the index of the symbol at the specified
@@ -577,6 +585,9 @@ int Document::binarySearch(QVector<qint32> position)
 	return -m;		// no match found, negative position returned
 }
 
+
+
+/************ FRACTIONAL POSITION METHODS *************/
 
 
 QVector<qint32> Document::fractionalPosBetween(int prev_i, int next_i)
@@ -648,7 +659,9 @@ QVector<qint32> Document::fractionalPosEnd()
 }
 
 
-// TODO: update serialization operators with all new Document fields
+
+/********* SERIALIZATION OPERATORS **********/
+
 
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
