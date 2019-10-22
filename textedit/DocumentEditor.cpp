@@ -13,12 +13,7 @@ void DocumentEditor::openDocument()
 	for (int i = 0; i < _document.length() - 1; i++) {
 		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
 	}
-
-	foreach(TextBlockID id, _document._blocks) {
-		TextBlock& blk = _document.getBlock(id);
-		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
-	}
-
+	   
 	foreach(TextListID id, _document._lists) {
 		TextList& lst = _document.getList(id);
 		QList<TextBlockID> blocks = lst.getBlocks();
@@ -32,6 +27,12 @@ void DocumentEditor::openDocument()
 			_textedit->addBlockToList(firstListBlockPosition, _document.getBlockPosition(id));
 		}
 	}
+
+	foreach(TextBlockID id, _document._blocks) {
+		TextBlock& blk = _document.getBlock(id);
+		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
+	}
+
 
 	_textedit->resetUndoRedo();
 	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());

@@ -1016,6 +1016,7 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
+
 	//Debug
 	printDocumenText();
 }
@@ -1083,7 +1084,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	_extraCursor->setPosition(position);
 
 	//Sets block format in current block
-	_extraCursor->setBlockFormat(fmt);
+	_extraCursor->mergeBlockFormat(fmt);
 
 	//Call alignment changed for update GUI
 	alignmentChanged(fmt.alignment());
