@@ -32,19 +32,19 @@
 #include <QDateTime>
 
 #if defined(QT_PRINTSUPPORT_LIB)
-	#include <QtPrintSupport/qtprintsupportglobal.h>
+#include <QtPrintSupport/qtprintsupportglobal.h>
 
-	#if QT_CONFIG(printer)
-		#if QT_CONFIG(printdialog)
-			#include <QPrintDialog>
-		#endif
+#if QT_CONFIG(printer)
+#if QT_CONFIG(printdialog)
+#include <QPrintDialog>
+#endif
 
-		#include <QPrinter>
+#include <QPrinter>
 
-		#if QT_CONFIG(printpreviewdialog)
-			#include <QPrintPreviewDialog>
-		#endif
-	#endif
+#if QT_CONFIG(printpreviewdialog)
+#include <QPrintPreviewDialog>
+#endif
+#endif
 #endif
 
 #include "textedit.h"
@@ -213,7 +213,7 @@ void TextEdit::setupEditActions()
 	actionRedo->setPriority(QAction::LowPriority);
 	actionRedo->setShortcut(QKeySequence::Redo);
 	tb->addAction(actionRedo);
-	
+
 	menu->addSeparator();
 
 
@@ -254,7 +254,7 @@ void TextEdit::setupTextActions()
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
-	
+
 	//Checkable
 	actionTextBold->setCheckable(true);
 
@@ -265,7 +265,7 @@ void TextEdit::setupTextActions()
 
 	//Add action to toolbar
 	tb->addAction(actionTextBold);
-	
+
 
 	//Italic
 	const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
@@ -279,7 +279,7 @@ void TextEdit::setupTextActions()
 	actionTextItalic->setFont(italic);
 
 	tb->addAction(actionTextItalic);
-	
+
 
 	//Underline
 	const QIcon underlineIcon = QIcon::fromTheme("format-text-underline", QIcon(rsrcPath + "/textunder.png"));
@@ -287,19 +287,19 @@ void TextEdit::setupTextActions()
 	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
 	actionTextUnderline->setPriority(QAction::LowPriority);
 	actionTextUnderline->setCheckable(true);
-	
+
 	QFont underline;
 	underline.setUnderline(true);
 	actionTextUnderline->setFont(underline);
-	
+
 	tb->addAction(actionTextUnderline);
-	
+
 	menu->addSeparator();
 	tb->addSeparator();
 
 
 	//Alignment
-	
+
 	//Left
 	const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
@@ -350,7 +350,7 @@ void TextEdit::setupTextActions()
 	menu->addActions(alignGroup->actions());
 
 	tb->addSeparator();
-	
+
 	//Lists
 	QMenu* menuList = new QMenu("List menu");
 	listStandard = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
@@ -400,7 +400,7 @@ void TextEdit::setupTextActions()
 
 	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	tb->addWidget(listButton);
-	
+
 	menu->addSeparator();
 	tb->addSeparator();
 
@@ -429,7 +429,7 @@ void TextEdit::setupTextActions()
 	comboFont = new QFontComboBox(tb);
 	tb->addWidget(comboFont);
 	connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
-	
+
 	//Size combobox
 	comboSize = new QComboBox(tb);
 	comboSize->setObjectName("comboSize");
@@ -525,16 +525,16 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	if (onlineUsers.contains(userId)) {
 		removePresence(userId);
 	}
-	
+
 	//Insert presence in editor
 	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
-	
+
 	//Redraw of the onlineUsers toolbar
 	setupOnlineUsersActions();
 
 	//Reset cursor postion to send to the new user current cursor position
 	_currentCursorPosition = -1;
-	
+
 	//Recompute text highlighting
 	updateUsersSelections();
 }
@@ -673,13 +673,13 @@ void TextEdit::filePrintPreview()
 #if QT_CONFIG(printpreviewdialog)
 	//Create printer
 	QPrinter printer(QPrinter::HighResolution);
-	
+
 	//Print preview window
 	QPrintPreviewDialog preview(&printer, this);
 
 	//Connect to print function
 	connect(&preview, &QPrintPreviewDialog::paintRequested, this, &TextEdit::printPreview);
-	
+
 	preview.exec();
 #endif
 }
@@ -730,7 +730,7 @@ void TextEdit::filePrintPdf()
 void TextEdit::fileShare()
 {
 	ShareUriWindow* su = new ShareUriWindow(URI, this);
-	
+
 	//Show created window
 	su->exec();
 }
@@ -1416,8 +1416,13 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 		//Getting QTextCharFormat from cursor
 		QTextCharFormat fmt = _extraCursor->charFormat();
 
+
 		//Emit signal to DocumentEditor to insert a character
-		emit charInserted(ch, fmt, i);
+		if (ch != QChar::Null) {
+			bool isLast = (ch == QChar::ParagraphSeparator) && (i == textEdit->document()->characterCount() - 1);
+			emit charInserted(ch, fmt, i, isLast);
+		}
+
 
 		if (ch == QChar::ParagraphSeparator) {
 			emit blockFormatChanged(i, i, blockFmt);
@@ -1647,7 +1652,7 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::printDocumenText()
 {
-	for (int i = 0; i < textEdit->document()->characterCount(); i++) {
+	for (int i = 0; i <= textEdit->document()->characterCount(); i++) {
 		qDebug() << textEdit->document()->characterAt(i);
 	}
 }
