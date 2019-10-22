@@ -257,7 +257,7 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 	{
 		TextList& oldList = _document.getList(listId);
 		TextListID newListId;
-		QList<TextBlockID> listBlocks = _document.getListBlocks(listId);
+		QList<TextBlockID> listBlocks = _document.getListBlocksInOrder(listId);
 		bool selectionBegun = false;
 		bool selectionEnded = false;
 
