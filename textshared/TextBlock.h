@@ -33,6 +33,7 @@ public:
 	bool operator<(const TextBlockID& other) const noexcept;		
 	bool operator>(const TextBlockID& other) const noexcept;
 	bool operator==(const TextBlockID& other) const noexcept;
+	bool operator!=(const TextBlockID& other) const noexcept;
 	operator bool() const noexcept;
 };
 

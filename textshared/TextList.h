@@ -33,6 +33,7 @@ public:
 	bool operator<(const TextListID& other) const noexcept;
 	bool operator>(const TextListID& other) const noexcept;
 	bool operator==(const TextListID& other) const noexcept;
+	bool operator!=(const TextListID& other) const noexcept;
 	operator bool() const noexcept;
 };
 

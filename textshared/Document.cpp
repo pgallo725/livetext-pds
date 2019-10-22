@@ -294,7 +294,9 @@ int Document::insert(Symbol& s)
 		else
 		{
 			// Insert the symbol in the document
-			addCharToBlock(s, _blocks[s.getBlockId()]);
+			TextBlockID id = s.getBlockId();
+			s.setBlock(nullptr);
+			addCharToBlock(s, _blocks[id]);
 			_text.insert(_text.begin() + insertionIndex, s);
 		}
 	}
@@ -535,7 +537,7 @@ QList<TextBlockID> Document::getListBlocksInOrder(TextListID listId)
 
 void Document::addBlockToList(TextBlock& b, TextList& l)
 {
-	if (b.getListId() && b.getListId() != l.getId())	
+	if (b.getListId() && b.getListId() != l.getId())
 	{
 		// Remove the block from any previous list it's in
 		removeBlockFromList(b, _lists[b.getListId()]);

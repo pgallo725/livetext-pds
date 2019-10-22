@@ -57,6 +57,12 @@ bool TextListID::operator==(const TextListID& other) const noexcept
 		this->_authorId == other._authorId);
 }
 
+bool TextListID::operator!=(const TextListID& other) const noexcept
+{
+	return (this->_number != other._number ||
+		this->_authorId != other._authorId);
+}
+
 TextListID::operator bool() const noexcept
 {
 	return !(_number == -1 && _authorId == -1);
