@@ -131,6 +131,9 @@ private:
 	void redrawAllCursors();
 	void drawGraphicCursor(Presence* p);
 
+	//DEBUG
+	void printDocumenText();
+
 
 	//List type
 	QToolButton* listButton;

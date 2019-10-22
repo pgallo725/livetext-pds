@@ -91,26 +91,28 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 //Generating extra selections for user
 void DocumentEditor::generateExtraSelection()
 {
-	QPair<int, int> selectionDelimiters;
+	if (_document.length() > 0) {
+		QPair<int, int> selectionDelimiters;
 
-	//Get firs character author
-	qint32 userId = _document[0].getAuthorId();
-	selectionDelimiters.first = 0;
-	selectionDelimiters.second = 0;
+		//Get firs character author
+		qint32 userId = _document[0].getAuthorId();
+		selectionDelimiters.first = 0;
+		selectionDelimiters.second = 0;
 
-	//Increment selection upper limit until we reach end of document or a character inserted by another user
-	for (int i = 0; i < _document.length() - 1; i++) {
-		if (_document[i].getAuthorId() != userId) {
-			_textedit->setExtraSelections(userId, selectionDelimiters);
+		//Increment selection upper limit until we reach end of document or a character inserted by another user
+		for (int i = 0; i < _document.length() - 1; i++) {
+			if (_document[i].getAuthorId() != userId) {
+				_textedit->setExtraSelections(userId, selectionDelimiters);
 
-			userId = _document[i].getAuthorId();
-			selectionDelimiters.first = i;
-			selectionDelimiters.second = i;
+				userId = _document[i].getAuthorId();
+				selectionDelimiters.first = i;
+				selectionDelimiters.second = i;
+			}
+			selectionDelimiters.second++;
 		}
-		selectionDelimiters.second++;
-	}
 
-	_textedit->setExtraSelections(userId, selectionDelimiters);
+		_textedit->setExtraSelections(userId, selectionDelimiters);
+	}
 }
 
 //Block format
@@ -348,7 +350,7 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 				// Following blocks will be appended to the list
 				_textedit->addBlockToList(_document.getListPosition(newListId), _document.getBlockPosition(blockId));
 			}
-			
+
 			_document.addBlockToList(block, list);
 
 			// Send for each block the message for adding it to the new list

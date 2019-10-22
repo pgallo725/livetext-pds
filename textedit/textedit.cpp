@@ -1011,6 +1011,9 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
+
+	//Debug
+	printDocumenText();
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
@@ -1058,6 +1061,9 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 
 	//Add block to list
 	currentList->add(blk);
+
+	//Debug
+	printDocumenText();
 }
 
 
@@ -1380,11 +1386,13 @@ void TextEdit::clipboardDataChanged()
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
 
+	//Debug
+	printDocumenText();
+
 	//Handle character deletion
 	for (int i = 0; i < charsRemoved; ++i) {
 		emit charDeleted(position);
 	}
-
 
 	QTextBlockFormat blockFmt;
 
@@ -1473,8 +1481,13 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 	//Finds the Presence
 	Presence* p = onlineUsers.find(user).value();
 
-	//Change user's cursor position
-	p->cursor()->setPosition(position);
+	if (position < textEdit->document()->characterCount()) {
+		//Change user's cursor position
+		p->cursor()->setPosition(position);
+	}
+	else {
+		p->cursor()->setPosition(textEdit->document()->characterCount() - 1);
+	}
 
 	drawGraphicCursor(p);
 }
@@ -1521,9 +1534,8 @@ void TextEdit::drawGraphicCursor(Presence* p)
 	userCursorLabel->show();
 }
 
-
-/*	HIGHLIGHT USER'S TEXT SELECTION
-*
+/**************************** HIGHLIGHT ONLINE USERS TEXT ****************************/
+/*
 *	Handle button behavior to check/uncheck all selections
 *	Compute text highlighting selections
 *	Handle resets of all text highlight
@@ -1615,4 +1627,20 @@ void TextEdit::updateUsersSelections()
 	emit generateExtraSelection();
 
 	handleMultipleSelections();
+}
+
+
+/**************************** DEBUG ****************************/
+/*
+*	Print document Text
+*/
+
+void TextEdit::printDocumenText()
+{
+	for (int i = 0; i <= textEdit->document()->characterCount() + 1; i++) {
+		QChar ch =  textEdit->document()->characterAt(i);
+		if (ch == '\0') {
+			qDebug() << "Found /0";
+		}
+	}
 }
