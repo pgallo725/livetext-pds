@@ -1647,7 +1647,7 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::printDocumenText()
 {
-	for (int i = 0; i < textEdit->document()->characterCount(); i++) {
+	for (int i = 0; i <= textEdit->document()->characterCount(); i++) {
 		qDebug() << textEdit->document()->characterAt(i);
 	}
 }

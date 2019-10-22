@@ -60,8 +60,10 @@ void DocumentEditor::removeSymbol(QVector<int> position)
 //From Client to Server
 void DocumentEditor::deleteCharAtIndex(int position)
 {
-	if (_document.length() == 0)
+	if (position >= _document.length()) {
+		qDebug() << "Skipped deletion of out-of-range symbol, pos =" << position;
 		return;
+	}
 
 	qDebug().nospace() << "Local char deletion: " << _document[position].getChar();
 	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
