@@ -35,7 +35,7 @@ public:
 	static MessageCapsule DocumentExit();
 	static MessageCapsule DocumentError(QString error);
 
-	static MessageCapsule CharInsert(Symbol symbol);
+	static MessageCapsule CharInsert(Symbol symbol, bool isLast);
 	static MessageCapsule CharDelete(QVector<qint32> position);
 	static MessageCapsule CharFormat(QVector<qint32> position, QTextCharFormat fmt);
 	static MessageCapsule BlockEdit(TextBlockID blockId, QTextBlockFormat fmt);

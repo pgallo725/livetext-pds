@@ -41,12 +41,14 @@ void DocumentEditor::openDocument()
 
 
 //From Server to Client
-void DocumentEditor::addSymbol(Symbol s)
+void DocumentEditor::addSymbol(Symbol s, bool isLast)
 {
 	qDebug().nospace() << "Remote char insertion: " << s.getChar();
 	int position = _document.insert(s);
-	_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
-	_textedit->updateUsersSelections();
+	if (!isLast) {
+		_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
+		_textedit->updateUsersSelections();
+	}
 }
 
 void DocumentEditor::removeSymbol(QVector<int> position)
@@ -70,7 +72,7 @@ void DocumentEditor::deleteCharAtIndex(int position)
 	emit deleteChar(fractionalPosition);
 }
 
-void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
+void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)
 {
 	Symbol s;
 	if (position == 0) {
@@ -86,7 +88,7 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position)
 	qDebug().nospace() << "Local char insertion: " << s.getChar();
 
 	_document.insert(s);
-	emit insertChar(s);
+	emit insertChar(s, isLast);
 }
 
 

@@ -140,9 +140,9 @@ MessageCapsule MessageFactory::DocumentError(QString error)
 	return new DocumentErrorMessage(error);
 }
 
-MessageCapsule MessageFactory::CharInsert(Symbol symbol)
+MessageCapsule MessageFactory::CharInsert(Symbol symbol, bool isLast)
 {
-	return new CharInsertMessage(symbol);
+	return new CharInsertMessage(symbol, isLast);
 }
 
 MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)

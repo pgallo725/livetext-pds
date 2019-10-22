@@ -24,8 +24,8 @@ public:
 
 public slots:
 
-	void addSymbol(Symbol s);
-	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position);
+	void addSymbol(Symbol s, bool isLast);
+	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
 
 	void removeSymbol(QVector<int> position);
 	void deleteCharAtIndex(int position);
@@ -47,7 +47,7 @@ public slots:
 signals:
 
 	void deleteChar(QVector<qint32> fPos);
-	void insertChar(Symbol s);
+	void insertChar(Symbol s, bool isLast);
 	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt);
 	void symbolFormatChanged(QVector<qint32> position, QTextCharFormat fmt);
 	void blockListChanged(TextBlockID blockId, TextListID listId, QTextListFormat fmt);

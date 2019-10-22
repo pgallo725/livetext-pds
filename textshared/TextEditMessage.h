@@ -11,13 +11,14 @@ class CharInsertMessage : public Message
 private:
 
 	Symbol m_symbol;
+	bool m_flag;
 
 protected:
 
 	CharInsertMessage();	// empty constructor
 
 	// Constructor for CharInsert messages, carrying the symbol object
-	CharInsertMessage(Symbol symbol);
+	CharInsertMessage(Symbol symbol, bool isLast);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -27,6 +28,7 @@ public:
 	~CharInsertMessage() {};
 
 	Symbol& getSymbol();
+	bool getIsLast();
 };
 
 

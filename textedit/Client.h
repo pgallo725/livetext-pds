@@ -81,7 +81,7 @@ signals:
 	void documentExitFailed(QString errorType);
 	
 	// TextEdit Signals
-	void recivedSymbol(Symbol character);
+	void recivedSymbol(Symbol character, bool isLast);
 	void removeSymbol(QVector<int> position);
 	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
@@ -106,7 +106,7 @@ public:
 
 	// Data Exchange
 	void sendCursor(qint32 userId, qint32 position);
-	void sendChar(Symbol character);
+	void sendChar(Symbol character, bool isLast);
 	void removeChar(QVector<int> position);
 	void charModified(QVector<qint32> position, QTextCharFormat fmt);
 	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);

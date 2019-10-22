@@ -455,9 +455,9 @@ void Client::receiveCursor(MessageCapsule message) {
 
 /*--------------------------- CHARACTER HANDLER --------------------------------*/
 
-void Client::sendChar(Symbol character) {
+void Client::sendChar(Symbol character, bool isLast) {
 
-	MessageCapsule sendChar = MessageFactory::CharInsert(character);
+	MessageCapsule sendChar = MessageFactory::CharInsert(character, isLast);
 	sendChar->send(socket);
 }
 
@@ -489,7 +489,7 @@ void Client::listModified(TextBlockID blockId, TextListID listId, QTextListForma
 void Client::receiveChar(MessageCapsule message) {
 
 	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(message.get());
-	emit recivedSymbol(recivechar->getSymbol());
+	emit recivedSymbol(recivechar->getSymbol(), recivechar->getIsLast());
 }
 
 void Client::deleteChar(MessageCapsule message) {

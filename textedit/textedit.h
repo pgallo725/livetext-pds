@@ -73,7 +73,7 @@ signals:
 	void openEditProfile();
 	void accountUpdate(QString nickname, QImage image, QString password);
 	void charDeleted(int position);
-	void charInserted(QChar ch, QTextCharFormat format, int position);
+	void charInserted(QChar ch, QTextCharFormat format, int position, bool isLast);
 	void generateExtraSelection();
 	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
 	void symbolFormatChanged(int position, QTextCharFormat fmt);

@@ -8,8 +8,8 @@ CharInsertMessage::CharInsertMessage()
 {
 }
 
-CharInsertMessage::CharInsertMessage(Symbol symbol)
-	: Message(CharInsert), m_symbol(symbol)
+CharInsertMessage::CharInsertMessage(Symbol symbol, bool isLast)
+	: Message(CharInsert), m_symbol(symbol), m_flag(isLast)
 {
 }
 
@@ -26,6 +26,11 @@ void CharInsertMessage::readFrom(QDataStream& stream)
 Symbol& CharInsertMessage::getSymbol()
 {
 	return m_symbol;
+}
+
+bool CharInsertMessage::getIsLast()
+{
+	return m_flag;
 }
 
 
