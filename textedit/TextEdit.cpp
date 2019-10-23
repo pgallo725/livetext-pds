@@ -1014,10 +1014,7 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	_extraCursor->setPosition(position);
 
 	//If block is in a list, remove from that list
-	QTextList* currentList = _extraCursor->currentList();
-	if (currentList) {
-		currentList->remove(_extraCursor->block());
-	}
+	removeBlockFromList(position);
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
@@ -1042,35 +1039,35 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Getting current block format
 	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
 
-	//Remove target bock from list
-	currentList->remove(blk);
+	if (currentList) {
+		//Remove target bock from list
+		currentList->remove(blk);
 
-	//Makes the index of the blockFormat object -1 --> Reset block format to default
-	blkFormat.setObjectIndex(-1);
+		//Makes the index of the blockFormat object -1 --> Reset block format to default
+		blkFormat.setObjectIndex(-1);
 
-	//Apply new format
-	_extraCursor->setBlockFormat(blkFormat);
+		//Apply new format
+		_extraCursor->setBlockFormat(blkFormat);
 
-	//Reload updated block format to send it to the server
-	blkFormat = _extraCursor->blockFormat();
+		//Reload updated block format to send it to the server
+		blkFormat = _extraCursor->blockFormat();
 
-	//Sends new block format to server
-	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
+		//Sends new block format to server
+		emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
+
+	}
 }
 
 void TextEdit::addBlockToList(int listPosition, int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	//If block is in a list, remove from that list
+	removeBlockFromList(blockPosition);
+
 	//Getting block at blockPosition
 	_extraCursor->setPosition(blockPosition);
 	QTextBlock blk = _extraCursor->block();
-
-	//If block is in a list, remove from that list
-	QTextList* currentBlockList = _extraCursor->currentList();
-	if (currentBlockList) {
-		currentBlockList->remove(blk);
-	}
 
 
 	//Getting list at listPosition
