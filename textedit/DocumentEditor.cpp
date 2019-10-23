@@ -6,6 +6,11 @@
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
+	qRegisterMetaType<TextBlockID>("TextBlockID");
+	qRegisterMetaType<TextBlock>("TextBlock");
+	qRegisterMetaType<TextListID>("TextListID");
+	qRegisterMetaType<TextList>("TextList");
+	qRegisterMetaType<Symbol>("Symbol");
 }
 
 void DocumentEditor::openDocument()
