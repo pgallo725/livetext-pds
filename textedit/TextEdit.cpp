@@ -1003,30 +1003,30 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-
-	//Debug
-	printDocumenText();
-
-	//Setting list indentation to 1 step
-	fmt.setIndent(1);
-
 	//Moving to desired position to create the list
 	_extraCursor->setPosition(position);
 
 	//If block is in a list, remove from that list
-	removeBlockFromList(position);
+	if (_extraCursor->currentList())
+		removeBlockFromList(position);
+
+	qDebug() << "Creating list at position " << position;
+
+	//Setting list indentation to 1 step
+	fmt.setIndent(1);
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
-
-	//Debug
-	printDocumenText();
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
+
+	qDebug() << "Removing block at position " << blockPosition;
+
+
 	//Moving to target block
 	_extraCursor->setPosition(blockPosition);
 
@@ -1062,13 +1062,15 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
-	//If block is in a list, remove from that list
-	removeBlockFromList(blockPosition);
+	qDebug() << "Add block at position " << blockPosition << " to list at position " << listPosition;
 
 	//Getting block at blockPosition
 	_extraCursor->setPosition(blockPosition);
 	QTextBlock blk = _extraCursor->block();
 
+	//If block is in a list, remove from that list
+	if (_extraCursor->currentList())
+		removeBlockFromList(blockPosition);
 
 	//Getting list at listPosition
 	_extraCursor->setPosition(listPosition);
@@ -1077,9 +1079,6 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 
 	//Add block to list
 	currentList->add(blk);
-
-	//Debug
-	printDocumenText();
 }
 
 
@@ -1400,11 +1399,8 @@ void TextEdit::clipboardDataChanged()
 *	Handle new char from server and delete char from server
 */
 
-void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded) {
-
-	//Debug
-	printDocumenText();
-
+void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
+{
 	//Handle character deletion
 	for (int i = 0; i < charsRemoved; ++i) {
 		emit charDeleted(position);
@@ -1490,10 +1486,6 @@ void TextEdit::removeChar(int position)
 
 	//Delete character
 	_extraCursor->deleteChar();
-
-
-	//Debug
-	printDocumenText();
 }
 
 /**************************** EXTRA CURSORS ****************************/
@@ -1664,7 +1656,7 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::printDocumenText()
 {
-	for (int i = 0; i <= textEdit->document()->characterCount(); i++) {
+	for (int i = 0; i < textEdit->document()->characterCount(); i++) {
 		qDebug() << textEdit->document()->characterAt(i);
 	}
 }

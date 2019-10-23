@@ -199,11 +199,11 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::charModified);
 	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::listModified);
 
-	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol);
-	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol);
-	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat);
-	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat);
-	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock);
+	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
+	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol, Qt::QueuedConnection);
+	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat, Qt::QueuedConnection);
+	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
+	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
 
 	//ADD DOCUMENT LOADING INTO EDITOR
 	openEditor();
