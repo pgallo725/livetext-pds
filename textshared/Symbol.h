@@ -43,3 +43,5 @@ public:
 	TextBlockID getBlockId();
 	qint32 getAuthorId();
 };
+
+Q_DECLARE_METATYPE(Symbol);

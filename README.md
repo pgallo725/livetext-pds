@@ -94,16 +94,16 @@ Secondary threads are created when a document is opened, which handle all editin
 
 # Security
 
-University assignment has no security requirements, but security issues are an interesting and important topic nowadays.
-We are concerning in this topics so we want to provide a basic way to exchange data in a safty way.
+Our University assignment has no security requirements, but security issues are an interesting and important topic nowadays.
+We care about it as we want to provide a basic way to exchange data in a safe way.
 
 First of all we set up [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) connections between the server and clients using a self-signed certificate.
-In this way all data flow in the network encripted and no one can see what is inside messages despite someone could sniff packets.
+In this way all data flow in the network is encripted and no one can see what are the inside messages if someone sniffed packets.
 
-If SSL connection is not enough, we provide a simple way to exchange critical data, as passwords, during Registration and Login operations. 
-We send to clients a random "nonce" within they hashed the password and sand back to the server.
+If SSL connection is not enough, we provide a simple way to exchange critical data, such as passwords, during Registration and Login operations. 
+We send to clients a random "nonce" within they hashed the password and sand it back to the server.
 
-User DataBase is also a critical point under security view, so we save all the password hashed with a "salt", which is also store in the DataBase.
+User DataBase is also a critical point under security view, so we save all the passwords hashed with a "salt", which is also stored in the DataBase.
 
 # Main functions code
 //TODO
