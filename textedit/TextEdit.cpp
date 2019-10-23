@@ -1013,6 +1013,12 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	//Moving to desired position to create the list
 	_extraCursor->setPosition(position);
 
+	//If block is in a list, remove from that list
+	QTextList* currentList = _extraCursor->currentList();
+	if (currentList) {
+		currentList->remove(_extraCursor->block());
+	}
+
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
@@ -1056,13 +1062,21 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
+	//Getting block at blockPosition
+	_extraCursor->setPosition(blockPosition);
+	QTextBlock blk = _extraCursor->block();
+
+	//If block is in a list, remove from that list
+	QTextList* currentBlockList = _extraCursor->currentList();
+	if (currentBlockList) {
+		currentBlockList->remove(blk);
+	}
+
+
 	//Getting list at listPosition
 	_extraCursor->setPosition(listPosition);
 	QTextList* currentList = _extraCursor->currentList();
 
-	//Getting block at blockPosition
-	_extraCursor->setPosition(blockPosition);
-	QTextBlock blk = _extraCursor->block();
 
 	//Add block to list
 	currentList->add(blk);
