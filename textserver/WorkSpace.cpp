@@ -6,7 +6,6 @@
 #include "ServerException.h"
 #include <SharedException.h>
 
-
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
 {
@@ -34,12 +33,12 @@ WorkSpace::~WorkSpace()
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
 
-	qDebug() << ">> Saving and unloading document" << doc->getURI().toString();
+	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Saving and unloading document " << doc->getURI().toString();
 
 	doc->save();			// Saving changes to the document before closing the workspace
 	doc->unload();			// Unload the document contents from memory until it gets re-opened
 
-	qDebug() << ">> (COMPLETED)" << endl;
+	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (COMPLETED)" << endl;
 }
 
 /****************************** CLIENT METHODS ******************************/
@@ -70,7 +69,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	editors.insert(socket, client);
 
-	qDebug() << ">> User" << client->getUsername() << "opened the document";
+	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] User " << client->getUsername() << " opened the document";
 }
 
 /* Read an incoming message on the workspace socket and process it */
@@ -89,11 +88,11 @@ void WorkSpace::readMessage()
 
 	socketBuffer.append(dataBuffer);
 
-	if (socketBuffer.bufferReadyRead()) 
+	if (socketBuffer.bufferReadyRead())
 	{
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
-		
+
 		try {
 			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
 			message->read(dataStream);
@@ -105,19 +104,19 @@ void WorkSpace::readMessage()
 			}
 			else
 			{
-				qDebug() << ">> (ERROR) Received unexpected message of type: " << mType;
+				qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (ERROR) Received unexpected message of type: " << mType;
 				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 				message->send(socket);
 			}
 		}
-		catch (MessageTypeException& mte) {
+		catch (MessageTypeException & mte) {
 			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
 			message->send(socket);
-			qDebug().noquote() << ">>" << mte.what();
+			qDebug().noquote().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] " << mte.what();
 			socketBuffer.clear();
 		}
-		catch (MessageException& mre) {
-			qDebug().noquote() << ">>" << mre.what();
+		catch (MessageException & mre) {
+			qDebug().noquote().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] " << mre.what();
 			socketBuffer.clear();
 			return;
 		}
@@ -145,8 +144,8 @@ void WorkSpace::clientDisconnection()
 	editors.remove(socket);
 	socket->close();
 	socket->deleteLater();
-	qDebug() << ">> Connection from client" << c->getUsername() << "was closed abruptly";
-	
+	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Connection from client " << c->getUsername() << " was closed abruptly";
+
 	// Make this user avaiable to be logged again	
 	emit userDisconnected(c->getUsername());
 
@@ -162,7 +161,7 @@ void WorkSpace::clientDisconnection()
 void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	if (socketError != QAbstractSocket::RemoteHostClosedError)
-		qDebug() << ">> (ERROR) Socket error: " << socketError;
+		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (ERROR) Socket error: " << socketError;
 }
 
 /****************************** DOCUMENT METHODS ******************************/
@@ -173,15 +172,15 @@ void WorkSpace::documentSave()
 	try
 	{
 		// Save the document's contents to file
-		qDebug() << ">> Saving document" << doc->getURI().toString();
+		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Saving document " << doc->getURI().toString();
 		doc->save();
 
-		qDebug() << ">> (SAVE COMPLETED)";
+		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (SAVE COMPLETED)";
 		nFails = 0;
 	}
-	catch (DocumentException& de) 
+	catch (DocumentException & de)
 	{
-		qDebug().noquote() << ">" << de.what() << ", fails count =" << nFails ;
+		qDebug().noquote().nospace() << qSetFieldWidth(7) << "> [TID:" << QThread::currentThreadId() << "] " << de.what() << ", fails count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Move Workspace clients back to TcpServer
 			for (QSharedPointer<Client> client : editors.values()) {
@@ -239,8 +238,8 @@ void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsul
 		dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
 			user->getNickname(), user->getIcon()), clientSocket);
 	}
-	
-	if(clientSocket->isOpen())
+
+	if (clientSocket->isOpen())
 		msg->send(clientSocket);
 }
 
@@ -251,7 +250,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug() << ">> User" << client->getUsername() << "closed the document";
+	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] User " << client->getUsername() << " closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
