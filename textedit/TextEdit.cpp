@@ -353,48 +353,48 @@ void TextEdit::setupTextActions()
 
 	//Lists
 	QMenu* menuList = new QMenu("List menu");
-	listStandard = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
-	listStandard->setCheckable(true);
-	listStandard->setChecked(true);
+	listActions[standard] = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
+	listActions[standard]->setCheckable(true);
+	listActions[standard]->setChecked(true);
 
-	listDisc = menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
-	listDisc->setCheckable(true);
-	listDisc->setChecked(false);
+	listActions[disc] = menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
+	listActions[disc]->setCheckable(true);
+	listActions[disc]->setChecked(false);
 
-	listCircle = menuList->addAction(QIcon(rsrcPath + "/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
-	listCircle->setCheckable(true);
-	listCircle->setChecked(false);
+	listActions[circle] = menuList->addAction(QIcon(rsrcPath + "/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
+	listActions[circle]->setCheckable(true);
+	listActions[circle]->setChecked(false);
 
-	listSquare = menuList->addAction(QIcon(rsrcPath + "/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
-	listSquare->setCheckable(true);
-	listSquare->setChecked(false);
+	listActions[square] = menuList->addAction(QIcon(rsrcPath + "/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
+	listActions[square]->setCheckable(true);
+	listActions[square]->setChecked(false);
 
-	listDecimal = menuList->addAction(QIcon(rsrcPath + "/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
-	listDecimal->setCheckable(true);
-	listDecimal->setChecked(false);
+	listActions[decimal] = menuList->addAction(QIcon(rsrcPath + "/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
+	listActions[decimal]->setCheckable(true);
+	listActions[decimal]->setChecked(false);
 
-	listAlpha = menuList->addAction(QIcon(rsrcPath + "/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
-	listAlpha->setCheckable(true);
-	listAlpha->setChecked(false);
+	listActions[alpha] = menuList->addAction(QIcon(rsrcPath + "/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
+	listActions[alpha]->setCheckable(true);
+	listActions[alpha]->setChecked(false);
 
-	listAlphaUpper = menuList->addAction(QIcon(rsrcPath + "/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
-	listAlphaUpper->setCheckable(true);
-	listAlphaUpper->setChecked(false);
+	listActions[alphaupper] = menuList->addAction(QIcon(rsrcPath + "/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
+	listActions[alphaupper]->setCheckable(true);
+	listActions[alphaupper]->setChecked(false);
 
-	listRoman = menuList->addAction(QIcon(rsrcPath + "/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
-	listRoman->setCheckable(true);
-	listRoman->setChecked(false);
+	listActions[roman] = menuList->addAction(QIcon(rsrcPath + "/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
+	listActions[roman]->setCheckable(true);
+	listActions[roman]->setChecked(false);
 
-	listRomanUpper = menuList->addAction(QIcon(rsrcPath + "/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
-	listRomanUpper->setCheckable(true);
-	listRomanUpper->setChecked(false);
+	listActions[romanupper] = menuList->addAction(QIcon(rsrcPath + "/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
+	listActions[romanupper]->setCheckable(true);
+	listActions[romanupper]->setChecked(false);
 
 
 	//Setup ToolButton
 	listButton = new QToolButton();
 	listButton->setMenu(menuList);
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
-	listButton->setDefaultAction(listDisc);
+	listButton->setDefaultAction(listActions[disc]);
 
 	listButton->setCheckable(true);
 
@@ -757,238 +757,13 @@ void TextEdit::listStyle(int styleIndex)
 	//Create standard style (undefined)
 	QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
 
-	//Switch between list styles
-	switch (styleIndex) {
-	case standard:
-		listStandard->setChecked(true);
-		listDisc->setChecked(false);
-		listCircle->setChecked(false);
-		listSquare->setChecked(false);
-		listDecimal->setChecked(false);
-		listAlpha->setChecked(false);
-		listAlphaUpper->setChecked(false);
-		listRoman->setChecked(false);
-		listRomanUpper->setChecked(false);
-
-		listButton->setChecked(false);
-		listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		break;
-
-	case disc:
-		if (!listDisc->isChecked()) {
-			listButton->setChecked(false);
-			listDisc->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(true);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListDisc;
-			listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
-		};
-		break;
-	case circle:
-		if (!listCircle->isChecked()) {
-			listButton->setChecked(false);
-			listCircle->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(true);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListCircle;
-			listButton->setIcon(QIcon(rsrcPath + "/circle.png"));
-		};
-		break;
-	case square:
-		if (!listSquare->isChecked()) {
-			listButton->setChecked(false);
-			listSquare->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(true);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListSquare;
-			listButton->setIcon(QIcon(rsrcPath + "/square.png"));
-		};
-		break;
-	case decimal:
-		if (!listDecimal->isChecked()) {
-			listButton->setChecked(false);
-			listDecimal->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(true);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListDecimal;
-			listButton->setIcon(QIcon(rsrcPath + "/decimal.png"));
-		};
-		break;
-
-	case alpha:
-		if (!listAlpha->isChecked()) {
-			listButton->setChecked(false);
-			listAlpha->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(true);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListLowerAlpha;
-			listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
-		};
-		break;
-
-	case alphaupper:
-		if (!listAlphaUpper->isChecked()) {
-			listButton->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(true);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListUpperAlpha;
-			listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
-		};
-		break;
-
-	case roman:
-		if (!listRoman->isChecked()) {
-			listButton->setChecked(false);
-			listRoman->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(true);
-			listRomanUpper->setChecked(false);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListLowerRoman;
-			listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
-		};
-		break;
-
-	case romanupper:
-		if (!listRomanUpper->isChecked()) {
-			listButton->setChecked(false);
-			listRomanUpper->setChecked(false);
-			listStandard->setChecked(true);
-
-			listButton->setIcon(QIcon(rsrcPath + "/list.png"));
-
-		}
-		else
-		{
-			listStandard->setChecked(false);
-			listDisc->setChecked(false);
-			listCircle->setChecked(false);
-			listSquare->setChecked(false);
-			listDecimal->setChecked(false);
-			listAlpha->setChecked(false);
-			listAlphaUpper->setChecked(false);
-			listRoman->setChecked(false);
-			listRomanUpper->setChecked(true);
-
-			listButton->setChecked(true);
-			style = QTextListFormat::ListUpperRoman;
-			listButton->setIcon(QIcon(rsrcPath + "/romanupper.png"));
-		};
-		break;
-	default:
-		break;
+	//Check/Uncheck correct list menu entry and save style
+	if (listActions[styleIndex]->isChecked()) {
+		toggleCheckList(styleIndex);
+		style = listStyles[styleIndex];
+	}
+	else {
+		toggleCheckList(standard);
 	}
 
 	//Set new list style
@@ -1270,66 +1045,43 @@ void TextEdit::cursorPositionChanged()
 
 	//Lists
 	QTextList* list = textEdit->textCursor().currentList();
+	
 	//Checks list format (if in list) and updates GUI according to format
 	if (list) {
-		switch (list->format().style()) {
-		case QTextListFormat::ListDisc:
-			listButton->setChecked(true);
-			listDisc->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/disc.png"));
-			break;
-		case QTextListFormat::ListCircle:
-			listButton->setChecked(true);
-			listCircle->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/circle.png"));
-			break;
-		case QTextListFormat::ListSquare:
-			listButton->setChecked(true);
-			listSquare->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/square.png"));
-			break;
-		case QTextListFormat::ListDecimal:
-			listButton->setChecked(true);
-			listDecimal->setChecked(true);
-			listButton->setIcon(QIcon(rsrcPath + "/decimal.png"));
-			break;
-		case QTextListFormat::ListLowerAlpha:
-			listButton->setChecked(true);
-			listAlpha->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/alpha.png"));
-			break;
-		case QTextListFormat::ListUpperAlpha:
-			listButton->setChecked(true);
-			listStandard->setChecked(false);
-			listAlphaUpper->setChecked(true);
-			listButton->setIcon(QIcon(rsrcPath + "/alphaupper.png"));
-			break;
-		case QTextListFormat::ListLowerRoman:
-			listButton->setChecked(true);
-			listRoman->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/roman.png"));
-			break;
-		case QTextListFormat::ListUpperRoman:
-			listButton->setChecked(true);
-			listRomanUpper->setChecked(true);
-			listStandard->setChecked(false);
-			listButton->setIcon(QIcon(rsrcPath + "/romanupper.png"));
-			break;
-		default:
-			break;
+		for (int i = 0; i < 9; i++) {
+			if (list->format().style() == listStyles[i]) {
+				//Find list format to update GUI correctly
+				toggleCheckList(i);
+				break;
+			}
 		}
 	}
 	else {
-		listButton->setChecked(false);
-		listStandard->setChecked(true);
-		listButton->setIcon(QIcon(rsrcPath + "/list.png"));
+		toggleCheckList(standard);
 	}
 }
+
+//Checks only listType menu entry in list menu
+void TextEdit::toggleCheckList(int listType)
+{
+
+	//All other entries are unchecked
+	for (int i = 0; i < 9; ++i) {
+		listActions[i]->setChecked(i == listType);
+	}
+
+	//Change behavior of main list button
+	if (listType == standard)
+		listButton->setDefaultAction(listActions[disc]);
+	else
+		listButton->setDefaultAction(listActions[listType]);
+
+	//Change icon of list button according to format
+	listButton->setChecked(listType != standard);
+	listButton->setIcon(QIcon(rsrcPath + listIconPath[listType]));
+}
+
+
 
 
 void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
@@ -1660,3 +1412,4 @@ void TextEdit::printDocumenText()
 		qDebug() << textEdit->document()->characterAt(i);
 	}
 }
+

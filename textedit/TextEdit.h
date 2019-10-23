@@ -134,10 +134,17 @@ private:
 	//DEBUG
 	void printDocumenText();
 
+	//LISTS
+	void toggleCheckList(int listType);
+
+
 
 	//List type
 	QToolButton* listButton;
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
+	QString listIconPath[9] = { "/list.png", "/disc.png", "/circle.png", "/square.png", "/decimal.png", "/alpha.png", "/alphaupper.png", "/roman.png", "/romanupper.png" };
+	QTextListFormat::Style listStyles[9] = { QTextListFormat::ListStyleUndefined, QTextListFormat::ListDisc, QTextListFormat::ListCircle, QTextListFormat::ListSquare, QTextListFormat::ListDecimal, QTextListFormat::ListLowerAlpha, QTextListFormat::ListUpperAlpha, QTextListFormat::ListLowerRoman, QTextListFormat::ListUpperRoman };
+	QAction* listActions[9];
 
 	//Users
 	QMap<qint32, Presence*> onlineUsers;
@@ -163,17 +170,6 @@ private:
 	QAction* actionUndo;
 	QAction* actionRedo;
 	QAction* actionHighlightUsers;
-
-	//Lists actions
-	QAction* listStandard;
-	QAction* listDisc;
-	QAction* listCircle;
-	QAction* listSquare;
-	QAction* listDecimal;
-	QAction* listAlpha;
-	QAction* listAlphaUpper;
-	QAction* listRoman;
-	QAction* listRomanUpper;
 
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;
