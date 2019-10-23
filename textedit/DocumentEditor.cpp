@@ -136,6 +136,10 @@ void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 
 void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
 {
+	// Early out if the local state is already aligned with the server's
+	if (_document.getBlock(blockId).getFormat() == fmt)
+		return;
+
 	qDebug().nospace() << "Remote format change of block {" << blockId.getBlockNumber()
 		<< ", " << blockId.getAuthorId() << "}";
 
@@ -157,6 +161,10 @@ void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)
 
 void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)
 {
+	// Early out if the local state is already aligned with the server's
+	if (_document[position].getFormat() == fmt)
+		return;
+
 	qDebug().nospace() << "Remote format change of character: " << _document[position].getChar();
 
 	int pos = _document.formatSymbol(position, fmt);
