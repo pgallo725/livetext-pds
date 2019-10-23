@@ -11,6 +11,9 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<TextListID>("TextListID");
 	qRegisterMetaType<TextList>("TextList");
 	qRegisterMetaType<Symbol>("Symbol");
+	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
+	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
+	qRegisterMetaType<QTextListFormat>("QTextListFormat");
 }
 
 void DocumentEditor::openDocument()
