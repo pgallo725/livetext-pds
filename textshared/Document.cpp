@@ -162,8 +162,7 @@ void Document::load()
 	{
 		QDataStream docFileStream(&file);
 
-		// Load the document content (_text vector<Symbol>) from file
-		// using built-in Qt Vector and StringList deserialization
+		// Load the document content from file via deserialization
 		if (!docFileStream.atEnd())
 			docFileStream >> editors >> _blockCounter >> _blocks 
 				>> _listCounter >> _lists >> _text;
@@ -199,7 +198,6 @@ void Document::save()
 		QDataStream docFileStream(&file);
 
 		// Write the the current document content to file
-		// using built-in Qt Vector and StringList serialization
 		docFileStream << editors << _blockCounter << _blocks 
 			<< _listCounter << _lists << _text;
 
@@ -251,13 +249,13 @@ Symbol& Document::operator[](int pos)
 
 int Document::insert(Symbol& s)
 {
-	int insertionIndex = -binarySearch(s._fPos);	// Search for the insertion position
-	assert(insertionIndex >= 0);					// should be a negative index (for a non-existing Symbol)
+	int insertPos = -binarySearch(s._fPos);		// Search for the insertion position
+	assert(insertPos >= 0);						// should be a negative index (for a non-existing Symbol)
 
 	// Check if the inserted symbol implies the creation of a new block
-	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertionIndex < _text.length())
-		|| (insertionIndex == _text.length() && _text[insertionIndex-1].getChar() == QChar::ParagraphSeparator
-		&& s.getChar() != QChar::Null))
+	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertPos < _text.length())
+		|| (insertPos == _text.length() && _text[insertPos-1].getChar() == QChar::ParagraphSeparator 
+			&& s.getChar() != QChar::Null))
 	{
 		if (!s.getBlockId())	// (symbol received from Qt editor)
 		{
@@ -276,20 +274,20 @@ int Document::insert(Symbol& s)
 		}
 
 		// Check if it's needed to split blocks
-		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertionIndex != _text.length())
+		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertPos != _text.length())
 		{
 			TextBlock& block = _blocks[s.getBlockId()];
-			TextBlock& prevBlock = _blocks[getBlockAt(insertionIndex)];
+			TextBlock& prevBlock = _blocks[getBlockAt(insertPos)];
 
 			Symbol s2(s);	// Copy the symbol to avoid modifying the original one (which has the block ID)
 
 			// The paragraph delimiter belongs to the previous block
 			s2.setBlock(nullptr);
 			addCharToBlock(s2, prevBlock);
-			_text.insert(_text.begin() + insertionIndex, s2);
+			_text.insert(_text.begin() + insertPos, s2);
 
 			// All the following symbols of that paragraph are assigned to the new block
-			for (int i = binarySearch(prevBlock.end()); i > insertionIndex; i--) {
+			for (int i = binarySearch(prevBlock.end()); i > insertPos; i--) {
 				addCharToBlock(_text[i], block);
 			}
 		}
@@ -297,24 +295,19 @@ int Document::insert(Symbol& s)
 		{
 			// Insert the symbol in the document
 			addCharToBlock(s, _blocks[s.getBlockId()]);
-			_text.insert(_text.begin() + insertionIndex, s);
+			_text.insert(_text.begin() + insertPos, s);
 		}
 	}
-	else if (insertionIndex == _text.length())	  // Inserting a symbol at the last position in the document
-	{
-		TextBlockID blockId = getBlockAt(insertionIndex - 1);	// inherit the block ID from the previous char
-		addCharToBlock(s, _blocks[blockId]);
-		_text.insert(_text.begin() + insertionIndex, s);
-	}
-	else	// Regular symbol insertion
+	else	// Inserting a regular symbol in the document
 	{
 		// Assign the character to the block on which it is inserted
-		TextBlockID blockId = getBlockAt(insertionIndex);
+		TextBlockID blockId = (insertPos == _text.length() ?
+			getBlockAt(insertPos - 1) :	getBlockAt(insertPos));		// the last char belongs to the previous block
 		addCharToBlock(s, _blocks[blockId]);
-		_text.insert(_text.begin() + insertionIndex, s);
+		_text.insert(_text.begin() + insertPos, s);
 	}
 
-	return insertionIndex;
+	return insertPos;
 }
 
 int Document::remove(QVector<qint32> fPos)
