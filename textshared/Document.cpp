@@ -360,21 +360,24 @@ int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFor
 {
 	TextBlock& block = _blocks[blockId];
 
-	if (listId && !_lists.contains(listId))
+	if (listId)
 	{
-		// Create the list if the id is unknown
-		_lists.insert(listId, TextList(listId, fmt));
-		_listCounter++;									// keep the list counters aligned
-	}
-	TextList& list = _lists[listId];
+		if (!_lists.contains(listId))
+		{
+			// Create the list if the id is unknown
+			_lists.insert(listId, TextList(listId, fmt));
+			_listCounter++;									// keep the list counters aligned
+		}
 
-	if (!listId) {
-		// Remove the block from the list
-		removeBlockFromList(block, list);
-	}
-	else {
 		// Add the block to the list
+		TextList& list = _lists[listId];
 		addBlockToList(block, list);
+	}
+	else
+	{
+		// Remove the block from the list
+		TextList& list = _lists[block.getListId()];
+		removeBlockFromList(block, list);
 	}
 
 	return getBlockPosition(blockId);
@@ -476,8 +479,8 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 
 	if (s._fPos == b.begin() && s._fPos == b.end())
 	{
-		/* qDebug().nospace() << "Delete block {" << b.getId().getBlockNumber()
-			<< ", " << b.getId().getAuthorId() << "}"; */
+		qDebug().nospace() << "Delete block {" << b.getId().getBlockNumber()
+			<< ", " << b.getId().getAuthorId() << "}";
 
 		// Completely remove the block when it's empty
 		if (b.getListId()) {
@@ -553,17 +556,17 @@ void Document::addBlockToList(TextBlock& b, TextList& l)
 
 void Document::removeBlockFromList(TextBlock& b, TextList& l)
 {
-	/* qDebug().nospace() << "Remove block {" << b.getId().getBlockNumber()
+	qDebug().nospace() << "Remove block {" << b.getId().getBlockNumber()
 		<< ", " << b.getId().getAuthorId() << "} from list {" << l.getId().getListNumber()
-		<< ", " << l.getId().getAuthorId() << "}"; */
+		<< ", " << l.getId().getAuthorId() << "}";
 
 	b.setList(nullptr);
 	l.removeBlock(b.getId());
 
 	if (l.isEmpty())
 	{
-		/* qDebug().nospace() << "Delete list {" << l.getId().getListNumber()
-			<< ", " << l.getId().getAuthorId() << "}"; */
+		qDebug().nospace() << "Delete list {" << l.getId().getListNumber()
+			<< ", " << l.getId().getAuthorId() << "}"; 
 
 		// Delete the list when it's empty
 		_lists.remove(l.getId());
