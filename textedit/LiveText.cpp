@@ -155,8 +155,7 @@ void LiveText::openDocumentCompleted(Document doc)
 {
 	_landingPage->stopLoadingAnimation();
 
-	_textEdit = new TextEdit();
-	_textEdit->setUser(&_user);
+	_textEdit = new TextEdit(_user);
 
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
@@ -173,7 +172,6 @@ void LiveText::openDocumentCompleted(Document doc)
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
 	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
-	connect(_textEdit, &TextEdit::accountUpdate, this, &LiveText::sendAccountUpdate);
 	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile);
 
 

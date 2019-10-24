@@ -27,9 +27,7 @@
 #include <QMimeData>
 #include <QScrollBar>
 #include <QRectF>
-#include <QAbstractTextDocumentLayout>
 #include <QToolButton>
-#include <QDateTime>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -52,7 +50,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
+TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
 {
 	//Setting window title
 	setWindowTitle(QCoreApplication::applicationName());
@@ -142,6 +140,9 @@ TextEdit::TextEdit(QWidget* parent) : QMainWindow(parent), timerId(-1)
 
 	//Setup cursor position
 	_currentCursorPosition = -1;
+
+	//Generate new presence for current user
+	newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
 }
 
 /**************************** GUI SETUP ****************************/
@@ -498,16 +499,6 @@ void TextEdit::setupOnlineUsersActions()
 }
 
 
-void TextEdit::setUser(User* user)
-{
-	//Set current user
-	_user = user;
-
-	//Set user on online users toolbar
-	newPresence(_user->getUserId(), _user->getUsername(), _user->getIcon());
-}
-
-
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
@@ -584,6 +575,7 @@ void TextEdit::askBeforeCloseDocument()
 void TextEdit::closeDocumentError(QString error)
 {
 	statusBar()->showMessage(error);
+	startTimer(timerId);
 }
 
 
@@ -793,14 +785,12 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
+	cursorPositionChanged();
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
-
-	qDebug() << "Removing block at position " << blockPosition;
-
 
 	//Moving to target block
 	_extraCursor->setPosition(blockPosition);
@@ -808,13 +798,15 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Getting current list
 	QTextList* currentList = _extraCursor->currentList();
 
-	//Getting current block
-	QTextBlock blk = _extraCursor->block();
-
-	//Getting current block format
-	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
-
 	if (currentList) {
+		qDebug() << "Removing block at position " << blockPosition;
+
+		//Getting current block
+		QTextBlock blk = _extraCursor->block();
+
+		//Getting current block format
+		QTextBlockFormat blkFormat = _extraCursor->blockFormat();
+
 		//Remove target bock from list
 		currentList->remove(blk);
 
@@ -831,6 +823,8 @@ void TextEdit::removeBlockFromList(int blockPosition)
 		emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
 	}
+
+	cursorPositionChanged();
 }
 
 void TextEdit::addBlockToList(int listPosition, int blockPosition)
@@ -854,6 +848,8 @@ void TextEdit::addBlockToList(int listPosition, int blockPosition)
 
 	//Add block to list
 	currentList->add(blk);
+
+	cursorPositionChanged();
 }
 
 
@@ -868,8 +864,11 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 	_extraCursor->setPosition(position);
 
+	QTextBlockFormat format;
+	format.setAlignment(fmt.alignment());
+
 	//Sets block format in current block
-	_extraCursor->mergeBlockFormat(fmt);
+	_extraCursor->mergeBlockFormat(format);
 
 	//Call alignment changed for update GUI
 	alignmentChanged(fmt.alignment());
@@ -1045,7 +1044,7 @@ void TextEdit::cursorPositionChanged()
 
 	//Lists
 	QTextList* list = textEdit->textCursor().currentList();
-	
+
 	//Checks list format (if in list) and updates GUI according to format
 	if (list) {
 		for (int i = 0; i < 9; i++) {
@@ -1161,34 +1160,34 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	QTextBlockFormat blockFmt;
 
 	for (int i = position; i < position + charsAdded; ++i) {
-		_extraCursor->setPosition(i);
-
-		//Getting QTextBlockFormat from cursor
-		blockFmt = _extraCursor->blockFormat();
-
-		//Ricavo il carattere inserito
-		QChar ch = textEdit->document()->characterAt(i);
-
-		//Setto il cursore alla posizione+1 perchè il formato (charFormat) viene verificato sul carattere
-		//precedente al cursore.
+		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(i + 1);
 
 		//Getting QTextCharFormat from cursor
 		QTextCharFormat fmt = _extraCursor->charFormat();
 
+		//Reset position to i to get blockformat
+		_extraCursor->setPosition(i);
 
-		//Emit signal to DocumentEditor to insert a character
+		//Getting QTextBlockFormat from cursor
+		blockFmt = _extraCursor->blockFormat();
+
+		//Getting inserted character
+		QChar ch = textEdit->document()->characterAt(i);
+
+		//Emit signal to DocumentEditor to insert a character if is not a null character '\0'
 		if (ch != QChar::Null) {
+			//Boolean flag to check id it's last '8233' of the document (eof)
 			bool isLast = (ch == QChar::ParagraphSeparator) && (i == textEdit->document()->characterCount() - 1);
 			emit charInserted(ch, fmt, i, isLast);
 		}
 
-
+		//If it is a paragraph separator ('8233')
 		if (ch == QChar::ParagraphSeparator) {
+
+			//Update block format to server
 			emit blockFormatChanged(i, i, blockFmt);
 
-			//Check if current block is in a list
-			_extraCursor->setPosition(i);
 
 			//Getting current list (if present)
 			QTextList* textList = _extraCursor->currentList();
@@ -1269,7 +1268,7 @@ void TextEdit::redrawAllCursors() {
 	QMap<qint32, Presence*>::iterator it;
 
 	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		if (it.key() != _user->getUserId()) {
+		if (it.key() != _user.getUserId()) {
 
 			Presence* p = it.value();
 
