@@ -32,7 +32,7 @@ void DocumentEditor::openDocument()
 		blocks.removeFirst();
 
 		foreach(TextBlockID id, blocks) {
-			_textedit->addBlockToList(firstListBlockPosition, _document.getBlockPosition(id));
+			_textedit->addBlockToList(_document.getBlockPosition(id), firstListBlockPosition);
 		}
 	}
 
@@ -208,7 +208,7 @@ void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QText
 	else if (_document._lists.contains(listId))
 	{
 		// Add the block to an existing list
-		_textedit->addBlockToList(_document.getListPosition(listId), blockPos);
+		_textedit->addBlockToList(blockPos, _document.getListPosition(listId));
 	}
 	else
 	{
@@ -392,7 +392,7 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 			else
 			{
 				// Following blocks will be appended to the list
-				_textedit->addBlockToList(_document.getListPosition(newListId), _document.getBlockPosition(blockId));
+				_textedit->addBlockToList(_document.getBlockPosition(blockId), _document.getListPosition(newListId));
 			}
 
 			_document.addBlockToList(block, list);
