@@ -168,6 +168,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 	connect(_textEdit, &TextEdit::createNewList, _docEditor, &DocumentEditor::createList);
 	connect(_textEdit, &TextEdit::assignBlockToList, _docEditor, &DocumentEditor::assignBlockToList);
+	connect(_textEdit, &TextEdit::setBlockNoList, _docEditor, &DocumentEditor::removeBlockFromList);
 
 	//TEXTEDIT - LIVETEXT
 	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);

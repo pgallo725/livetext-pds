@@ -41,6 +41,7 @@ public slots:
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 	void createList(int position, QTextListFormat fmt);
 	void assignBlockToList(int blockPosition, int listPosition);
+	void removeBlockFromList(int blockPosition);
 	void toggleList(int start, int end, QTextListFormat fmt);
 
 

@@ -186,7 +186,13 @@ void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QText
 {
 	// Early out if the local state is already aligned with the server's
 	if (_document.getBlock(blockId).getListId() == listId)
+	{
+		if (!listId) {	// removeBlockFromList is dispatched anyways, to ensure Qt document consistency between clients
+			_textedit->removeBlockFromList(_document.getBlockPosition(blockId));
+		}
+
 		return;
+	}
 
 	qDebug().nospace() << "Remote assignment of block {" << blockId.getBlockNumber()
 		<< ", " << blockId.getAuthorId() << "} to list {" << listId.getListNumber()
@@ -256,6 +262,24 @@ void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)
 		// Notify other clients
 		emit blockListChanged(blockId, listId, list.getFormat());
 	}
+}
+
+
+// Called by textedit when a block is set to not be part of a list
+void DocumentEditor::removeBlockFromList(int blockPosition)
+{
+	// Get the specified block
+	TextBlockID blockId = _document.getBlockAt(blockPosition);
+
+	TextBlock& block = _document.getBlock(blockId);
+	if (block.getListId())
+	{
+		TextList& list = _document.getList(block.getListId());
+		_document.removeBlockFromList(block, list);
+	}
+
+	// Notify other clients
+	emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
 }
 
 

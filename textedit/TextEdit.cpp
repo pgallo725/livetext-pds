@@ -1189,13 +1189,12 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 			emit blockFormatChanged(i, i, blockFmt);
 
 
-			//Getting current list (if present)
+			//Getting current block and list (if present)
+			QTextBlock currentBlock = _extraCursor->block();
 			QTextList* textList = _extraCursor->currentList();
 
-			if (textList) {
-				//Getting current block
-				QTextBlock currentBlock = _extraCursor->block();
-
+			if (textList)
+			{
 				//Getting first block of the list
 				QTextBlock firstListBlock = textList->item(0);
 
@@ -1206,6 +1205,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 				else
 					emit assignBlockToList(currentBlock.position(), firstListBlock.position());
 			}
+			else emit setBlockNoList(currentBlock.position());
 		}
 	}
 

@@ -178,6 +178,7 @@ signals:
 	void toggleList(int start, int end, QTextListFormat fmt);
 	void createNewList(int position, QTextListFormat fmt);
 	void assignBlockToList(int blockPosition, int listPosition);
+	void setBlockNoList(int blockPosition);
 
 
 	/* ----------------------- SLOTS ----------------------- */
