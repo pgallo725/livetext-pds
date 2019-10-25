@@ -25,13 +25,18 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
 		mngr.centerAndResize(0.7, 0.8);
 	else
-		mngr.centerAndResize(0.45, 0.55);
+		mngr.centerAndResize(0.5, 0.55);
 
 
 	//Connects of ui elements
 	connect(ui->pushButton_updateProfile, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonUpdateClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonBrowseClicked);
 	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
+
+	connect(ui->lineEdit_editNick, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
+	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
+	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
+	connect(ui->lineEdit_editPswConf, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 
 	//Update GUI according to user info
 	updateInfo();
