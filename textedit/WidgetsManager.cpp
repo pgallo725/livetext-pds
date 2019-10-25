@@ -6,7 +6,8 @@
 
 WidgetsManager::WidgetsManager(QWidget* widget) : _widget(widget)
 {
-	//Nothing to do
+	//Sets widget icon
+	_widget->setWindowIcon(QIcon(":/images/misc/logo.png"));
 }
 
 WidgetsManager::~WidgetsManager()

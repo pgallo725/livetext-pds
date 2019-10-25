@@ -12,12 +12,9 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-const QString rsrcPath = ":/images/win";
+const QString rsrcPath = ":/images";
 
 ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow), _user(user), mngr(WidgetsManager(this)) {
-	//Window icon
-	setWindowIcon(QIcon(":/images/logo.png"));
-
 	//UI setup
 	ui->setupUi(this);
 
@@ -155,7 +152,7 @@ void ProfileEditWindow::showUserIcon(QString path)
 	ui->label_incorrect_edit->setText("Please choose a valid image file");
 
 	//And resets default profile icon
-	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
+	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 

@@ -43,7 +43,7 @@ private:
 
 	//GUI update and list style easy application
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
-	QString listIconPath[9] = { "/list.png", "/disc.png", "/circle.png", "/square.png", "/decimal.png", "/alpha.png", "/alphaupper.png", "/roman.png", "/romanupper.png" };
+	QString listIconPath[9] = { "/editor/list.png", "/editor/disc.png", "/editor/circle.png", "/editor/square.png", "/editor/decimal.png", "/editor/alpha.png", "/editor/alphaupper.png", "/editor/roman.png", "/editor/romanupper.png" };
 	QTextListFormat::Style listStyles[9] = { QTextListFormat::ListStyleUndefined, QTextListFormat::ListDisc, QTextListFormat::ListCircle, QTextListFormat::ListSquare, QTextListFormat::ListDecimal, QTextListFormat::ListLowerAlpha, QTextListFormat::ListUpperAlpha, QTextListFormat::ListLowerRoman, QTextListFormat::ListUpperRoman };
 
 	//Current cursor position
@@ -141,7 +141,7 @@ public:
 	void setCurrentFileName(QString fileName, QString uri);
 
 	//REMOTE: character insertion/deletion
-	void newChar(QChar ch, QTextCharFormat format, int position, qint32 user = -1);
+	void newChar(QChar ch, QTextCharFormat format, int position);
 	void removeChar(int position);
 
 	//REMOTE: Apply text block format

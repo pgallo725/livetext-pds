@@ -11,7 +11,6 @@
 OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow), _uri(uri) {
 	//Window name and logo
 	setWindowTitle(tr("Open from URI"));
-	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//UI setup
 	ui->setupUi(this);
