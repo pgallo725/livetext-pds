@@ -1,7 +1,5 @@
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QCommandLineParser>
-#include <QCommandLineOption>
 
 #include "LiveText.h"
 

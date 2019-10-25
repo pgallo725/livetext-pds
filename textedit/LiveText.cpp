@@ -125,14 +125,6 @@ void LiveText::openDocumentCompleted(Document doc)
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
 
 
-	//If opening document is not present in user data, it updates data
-	if (!_user.getDocuments().contains(doc.getURI())) {
-		_user.addDocument(doc.getURI());
-	}
-
-	//Load document in editor
-	_docEditor->openDocument();
-
 	/********************** CONNECTS **********************/
 
 	//TEXTEDIT - DOCUMENTEDITOR
@@ -168,11 +160,21 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::charModified);
 	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::listModified);
 
+
+	//CLIENT - DOCUMENTEDITOR
 	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol, Qt::QueuedConnection);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat, Qt::QueuedConnection);
 	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
 	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
+
+	//If opening document is not present in user data, it updates data
+	if (!_user.getDocuments().contains(doc.getURI())) {
+		_user.addDocument(doc.getURI());
+	}
+
+	//Load document in editor
+	_docEditor->openDocument();
 
 	//Opens text editor
 	openEditor();

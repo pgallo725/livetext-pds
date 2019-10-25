@@ -9,8 +9,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QStandardPaths>
-#include <QMovie>
-#include <QSplashScreen>
 #include <QTextStream>
 #include <QApplication>
 #include <QDesktopWidget>

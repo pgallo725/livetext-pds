@@ -45,7 +45,7 @@ private:
 	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
 	QString listIconPath[9] = { "/list.png", "/disc.png", "/circle.png", "/square.png", "/decimal.png", "/alpha.png", "/alphaupper.png", "/roman.png", "/romanupper.png" };
 	QTextListFormat::Style listStyles[9] = { QTextListFormat::ListStyleUndefined, QTextListFormat::ListDisc, QTextListFormat::ListCircle, QTextListFormat::ListSquare, QTextListFormat::ListDecimal, QTextListFormat::ListLowerAlpha, QTextListFormat::ListUpperAlpha, QTextListFormat::ListLowerRoman, QTextListFormat::ListUpperRoman };
-	
+
 	//Current cursor position
 	int _currentCursorPosition;
 	//Extra cursor to apply formats or insert/delete characters
@@ -54,6 +54,13 @@ private:
 	//Document infos
 	QString URI;
 	QString fileName;
+
+	//Line height
+	QToolButton* lineHeightButton;
+	QAction* actionLineHeight100;
+	QAction* actionLineHeight115;
+	QAction* actionLineHeight150;
+	QAction* actionLineHeight200;
 
 	//Text format actions
 	QAction* actionTextBold;
@@ -64,10 +71,12 @@ private:
 	QAction* actionAlignCenter;
 	QAction* actionAlignRight;
 	QAction* actionAlignJustify;
-	QAction* actionUndo;
-	QAction* actionRedo;
 	QFontComboBox* comboFont;
 	QComboBox* comboSize;
+
+	//Undo/redo actions
+	QAction* actionUndo;
+	QAction* actionRedo;
 
 	//Copy/Cut/Paste
 #ifndef QT_NO_CLIPBOARD
@@ -75,10 +84,10 @@ private:
 	QAction* actionCopy;
 	QAction* actionPaste;
 #endif
-	
+
 	//Text editor
 	QTextEdit* textEdit;
-	
+
 	//Timer event
 	int timerId;
 
@@ -102,10 +111,11 @@ private:
 	//Apply format on selection (if present)
 	void mergeFormatOnSelection(const QTextCharFormat& format);
 
-	//Update GUI according to text format/list/alignment
+	//Update GUI according to text format/list/alignment/line height
 	void fontChanged(const QFont& f);
 	void colorChanged(const QColor& c);
 	void alignmentChanged(Qt::Alignment a);
+	void lineHeightChanged(qreal height);
 	void toggleCheckList(int listType);
 
 	//User text highlighting
@@ -221,11 +231,16 @@ private slots:
 	void textItalic();
 	void textFamily(const QString& f);
 	void textSize(const QString& p);
+	void incrementSize();
+	void decrementSize();
 	void textColor();
 	void textAlign(QAction* a);
-	
+
 	//Lists
 	void listStyle(int styleIndex);
+
+	//LineHeight
+	void setLineHeight(QAction* a);
 
 	//GUI update according to format and cursor position
 	void currentCharFormatChanged(const QTextCharFormat& format);

@@ -25,7 +25,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
 		mngr.centerAndResize(0.7, 0.8);
 	else
-		mngr.centerAndResize(0.55, 0.65);
+		mngr.centerAndResize(0.45, 0.55);
 
 
 	//Connects of ui elements

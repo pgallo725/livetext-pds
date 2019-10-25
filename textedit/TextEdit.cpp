@@ -83,14 +83,11 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
-	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::redrawAllCursors);
-
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
 	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
-	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateUsersSelections);
 
 	//Undo/Redo actions binded to document Undo/Redo
 	connect(textEdit->document(), &QTextDocument::undoAvailable, actionUndo, &QAction::setEnabled);
@@ -202,13 +199,13 @@ void TextEdit::setupEditActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
 
 	//Undo
-	const QIcon undoIcon = QIcon::fromTheme("edit-undo", QIcon(rsrcPath + "/editundo.png"));
+	const QIcon undoIcon = QIcon(rsrcPath + "/editundo.png");
 	actionUndo = menu->addAction(undoIcon, tr("&Undo"), textEdit, &QTextEdit::undo);
 	actionUndo->setShortcut(QKeySequence::Undo);
 	tb->addAction(actionUndo);
 
 	//Redo
-	const QIcon redoIcon = QIcon::fromTheme("edit-redo", QIcon(rsrcPath + "/editredo.png"));
+	const QIcon redoIcon = QIcon(rsrcPath + "/editredo.png");
 	actionRedo = menu->addAction(redoIcon, tr("&Redo"), textEdit, &QTextEdit::redo);
 	actionRedo->setPriority(QAction::LowPriority);
 	actionRedo->setShortcut(QKeySequence::Redo);
@@ -219,21 +216,21 @@ void TextEdit::setupEditActions()
 
 #ifndef QT_NO_CLIPBOARD
 	//Cut
-	const QIcon cutIcon = QIcon::fromTheme("edit-cut", QIcon(rsrcPath + "/editcut.png"));
+	const QIcon cutIcon = QIcon(rsrcPath + "/editcut.png");
 	actionCut = menu->addAction(cutIcon, tr("Cu&t"), textEdit, &QTextEdit::cut);
 	actionCut->setPriority(QAction::LowPriority);
 	actionCut->setShortcut(QKeySequence::Cut);
 	tb->addAction(actionCut);
 
 	//Copy
-	const QIcon copyIcon = QIcon::fromTheme("edit-copy", QIcon(rsrcPath + "/editcopy.png"));
+	const QIcon copyIcon = QIcon(rsrcPath + "/editcopy.png");
 	actionCopy = menu->addAction(copyIcon, tr("&Copy"), textEdit, &QTextEdit::copy);
 	actionCopy->setPriority(QAction::LowPriority);
 	actionCopy->setShortcut(QKeySequence::Copy);
 	tb->addAction(actionCopy);
 
 	//Paste
-	const QIcon pasteIcon = QIcon::fromTheme("edit-paste", QIcon(rsrcPath + "/editpaste.png"));
+	const QIcon pasteIcon = QIcon(rsrcPath + "/editpaste.png");
 	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), textEdit, &QTextEdit::paste);
 	actionPaste->setPriority(QAction::LowPriority);
 	actionPaste->setShortcut(QKeySequence::Paste);
@@ -250,7 +247,7 @@ void TextEdit::setupTextActions()
 	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
 
 	//Bold
-	const QIcon boldIcon = QIcon::fromTheme("format-text-bold", QIcon(rsrcPath + "/textbold.png"));
+	const QIcon boldIcon = QIcon(rsrcPath + "/textbold.png");
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
@@ -268,7 +265,7 @@ void TextEdit::setupTextActions()
 
 
 	//Italic
-	const QIcon italicIcon = QIcon::fromTheme("format-text-italic", QIcon(rsrcPath + "/textitalic.png"));
+	const QIcon italicIcon = QIcon(rsrcPath + "/textitalic.png");
 	actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
 	actionTextItalic->setPriority(QAction::LowPriority);
 	actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
@@ -282,7 +279,7 @@ void TextEdit::setupTextActions()
 
 
 	//Underline
-	const QIcon underlineIcon = QIcon::fromTheme("format-text-underline", QIcon(rsrcPath + "/textunder.png"));
+	const QIcon underlineIcon = QIcon(rsrcPath + "/textunder.png");
 	actionTextUnderline = menu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
 	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
 	actionTextUnderline->setPriority(QAction::LowPriority);
@@ -301,28 +298,28 @@ void TextEdit::setupTextActions()
 	//Alignment
 
 	//Left
-	const QIcon leftIcon = QIcon::fromTheme("format-justify-left", QIcon(rsrcPath + "/textleft.png"));
+	const QIcon leftIcon = QIcon(rsrcPath + "/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 	actionAlignLeft->setPriority(QAction::LowPriority);
 
 	//Center
-	const QIcon centerIcon = QIcon::fromTheme("format-justify-center", QIcon(rsrcPath + "/textcenter.png"));
+	const QIcon centerIcon = QIcon(rsrcPath + "/textcenter.png");
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 	actionAlignCenter->setPriority(QAction::LowPriority);
 
 	//Right
-	const QIcon rightIcon = QIcon::fromTheme("format-justify-right", QIcon(rsrcPath + "/textright.png"));
+	const QIcon rightIcon = QIcon(rsrcPath + "/textright.png");
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 	actionAlignRight->setPriority(QAction::LowPriority);
 
 	//Justify
-	const QIcon fillIcon = QIcon::fromTheme("format-justify-fill", QIcon(rsrcPath + "/textjustify.png"));
+	const QIcon fillIcon = QIcon(rsrcPath + "/textjustify.png");
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
 	actionAlignJustify->setCheckable(true);
@@ -393,6 +390,7 @@ void TextEdit::setupTextActions()
 	//Setup ToolButton
 	listButton = new QToolButton();
 	listButton->setMenu(menuList);
+	listButton->setToolTip(tr("List style"));
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
 	listButton->setDefaultAction(listActions[disc]);
 
@@ -400,6 +398,49 @@ void TextEdit::setupTextActions()
 
 	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
 	tb->addWidget(listButton);
+
+	tb->addSeparator();
+
+	//LineHeight
+	QMenu* menuLineHeight = new QMenu("Line height menu");
+
+	//1
+	actionLineHeight100 = new QAction(tr("1"), this);
+	actionLineHeight100->setCheckable(true);
+
+
+	//1.15
+	actionLineHeight115 = new QAction(tr("1.15"), this);
+	actionLineHeight115->setCheckable(true);
+
+	//1.5
+	actionLineHeight150 = new QAction(tr("1.5"), this);
+	actionLineHeight150->setCheckable(true);
+
+	//2
+	actionLineHeight200 = new QAction(tr("2"), this);
+	actionLineHeight200->setCheckable(true);
+
+	//Creating a new QActionGroup
+	QActionGroup* lineHeightGroup = new QActionGroup(this);
+	connect(lineHeightGroup, &QActionGroup::triggered, this, &TextEdit::setLineHeight);
+
+	lineHeightGroup->addAction(actionLineHeight100);
+	lineHeightGroup->addAction(actionLineHeight115);
+	lineHeightGroup->addAction(actionLineHeight150);
+	lineHeightGroup->addAction(actionLineHeight200);
+
+	menuLineHeight->addActions(lineHeightGroup->actions());
+
+	//Setup ToolButton
+	lineHeightButton = new QToolButton();
+	lineHeightButton->setMenu(menuLineHeight);
+	lineHeightButton->setPopupMode(QToolButton::InstantPopup);
+	lineHeightButton->setToolTip(tr("Line height"));
+
+	lineHeightButton->setIcon(QIcon(rsrcPath + "/lineheight.png"));
+
+	tb->addWidget(lineHeightButton);
 
 	menu->addSeparator();
 	tb->addSeparator();
@@ -445,6 +486,20 @@ void TextEdit::setupTextActions()
 	comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
 	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
+
+
+	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/incrementsize.png");
+	QAction* a = new QAction(incrementSizeIcon, tr("Increment text size"), this);
+	connect(a, &QAction::triggered, this, &TextEdit::incrementSize);
+
+	tb->addAction(a);
+
+
+	const QIcon decrementSizeIcon = QIcon(rsrcPath + "/decrementsize.png");
+	a = new QAction(decrementSizeIcon, tr("Decrement text size"), this);
+	connect(a, &QAction::triggered, this, &TextEdit::decrementSize);
+
+	tb->addAction(a);
 }
 
 void TextEdit::setupUserActions()
@@ -813,7 +868,7 @@ void TextEdit::removeBlockFromList(int blockPosition)
 		//Remove target bock from list
 		currentList->remove(blk);
 	}
-	
+
 	//Makes the index of the blockFormat object -1 --> Reset block format to default
 	blkFormat.setObjectIndex(-1);
 
@@ -851,6 +906,7 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 	//Add block to list
 	currentList->add(blk);
 
+	//GUI update
 	cursorPositionChanged();
 }
 
@@ -870,14 +926,17 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	QTextBlockFormat format;
 	format.setAlignment(fmt.alignment());
 	format.setIndent(fmt.indent());
+	format.setLineHeight(fmt.lineHeight(), QTextBlockFormat::ProportionalHeight);
 
 	//Sets block format in current block
 	_extraCursor->mergeBlockFormat(format);
 
 	//Call alignment changed for update GUI
 	alignmentChanged(fmt.alignment());
-}
 
+	//GUI update
+	cursorPositionChanged();
+}
 
 
 /**************************** CHANGE TEXT FORMAT ****************************/
@@ -889,6 +948,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 *	Change text alignment
 *	Merge format on selection (if present)
 *	Apply remote char format
+*	Line height
 */
 
 void TextEdit::textBold()
@@ -948,7 +1008,7 @@ void TextEdit::textSize(const QString& p)
 
 	//Casting point size to float
 	qreal pointSize = p.toFloat();
-	if (p.toFloat() > 0) {
+	if (pointSize > 0) {
 		//Set font size
 		QTextCharFormat fmt;
 		fmt.setFontPointSize(pointSize);
@@ -958,6 +1018,30 @@ void TextEdit::textSize(const QString& p)
 	}
 }
 
+void TextEdit::incrementSize()
+{
+	//Get current combobox index
+	int index = comboSize->currentIndex();
+	if (index < comboSize->count() - 1) {
+		//Increment it (if less the max size)
+		comboSize->setCurrentIndex(++index);
+
+		//Adapt text size according
+		textSize(comboSize->currentText());
+	}
+}
+
+void TextEdit::decrementSize()
+{
+	int index = comboSize->currentIndex();
+	if (index > 0) {
+		//Increment it (if greater then first index)
+		comboSize->setCurrentIndex(--index);
+
+		//Adapt text size according
+		textSize(comboSize->currentText());
+	}
+}
 
 void TextEdit::textColor()
 {
@@ -1034,6 +1118,29 @@ void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 }
 
 
+void TextEdit::setLineHeight(QAction* a)
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	QTextBlockFormat fmt;
+
+	//Sets alignment according to what button is pressed
+	if (a == actionLineHeight100)
+		fmt.setLineHeight(100, QTextBlockFormat::ProportionalHeight);
+	else if (a == actionLineHeight115)
+		fmt.setLineHeight(115, QTextBlockFormat::ProportionalHeight);
+	else if (a == actionLineHeight150)
+		fmt.setLineHeight(150, QTextBlockFormat::ProportionalHeight);
+	else if (a == actionLineHeight200)
+		fmt.setLineHeight(200, QTextBlockFormat::ProportionalHeight);;
+
+	//Sets block format
+	QTextCursor cursor = textEdit->textCursor();
+	cursor.mergeBlockFormat(fmt);
+
+	//Sends new block format to server
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+}
 
 /**************************** GUI UPDATE ****************************/
 /*
@@ -1043,8 +1150,17 @@ void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 //Updates GUI if cursor changes it's position
 void TextEdit::cursorPositionChanged()
 {
+	//Users cursors
+	redrawAllCursors();
+
+	//User text higlighting
+	updateUsersSelections();
+
 	//Alignment
 	alignmentChanged(textEdit->alignment());
+
+	//Line height
+	lineHeightChanged(textEdit->textCursor().blockFormat().lineHeight());
 
 	//Lists
 	QTextList* list = textEdit->textCursor().currentList();
@@ -1128,6 +1244,19 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
 		actionAlignRight->setChecked(true);
 	else if (a & Qt::AlignJustify)
 		actionAlignJustify->setChecked(true);
+}
+
+void TextEdit::lineHeightChanged(qreal height)
+{
+	//Checks line height button according to Alignment a
+	if (height == 100)
+		actionLineHeight100->setChecked(true);
+	else if (height == 115)
+		actionLineHeight115->setChecked(true);
+	else if (height == 150)
+		actionLineHeight150->setChecked(true);
+	else if (height == 200)
+		actionLineHeight200->setChecked(true);
 }
 
 /**************************** PASTE EVENT ****************************/
