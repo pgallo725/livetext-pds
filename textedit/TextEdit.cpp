@@ -1331,9 +1331,18 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 				//Getting first block of the list
 				QTextBlock firstListBlock = textList->item(0);
 
-				//If current block is the beginning of its list emit the signal to create a new list
+				//If the current block is the beginning of a new list emit the signal to create a new one
 				if (currentBlock == firstListBlock)
-					emit createNewList(currentBlock.position(), textList->format());
+				{
+					// It's not actually a new list in this case, but the re-insertion of a block
+					if (textList->count() > 1 && i == position + charsAdded - 1)
+					{
+						QTextBlock otherListBlock = textList->item(1);
+						emit assignBlockToList(currentBlock.position(), otherListBlock.position());
+					}
+					else emit createNewList(currentBlock.position(), textList->format());
+				}
+					
 				//Else assign current block to his proper list
 				else
 					emit assignBlockToList(currentBlock.position(), firstListBlock.position());

@@ -14,6 +14,7 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
+	qRegisterMetaType<QVector<qint32>>("QVector<qint32>");
 }
 
 void DocumentEditor::openDocument()
