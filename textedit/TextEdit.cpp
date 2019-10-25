@@ -46,7 +46,6 @@
 #endif
 
 #include "textedit.h"
-#include "ShareUriWindow.h"
 
 const QString rsrcPath = ":/images/win";
 
@@ -593,6 +592,10 @@ void TextEdit::closeEditor()
 	if (timerId > 0)
 		killTimer(timerId);
 
+	if (_shareUri->isVisible()) {
+		_shareUri->close();
+	}
+
 	//Close window
 	this->close();
 }
@@ -631,6 +634,8 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 {
 	this->fileName = fileName;
 	this->URI = uri;
+
+	_shareUri = new ShareUriWindow(URI, statusBar());
 
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
@@ -721,10 +726,8 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	ShareUriWindow* su = new ShareUriWindow(URI, this);
-
 	//Show created window
-	su->exec();
+	_shareUri->exec();
 }
 
 /**************************** LISTS ****************************/

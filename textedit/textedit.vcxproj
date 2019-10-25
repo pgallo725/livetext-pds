@@ -204,8 +204,10 @@
     <ClCompile Include="ShareUriWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TextEdit.cpp" />
+    <ClCompile Include="WidgetsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="WidgetsManager.h" />
     <QtMoc Include="Client.h">
     </QtMoc>
     <QtMoc Include="DocumentEditor.h">

@@ -6,9 +6,11 @@
 #include <QLabel>
 #include <Document.h>
 
+#include <User.h>
+
 #include "OpenUriWindow.h"
 #include "NewFileWindow.h"
-#include "Client.h"
+#include "WidgetsManager.h"
 
 
 namespace Ui {
@@ -19,38 +21,70 @@ class LandingPage : public QMainWindow
 {
 	Q_OBJECT
 
+private:
+	Ui::LandingPage* ui;
+
+	//Current user
+	User* _user;
+
+	//Loading splash screen
+	QLabel* loading;
+
+	//Widget Manager for resizing and loading screen
+	WidgetsManager mngr;
+
+	//Dialogs to open/create a file
+	OpenUriWindow* openURIWindow;
+	NewFileWindow* newFileWindow;
+	//Service buffer for filename or URI
+	QString _buffer;
+
+	//Register/Login methods
+	void Register();
+	void Login();
+
 public:
 	LandingPage(QWidget* parent = nullptr);
 	~LandingPage();
 
-	void openLoggedPage();
-	void incorrectOperation(QString msg);
-	void documentDismissed(); //Remove document
-	void setupFileList(); //Document List
-	void closeAll();
+	//Opens document selection page
+	void LoginSuccessful(User* user);
 
-	void startLoadingAnimation(QString text);
-	void stopLoadingAnimation();
-
-	void loadUserLoginInfo();
-	void saveUserLoginInfo(QString username);
-	void setUser(User* user);
+	//Updates user info in main page
 	void updateUserInfo();
+
+	//Home page error
+	void incorrectOperation(QString error);
+
+	//Document list update (remove/add document)
+	void documentDismissed();
+	void setupFileList();
+	
+	//Close all LandingPage windows
+	void closeAll();
+	
+	//Reset all UI fields
 	void resetFields();
 
-private slots:
-	void pushButtonNewClicked();
-	void pushButtonRegisterClicked();
-	void pushButtonBrowseClicked();
-	void pushButtonOpenClicked();
-	void pushButtonRemoveClicked();
-	void pushButtonOpenUriClicked();
-	void enablePushButtonOpen();
-	void currentTabChanged(int index);
-	void showUserIcon(QString path);
-	void confirmOperation();
-	void setupLoadingMessage();
+	//User login info (load/save)
+	void loadUserLoginInfo();
+	void saveUserLoginInfo(QString username);
+	
+signals:
+	//Create/Open/Remove document
+	void newDocument(QString name);
+	void addDocument(QString URI);
+	void openDocument(int index);
+	void removeDocument(int index);
 
+	//Server (Connection/Login/Register/Logout)
+	void connectToServer(QString ipAddress, quint16 port);
+	void serverLogin(QString username, QString password);
+	void serverRegister(QString username, QString password, QString nickname, QImage icon);
+	void serverLogout();
+	
+	//Open edit profile window
+	void editProfile();
 
 public slots:
 	void connectionEstabilished();
@@ -58,32 +92,24 @@ public slots:
 	void incorrectFileOperation(QString error);
 	void pushButtonBackClicked();
 
-signals:
-	void newDocument(QString name);
-	void addDocument(QString URI);
-	void openDocument(int index);
-	void removeDocument(int index);
-	void connectToServer(QString ipAddress, quint16 port);
-	void serverLogin(QString username, QString password);
-	void serverRegister(QString username, QString password, QString nickname, QImage icon);
-	void serverLogout();
-	void editProfile();
+private slots:
+	//GUI push buttons slots
+	void pushButtonNewClicked();
+	void pushButtonRegisterClicked();
+	void pushButtonBrowseClicked();
+	void pushButtonOpenClicked();
+	void pushButtonRemoveClicked();
+	void pushButtonOpenUriClicked();
+	void pushButtonConfirmOperationClicked();
+	
+	//Enable/Disable push button (open/remove) when a selection in list changes
+	void enablePushButtonOpen();
 
-private:
-	Ui::LandingPage* ui;
-	Client* client;
-	User* _user;
-	QLabel* loading;
+	//tabWidget slot to switch tabs
+	void currentTabChanged(int index);
 
-	OpenUriWindow* openURIWindow;
-	NewFileWindow* newFileWindow;
-
-private:
-	void centerAndResize();
-
-	void Register();
-	void Login();
-
+	//User profile picture preview
+	void showUserIcon(QString path);
 };
 
 #endif // LANDINGPAGE_H

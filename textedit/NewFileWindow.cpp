@@ -1,28 +1,31 @@
 #include "NewFileWindow.h"
 #include "ui_newfilewindow.h"
 
-#include "LandingPage.h"
-
 #include <QWidget>
 #include <QStyle>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QRegExpValidator>
 
-NewFileWindow::NewFileWindow(LandingPage* lp, QWidget* parent) : landingPage(lp), QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow) {
-	//Costruttore landing page
+#include "WidgetsManager.h"
+
+NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow), _filename(filename) {
+	//Window name and logo
 	setWindowTitle(tr("New file"));
 	setWindowIcon(QIcon(":/images/logo.png"));
 
-	//Setup delle varie finestre ui
+	//UI setup
 	ui->setupUi(this);
-	centerAndResize();
 
-	//Connect con i bottoni del dialog box
+	//Center and resize window
+	WidgetsManager mngr(this);
+	mngr.centerAndResize(0.3, 0.15);
+
+	//Connect for push buttons
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewFileWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewFileWindow::rejectClicked);
 
-	//Validator per non inserire lettere nei campi server/port
+	//Validator to prevent insertion of '_' character in filename
 	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
 }
 
@@ -33,54 +36,32 @@ NewFileWindow::~NewFileWindow()
 
 void NewFileWindow::incorrectOperation(QString error)
 {
+	//Sets error
 	ui->label_incorrectFilename->setText(error);
 }
 
 void NewFileWindow::resetFields()
 {
+	//Reset all fields
 	ui->lineEdit_fileName->setText("");
+	ui->label_incorrectFilename->setText("");
 }
 
 void NewFileWindow::acceptClicked()
 {
-	QString name = ui->lineEdit_fileName->text();
+	//Gets filename
+	_filename = ui->lineEdit_fileName->text();
 
-	if (name.isEmpty()) {
+	//If filename is valid it closes and confirm operation else print an error
+	if (!_filename.isEmpty())
+		this->done(QDialog::Accepted);
+	else
 		incorrectOperation(tr("Please insert a valid filename"));
-	}
-	else {
-		this->close();
-		landingPage->startLoadingAnimation("Creating new document...");
-		emit landingPage->newDocument(name);
-	}
 }
 
 void NewFileWindow::rejectClicked()
 {
-	ui->label_incorrectFilename->setText("");
-	ui->lineEdit_fileName->setText("");
+	//Reset fields and closes
+	resetFields();
 	this->close();
-}
-
-void NewFileWindow::centerAndResize() {
-	//Ricava dimensione desktop
-	QSize availableSize = QApplication::desktop()->availableGeometry().size();
-	int width = availableSize.width();
-	int height = availableSize.height();
-
-	//Proporzionamento
-	width *= 0.3;
-	height *= 0.15;
-
-	//Le dimensioni vengono fissate per rendere la finestra non resizable
-	setMaximumHeight(height);
-	setMinimumHeight(height);
-	setMaximumWidth(width);
-	setMinimumWidth(width);
-
-	//Nuova dimensione
-	QSize newSize(width, height);
-
-	//Crea il nuovo rettangolo su cui aprire la finestra
-	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }

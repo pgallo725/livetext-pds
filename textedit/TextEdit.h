@@ -7,7 +7,7 @@
 #include <User.h>
 
 #include "Presence.h"
-#include "ProfileEditWindow.h"
+#include "ShareUriWindow.h"
 
 #define CURSOR_SEND_INTERVAL 100
 
@@ -81,6 +81,10 @@ private:
 	
 	//Timer event
 	int timerId;
+
+	//Share URI window
+	ShareUriWindow* _shareUri;
+
 
 	/* ----------------------- METHODS ----------------------- */
 

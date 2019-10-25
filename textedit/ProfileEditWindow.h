@@ -6,6 +6,8 @@
 
 #include <QLabel>
 
+#include "WidgetsManager.h"
+
 namespace Ui {
 	class ProfileEditWindow;
 }
@@ -14,31 +16,42 @@ class ProfileEditWindow : public QDialog
 {
 	Q_OBJECT
 
+private:
+	//Loading splash screen
+	QLabel* loading;
+
+	//User infos
+	User& _user;
+
+	//Widget manager (resize/loading screen)
+	WidgetsManager mngr;
+
+	Ui::ProfileEditWindow* ui;
+
+	//Methods
+	void resetFields();
+	
+
 public:
-	ProfileEditWindow(User* user, QWidget* parent = nullptr);
+	ProfileEditWindow(User& user, QWidget* parent = nullptr);
 	~ProfileEditWindow();
 
+	//REMOTE: response from server
 	void updateSuccessful();
 	void updateFailed(QString error);
 
+signals:
+	//LOCAL: Account modified
+	void accountUpdate(QString name, QImage image, QString password);
+
 private slots:
+	//Push buttons
 	void pushButtonUpdateClicked();
 	void pushButtonBrowseClicked();
 	void pushButtonCancelClicked();
+
+	//GUI update
 	void showUserIcon(QString path);
-	void setupLoadingMessage();
-
-signals:
-	void accountUpdate(QString name, QImage image, QString password);
-
-private:
-	QLabel* loading;
-
-	Ui::ProfileEditWindow* ui;
-	void centerAndResize();
-	void startLoadingAnimation(QString text);
-	void stopLoadingAnimation();
-
 };
 
 

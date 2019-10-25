@@ -2,7 +2,7 @@
 #define SHAREURIWINDOW_H
 
 #include <QDialog>
-#include <textedit.h>
+#include <QStatusBar>
 
 namespace Ui {
 	class ShareUriWindow;
@@ -13,21 +13,21 @@ class ShareUriWindow : public QDialog
 {
 	Q_OBJECT
 
-public:
-	ShareUriWindow(QString text, TextEdit* editor, QWidget* parent = nullptr);
-	~ShareUriWindow();
-	Ui::ShareUriWindow* ui;
-
 private:
-	void centerAndResize();
+	QString _uri;
+
+	//Editor status bar to print in
+	QStatusBar* _statusBar;
+
+	//Copy URI into clipboards
 	void copyAndClose();
 
-	QString _uri;
-	TextEdit* _textEdit;
+public:
+	ShareUriWindow(QString uri, QStatusBar* editor, QWidget* parent = nullptr);
+	~ShareUriWindow();
 
+	Ui::ShareUriWindow* ui;
 };
-
-
 
 
 #endif //SHAREURIWINDOW_H

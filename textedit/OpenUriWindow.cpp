@@ -1,21 +1,26 @@
 #include "OpenUriWindow.h"
 #include "ui_openuriwindow.h"
 
-#include "LandingPage.h"
-
 #include <QWidget>
 #include <QStyle>
 #include <QApplication>
 #include <QDesktopWidget>
 
-OpenUriWindow::OpenUriWindow(LandingPage* lp, QWidget* parent) : landingPage(lp), QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow) {
-	//Costruttore landing page
+#include "WidgetsManager.h"
+
+OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow), _uri(uri) {
+	//Window name and logo
+	setWindowTitle(tr("Open from URI"));
 	setWindowIcon(QIcon(":/images/logo.png"));
 
-	//Setup delle varie finestre ui
+	//UI setup
 	ui->setupUi(this);
-	centerAndResize();
-	
+
+	//Center and resize window
+	WidgetsManager mngr(this);
+	mngr.centerAndResize(0.3, 0.15);
+
+	//Connect for push buttons
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &OpenUriWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &OpenUriWindow::rejectClicked);
 }
@@ -27,54 +32,32 @@ OpenUriWindow::~OpenUriWindow()
 
 void OpenUriWindow::incorrectOperation(QString error)
 {
+	//Sets error
 	ui->label_incorrectUri->setText(error);
 }
 
 void OpenUriWindow::resetFields()
 {
+	//Reset fields
+	ui->label_incorrectUri->setText("");
 	ui->lineEdit_uri->setText("");
 }
 
 void OpenUriWindow::acceptClicked()
 {
-	QString uri = ui->lineEdit_uri->text();
+	//Gets uri
+	_uri = ui->lineEdit_uri->text();
 
-	if (uri.isEmpty()) {
+	//If filename is valid it closes and confirm operation else print an error
+	if (!_uri.isEmpty())
+		this->done(QDialog::Accepted);
+	else
 		incorrectOperation(tr("Please insert a valid URI"));
-	}
-	else {
-		this->close();
-		landingPage->startLoadingAnimation("Open document from URI...");
-		emit landingPage->addDocument(uri);
-	}
 }
 
 void OpenUriWindow::rejectClicked()
 {
-	ui->label_incorrectUri->setText("");
-	ui->lineEdit_uri->setText("");
+	//Reset fields and closes
+	resetFields();
 	this->close();
-}
-
-void OpenUriWindow::centerAndResize() {
-	//Ricava dimensione desktop
-	QSize availableSize = QApplication::desktop()->availableGeometry().size();
-	int width = availableSize.width();
-	int height = availableSize.height();
-
-	//Proporzionamento
-	width *= 0.3;
-	height *= 0.15;
-
-	//Le dimensioni vengono fissate per rendere la finestra non resizable
-	setMaximumHeight(height);
-	setMinimumHeight(height);
-	setMaximumWidth(width);
-	setMinimumWidth(width);
-
-	//Nuova dimensione
-	QSize newSize(width, height);
-
-	//Crea il nuovo rettangolo su cui aprire la finestra
-	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
 }

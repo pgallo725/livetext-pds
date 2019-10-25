@@ -16,21 +16,22 @@ class OpenUriWindow : public QDialog
 public:
 	Ui::OpenUriWindow* ui;
 	
-	OpenUriWindow(LandingPage* lp, QWidget* parent = nullptr);
+	OpenUriWindow(QString& uri, QWidget* parent = nullptr);
 	~OpenUriWindow();
 		
+	//Show an error
 	void incorrectOperation(QString error);
+
+	//Reset all fields
 	void resetFields();
-	
+
 private slots:
+	//Buttons slots
 	void acceptClicked();
 	void rejectClicked();
+
 private:
-	
-	void centerAndResize();
-
-	LandingPage* landingPage;
-
+	QString& _uri;
 };
 
 

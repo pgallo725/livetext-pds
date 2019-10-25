@@ -1,28 +1,30 @@
 #include "ShareUriWindow.h"
 #include "ui_shareuriwindow.h"
 
-
 #include <QWidget>
 #include <QStyle>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QClipboard>
-#include <QStatusBar>
+
+#include "WidgetsManager.h"
 
 const QString rsrcPath = ":/images/win";
 
-ShareUriWindow::ShareUriWindow(QString text, TextEdit* editor, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _textEdit(editor){
-	//Costruttore landing page
+ShareUriWindow::ShareUriWindow(QString uri, QStatusBar* statusBar, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _statusBar(statusBar), _uri(uri) {
+	//Window Icon
 	setWindowIcon(QIcon(":/images/logo.png"));
 
-	//Setup delle varie finestre ui
+	//Setup UI window and resize
 	ui->setupUi(this);
-	centerAndResize();
 
-	ui->lineEdit_uri->setText(text);
+	//Widget size manager
+	WidgetsManager mngr(this);
+	mngr.centerAndResize(0.3, 0.12);
 
-	_uri = text;
-	
+	//Set uri in textbox
+	ui->lineEdit_uri->setText(uri);
+
 	//Copy icon
 	ui->pushButton_copy->setIcon(QIcon::QIcon(rsrcPath + "/editcopy.png"));
 
@@ -36,33 +38,15 @@ ShareUriWindow::~ShareUriWindow()
 	delete ui;
 }
 
-void ShareUriWindow::centerAndResize() {
-	//Ricava dimensione desktop
-	QSize availableSize = QApplication::desktop()->availableGeometry().size();
-	int width = availableSize.width();
-	int height = availableSize.height();
-
-	//Proporzionamento
-	width *= 0.3;
-	height *= 0.12;
-
-	//Le dimensioni vengono fissate per rendere la finestra non resizable
-	setMaximumHeight(height);
-	setMinimumHeight(height);
-	setMaximumWidth(width);
-	setMinimumWidth(width);
-
-	//Nuova dimensione
-	QSize newSize(width, height);
-
-	//Crea il nuovo rettangolo su cui aprire la finestra
-	setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
-}
-
 void ShareUriWindow::copyAndClose()
 {
+	//Copy uri to clip board
 	QClipboard* clipboard = QApplication::clipboard();
 	clipboard->setText(_uri);
+
+	//Close window
 	this->close();
-	_textEdit->statusBar()->showMessage(tr("URI copied into clipboards"));
+
+	//Show message to clipboard
+	_statusBar->showMessage(tr("URI copied into clipboards"));
 }

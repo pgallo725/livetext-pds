@@ -5,6 +5,8 @@
 #include "LandingPage.h"
 #include "Client.h"
 #include "DocumentEditor.h"
+#include "ProfileEditWindow.h"
+
 #include <User.h>
 
 #include <QObject>

@@ -15,21 +15,22 @@ class NewFileWindow : public QDialog
 
 public:
 	Ui::NewFileWindow* ui;
-	NewFileWindow(LandingPage* lp, QWidget* parent = nullptr);
+	NewFileWindow(QString& filename, QWidget* parent = nullptr);
 	~NewFileWindow();
 
+	//Show an error
 	void incorrectOperation(QString error);
+
+	//Reset all fields
 	void resetFields();
 	
 private slots:
+	//Buttons slots
 	void acceptClicked();
 	void rejectClicked();
+
 private:
-	
-	void centerAndResize();
-
-	LandingPage* landingPage;
-
+	QString& _filename;
 };
 
 

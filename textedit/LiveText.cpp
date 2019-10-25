@@ -79,8 +79,7 @@ void LiveText::Login(QString username, QString password)
 void LiveText::loginSuccess(User user)
 {
 	_user = user;
-	_landingPage->setUser(&_user);
-	_landingPage->openLoggedPage();
+	_landingPage->LoginSuccessful(&_user);
 }
 
 //Registration
@@ -135,7 +134,6 @@ void LiveText::removeDocument(int index)
 void LiveText::dismissDocumentCompleted(URI URI)
 {
 	_user.removeDocument(URI);
-	_landingPage->setupFileList();
 	_landingPage->documentDismissed();
 }
 
@@ -153,8 +151,6 @@ void LiveText::addDocument(QString uri)
 
 void LiveText::openDocumentCompleted(Document doc)
 {
-	_landingPage->stopLoadingAnimation();
-
 	_textEdit = new TextEdit(_user);
 
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
@@ -210,19 +206,18 @@ void LiveText::openDocumentCompleted(Document doc)
 //Open editor
 void LiveText::openEditor()
 {
-	//Chiude finestra attuale
-	_landingPage->closeAll();
-
 	//Dimensione finestra
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
 
 	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
 	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
 	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
-	
 
 	_textEdit->showMaximized();
-}
+	
+	//Chiude finestra attuale
+	_landingPage->closeAll();
+}	
 
 //Close editor
 void LiveText::closeDocument()
@@ -236,11 +231,14 @@ void LiveText::closeDocumentCompleted(bool isForced)
 		_textEdit->criticalError(tr("Server encountered an error, the document will be closed"));
 	}
 
-	_textEdit->closeEditor();
+	
 
-	_landingPage->openLoggedPage();
+	_landingPage->LoginSuccessful(&_user);
 	_landingPage->show();
 
+	_textEdit->closeEditor();
+	
+	
 	delete _docEditor;
 	delete _textEdit;
 
@@ -286,7 +284,7 @@ void LiveText::accountUpdated(User user)
 
 void LiveText::openEditProfile()
 {
-	_editProfile = new ProfileEditWindow(&_user);
+	_editProfile = new ProfileEditWindow(_user);
 
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, this, &LiveText::sendAccountUpdate);
 	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);

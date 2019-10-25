@@ -13,6 +13,7 @@
 class Presence
 {
 private:
+	//User parameter
 	QString _name;
 	QString _nickname;
 	QColor _color;
@@ -26,6 +27,7 @@ public:
 	Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
 	~Presence();
 
+	//Getters
 	QColor color();
 	QString name();
 	QString nickname();
@@ -35,8 +37,7 @@ public:
 	QList<QTextEdit::ExtraSelection> userText();
 	QAction* actionHighlightText();
 	
-
-
+	//Text highlighting
 	void addUserText(QTextEdit::ExtraSelection selection);
 	void clearSelections();
 	void setAction(QAction* action);

@@ -23,9 +23,10 @@ Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* te
 
 Presence::~Presence()
 {
-
+	//Nothing to do
 }
 
+/************************ GETTERS ************************/
 QColor Presence::color()
 {
 	return _color;
@@ -66,6 +67,8 @@ QAction* Presence::actionHighlightText()
 	return _iconPressedAction;
 }
 
+
+/************************ TEXT HIGHLIGHTING ************************/
 void Presence::addUserText(QTextEdit::ExtraSelection selection)
 {
 	_userText.append(selection);
@@ -73,10 +76,12 @@ void Presence::addUserText(QTextEdit::ExtraSelection selection)
 
 void Presence::clearSelections()
 {
+	//Clears all highlighted text
 	_userText.clear();
 }
 
 void Presence::setAction(QAction* action)
 {
+	//Editor action
 	_iconPressedAction = action;
 }
