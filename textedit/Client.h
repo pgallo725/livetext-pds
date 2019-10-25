@@ -99,37 +99,22 @@ public:
 	void messageHandler(MessageCapsule message);
 	MessageCapsule readMessage(QDataStream& stream);
 
+	// Document handler
+	void forceDocumentClose();
+
+	// Server connection
+	void Disconnect();
+
+public slots:
 	// User connection
 	void Login(QString usr, QString passwd);
 	void Register(QString usr, QString passwd, QString nick, QImage img);
 	void Logout();
 
-	// Data Exchange
-	void sendCursor(qint32 userId, qint32 position);
-	void sendChar(Symbol character, bool isLast);
-	void removeChar(QVector<int> position);
-	void charModified(QVector<qint32> position, QTextCharFormat fmt);
-	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);
-	void listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
-	void editList(MessageCapsule message);
-
-	// Document handler
-	void openDocument(URI URI);
-	void createDocument(QString name);
-	void deleteDocument(URI URI);
-	void forceDocumentClose();
-
 	// Server connection
 	void Connect(QString ipAddress, quint16 port);
-	void Disconnect();
 
-	// Account handler
-	void removeFromFile(qint32 myId); 
-	void sendAccountUpdate(QString nickname, QImage image, QString password);
-
-public slots:
-
-	// signals handler
+	// Signals handler
 	void serverConnection();
 	void readBuffer();
 	void serverDisconnection();
@@ -141,11 +126,29 @@ public slots:
 	void deleteChar(MessageCapsule message);
 	void editChar(MessageCapsule message);
 	void editBlock(MessageCapsule message);
+	void editList(MessageCapsule message);
+
+	// Local to remote
+	void sendCursor(qint32 userId, qint32 position);
+	void sendChar(Symbol character, bool isLast);
+	void removeChar(QVector<int> position);
+	void charModified(QVector<qint32> position, QTextCharFormat fmt);
+	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);
+	void listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
 	// Account handler
 	void newUserPresence(MessageCapsule message);
 	void updateUserPresence(MessageCapsule message);
 	void deleteUserPresence(MessageCapsule message);
+
+	// Local to remote
+	void removeFromFile(qint32 myId);
+	void sendAccountUpdate(QString nickname, QImage image, QString password);
+
+	// Document handler
+	void openDocument(URI URI);
+	void createDocument(QString name);
+	void deleteDocument(URI URI);
 	
 };
 

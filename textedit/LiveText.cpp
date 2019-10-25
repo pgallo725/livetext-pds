@@ -7,31 +7,32 @@
 #include <QMessageBox>
 
 
-LiveText::LiveText(QObject* parent) : QObject(parent)
+LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 {
+	//Initialize landing page and client
 	_landingPage = new LandingPage();
 	_client = new Client();
 
+
+	/************************ CONNECTS ************************/
+
 	//LANDINGPAGE - LIVETEXT
-	connect(_landingPage, &LandingPage::connectToServer, this, &LiveText::connectToServer); //Server connection
-	connect(_landingPage, &LandingPage::serverLogin, this, &LiveText::Login); //Login
-	connect(_landingPage, &LandingPage::serverRegister, this, &LiveText::Register); //Register
-	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::Logout); //Logout
-	connect(_landingPage, &LandingPage::removeDocument, this, &LiveText::removeDocument);
-	connect(_landingPage, &LandingPage::addDocument, this, &LiveText::addDocument);
-	connect(_landingPage, &LandingPage::openDocument, this, &LiveText::openDocument);
 	connect(_landingPage, &LandingPage::editProfile, this, &LiveText::openEditProfile);
 
 	//LANDINGPAGE - CLIENT
-	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);
+	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect); //Connect
+	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login); //Login
+	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register); //Register
+	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout); //Logout
+	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument); //Create document
+	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument); //Remove document
+	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument); //Open document
 
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
 	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation);
 
-	//connect(_client, &Client::logoutCompleted, _landingPage, );
-	//connect(_client, &Client::logoutFailed, _landingPage, );
 
 	//CLIENT - LIVETEXT
 	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed);
@@ -51,109 +52,88 @@ LiveText::~LiveText()
 	delete _client;
 }
 
-
-//Show landing page
-void LiveText::start()
+//Startup
+void LiveText::launch()
 {
 	_landingPage->show();
 }
 
-//Connection
-void LiveText::connectToServer(QString ipAddress, quint16 port)
-{
-	_client->Connect(ipAddress, port);
-}
 
-void LiveText::operationFailed(QString errorType)
-{
-	_landingPage->incorrectOperation(errorType);
-	_client->Disconnect();
-}
-
-//Login
-void LiveText::Login(QString username, QString password)
-{
-	_client->Login(username, password);
-}
+/************************ SERVER CONNECTION ************************/
+/*
+*	Connection to server
+*	Force logout from server
+*	Error during login/register
+*/
 
 void LiveText::loginSuccess(User user)
 {
+	//Sets logged user
 	_user = user;
+
+	_editProfile = new ProfileEditWindow(_user);
+
+	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate);
+	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
+
+	//Open logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
 }
 
-//Registration
-void LiveText::Register(QString username, QString password, QString nickname, QImage icon)
-{
-	_client->Register(username, password, nickname, icon);
-}
 
-//Logout
-void LiveText::Logout()
+void LiveText::operationFailed(QString errorType)
 {
-	_client->Logout();
-}
+	//Sets error message to landing page
+	_landingPage->incorrectOperation(errorType);
 
+	//Disconnect from server
+	_client->Disconnect();
+}
 
 void LiveText::forceLogout()
 {
-	if (_editProfile != nullptr) {
+	//Close edit profile (if opened)
+	if (_editProfile->isVisible())
 		_editProfile->close();
 
-		delete _editProfile;
-		_editProfile = nullptr;
-	}
-
-	if (_textEdit != nullptr) {
-		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
-		_textEdit->closeEditor();
-
-		delete _docEditor;
-		delete _textEdit;
-
-
-		_docEditor = nullptr;
-		_textEdit = nullptr;
-	}
-	else {
-		QMessageBox::StandardButton msgbox = QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok);
-	}
-
+	//Shows landing page again
 	_landingPage->pushButtonBackClicked();
 	_landingPage->incorrectOperation(tr("Server not responding"));
 	_landingPage->show();
 
+	if (editorOpen) {
+		//Show an error on editor
+		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+		//Close editor
+		closeEditor();
+	}
+	else
+		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
 }
 
-//Delete document from list
-void LiveText::removeDocument(int index)
-{
-	_client->deleteDocument(_user.getURIat(index));
-}
-
-void LiveText::dismissDocumentCompleted(URI URI)
-{
-	_user.removeDocument(URI);
-	_landingPage->documentDismissed();
-}
-
-//Open a new document
-void LiveText::openDocument(int index)
-{
-	_client->openDocument(_user.getURIat(index));
-}
-
-void LiveText::addDocument(QString uri)
-{
-	_client->openDocument(URI(uri));
-}
-
+/************************ DOCUMENT OPERATIONS ************************/
+/*
+*	Open document
+*	Close document
+*	Remove document
+*/
 
 void LiveText::openDocumentCompleted(Document doc)
 {
+	//Initialize text editor and local document editor
 	_textEdit = new TextEdit(_user);
-
 	_docEditor = new DocumentEditor(doc, _textEdit, _user);
+
+
+	//If opening document is not present in user data, it updates data
+	if (!_user.getDocuments().contains(doc.getURI())) {
+		_user.addDocument(doc.getURI());
+	}
+
+	//Load document in editor
+	_docEditor->openDocument();
+
+	/********************** CONNECTS **********************/
 
 	//TEXTEDIT - DOCUMENTEDITOR
 	connect(_textEdit, &TextEdit::charDeleted, _docEditor, &DocumentEditor::deleteCharAtIndex);
@@ -167,25 +147,19 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::setBlockNoList, _docEditor, &DocumentEditor::removeBlockFromList);
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::closeDocument, this, &LiveText::closeDocument);
-	connect(_textEdit, &TextEdit::newCursorPosition, this, &LiveText::sendCursor);
 	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile);
 
 
 	//CLIENT - TEXTEDIT
-	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //Received Cursor position
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //REMOTE: Cursor position recived
 	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
-	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);
+	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError); //Problem during close document
 
-
-	if (!_user.getDocuments().contains(doc.getURI())) {
-		_user.addDocument(doc.getURI());
-	}
-
-	_docEditor->openDocument();
-
+	//TEXTEDIT - CLIENT
+	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
+	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::removeFromFile);
 
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
@@ -200,78 +174,91 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
 	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
 
-	//ADD DOCUMENT LOADING INTO EDITOR
+	//Opens text editor
 	openEditor();
 }
 
-//Open editor
-void LiveText::openEditor()
-{
-	//Dimensione finestra
-	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
-
-	//Applica la dimensione al TextEdit e lo mette nella finestra corretta
-	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
-	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
-
-	_textEdit->showMaximized();
-	
-	//Chiude finestra attuale
-	_landingPage->closeAll();
-}	
-
-//Close editor
-void LiveText::closeDocument()
-{
-	_client->removeFromFile(_user.getUserId());
-}
 
 void LiveText::closeDocumentCompleted(bool isForced)
 {
 	if (isForced) {
+		//If it is forced print an error message in editor
 		_textEdit->criticalError(tr("Server encountered an error, the document will be closed"));
 	}
 
-	
-
+	//Reopen logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
 	_landingPage->show();
 
+	closeEditor();
+}
+
+
+void LiveText::dismissDocumentCompleted(URI URI)
+{
+	//Remove document from uri
+	_user.removeDocument(URI);
+
+	//Rebuild document list in landing page
+	_landingPage->documentDismissed();
+}
+
+
+/************************ EDITOR OPERATIONS ************************/
+/*
+*	Open editor
+*	Close editor
+*/
+
+void LiveText::openEditor()
+{
+	//Center and resizes window
+	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
+	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
+	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
+
+	//Show maximized
+	_textEdit->showMaximized();
+
+	//Close all window in landing page
+	_landingPage->closeAll();
+
+	//Checks flag
+	editorOpen = true;
+}
+
+
+void LiveText::closeEditor()
+{
+	//Close editor
 	_textEdit->closeEditor();
-	
-	
+
+	//Delete pointers
 	delete _docEditor;
 	delete _textEdit;
 
-	_docEditor = nullptr;
-	_textEdit = nullptr;
+	editorOpen = false;
 }
 
-//Send cursor
-void LiveText::sendCursor(qint32 pos)
+/************************ USER ACCOUNT UPDATE ************************/
+/*
+*	Open edit profile window
+*	Update account in editor/landing page
+*/
+
+
+void LiveText::openEditProfile()
 {
-	_client->sendCursor(_user.getUserId(), pos);
+	_editProfile->updateInfo();
+	_editProfile->exec();
 }
 
-//Account update
-void LiveText::sendAccountUpdate(QString nickname, QImage image, QString password)
-{
-	if (nickname == _user.getNickname()) {
-		nickname = QString();
-	}
-
-	if (image == _user.getIcon()) {
-		image = QImage();
-	}
-
-
-	_client->sendAccountUpdate(nickname, image, password);
-}
 
 void LiveText::accountUpdated(User user)
 {
 	_user = user;
-	if (_textEdit != nullptr) {
+
+	if (editorOpen) {
 		_textEdit->newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
 	}
 	if (_landingPage->isVisible()) {
@@ -279,18 +266,4 @@ void LiveText::accountUpdated(User user)
 	}
 
 	_editProfile->updateSuccessful();
-	delete _editProfile;
-	_editProfile = nullptr;
 }
-
-void LiveText::openEditProfile()
-{
-	_editProfile = new ProfileEditWindow(_user);
-
-	connect(_editProfile, &ProfileEditWindow::accountUpdate, this, &LiveText::sendAccountUpdate);
-	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
-
-	_editProfile->exec();
-}
-
-

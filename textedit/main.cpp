@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
 	LiveText liveText;
 
-	liveText.start();
+	liveText.launch();
 
 	//Entra nel loop principale dell'applicazione in attesa di azioni e attende fino alla exit (chiusura app)
 	return a.exec();

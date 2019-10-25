@@ -143,7 +143,7 @@ public:
 	//List management
 	void createList(int position, QTextListFormat fmt);
 	void removeBlockFromList(int blockPosition);
-	void addBlockToList(int listPosition, int blockPosition);
+	void addBlockToList(int blockPosition, int listPosition);
 
 	//Editor operations (close/error/undo/redo)
 	void closeEditor();
@@ -157,10 +157,10 @@ public:
 	/* ----------------------- SIGNALS ----------------------- */
 signals:
 	//Ask to close current document
-	void closeDocument();
+	void closeDocument(int userId);
 
 	//Send current cursor position
-	void newCursorPosition(qint32 position);
+	void newCursorPosition(int userId, qint32 position);
 
 	//Ask to open edit profile window
 	void openEditProfile();

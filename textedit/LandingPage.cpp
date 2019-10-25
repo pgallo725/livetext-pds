@@ -1,7 +1,5 @@
 #include "LandingPage.h"
 #include "ui_landingpage.h"
-#include "textedit.h"
-
 
 #include <QMessageBox>
 #include <QPixmap>
@@ -14,9 +12,9 @@
 #include <QMovie>
 #include <QSplashScreen>
 #include <QTextStream>
-
 #include <QApplication>
 #include <QDesktopWidget>
+
 
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PORT "1500"
@@ -385,8 +383,8 @@ void LandingPage::incorrectFileOperation(QString error)
 	mngr.hideLoadingScreen(loading);
 
 	//Print errors
-	openURIWindow->incorrectOperation(error);
-	newFileWindow->incorrectOperation(error);
+	//openURIWindow->incorrectOperation(error);
+	//newFileWindow->incorrectOperation(error);
 	ui->label_incorrect_file_operation->setText(error);
 
 	//Recompute file list
@@ -504,7 +502,7 @@ void LandingPage::pushButtonOpenClicked()
 		mngr.showLoadingScreen(loading, tr("Opening document..."));
 
 		//Send request to open file to server
-		emit openDocument(ui->listWidget->currentRow());
+		emit openDocument(_user->getURIat(ui->listWidget->currentRow()));
 	}
 
 }
@@ -517,7 +515,7 @@ void LandingPage::pushButtonRemoveClicked()
 		mngr.showLoadingScreen(loading, tr("Removing document..."));
 
 		//Send request to remove file to server
-		emit removeDocument(ui->listWidget->currentRow());
+		emit removeDocument(_user->getURIat(ui->listWidget->currentRow()));
 	}
 }
 
@@ -529,7 +527,7 @@ void LandingPage::pushButtonOpenUriClicked()
 		mngr.showLoadingScreen(loading, tr("Open document from URI..."));
 		
 		//Adds document recived from open uri
-		emit addDocument(_buffer);
+		emit openDocument(URI(_buffer));
 	};
 
 	//Reset all fields of openURIWindow
@@ -553,7 +551,12 @@ void LandingPage::pushButtonNewClicked()
 
 void LandingPage::pushButtonBackClicked()
 {
+	//Reset fields
 	resetFields();
+
+	//Close all windows
+	openURIWindow->close();
+	newFileWindow->close();
 
 	//Return to Home Page
 	ui->stackedWidget->setCurrentIndex(0);

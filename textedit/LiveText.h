@@ -13,51 +13,55 @@
 
 class LiveText : public QObject
 {
+private:
+	//Landing page
+	LandingPage* _landingPage;
+
+	//Client
+	Client* _client;
+
+	//Text editor
+	TextEdit* _textEdit;
+	bool editorOpen;
+
+	//Local document editor
+	DocumentEditor* _docEditor;
+
+	//profile edit window
+	ProfileEditWindow* _editProfile;
+
+	//Current user
+	User _user;
+
+
 public:
 	LiveText(QObject* parent = nullptr);
 	~LiveText();
 
-	void start();
+	//Launch the main window
+	void launch();
 
 
 private slots:
-	//LANDING PAGE
+	//Text editor operations
 	void openEditor();
-	void connectToServer(QString ipAddress, quint16 port);
-	void Login(QString username, QString password);
-	void Register(QString username, QString password, QString nickname, QImage icon);
-	void Logout();
-	void removeDocument(int index);
-	void openDocument(int index);
-	void addDocument(QString uri);
-	
-	//TEXTEDIT
-	void closeDocument();
+	void closeEditor();
+
+	//Document operation
+	void openDocumentCompleted(Document doc);
 	void closeDocumentCompleted(bool isForced);
-	void sendCursor(qint32 pos);
-	void sendAccountUpdate(QString nickname, QImage image, QString password);
+	void dismissDocumentCompleted(URI URI);
+
+	//User profile editing
 	void accountUpdated(User user);
 	void openEditProfile();
 
-	//LIVETEXT
-	void operationFailed(QString errorType);
+	//Server connection
 	void loginSuccess(User user);
 	void forceLogout();
 
-
-	//DOCUMENTEDITOR
-	void openDocumentCompleted(Document doc);
-	void dismissDocumentCompleted(URI URI);
-
-private:
-	LandingPage* _landingPage;
-	Client* _client;
-	TextEdit* _textEdit;
-	DocumentEditor* _docEditor;
-	ProfileEditWindow* _editProfile;
-	User _user;
+	//GUI
+	void operationFailed(QString errorType);
 };
-
-
 
 #endif //LIVETEXT_H

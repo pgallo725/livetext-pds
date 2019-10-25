@@ -39,6 +39,7 @@ public:
 	//REMOTE: response from server
 	void updateSuccessful();
 	void updateFailed(QString error);
+	void updateInfo();
 
 signals:
 	//LOCAL: Account modified

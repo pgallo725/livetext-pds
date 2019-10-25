@@ -73,9 +73,8 @@ public:
 signals:
 	//Create/Open/Remove document
 	void newDocument(QString name);
-	void addDocument(QString URI);
-	void openDocument(int index);
-	void removeDocument(int index);
+	void openDocument(URI uri);
+	void removeDocument(URI uri);
 
 	//Server (Connection/Login/Register/Logout)
 	void connectToServer(QString ipAddress, quint16 port);

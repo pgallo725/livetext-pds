@@ -14,7 +14,7 @@
 
 const QString rsrcPath = ":/images/win";
 
-ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow), _user(user) , mngr(WidgetsManager(this)){
+ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow), _user(user), mngr(WidgetsManager(this)) {
 	//Window icon
 	setWindowIcon(QIcon(":/images/logo.png"));
 
@@ -33,21 +33,8 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonBrowseClicked);
 	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
 
-	//User profile picture
-	QPixmap userPix;
-	userPix.convertFromImage(user.getIcon());
-
-	int w = ui->label_UsrIcon->width();
-	int h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-	//Any changes in user profile picture path triggers a functions that updates preview
-	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &ProfileEditWindow::showUserIcon);
-
-
-	//Set username
-	ui->label_username->setText(user.getUsername());
-	ui->lineEdit_editNick->setText(user.getNickname());
+	//Update GUI according to user info
+	updateInfo();
 
 	//Setups splash screen to show loading informations
 	loading = new QLabel(this);
@@ -66,8 +53,10 @@ void ProfileEditWindow::updateSuccessful()
 	//If update went successful it closes the window
 	mngr.hideLoadingScreen(loading);
 
+	//Reset fields
 	resetFields();
 
+	//Closes window
 	this->close();
 }
 
@@ -77,6 +66,7 @@ void ProfileEditWindow::updateFailed(QString error)
 	mngr.hideLoadingScreen(loading);
 	ui->label_incorrect_edit->setText(error);
 }
+
 
 
 /* ---------------- PUSH BUTTONS ----------------*/
@@ -117,6 +107,15 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 
 	//Shows loading splash screen 
 	mngr.showLoadingScreen(loading, tr("Updating profile..."));
+
+
+	//Check if some fields are unchanged it emits empty ones
+	if (nick == _user.getNickname())
+		nick = QString();
+	
+	if (userIcon == _user.getIcon())
+		userIcon = QImage();
+
 
 	//Sends new info to server
 	emit(accountUpdate(nick, userIcon, newPassword));
@@ -159,8 +158,30 @@ void ProfileEditWindow::showUserIcon(QString path)
 //Resets all fields
 void ProfileEditWindow::resetFields()
 {
+	ui->label_incorrect_edit->setText("");
 	ui->lineEdit_editNick->setText("");
 	ui->lineEdit_editPsw->setText("");
 	ui->lineEdit_editPswConf->setText("");
 	ui->lineEdit_UsrIconPath->setText("");
+}
+
+void ProfileEditWindow::updateInfo()
+{
+	resetFields();
+
+	//User profile picture
+	QPixmap userPix;
+	userPix.convertFromImage(_user.getIcon());
+
+	int w = ui->label_UsrIcon->width();
+	int h = ui->label_UsrIcon->height();
+	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	//Any changes in user profile picture path triggers a functions that updates preview
+	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &ProfileEditWindow::showUserIcon);
+
+
+	//Set username
+	ui->label_username->setText(_user.getUsername());
+	ui->lineEdit_editNick->setText(_user.getNickname());
 }

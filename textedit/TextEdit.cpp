@@ -566,7 +566,7 @@ void TextEdit::askBeforeCloseDocument()
 	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes) {
 		killTimer(timerId);
-		emit closeDocument();
+		emit closeDocument(_user.getUserId());
 	}
 }
 
@@ -625,7 +625,7 @@ void TextEdit::timerEvent(QTimerEvent* event)
 	//Sends cursor position only if it's different from previous sent position
 	//if (textEdit->textCursor().position() != _currentCursorPosition) {
 	_currentCursorPosition = textEdit->textCursor().position();
-	emit newCursorPosition(textEdit->textCursor().position());
+	emit newCursorPosition(_user.getUserId(), textEdit->textCursor().position());
 	//}
 }
 
@@ -801,36 +801,35 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Getting current list
 	QTextList* currentList = _extraCursor->currentList();
 
+	//Getting current block format
+	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
+
 	if (currentList) {
 		qDebug() << "Removing block at position " << blockPosition;
 
 		//Getting current block
 		QTextBlock blk = _extraCursor->block();
 
-		//Getting current block format
-		QTextBlockFormat blkFormat = _extraCursor->blockFormat();
-
 		//Remove target bock from list
 		currentList->remove(blk);
-
-		//Makes the index of the blockFormat object -1 --> Reset block format to default
-		blkFormat.setObjectIndex(-1);
-
-		//Apply new format
-		_extraCursor->setBlockFormat(blkFormat);
-
-		//Reload updated block format to send it to the server
-		blkFormat = _extraCursor->blockFormat();
-
-		//Sends new block format to server
-		emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
-
 	}
+	
+	//Makes the index of the blockFormat object -1 --> Reset block format to default
+	blkFormat.setObjectIndex(-1);
+
+	//Apply new format (is applied anyway)
+	_extraCursor->setBlockFormat(blkFormat);
+
+	//Reload updated block format to send it to the server
+	blkFormat = _extraCursor->blockFormat();
+
+	//Sends new block format to server
+	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
 	cursorPositionChanged();
 }
 
-void TextEdit::addBlockToList(int listPosition, int blockPosition)
+void TextEdit::addBlockToList(int blockPosition, int listPosition)
 {
 	const QSignalBlocker blocker(textEdit->document());
 
@@ -867,8 +866,10 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 	_extraCursor->setPosition(position);
 
+	//Sets alignment and indent in a new format (due to compatibility problems)
 	QTextBlockFormat format;
 	format.setAlignment(fmt.alignment());
+	format.setIndent(fmt.indent());
 
 	//Sets block format in current block
 	_extraCursor->mergeBlockFormat(format);
