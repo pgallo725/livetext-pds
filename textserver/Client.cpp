@@ -17,29 +17,29 @@ Client::~Client()
 	// NOTHING, activeUser is owned by TcpServer and therefore it does NOT need to be destroyed
 }
 
-QSslSocket* Client::getSocket()
+QSslSocket* Client::getSocket() const
 {
 	return socket;
 
 }
-qintptr Client::getSocketDescriptor()
+qintptr Client::getSocketDescriptor() const
 {
 	return socket->socketDescriptor();
 }
 
-User* Client::getUser()
+User* Client::getUser() const
 {
 	return activeUser;
 }
 
-int Client::getUserId()
+int Client::getUserId() const
 {
 	if (activeUser == nullptr)
 		return -1;
 	else return activeUser->getUserId();
 }
 
-QString Client::getUsername()
+QString Client::getUsername() const
 {
 	if (activeUser == nullptr)
 		return QString::null;
@@ -63,7 +63,7 @@ bool Client::isLogged()
 	return logged;
 }
 
-bool Client::authentication(QByteArray token)
+bool Client::authenticate(QByteArray token)
 {
 	QCryptographicHash hash(QCryptographicHash::Md5);
 

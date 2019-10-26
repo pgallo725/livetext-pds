@@ -1,6 +1,6 @@
 #pragma once
 
-#include "User.h"
+#include <User.h>
 #include <QSslSocket>	
 
 class Client 
@@ -25,15 +25,15 @@ public:
 	void logout();
 	bool isLogged();
 
-	bool authentication(QByteArray token);
+	bool authenticate(QByteArray token);
 	QByteArray challenge(User* user);
 
 	/* getters */
-	User* getUser();
-	int getUserId();
-	QString getUsername();
-	QSslSocket* getSocket();
-	qintptr getSocketDescriptor();
+	User* getUser() const;
+	int getUserId() const;
+	QString getUsername() const;
+	QSslSocket* getSocket() const;
+	qintptr getSocketDescriptor() const;
 
 };
 
