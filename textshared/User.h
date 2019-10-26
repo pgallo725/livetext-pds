@@ -8,8 +8,8 @@
 class User
 {
 	/* Operators for QDataStream serialization and deserialization */
-	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input
-	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output
+	friend QDataStream& operator>>(QDataStream& in, User& user);			// Input deserialization
+	friend QDataStream& operator<<(QDataStream& out, const User& user);		// Output serialization
 	
 private:
 
@@ -33,15 +33,15 @@ public:
 	~User();
 
 	/* getters */
-	int getUserId();
-	QString getUsername();
-	QString getNickname();
-	QByteArray getPasswordHash();
-	QByteArray getSalt();
-	QImage getIcon();
-	QList<URI> getDocuments();
-	bool hasDocument(URI uri);
-	URI getURIat(int index);
+	int getUserId() const;
+	QString getUsername() const;
+	QString getNickname() const;
+	QByteArray getPasswordHash() const;
+	QByteArray getSalt() const;
+	QImage getIcon() const;
+	QList<URI> getDocuments() const;
+	bool hasDocument(URI uri) const;
+	URI getURIat(int index) const;
 
 	/* setters */
 	void addDocument(URI docUri);
@@ -50,10 +50,5 @@ public:
 	void setIcon(QImage newIcon);
 	void setPassword(QString newPassword);
 	void update(QString nickname, QImage icon, QString password);
-	void rollback(User& u);
+	void rollback(const User& backup);
 };
-
-
-QDataStream& operator>>(QDataStream& in, User& user);			// Input deserialization
-QDataStream& operator<<(QDataStream& out, const User& user);	// Output serialization
-
