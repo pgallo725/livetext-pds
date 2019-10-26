@@ -40,47 +40,47 @@ User::~User()
 	// NOTHING
 }
 
-QString User::getUsername()
+QString User::getUsername() const
 {
 	return m_username;
 }
 
-int User::getUserId()
+int User::getUserId() const
 {
 	return m_userId;
 }
 
-QString User::getNickname()
+QString User::getNickname() const
 {
 	return m_nickname;
 }
 
-QByteArray User::getPasswordHash()
+QByteArray User::getPasswordHash() const
 {
 	return m_passwd;
 }
 
-QImage User::getIcon()
+QImage User::getIcon() const
 {
 	return m_icon;
 }
 
-QByteArray User::getSalt()
+QByteArray User::getSalt() const
 {
 	return m_salt;
 }
 
-bool User::hasDocument(URI uri)
+bool User::hasDocument(URI uri) const
 {
 	return m_documents.contains(uri);
 }
 
-QList<URI> User::getDocuments()
+QList<URI> User::getDocuments() const
 {
 	return m_documents;
 }
 
-URI User::getURIat(int index)
+URI User::getURIat(int index) const
 {
 	return m_documents.at(index);
 }
@@ -135,13 +135,13 @@ void User::update(QString nickname, QImage icon, QString password)
 		setPassword(password);
 }
 
-void User::rollback(User& u)
+void User::rollback(const User& backup)
 {
-	m_nickname = u.getNickname();
-	m_icon = u.getIcon();
-	m_passwd = u.getPasswordHash();
-	m_salt = u.getSalt();
-	m_documents = u.getDocuments();
+	m_nickname = backup.getNickname();
+	m_icon = backup.getIcon();
+	m_passwd = backup.getPasswordHash();
+	m_salt = backup.getSalt();
+	m_documents = backup.getDocuments();
 }
 
 

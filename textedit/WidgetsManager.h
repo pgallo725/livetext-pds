@@ -3,10 +3,13 @@
 
 #include <QWidget>
 #include <QLabel>
-#include <QString>
 
 class WidgetsManager
 {
+private:
+	//Main widget
+	QWidget* _widget;
+
 public:
 	WidgetsManager(QWidget* widget);
 	~WidgetsManager();
@@ -18,9 +21,6 @@ public:
 	void setupLoadingInfo(QLabel* _label);
 	void showLoadingScreen(QLabel* _label, QString text);
 	void hideLoadingScreen(QLabel* _label);
-private:
-	//Main widget
-	QWidget* _widget;
 };
 
 

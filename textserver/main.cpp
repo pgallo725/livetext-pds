@@ -1,7 +1,5 @@
 #include <QCoreApplication>
 
-#include <QSaveFile>
-
 #include "TcpServer.h"
 #include "ServerException.h"
 
@@ -17,8 +15,8 @@ int main(int argc, char *argv[])
 		QCoreApplication::setApplicationName("LiveText - Server");
 		QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 		
-		// Possible failures in initialize are handled by throwing StartupException
-		// or a sub-type of FileException with more specific details
+		// Possible failures in initialize are notified by throwing StartupException
+		// or a sub-type of DatabaseException with more specific details
 		server.initialize();
 
 		return a.exec();

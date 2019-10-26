@@ -1,101 +1,135 @@
 #include "ServerDatabase.h"
 #include "ServerException.h"
 
-#include <QString>
+#include <QFile>
 #include <QVariant>
+#include <QImage>
 #include <QByteArray>
 #include <QBuffer>
 
-ServerDatabase::ServerDatabase()
-{
-}
 
-ServerDatabase::~ServerDatabase()
-{
-}
-
-void ServerDatabase::initialize(QString dbName)
+void ServerDatabase::open(QString dbName)
 {
 	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+	bool creatingDb = !QFile::exists(dbName);
 	db.setDatabaseName(dbName);
-	bool ok = db.open();
-	if (!ok)
+	if (!db.open())
 	{
-		throw StartupException("Impossible to connect to the database");
+		throw DatabaseConnectionException(db.lastError());
+	}
+	if (creatingDb)
+	{
+		// Database initialization queries
+
+		QSqlQuery createTableUsers(db);								// Query to create the Users table
+		if (!createTableUsers.exec("CREATE TABLE \"Users\" (\
+			\"Username\"	TEXT,\
+			\"UserID\"	INTEGER NOT NULL UNIQUE,\
+			\"Nickname\"	TEXT,\
+			\"PassHash\"	BLOB NOT NULL,\
+			\"Salt\"	BLOB NOT NULL,\
+			\"Icon\"	BLOB,\
+			PRIMARY KEY(\"Username\"))"))
+		{
+			throw DatabaseCreateException(createTableUsers.lastQuery().toStdString(), createTableUsers.lastError());
+		}
+
+		QSqlQuery createTableDocs(db);								  // Query to create the DocEditors table
+		if (!createTableDocs.exec("CREATE TABLE \"DocEditors\" (\
+			\"Username\"	TEXT NOT NULL,\
+			\"DocURI\"	TEXT NOT NULL,\
+			FOREIGN KEY(\"Username\") REFERENCES \"Users\"(\"Username\") ON UPDATE CASCADE ON DELETE CASCADE,\
+			PRIMARY KEY(\"Username\", \"DocURI\"))"))
+		{
+			throw DatabaseCreateException(createTableDocs.lastQuery().toStdString(), createTableDocs.lastError());
+		}
 	}
 
-	qInsertNewUser = QSqlQuery(db);
-	qUpdateUser = QSqlQuery(db);
-	qInsertNewDocToUser = QSqlQuery(db);
-	qRemoveDocFromUser = QSqlQuery(db);
-	qRemoveDoc = QSqlQuery(db);
-	qSelectDocuments = QSqlQuery(db);
-	qCountDocumentEditors = QSqlQuery(db);
-	qSelectMaxUserID = QSqlQuery(db);
-	qSelectDocsUsers = QSqlQuery(db);
+	// Prepare all var-arg queries, leave only parameter binding for later
 
+	qInsertNewUser	 = QSqlQuery(db);
+	qUpdateUser		 = QSqlQuery(db);
+	qInsertDocEditor = QSqlQuery(db);
+	qRemoveDocEditor = QSqlQuery(db);
+	qRemoveDoc		 = QSqlQuery(db);
+	qCountDocEditors = QSqlQuery(db);
+	qSelectUserDocs	 = QSqlQuery(db);
+
+	// Insertion query of a new record in the Users table
 	qInsertNewUser.prepare("INSERT INTO Users (Username, UserID, Nickname, PassHash, Salt, Icon) "
 		"VALUES (:username, :id, :nickname, :passhash, :salt, :icon)");
 
+	// Update query of an existing record in the Users table
 	qUpdateUser.prepare("UPDATE Users SET Nickname = :nickname, PassHash = :passhash, Salt = :salt, Icon = :icon "
 		"WHERE Username = :username");
 
-	qInsertNewDocToUser.prepare("INSERT INTO DocEditors (Username, DocURI) VALUES (:username, :uri)");
+	// Insertion query of a new User-URI pair in the DocEditors table
+	qInsertDocEditor.prepare("INSERT INTO DocEditors (Username, DocURI) VALUES (:username, :uri)");
 
-	qRemoveDocFromUser.prepare("DELETE FROM DocEditors WHERE Username = :username AND DocURI = :uri");
+	// Deletion query of a User-URI pair from the DocEditors table
+	qRemoveDocEditor.prepare("DELETE FROM DocEditors WHERE Username = :username AND DocURI = :uri");
 
+	// Deletion query of all records referring to a document URI in the DocEditors table
 	qRemoveDoc.prepare("DELETE FROM DocEditors WHERE DocURI = :uri");
 
-	qSelectDocuments.prepare("SELECT DISTINCT DocURI FROM DocEditors");
+	// Query to count the editors of a document (DocEditors table)
+	qCountDocEditors.prepare("SELECT COUNT(*) FROM DocEditors WHERE DocURI = :uri");
 
-	qCountDocumentEditors.prepare("SELECT COUNT(*) FROM DocEditors WHERE DocURI = :uri");
-
-	qSelectMaxUserID.prepare("SELECT MAX(UserID) FROM Users");
-
-	qSelectDocsUsers.prepare("SELECT DocURI FROM DocEditors WHERE Username = :username");
+	// Selection query of all the URIs owned by a user (DocEditors table)
+	qSelectUserDocs.prepare("SELECT DocURI FROM DocEditors WHERE Username = :username");
 }
 
-void ServerDatabase::insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon)
+void ServerDatabase::insertUser(const User& user)
 {
-	qInsertNewUser.bindValue(":username", username);
-	qInsertNewUser.bindValue(":id", userId);
-	qInsertNewUser.bindValue(":nickname", nickname);
-	qInsertNewUser.bindValue(":passhash", passhash);
-	qInsertNewUser.bindValue(":salt", salt);
+	QByteArray icon;
+	QBuffer buffer(&icon);
+	buffer.open(QIODevice::WriteOnly);
+	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
+
+	qInsertNewUser.bindValue(":username", user.getUsername());
+	qInsertNewUser.bindValue(":id", user.getUserId());
+	qInsertNewUser.bindValue(":nickname", user.getNickname());
+	qInsertNewUser.bindValue(":passhash", user.getPasswordHash());
+	qInsertNewUser.bindValue(":salt", user.getSalt());
 	qInsertNewUser.bindValue(":icon", icon);
 
 	if (!qInsertNewUser.exec())
-		throw DataBaseWriteRecordException(qInsertNewUser.lastQuery().toStdString(), qInsertNewUser.lastError());
+		throw DatabaseWriteException(qInsertNewUser.lastQuery().toStdString(), qInsertNewUser.lastError());
 }
 
-void ServerDatabase::updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon)
+void ServerDatabase::updateUser(const User& user)
 {
-	qUpdateUser.bindValue(":username", username);
-	qUpdateUser.bindValue(":nickname", nickname);
-	qUpdateUser.bindValue(":passhash", passhash);
-	qUpdateUser.bindValue(":salt", salt);
+	QByteArray icon;
+	QBuffer buffer(&icon);
+	buffer.open(QIODevice::WriteOnly);
+	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
+
+	qUpdateUser.bindValue(":username", user.getUsername());
+	qUpdateUser.bindValue(":nickname", user.getNickname());
+	qUpdateUser.bindValue(":passhash", user.getPasswordHash());
+	qUpdateUser.bindValue(":salt", user.getSalt());
 	qUpdateUser.bindValue(":icon", icon);
 
 	if (!qUpdateUser.exec())
-		throw DataBaseWriteRecordException(qUpdateUser.lastQuery().toStdString(), qUpdateUser.lastError());
+		throw DatabaseWriteException(qUpdateUser.lastQuery().toStdString(), qUpdateUser.lastError());
 }
 
 void ServerDatabase::addDocToUser(QString username, QString uri)
 {
-	qInsertNewDocToUser.bindValue(":username", username);
-	qInsertNewDocToUser.bindValue(":uri", uri);
+	qInsertDocEditor.bindValue(":username", username);
+	qInsertDocEditor.bindValue(":uri", uri);
 
-	if (!qInsertNewDocToUser.exec())
-		throw DataBaseWriteRecordException(qInsertNewDocToUser.lastQuery().toStdString(), qInsertNewDocToUser.lastError());
+	if (!qInsertDocEditor.exec())
+		throw DatabaseWriteException(qInsertDocEditor.lastQuery().toStdString(), qInsertDocEditor.lastError());
 }
 
 void ServerDatabase::removeDocFromUser(QString username, QString uri)
 {
-	qRemoveDocFromUser.bindValue(":username", username);
-	qRemoveDocFromUser.bindValue(":uri", uri);
+	qRemoveDocEditor.bindValue(":username", username);
+	qRemoveDocEditor.bindValue(":uri", uri);
 
-	if (!qRemoveDocFromUser.exec())
-		throw DataBaseWriteRecordException(qRemoveDocFromUser.lastQuery().toStdString(), qRemoveDocFromUser.lastError());
+	if (!qRemoveDocEditor.exec())
+		throw DatabaseWriteException(qRemoveDocEditor.lastQuery().toStdString(), qRemoveDocEditor.lastError());
 }
 
 void ServerDatabase::removeDoc(QString uri)
@@ -103,21 +137,23 @@ void ServerDatabase::removeDoc(QString uri)
 	qRemoveDoc.bindValue(":uri", uri);
 
 	if (!qRemoveDoc.exec())
-		throw DataBaseWriteRecordException(qRemoveDoc.lastQuery().toStdString(), qRemoveDoc.lastError());
+		throw DatabaseWriteException(qRemoveDoc.lastQuery().toStdString(), qRemoveDoc.lastError());
 }
 
 
 int ServerDatabase::getMaxUserID()
 {
-	if (qSelectMaxUserID.exec() && qSelectMaxUserID.isActive())
+	QSqlQuery query;
+	if (query.exec("SELECT MAX(UserID) FROM Users") && query.isActive())
 	{
-		qSelectMaxUserID.next();
-		if (qSelectMaxUserID.isValid())
-			return qSelectMaxUserID.value(0).toInt() + 1;
+		// Get the max value of the UserID column and return it incremented by 1 (first available ID)
+		query.next();
+		if (query.isValid())
+			return query.value(0).toInt() + 1;
 	}
 	else 
 	{
-		throw DataBaseReadTableException(qSelectMaxUserID.lastQuery().toStdString(), qSelectMaxUserID.lastError());
+		throw DatabaseReadException(query.lastQuery().toStdString(), query.lastError());
 	}
 
 	return 0;
@@ -127,7 +163,8 @@ QList<User> ServerDatabase::readUsersList()
 {
 	QList<User> users;
 	QSqlQuery query;
-	if (query.exec("SELECT * FROM Users") && query.isActive()) {
+	if (query.exec("SELECT * FROM Users") && query.isActive()) 
+	{
 		// Read all the users' information from the database and load them in memory
 		query.next();
 		while (query.isValid())
@@ -144,8 +181,9 @@ QList<User> ServerDatabase::readUsersList()
 			query.next();
 		}
 	}
-	else {
-		throw DataBaseReadTableException(query.lastQuery().toStdString(), query.lastError());
+	else 
+	{
+		throw DatabaseReadException(query.lastQuery().toStdString(), query.lastError());
 	}
 
 	return users;
@@ -154,20 +192,20 @@ QList<User> ServerDatabase::readUsersList()
 QStringList ServerDatabase::readUserDocuments(QString username)
 {
 	QStringList docs;
-	qSelectDocsUsers.bindValue(":username", username);
+	qSelectUserDocs.bindValue(":username", username);
 	
-	if (qSelectDocsUsers.exec() && qSelectDocsUsers.isActive())
+	if (qSelectUserDocs.exec() && qSelectUserDocs.isActive())
 	{
-		qSelectDocsUsers.next();
-		while (qSelectDocsUsers.isValid())
+		qSelectUserDocs.next();
+		while (qSelectUserDocs.isValid())
 		{
-			docs << qSelectDocsUsers.value(0).toString();
-			qSelectDocsUsers.next();
+			docs << qSelectUserDocs.value(0).toString();
+			qSelectUserDocs.next();
 		}
 	}
 	else
 	{
-		throw DataBaseReadTableException(qSelectDocsUsers.lastQuery().toStdString(), qSelectDocsUsers.lastError());
+		throw DatabaseReadException(qSelectUserDocs.lastQuery().toStdString(), qSelectUserDocs.lastError());
 	}
 
 	return docs;
@@ -176,20 +214,20 @@ QStringList ServerDatabase::readUserDocuments(QString username)
 QStringList ServerDatabase::readDocumentURIs()
 {
 	QList<QString> documents;
-
-	if (qSelectDocuments.exec("SELECT DISTINCT DocURI FROM DocEditors") && qSelectDocuments.isActive())
+	QSqlQuery query;
+	if (query.exec("SELECT DISTINCT DocURI FROM DocEditors") && query.isActive())
 	{
 		// Load all the document URIs in a QString list
-		qSelectDocuments.next();
-		while (qSelectDocuments.isValid())
+		query.next();
+		while (query.isValid())
 		{
-			documents.append(qSelectDocuments.value(0).toString());
-			qSelectDocuments.next();
+			documents.append(query.value(0).toString());
+			query.next();
 		}
 	}
 	else
 	{
-		throw DataBaseReadTableException(qSelectDocuments.lastQuery().toStdString(), qSelectDocuments.lastError());
+		throw DatabaseReadException(query.lastQuery().toStdString(), query.lastError());
 	}
 
 	return documents;
@@ -197,15 +235,15 @@ QStringList ServerDatabase::readDocumentURIs()
 
 int ServerDatabase::countDocEditors(QString docURI)
 {
-	qCountDocumentEditors.bindValue(":uri", docURI);
+	qCountDocEditors.bindValue(":uri", docURI);
 
-	if (qCountDocumentEditors.exec() && qCountDocumentEditors.isActive())
+	if (qCountDocEditors.exec() && qCountDocEditors.isActive())
 	{
-		qCountDocumentEditors.next();
-		return qCountDocumentEditors.value(0).toInt();
+		qCountDocEditors.next();
+		return qCountDocEditors.value(0).toInt();
 	}
 	else
 	{
-		throw DataBaseReadTableException(qCountDocumentEditors.lastQuery().toStdString(), qCountDocumentEditors.lastError());
+		throw DatabaseReadException(qCountDocEditors.lastQuery().toStdString(), qCountDocEditors.lastError());
 	}
 }
