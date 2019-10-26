@@ -884,6 +884,12 @@ a.a 2018/2019</string>
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_confirmOperation">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -892,6 +898,9 @@ a.a 2018/2019</string>
                </property>
                <property name="text">
                 <string/>
+               </property>
+               <property name="autoDefault">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -982,6 +991,12 @@ a.a 2018/2019</string>
                   <widget class="QPushButton" name="pushButton_remove">
                    <property name="enabled">
                     <bool>false</bool>
+                   </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
                    <property name="minimumSize">
                     <size>
@@ -1079,6 +1094,12 @@ a.a 2018/2019</string>
             </property>
             <item>
              <widget class="QPushButton" name="pushButton_back">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>

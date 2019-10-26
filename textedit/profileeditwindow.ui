@@ -371,6 +371,9 @@ password</string>
               <property name="text">
                <string>Browse...</string>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -448,23 +451,38 @@ password</string>
             </property>
             <item>
              <widget class="QPushButton" name="pushButton_cancel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>28</height>
+                <height>30</height>
                </size>
               </property>
               <property name="text">
                <string>Cancel</string>
               </property>
+              <property name="autoDefault">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_updateProfile">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
-                <width>190</width>
-                <height>28</height>
+                <width>200</width>
+                <height>30</height>
                </size>
               </property>
               <property name="font">

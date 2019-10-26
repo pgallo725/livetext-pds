@@ -55,7 +55,7 @@ void DocumentEditor::addSymbol(Symbol s, bool isLast)
 	qDebug().nospace() << "Remote char insertion: " << s.getChar();
 	int position = _document.insert(s);
 	if (!isLast) {	// skip inserting this char in the Qt document, because it inserts one automatically
-		_textedit->newChar(s.getChar(), s.getFormat(), position, s.getAuthorId());
+		_textedit->newChar(s.getChar(), s.getFormat(), position);
 		_textedit->updateUsersSelections();
 	}
 }

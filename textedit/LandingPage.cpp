@@ -17,12 +17,11 @@
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PORT "1500"
 
-const QString rsrcPath = ":/images/win";
+const QString rsrcPath = ":/images";
 
 LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)){
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
-	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
@@ -44,31 +43,31 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	int w = ui->pushButton_new->width();
 	int h = ui->pushButton_new->height();
 	ui->pushButton_new->setIconSize(QSize::QSize(w, h));
-	ui->pushButton_new->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/new.png"));
+	ui->pushButton_new->setIcon(QIcon(rsrcPath + "/landingPage/new.png"));
 
 	//Tab widget icons
-	ui->tabWidget->setTabIcon(0, QIcon::QIcon(rsrcPath + "/LandingPage/login.png"));
-	ui->tabWidget->setTabIcon(1, QIcon::QIcon(rsrcPath + "/LandingPage/register.png"));
+	ui->tabWidget->setTabIcon(0,QIcon(rsrcPath + "/landingPage/login.png"));
+	ui->tabWidget->setTabIcon(1, QIcon(rsrcPath + "/landingPage/register.png"));
 	ui->tabWidget->setIconSize(QSize(40, 65));
 
 	//Browse icon
-	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/fileopen.png"));
+	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/landingPage/fileopen.png"));
 
 	//Open from URI push button icon
 	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
-	ui->pushButton_openuri->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/openuri.png"));
+	ui->pushButton_openuri->setIcon(QIcon(rsrcPath + "/landingPage/openuri.png"));
 
 	//Logout
-	ui->pushButton_back->setIcon(QIcon::QIcon(rsrcPath + "/logout.png"));
+	ui->pushButton_back->setIcon(QIcon(rsrcPath + "/misc/logout.png"));
 
 	//Open
-	ui->pushButton_open->setIcon(QIcon::QIcon(rsrcPath + "/filenew.png"));
+	ui->pushButton_open->setIcon(QIcon(rsrcPath + "/landingPage/filenew.png"));
 
 	//Remove
-	ui->pushButton_remove->setIcon(QIcon::QIcon(rsrcPath + "/LandingPage/remove.png"));
+	ui->pushButton_remove->setIcon(QIcon(rsrcPath + "/landingPage/remove.png"));
 
 	//LiveText main page logo
-	QPixmap logoPix(":/images/logo.png");
+	QPixmap logoPix(rsrcPath + "/misc/logo.png");
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -114,7 +113,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 
 	//User Icon
-	QPixmap userPix(rsrcPath + "/LandingPage/defaultProfile.png");
+	QPixmap userPix(rsrcPath + "/misc/defaultProfile.png");
 	w = ui->label_UsrIcon->width();
 	h = ui->label_UsrIcon->height();
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -312,7 +311,7 @@ void LandingPage::setupFileList()
 	//Add every document to the list
 	QList<URI>::iterator it;
 	for (it = documents.begin(); it != documents.end(); it++) {
-		ui->listWidget->addItem(new QListWidgetItem(QIcon(rsrcPath + "/LandingPage/richtext.png"), it->getDocumentName() + " (" + it->getAuthorName() + ")"));
+		ui->listWidget->addItem(new QListWidgetItem(QIcon(rsrcPath + "/landingPage/richtext.png"), it->getDocumentName() + " (" + it->getAuthorName() + ")"));
 	}
 
 	//If there are no files list dislays "<No files found>"
@@ -458,7 +457,7 @@ void LandingPage::showUserIcon(QString path)
 	ui->label_incorrect_operation->setText("Please choose a valid image file");
 
 	//Load default profile picture
-	QPixmap default(rsrcPath + "/LandingPage/defaultProfile.png");
+	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 

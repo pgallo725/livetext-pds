@@ -47,14 +47,14 @@
 
 #include "textedit.h"
 
-const QString rsrcPath = ":/images/win";
+const QString rsrcPath = ":/images";
 
 TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
 {
 	//Setting window title
 	setWindowTitle(QCoreApplication::applicationName());
 	//Setting window icon
-	setWindowIcon(QIcon(":/images/logo.png"));
+	setWindowIcon(QIcon(rsrcPath + "/misc/logo.png"));
 
 	//Inizialize Qt text editor
 	textEdit = new QTextEdit(this);
@@ -162,14 +162,14 @@ void TextEdit::setupFileActions()
 #ifndef QT_NO_PRINTER
 
 	//Export document in PDF
-	const QIcon exportPdfIcon = QIcon(rsrcPath + "/exportpdf.png");
+	const QIcon exportPdfIcon = QIcon(rsrcPath + "/editor/exportpdf.png");
 	QAction* a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
 	a->setPriority(QAction::LowPriority);
 	a->setShortcut(Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
 
 	//Print document
-	const QIcon filePrintIcon = QIcon(rsrcPath + "/fileprint.png");
+	const QIcon filePrintIcon = QIcon(rsrcPath + "/editor/fileprint.png");
 	menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
 
 	a = menu->addAction(filePrintIcon, tr("&Print..."), this, &TextEdit::filePrint);
@@ -187,7 +187,7 @@ void TextEdit::setupShareActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Share"));
 
 	//Share URI, opens a box with URI pasted inside
-	const QIcon shareIcon = QIcon(rsrcPath + "/share.png");
+	const QIcon shareIcon = QIcon(rsrcPath + "/editor/share.png");
 	QAction* a = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
 	tb->addAction(a);
 }
@@ -199,13 +199,13 @@ void TextEdit::setupEditActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
 
 	//Undo
-	const QIcon undoIcon = QIcon(rsrcPath + "/editundo.png");
+	const QIcon undoIcon = QIcon(rsrcPath + "/editor/editundo.png");
 	actionUndo = menu->addAction(undoIcon, tr("&Undo"), textEdit, &QTextEdit::undo);
 	actionUndo->setShortcut(QKeySequence::Undo);
 	tb->addAction(actionUndo);
 
 	//Redo
-	const QIcon redoIcon = QIcon(rsrcPath + "/editredo.png");
+	const QIcon redoIcon = QIcon(rsrcPath + "/editor/editredo.png");
 	actionRedo = menu->addAction(redoIcon, tr("&Redo"), textEdit, &QTextEdit::redo);
 	actionRedo->setPriority(QAction::LowPriority);
 	actionRedo->setShortcut(QKeySequence::Redo);
@@ -216,21 +216,21 @@ void TextEdit::setupEditActions()
 
 #ifndef QT_NO_CLIPBOARD
 	//Cut
-	const QIcon cutIcon = QIcon(rsrcPath + "/editcut.png");
+	const QIcon cutIcon = QIcon(rsrcPath + "/editor/editcut.png");
 	actionCut = menu->addAction(cutIcon, tr("Cu&t"), textEdit, &QTextEdit::cut);
 	actionCut->setPriority(QAction::LowPriority);
 	actionCut->setShortcut(QKeySequence::Cut);
 	tb->addAction(actionCut);
 
 	//Copy
-	const QIcon copyIcon = QIcon(rsrcPath + "/editcopy.png");
+	const QIcon copyIcon = QIcon(rsrcPath + "/editor/editcopy.png");
 	actionCopy = menu->addAction(copyIcon, tr("&Copy"), textEdit, &QTextEdit::copy);
 	actionCopy->setPriority(QAction::LowPriority);
 	actionCopy->setShortcut(QKeySequence::Copy);
 	tb->addAction(actionCopy);
 
 	//Paste
-	const QIcon pasteIcon = QIcon(rsrcPath + "/editpaste.png");
+	const QIcon pasteIcon = QIcon(rsrcPath + "/editor/editpaste.png");
 	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), textEdit, &QTextEdit::paste);
 	actionPaste->setPriority(QAction::LowPriority);
 	actionPaste->setShortcut(QKeySequence::Paste);
@@ -247,7 +247,7 @@ void TextEdit::setupTextActions()
 	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
 
 	//Bold
-	const QIcon boldIcon = QIcon(rsrcPath + "/textbold.png");
+	const QIcon boldIcon = QIcon(rsrcPath + "/editor/textbold.png");
 	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
@@ -265,7 +265,7 @@ void TextEdit::setupTextActions()
 
 
 	//Italic
-	const QIcon italicIcon = QIcon(rsrcPath + "/textitalic.png");
+	const QIcon italicIcon = QIcon(rsrcPath + "/editor/textitalic.png");
 	actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
 	actionTextItalic->setPriority(QAction::LowPriority);
 	actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
@@ -279,7 +279,7 @@ void TextEdit::setupTextActions()
 
 
 	//Underline
-	const QIcon underlineIcon = QIcon(rsrcPath + "/textunder.png");
+	const QIcon underlineIcon = QIcon(rsrcPath + "/editor/textunder.png");
 	actionTextUnderline = menu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
 	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
 	actionTextUnderline->setPriority(QAction::LowPriority);
@@ -298,28 +298,28 @@ void TextEdit::setupTextActions()
 	//Alignment
 
 	//Left
-	const QIcon leftIcon = QIcon(rsrcPath + "/textleft.png");
+	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 	actionAlignLeft->setPriority(QAction::LowPriority);
 
 	//Center
-	const QIcon centerIcon = QIcon(rsrcPath + "/textcenter.png");
+	const QIcon centerIcon = QIcon(rsrcPath + "/editor/textcenter.png");
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 	actionAlignCenter->setPriority(QAction::LowPriority);
 
 	//Right
-	const QIcon rightIcon = QIcon(rsrcPath + "/textright.png");
+	const QIcon rightIcon = QIcon(rsrcPath + "/editor/textright.png");
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 	actionAlignRight->setPriority(QAction::LowPriority);
 
 	//Justify
-	const QIcon fillIcon = QIcon(rsrcPath + "/textjustify.png");
+	const QIcon fillIcon = QIcon(rsrcPath + "/editor/textjustify.png");
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
 	actionAlignJustify->setCheckable(true);
@@ -354,35 +354,35 @@ void TextEdit::setupTextActions()
 	listActions[standard]->setCheckable(true);
 	listActions[standard]->setChecked(true);
 
-	listActions[disc] = menuList->addAction(QIcon(rsrcPath + "/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
+	listActions[disc] = menuList->addAction(QIcon(rsrcPath + "/editor/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
 	listActions[disc]->setCheckable(true);
 	listActions[disc]->setChecked(false);
 
-	listActions[circle] = menuList->addAction(QIcon(rsrcPath + "/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
+	listActions[circle] = menuList->addAction(QIcon(rsrcPath + "/editor/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
 	listActions[circle]->setCheckable(true);
 	listActions[circle]->setChecked(false);
 
-	listActions[square] = menuList->addAction(QIcon(rsrcPath + "/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
+	listActions[square] = menuList->addAction(QIcon(rsrcPath + "/editor/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
 	listActions[square]->setCheckable(true);
 	listActions[square]->setChecked(false);
 
-	listActions[decimal] = menuList->addAction(QIcon(rsrcPath + "/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
+	listActions[decimal] = menuList->addAction(QIcon(rsrcPath + "/editor/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
 	listActions[decimal]->setCheckable(true);
 	listActions[decimal]->setChecked(false);
 
-	listActions[alpha] = menuList->addAction(QIcon(rsrcPath + "/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
+	listActions[alpha] = menuList->addAction(QIcon(rsrcPath + "/editor/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
 	listActions[alpha]->setCheckable(true);
 	listActions[alpha]->setChecked(false);
 
-	listActions[alphaupper] = menuList->addAction(QIcon(rsrcPath + "/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
+	listActions[alphaupper] = menuList->addAction(QIcon(rsrcPath + "/editor/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
 	listActions[alphaupper]->setCheckable(true);
 	listActions[alphaupper]->setChecked(false);
 
-	listActions[roman] = menuList->addAction(QIcon(rsrcPath + "/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
+	listActions[roman] = menuList->addAction(QIcon(rsrcPath + "/editor/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
 	listActions[roman]->setCheckable(true);
 	listActions[roman]->setChecked(false);
 
-	listActions[romanupper] = menuList->addAction(QIcon(rsrcPath + "/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
+	listActions[romanupper] = menuList->addAction(QIcon(rsrcPath + "/editor/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
 	listActions[romanupper]->setCheckable(true);
 	listActions[romanupper]->setChecked(false);
 
@@ -396,7 +396,7 @@ void TextEdit::setupTextActions()
 
 	listButton->setCheckable(true);
 
-	listButton->setIcon(QIcon(rsrcPath + "/list.png"));
+	listButton->setIcon(QIcon(rsrcPath + "/editor/list.png"));
 	tb->addWidget(listButton);
 
 	tb->addSeparator();
@@ -438,7 +438,7 @@ void TextEdit::setupTextActions()
 	lineHeightButton->setPopupMode(QToolButton::InstantPopup);
 	lineHeightButton->setToolTip(tr("Line height"));
 
-	lineHeightButton->setIcon(QIcon(rsrcPath + "/lineheight.png"));
+	lineHeightButton->setIcon(QIcon(rsrcPath + "/editor/lineheight.png"));
 
 	tb->addWidget(lineHeightButton);
 
@@ -446,7 +446,7 @@ void TextEdit::setupTextActions()
 	tb->addSeparator();
 
 	//Color
-	QPixmap pix(rsrcPath + "/textcolor.png");
+	QPixmap pix(rsrcPath + "/editor/textcolor.png");
 	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
 
@@ -454,7 +454,7 @@ void TextEdit::setupTextActions()
 	tb->addSeparator();
 
 	//Highlight user text
-	const QIcon HighlightUsersIcon(rsrcPath + "/highlightusers.png");
+	const QIcon HighlightUsersIcon(rsrcPath + "/editor/highlightusers.png");
 	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
 	tb->addAction(actionHighlightUsers);
 	actionHighlightUsers->setCheckable(true);
@@ -488,14 +488,14 @@ void TextEdit::setupTextActions()
 	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
 
 
-	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/incrementsize.png");
+	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/editor/incrementsize.png");
 	QAction* a = new QAction(incrementSizeIcon, tr("Increment text size"), this);
 	connect(a, &QAction::triggered, this, &TextEdit::incrementSize);
 
 	tb->addAction(a);
 
 
-	const QIcon decrementSizeIcon = QIcon(rsrcPath + "/decrementsize.png");
+	const QIcon decrementSizeIcon = QIcon(rsrcPath + "/editor/decrementsize.png");
 	a = new QAction(decrementSizeIcon, tr("Decrement text size"), this);
 	connect(a, &QAction::triggered, this, &TextEdit::decrementSize);
 
@@ -508,12 +508,12 @@ void TextEdit::setupUserActions()
 	QMenu* menu = menuBar()->addMenu(tr("&Account"));
 
 	//Edit profile
-	const QIcon userIcon(rsrcPath + "/user.png");
+	const QIcon userIcon(rsrcPath + "/editor/user.png");
 	QAction* a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
 	tb->addAction(a);
 
 	//Close document
-	const QIcon closeDocumentIcon(rsrcPath + "/logout.png");
+	const QIcon closeDocumentIcon(rsrcPath + "/misc/logout.png");
 	a = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
 	tb->addAction(a);
 
@@ -1226,7 +1226,7 @@ void TextEdit::fontChanged(const QFont& f)
 void TextEdit::colorChanged(const QColor& c)
 {
 	//Change color of textColor button according to text
-	QPixmap pix(rsrcPath + "/textcolor.png");
+	QPixmap pix(rsrcPath + "/editor/textcolor.png");
 	QBitmap mask = pix.createMaskFromColor(Qt::transparent, Qt::MaskInColor);
 	pix.fill(c);
 	pix.setMask(mask);
@@ -1358,7 +1358,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 }
 
 
-void TextEdit::newChar(QChar ch, QTextCharFormat format, int position, qint32 user)
+void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 {
 	const QSignalBlocker blocker(textEdit->document());
 

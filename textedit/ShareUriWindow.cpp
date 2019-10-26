@@ -9,12 +9,9 @@
 
 #include "WidgetsManager.h"
 
-const QString rsrcPath = ":/images/win";
+const QString rsrcPath = ":/images";
 
 ShareUriWindow::ShareUriWindow(QString uri, QStatusBar* statusBar, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _statusBar(statusBar), _uri(uri) {
-	//Window Icon
-	setWindowIcon(QIcon(":/images/logo.png"));
-
 	//Setup UI window and resize
 	ui->setupUi(this);
 
@@ -26,7 +23,7 @@ ShareUriWindow::ShareUriWindow(QString uri, QStatusBar* statusBar, QWidget* pare
 	ui->lineEdit_uri->setText(uri);
 
 	//Copy icon
-	ui->pushButton_copy->setIcon(QIcon::QIcon(rsrcPath + "/editcopy.png"));
+	ui->pushButton_copy->setIcon(QIcon::QIcon(rsrcPath + "/editor/editcopy.png"));
 
 	//Connect pushbutton
 	connect(ui->pushButton_copy, &QPushButton::clicked, this, &ShareUriWindow::copyAndClose);

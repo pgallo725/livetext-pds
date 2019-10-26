@@ -10,9 +10,8 @@
 #include "WidgetsManager.h"
 
 NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow), _filename(filename) {
-	//Window name and logo
+	//Window name
 	setWindowTitle(tr("New file"));
-	setWindowIcon(QIcon(":/images/logo.png"));
 
 	//UI setup
 	ui->setupUi(this);
