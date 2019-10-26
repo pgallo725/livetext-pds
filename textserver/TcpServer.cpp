@@ -8,9 +8,6 @@
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QDir>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QsqlError>
 
 #include <MessageFactory.h>
 #include "ServerException.h"
@@ -105,7 +102,7 @@ void TcpServer::initialize()
 
 	// Create a connection to the server's database
 	qDebug() << "> Opening connection to server database";
-	db.initialize("livetext.db3");
+	db.open("livetext.db3");
 	qDebug() << "> (COMPLETED)";
 
 
@@ -295,7 +292,7 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 	if (usersNotAvailable.contains(client->getUsername()))
 		return MessageFactory::LoginError("This user is already logged in ");
 
-	if (client->authentication(token))		// verify the user's account credentials
+	if (client->authenticate(token))		// verify the user's account credentials
 	{
 		qDebug() << "> User" << client->getUsername() << "logged in";
 
@@ -332,17 +329,11 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
 
 	client->login(&(*i));		// client is automatically logged in as the new user
-
-	QByteArray ba;
-	QBuffer buffer(&ba);
-	buffer.open(QIODevice::WriteOnly);
-	user.getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
-
+	
 	try {
-		db.insertUser(user, user.getUsername(), user.getUserId(), user.getNickname(),
-			user.getPasswordHash(), user.getSalt(), ba);
+		db.insertUser(user);
 	}
-	catch (DataBaseException & dbe) {
+	catch (DatabaseException & dbe) {
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
 		client->logout();
 		users.remove(username);
@@ -366,16 +357,10 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	QByteArray ba;
-	QBuffer buffer(&ba);
-	buffer.open(QIODevice::WriteOnly);
-	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
-
 	try {
-		db.updateUser(user->getUsername(), user->getNickname(),
-			user->getPasswordHash(), user->getSalt(), ba);
+		db.updateUser(*user);
 	}
-	catch (DataBaseException & dbe) {
+	catch (DatabaseException & dbe) {
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		return MessageFactory::AccountError("Users database update failed, please try again later");
@@ -399,16 +384,10 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	QByteArray ba;
-	QBuffer buffer(&ba);
-	buffer.open(QIODevice::WriteOnly);
-	user->getIcon().save(&buffer, "PNG");	// writes image into the bytearray in PNG format
-
 	try {
-		db.updateUser(user->getUsername(), user->getNickname(),
-			user->getPasswordHash(), user->getSalt(), ba);
+		db.updateUser(*user);
 	}
-	catch (DataBaseException & dbe) {
+	catch (DatabaseException & dbe) {
 		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
 		client->getUser()->rollback(backupUser);
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
@@ -504,7 +483,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		try {
 			db.addDocToUser(user->getUsername(), docURI.toString());
 		}
-		catch (DataBaseException & dbe) {
+		catch (DatabaseException & dbe) {
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
 			doc->remove();
 			return MessageFactory::DocumentError("Document creation failed, please try again");
@@ -553,7 +532,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 			try {
 				db.addDocToUser(user->getUsername(), docUri.toString());
 			}
-			catch (DataBaseException & dbe) {
+			catch (DatabaseException & dbe) {
 				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
 				client->getUser()->rollback(backupUser);
 				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
@@ -620,7 +599,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		try {
 			db.removeDocFromUser(user->getUsername(), docUri.toString());
 		}
-		catch (DataBaseException & dbe) {
+		catch (DatabaseException & dbe) {
 			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
 			client->getUser()->rollback(backupUser);
 			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
@@ -639,7 +618,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 			qDebug() << "> Permanently deleted document" << docUri.toString() << "file from disk";
 		}
 	}
-	catch (DataBaseException & de)
+	catch (DatabaseException & de)
 	{
 		qDebug().noquote() << ">" << de.what();
 	}

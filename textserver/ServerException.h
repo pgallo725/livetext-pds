@@ -7,7 +7,6 @@
 
 class ServerException : public std::exception
 {
-
 protected:
 
 	ServerException(std::string msg);
@@ -17,31 +16,51 @@ protected:
 
 class StartupException : public ServerException
 {
-
 public:
 
 	StartupException(std::string msg);
 };
 
 
-class DataBaseException : public ServerException
+class DatabaseException : public ServerException
 {
 private:
+
 	QSqlError err;
+
 protected:
-	DataBaseException(std::string msg, QSqlError err);
+
+	DatabaseException(std::string msg, QSqlError err);
+
 public:
-	QSqlError getSqlError();
+
+	QSqlError& getSqlError();
 };
 
-class DataBaseReadTableException : public DataBaseException
+class DatabaseConnectionException : public DatabaseException
 {
 public:
-	DataBaseReadTableException(std::string query, QSqlError err);
+
+	DatabaseConnectionException(QSqlError err);
 };
 
-class DataBaseWriteRecordException : public DataBaseException
+class DatabaseCreateException : public DatabaseException
 {
 public:
-	DataBaseWriteRecordException(std::string query, QSqlError err);
+
+	DatabaseCreateException(std::string query, QSqlError err);
+};
+
+class DatabaseReadException : public DatabaseException
+{
+public:
+
+	DatabaseReadException(std::string query, QSqlError err);
+};
+
+class DatabaseWriteException : public DatabaseException
+{
+public:
+
+	DatabaseWriteException(std::string query, QSqlError err);
 };

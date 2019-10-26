@@ -3,38 +3,37 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlRecord>
-#include <QImage>
-#include <QStringList>
-#include "User.h"
+#include <User.h>
 
 class ServerDatabase
 {
 private:
 
+	// Prepared queries
 	QSqlQuery qInsertNewUser;
 	QSqlQuery qUpdateUser;
-	QSqlQuery qInsertNewDocToUser;
-	QSqlQuery qRemoveDocFromUser;
+	QSqlQuery qInsertDocEditor;
+	QSqlQuery qRemoveDocEditor;
 	QSqlQuery qRemoveDoc;
-	QSqlQuery qSelectDocuments;
-	QSqlQuery qCountDocumentEditors;
-	QSqlQuery qSelectMaxUserID;
-	QSqlQuery qSelectDocsUsers;
+	QSqlQuery qCountDocEditors;
+	QSqlQuery qSelectUserDocs;
 
 public:
 
-	ServerDatabase();
+	// Neutral ctor and dtor; the initialization work is done inside open()
 
-	~ServerDatabase();
+	ServerDatabase() {};
+
+	~ServerDatabase() {};
 
 	// Database connection and initialization
-
-	void initialize(QString dbName);
+	// the database file is created if it doesn't exist
+	void open(QString dbName);
 
 	// Queries
 
-	void insertUser(User user, QString username, int userId, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
-	void updateUser(QString username, QString nickname, QByteArray passhash, QByteArray salt, QByteArray icon);
+	void insertUser(const User& user);
+	void updateUser(const User& user);
 	void addDocToUser(QString username, QString uri);
 	void removeDocFromUser(QString username, QString uri);
 	void removeDoc(QString uri);
