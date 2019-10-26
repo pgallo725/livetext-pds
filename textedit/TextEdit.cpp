@@ -1278,8 +1278,10 @@ void TextEdit::clipboardDataChanged()
 #ifndef QT_NO_CLIPBOARD
 	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
 	if (const QMimeData* md = QApplication::clipboard()->mimeData()) {
-		actionPaste->setEnabled(md->hasText());
-		actionPaste->setEnabled(!md->hasImage());
+		if (md->hasImage())
+			QApplication::clipboard()->clear();
+		else
+			actionPaste->setEnabled(md->hasText());
 	}
 #endif
 }
