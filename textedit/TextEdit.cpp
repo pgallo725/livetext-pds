@@ -119,6 +119,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	fontChanged(textEdit->font());
 	colorChanged(textEdit->textColor());
 	alignmentChanged(textEdit->alignment());
+	setLineHeight(actionLineHeight115);
 
 	//Initialize Undo/Redo actions
 	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
@@ -475,7 +476,7 @@ void TextEdit::setupTextActions()
 	comboSize = new QComboBox(tb);
 	comboSize->setObjectName("comboSize");
 	tb->addWidget(comboSize);
-	comboSize->setEditable(true); //Permetto di modificare direttamente la dimensione senza scegliere nel combobox
+	comboSize->setEditable(true);
 
 	//Adding standard sizes to combobox
 	const QList<int> standardSizes = QFontDatabase::standardSizes();
@@ -925,8 +926,13 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	//Sets alignment and indent in a new format (due to compatibility problems)
 	QTextBlockFormat format;
 	format.setAlignment(fmt.alignment());
+
+	//Set format lineheight, if not present sets default one
 	format.setIndent(fmt.indent());
-	format.setLineHeight(fmt.lineHeight(), QTextBlockFormat::ProportionalHeight);
+	if (fmt.lineHeight() == 0)
+		format.setLineHeight(115, QTextBlockFormat::ProportionalHeight);
+	else 
+		format.setLineHeight(fmt.lineHeight(), QTextBlockFormat::ProportionalHeight);
 
 	//Sets block format in current block
 	_extraCursor->mergeBlockFormat(format);
@@ -1005,6 +1011,9 @@ void TextEdit::textFamily(const QString& f)
 void TextEdit::textSize(const QString& p)
 {
 	const QSignalBlocker blocker(textEdit->document());
+
+	//Set keyboard focus
+	textEdit->setFocus();
 
 	//Casting point size to float
 	qreal pointSize = p.toFloat();
