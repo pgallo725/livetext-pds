@@ -85,7 +85,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 
 	case AccountUpdate:
 	{
-		if (!_usecase) {	// usecase = server(0)
+		if (_usecase == Server) {
 			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
 			MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
 				accntUpdate->getIcon(), accntUpdate->getPassword());
@@ -93,8 +93,9 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		}
 		else {
 			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
-			emit accountUpdate(socket, accntUpdate->getNickname(), 
-				accntUpdate->getIcon(), accntUpdate->getPassword());
+			emit accountUpdate(socket, accntUpdate->getNickname(), accntUpdate->getIcon(),
+				accntUpdate->getPassword());
+			// the answer is then routed back through separate Workspace slots for success and failure
 		}
 		break;
 	}
