@@ -2,19 +2,19 @@
 
 
 ServerException::ServerException(std::string msg)
-	: std::exception(("(SERVER ERROR) " + msg).c_str())
+	: std::exception(msg.c_str())
 {
 }
 
 
 StartupException::StartupException(std::string msg)
-	: ServerException("textserver was unable to start...\n" + msg)
+	: ServerException("textserver was unable to start...\n(ERROR) " + msg)
 {
 }
 
 
 DatabaseException::DatabaseException(std::string msg, QSqlError err)
-	: ServerException(msg)
+	: ServerException("(DB ERROR) " + msg)
 {
 }
 

@@ -1,19 +1,19 @@
 #include "TcpServer.h"
 
-#include <QFileInfo>
-#include <QDataStream>
 #include <QtNetwork>
 #include <QHostAddress>
+#include <QDataStream>
 #include <QDateTime>
 #include <QRandomGenerator>
 #include <QRegularExpression>
+#include <QFileInfo>
 #include <QDir>
 
 #include <MessageFactory.h>
-#include "ServerException.h"
-#include "SharedException.h"
+#include <SharedException.h>
 
-/* Server costructor */
+
+/* Server constructor */
 TcpServer::TcpServer(QObject* parent)
 	: QTcpServer(parent), messageHandler(this), _userIdCounter(0)
 {

@@ -3,7 +3,6 @@
 #include <QCoreApplication>
 
 #include <MessageFactory.h>
-#include "ServerException.h"
 #include <SharedException.h>
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)

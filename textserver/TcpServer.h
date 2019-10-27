@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslConfiguration>
@@ -10,6 +9,7 @@
 #include <Document.h>
 #include "WorkSpace.h"
 #include "ServerDatabase.h"
+#include "ServerException.h"
 #include <Message.h>
 #include "MessageHandler.h"
 #include "SocketBuffer.h"
