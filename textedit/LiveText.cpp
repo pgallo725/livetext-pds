@@ -214,11 +214,6 @@ void LiveText::dismissDocumentCompleted(URI URI)
 
 void LiveText::openEditor()
 {
-	//Center and resizes window
-	const QRect availableGeometry = QApplication::desktop()->availableGeometry(_textEdit);
-	_textEdit->resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
-	_textEdit->move((availableGeometry.width() - _textEdit->width()) / 2, (availableGeometry.height() - _textEdit->height()) / 2);
-
 	//Show maximized
 	_textEdit->showMaximized();
 

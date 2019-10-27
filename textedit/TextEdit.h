@@ -98,6 +98,7 @@ private:
 	/* ----------------------- METHODS ----------------------- */
 
 	//GUI Setup
+	void setupMainWindow();
 	void setupFileActions();
 	void setupEditActions();
 	void setupTextActions();

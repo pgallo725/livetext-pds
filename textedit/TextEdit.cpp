@@ -39,6 +39,8 @@
 
 #include <QPrinter>
 
+#include <QLayout>
+
 #if QT_CONFIG(printpreviewdialog)
 #include <QPrintPreviewDialog>
 #endif
@@ -51,19 +53,9 @@ const QString rsrcPath = ":/images";
 
 TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
 {
-	//Setting window title
-	setWindowTitle(QCoreApplication::applicationName());
-	//Setting window icon
-	setWindowIcon(QIcon(rsrcPath + "/misc/logo.png"));
-
-	//Inizialize Qt text editor
-	textEdit = new QTextEdit(this);
-
-	//Assign textEdit as the central widget
-	setCentralWidget(textEdit);
-
 	/**************************** GUI SETUP ****************************/
 
+	setupMainWindow();
 	setupFileActions();
 	setupEditActions();
 	setupTextActions();
@@ -114,12 +106,12 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	textFont.setStyleHint(QFont::SansSerif);
 	textFont.setPointSize(12);
 	textEdit->setFont(textFont);
+	textEdit->document()->setDefaultFont(textFont);
 
 	//Initialize GUI, activating buttons according to current conditions
 	fontChanged(textEdit->font());
 	colorChanged(textEdit->textColor());
 	alignmentChanged(textEdit->alignment());
-	setLineHeight(actionLineHeight115);
 
 	//Initialize Undo/Redo actions
 	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
@@ -144,6 +136,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 
 /**************************** GUI SETUP ****************************/
 /*
+*	Setup window appearance (centralWidget/Resize/Borders/Style)
 *	This functions configure all Menu entries
 *	File (Export PDF, Print)
 *	Share document
@@ -151,6 +144,48 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 *	Text (TextFormat, Lists, Alignment)
 *	Account actions (Edit profile, Close document)
 */
+
+
+void TextEdit::setupMainWindow()
+{
+	//Setting window title
+	setWindowTitle(QCoreApplication::applicationName());
+	//Setting window icon
+	setWindowIcon(QIcon(rsrcPath + "/misc/logo.png"));
+
+
+	//Center and resizes window
+	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+
+	resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
+	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
+
+	//Inizialize Qt text editor
+	textEdit = new QTextEdit();
+	textEdit->setMaximumWidth(width());
+
+	//Creates 3D effect of document
+	textEdit->setFrameStyle(QFrame::Panel);
+	textEdit->setFrameShadow(QFrame::Raised);
+	textEdit->setLineWidth(3);
+
+	//Set central widget and layout
+	QWidget* cntr = new QWidget(this);
+	QHBoxLayout* bl = new QHBoxLayout();
+
+	//Set top margin
+	bl->setContentsMargins(0, 15, 0, 0);
+	//Set widget alignment
+	bl->setAlignment(Qt::AlignHCenter);
+
+	//Sets central widget and layout
+	bl->addWidget(textEdit);
+	cntr->setLayout(bl);
+	setCentralWidget(cntr);
+}
+
+
+
 void TextEdit::setupFileActions()
 {
 	//New toolbar
@@ -629,7 +664,7 @@ void TextEdit::askBeforeCloseDocument()
 
 void TextEdit::closeDocumentError(QString error)
 {
-	statusBar()->showMessage(error);
+	statusBar()->showMessage(error, 2000);
 	startTimer(timerId);
 }
 
@@ -776,7 +811,7 @@ void TextEdit::filePrintPdf()
 	textEdit->document()->print(&printer);
 
 	//Show in status bar outcome of operation ("Exported path/to/file.pdf")
-	statusBar()->showMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)));
+	statusBar()->showMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)), 2000);
 #endif
 }
 
@@ -931,7 +966,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	format.setIndent(fmt.indent());
 	if (fmt.lineHeight() == 0)
 		format.setLineHeight(115, QTextBlockFormat::ProportionalHeight);
-	else 
+	else
 		format.setLineHeight(fmt.lineHeight(), QTextBlockFormat::ProportionalHeight);
 
 	//Sets block format in current block
@@ -1277,14 +1312,14 @@ void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
 	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
-	if (const QMimeData* md = QApplication::clipboard()->mimeData()) {
+	if (const QMimeData* md = QApplication::clipboard()->mimeData())
 		if (md->hasImage())
 			QApplication::clipboard()->clear();
 		else
 			actionPaste->setEnabled(md->hasText());
-	}
-#endif
 }
+#endif
+
 
 
 /**************************** CONTENTS CHANGE ****************************/
@@ -1353,7 +1388,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 					}
 					else emit createNewList(currentBlock.position(), textList->format());
 				}
-					
+
 				//Else assign current block to his proper list
 				else
 					emit assignBlockToList(currentBlock.position(), firstListBlock.position());

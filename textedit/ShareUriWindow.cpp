@@ -45,5 +45,5 @@ void ShareUriWindow::copyAndClose()
 	this->close();
 
 	//Show message to clipboard
-	_statusBar->showMessage(tr("URI copied into clipboards"));
+	_statusBar->showMessage(tr("URI copied into clipboards"), 2000);
 }
