@@ -183,12 +183,14 @@
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="ServerDatabase.cpp" />
     <ClCompile Include="ServerException.cpp" />
+    <ClCompile Include="ServerLogger.cpp" />
     <ClCompile Include="TcpServer.cpp" />
     <ClCompile Include="WorkSpace.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
+    <ClInclude Include="ServerLogger.h" />
     <QtMoc Include="MessageHandler.h">
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</DynamicSource>
       <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</DynamicSource>

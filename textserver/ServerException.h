@@ -5,12 +5,25 @@
 #include <QSqlError>
 
 
+/******************************************************************
+
+	Exception hierarchy tree diagram:
+
+						   ServerException
+							/			\
+				StartupException		DatabaseException
+										/	 /	  \		\
+									Create  Open  Read	Write
+
+
+*******************************************************************/
+
+
 class ServerException : public std::exception
 {
 protected:
 
 	ServerException(std::string msg);
-
 };
 
 

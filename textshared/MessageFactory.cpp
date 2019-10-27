@@ -44,7 +44,7 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 	case MessageType::Failure:				return new FailureMessage();
 
 	default:
-		throw MessageTypeException("Type unknown", type);
+		throw MessageTypeException(type);
 		break;
 	}
 }

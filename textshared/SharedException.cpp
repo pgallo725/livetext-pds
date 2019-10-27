@@ -1,7 +1,14 @@
 #include "SharedException.h"
 
+
+SharedException::SharedException(std::string msg)
+	: std::exception(msg.c_str())
+{
+}
+
+
 DocumentException::DocumentException(std::string msg)
-	: std::exception(("(DOCUMENT ERROR) " + msg).c_str())
+	: SharedException("(DOCUMENT ERROR) " + msg)
 {
 }
 
@@ -16,7 +23,7 @@ DocumentCreateException::DocumentCreateException(std::string fileName, std::stri
 }
 
 DocumentLoadException::DocumentLoadException(std::string fileName, std::string path)
-	: DocumentException("Unable to load file '" + fileName + "' in " + path)
+	: DocumentException("Unable to load file '" + fileName + "' from " + path)
 {
 }
 
@@ -25,8 +32,9 @@ DocumentWriteException::DocumentWriteException(std::string fileName, std::string
 {
 }
 
+
 MessageException::MessageException(std::string msg)
-	: std::exception(("(MESSAGE ERROR) " + msg).c_str())
+	: SharedException("(MESSAGE ERROR) " + msg)
 {
 }
 
@@ -40,7 +48,7 @@ MessageWriteException::MessageWriteException(std::string msg, MessageType m_type
 {
 }
 
-MessageTypeException::MessageTypeException(std::string msg, MessageType m_type)
-	: MessageException(msg + "(m_type = " + std::to_string(m_type) + ")")
+MessageTypeException::MessageTypeException(MessageType m_type)
+	: MessageException("Unknown message type : " + std::to_string(m_type))
 {
 }
