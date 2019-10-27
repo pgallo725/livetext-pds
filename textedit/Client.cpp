@@ -103,7 +103,7 @@ void Client::messageHandler(MessageCapsule message) {
 		forceDocumentClose();
 		break;
 	default:
-		throw MessageTypeException("Unknow message type", message->getType());
+		throw MessageTypeException(message->getType());
 		break;
 	}
 }
