@@ -109,7 +109,7 @@ public:
 
 	~LoginGrantedMessage() {};
 
-	User& getLoggedUser();
+	const User& getLoggedUser() const;
 };
 
 

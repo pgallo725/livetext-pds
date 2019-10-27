@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'WorkSpace.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.13.0)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.13.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -15,7 +15,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'WorkSpace.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.13.0. It"
+#error "This file was generated using the moc from 5.13.1. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -25,7 +25,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
     QByteArrayData data[48];
-    char stringdata0[612];
+    char stringdata0[611];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -63,25 +63,25 @@ QT_MOC_LITERAL(25, 310, 7), // "message"
 QT_MOC_LITERAL(26, 318, 6), // "sender"
 QT_MOC_LITERAL(27, 325, 12), // "documentSave"
 QT_MOC_LITERAL(28, 338, 20), // "documentInsertSymbol"
-QT_MOC_LITERAL(29, 359, 7), // "Symbol&"
-QT_MOC_LITERAL(30, 367, 6), // "symbol"
-QT_MOC_LITERAL(31, 374, 20), // "documentDeleteSymbol"
-QT_MOC_LITERAL(32, 395, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(33, 411, 8), // "position"
-QT_MOC_LITERAL(34, 420, 18), // "documentEditSymbol"
-QT_MOC_LITERAL(35, 439, 15), // "QTextCharFormat"
-QT_MOC_LITERAL(36, 455, 6), // "format"
-QT_MOC_LITERAL(37, 462, 17), // "documentEditBlock"
-QT_MOC_LITERAL(38, 480, 11), // "TextBlockID"
-QT_MOC_LITERAL(39, 492, 7), // "blockId"
-QT_MOC_LITERAL(40, 500, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(41, 517, 16), // "documentEditList"
-QT_MOC_LITERAL(42, 534, 10), // "TextListID"
-QT_MOC_LITERAL(43, 545, 6), // "listId"
-QT_MOC_LITERAL(44, 552, 15), // "QTextListFormat"
-QT_MOC_LITERAL(45, 568, 19), // "handleAccountUpdate"
-QT_MOC_LITERAL(46, 588, 19), // "answerAccountUpdate"
-QT_MOC_LITERAL(47, 608, 3) // "msg"
+QT_MOC_LITERAL(29, 359, 6), // "Symbol"
+QT_MOC_LITERAL(30, 366, 6), // "symbol"
+QT_MOC_LITERAL(31, 373, 20), // "documentDeleteSymbol"
+QT_MOC_LITERAL(32, 394, 15), // "QVector<qint32>"
+QT_MOC_LITERAL(33, 410, 8), // "position"
+QT_MOC_LITERAL(34, 419, 18), // "documentEditSymbol"
+QT_MOC_LITERAL(35, 438, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(36, 454, 6), // "format"
+QT_MOC_LITERAL(37, 461, 17), // "documentEditBlock"
+QT_MOC_LITERAL(38, 479, 11), // "TextBlockID"
+QT_MOC_LITERAL(39, 491, 7), // "blockId"
+QT_MOC_LITERAL(40, 499, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(41, 516, 16), // "documentEditList"
+QT_MOC_LITERAL(42, 533, 10), // "TextListID"
+QT_MOC_LITERAL(43, 544, 6), // "listId"
+QT_MOC_LITERAL(44, 551, 15), // "QTextListFormat"
+QT_MOC_LITERAL(45, 567, 19), // "handleAccountUpdate"
+QT_MOC_LITERAL(46, 587, 19), // "answerAccountUpdate"
+QT_MOC_LITERAL(47, 607, 3) // "msg"
 
     },
     "WorkSpace\0requestAccountUpdate\0\0"
@@ -93,7 +93,7 @@ QT_MOC_LITERAL(47, 608, 3) // "msg"
     "QAbstractSocket::SocketError\0socketError\0"
     "readMessage\0dispatchMessage\0MessageCapsule\0"
     "message\0sender\0documentSave\0"
-    "documentInsertSymbol\0Symbol&\0symbol\0"
+    "documentInsertSymbol\0Symbol\0symbol\0"
     "documentDeleteSymbol\0QVector<qint32>\0"
     "position\0documentEditSymbol\0QTextCharFormat\0"
     "format\0documentEditBlock\0TextBlockID\0"
@@ -219,6 +219,13 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QSslSocket* >(); break;
+            }
+            break;
+        case 11:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< Symbol >(); break;
             }
             break;
         case 12:

@@ -112,7 +112,7 @@ void LoginGrantedMessage::readFrom(QDataStream& stream)
 	stream >> m_user;
 }
 
-User& LoginGrantedMessage::getLoggedUser()
+const User& LoginGrantedMessage::getLoggedUser() const
 {
 	return m_user;
 }

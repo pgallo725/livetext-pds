@@ -56,6 +56,7 @@ protected:
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
+
 public:
 
 	~AccountUpdateMessage() {};
@@ -84,11 +85,12 @@ protected:
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
+
 public:
 
 	~AccountConfirmedMessage() {};
 
-	User& getUserObj();
+	const User& getUserObj() const;
 };
 
 
@@ -110,6 +112,7 @@ protected:
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
+
 public:
 
 	~AccountErrorMessage() {};

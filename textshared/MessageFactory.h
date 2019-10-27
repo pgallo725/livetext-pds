@@ -3,7 +3,6 @@
 #include "Message.h"
 #include "User.h"
 #include "Symbol.h"
-#include "TextBlock.h"
 #include "Document.h"
 
 

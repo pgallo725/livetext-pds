@@ -2,6 +2,8 @@
 
 #include "Message.h"
 #include "Symbol.h"
+#include "TextBlock.h"
+#include "TextList.h"
 
 
 class CharInsertMessage : public Message
@@ -27,8 +29,8 @@ public:
 
 	~CharInsertMessage() {};
 
-	Symbol& getSymbol();
-	bool getIsLast();
+	Symbol getSymbol() const;
+	bool getIsLast() const;
 };
 
 

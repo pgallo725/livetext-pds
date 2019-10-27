@@ -21,7 +21,7 @@ void FailureMessage::readFrom(QDataStream& stream)
 	stream >> m_error;
 }
 
-QString FailureMessage::getDescription()
+QString FailureMessage::getDescription() const
 {
 	return m_error;
 }

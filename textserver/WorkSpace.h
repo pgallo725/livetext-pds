@@ -49,7 +49,7 @@ public slots:
 	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 	
 	void documentSave();
-	void documentInsertSymbol(Symbol& symbol);
+	void documentInsertSymbol(Symbol symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
 	void documentEditSymbol(QVector<qint32> position, QTextCharFormat format);
 	void documentEditBlock(TextBlockID blockId, QTextBlockFormat format);

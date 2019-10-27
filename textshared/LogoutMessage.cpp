@@ -11,9 +11,11 @@ LogoutMessage::LogoutMessage()
 void LogoutMessage::writeTo(QDataStream& stream) const
 {
 	// NOTHING TO WRITE
+	(void)stream;
 }
 
 void LogoutMessage::readFrom(QDataStream& stream)
 {
 	// NOTHING TO READ
+	(void)stream;
 }

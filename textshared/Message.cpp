@@ -1,5 +1,7 @@
 #include "Message.h"
+
 #include <SharedException.h>
+
 
 Message::Message(MessageType type)
 	: m_type(type)

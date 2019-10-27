@@ -25,6 +25,6 @@ public:
 
 	~FailureMessage() {};
 	
-	QString getDescription();
+	QString getDescription() const;
 };
 
