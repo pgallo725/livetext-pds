@@ -74,9 +74,6 @@ private:
 	QFontComboBox* comboFont;
 	QComboBox* comboSize;
 
-	//Undo/redo actions
-	QAction* actionUndo;
-	QAction* actionRedo;
 
 	//Copy/Cut/Paste
 #ifndef QT_NO_CLIPBOARD
@@ -159,10 +156,9 @@ public:
 	void removeBlockFromList(int blockPosition);
 	void addBlockToList(int blockPosition, int listPosition);
 
-	//Editor operations (close/error/undo/redo)
+	//Editor operations (close/error)
 	void closeEditor();
 	void criticalError(QString error);
-	void resetUndoRedo();
 	void resetCursorPosition();
 
 	//User text highlighting
@@ -253,6 +249,9 @@ private slots:
 
 	//Clipboard filter
 	void clipboardDataChanged();
+
+	//Widget resize
+	void resizeEditor(const QSizeF& newSize);
 };
 
 #endif // TEXTEDIT_H

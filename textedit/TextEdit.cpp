@@ -28,6 +28,7 @@
 #include <QScrollBar>
 #include <QRectF>
 #include <QToolButton>
+#include <QScrollArea>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -40,6 +41,8 @@
 #include <QPrinter>
 #include <QTimer>
 #include <QLayout>
+#include <QAbstractTextDocumentLayout>
+#include <QAbstractScrollArea>
 
 #if QT_CONFIG(printpreviewdialog)
 #include <QPrintPreviewDialog>
@@ -81,12 +84,11 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
 	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 
-	//Undo/Redo actions binded to document Undo/Redo
-	connect(textEdit->document(), &QTextDocument::undoAvailable, actionUndo, &QAction::setEnabled);
-	connect(textEdit->document(), &QTextDocument::redoAvailable, actionRedo, &QAction::setEnabled);
-
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
 	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+
+	//Adapt textEditor layout according to document
+	connect(textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
 
 
 	//If i can use clipboard setup connects from QTextEdit of cut/copy and clipboard management
@@ -107,15 +109,17 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	textFont.setPointSize(12);
 	textEdit->setFont(textFont);
 	textEdit->document()->setDefaultFont(textFont);
+	
+	//Disable undo/redo
+	textEdit->setUndoRedoEnabled(false);
+
+	//Set document margin
+	textEdit->document()->setDocumentMargin(64);
 
 	//Initialize GUI, activating buttons according to current conditions
 	fontChanged(textEdit->font());
 	colorChanged(textEdit->textColor());
 	alignmentChanged(textEdit->alignment());
-
-	//Initialize Undo/Redo actions
-	actionUndo->setEnabled(textEdit->document()->isUndoAvailable());
-	actionRedo->setEnabled(textEdit->document()->isRedoAvailable());
 
 #ifndef QT_NO_CLIPBOARD
 	//Initialize copy/cut/paste actions
@@ -138,7 +142,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 *	This functions configure all Menu entries
 *	File (Export PDF, Print)
 *	Share document
-*	Edit (Undo, Redo, Cut, Copy, Paste)
+*	Edit (Cut, Copy, Paste)
 *	Text (TextFormat, Lists, Alignment)
 *	Account actions (Edit profile, Close document)
 */
@@ -154,21 +158,23 @@ void TextEdit::setupMainWindow()
 	//Center and resizes window
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
 
-	resize(availableGeometry.width() * 0.6, (availableGeometry.height() * 2) / 3);
+	resize(availableGeometry.width() * 0.6, availableGeometry.height()*2/3);
 	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 
 	//Inizialize Qt text editor
 	textEdit = new QTextEdit();
 	textEdit->setMaximumWidth(width());
+	textEdit->setMinimumHeight(height());
+	textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
 	textEdit->setFrameStyle(QFrame::Plain);
 	//textEdit->setFrameShadow(QFrame::Raised);
 	textEdit->setLineWidth(1);
 
+
 	//Set central widget and layout
 	QWidget* cntr = new QWidget(this);
-	QHBoxLayout* bl = new QHBoxLayout();
 
 	//Sets white background
 	cntr->setAutoFillBackground(true);
@@ -176,16 +182,24 @@ void TextEdit::setupMainWindow()
 	pal.setColor(QPalette::Window, QColor(128, 128, 128));
 	cntr->setPalette(pal);
 
+	//Generate scroll area to set QTextEditor
+	QScrollArea* area = new QScrollArea(this);
+	area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	area->setWidgetResizable(true);
+	area->setWidget(cntr);
 
-	//Set top margin
-	bl->setContentsMargins(0, 0, 0, 0);
-	//Set widget alignment
-	bl->setAlignment(Qt::AlignHCenter);
 
-	//Sets central widget and layout
-	bl->addWidget(textEdit);
+	//Set layout to QScroll Area
+	QHBoxLayout* bl = new QHBoxLayout(area);
+	bl->setContentsMargins(0, 30, 0, 30);
+	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
+	bl->addWidget(textEdit);	//Add text editor to widget
+
+	//set widget layout
 	cntr->setLayout(bl);
-	setCentralWidget(cntr);
+
+	//Set QMainWindow central widget
+	setCentralWidget(area);
 
 	//Hide status bar
 	statusBar()->hide();
@@ -243,21 +257,6 @@ void TextEdit::setupEditActions()
 {
 	QToolBar* tb = addToolBar(tr("Edit Actions"));
 	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
-
-	//Undo
-	const QIcon undoIcon = QIcon(rsrcPath + "/editor/editundo.png");
-	actionUndo = menu->addAction(undoIcon, tr("&Undo"), textEdit, &QTextEdit::undo);
-	actionUndo->setShortcut(QKeySequence::Undo);
-	tb->addAction(actionUndo);
-
-	//Redo
-	const QIcon redoIcon = QIcon(rsrcPath + "/editor/editredo.png");
-	actionRedo = menu->addAction(redoIcon, tr("&Redo"), textEdit, &QTextEdit::redo);
-	actionRedo->setPriority(QAction::LowPriority);
-	actionRedo->setShortcut(QKeySequence::Redo);
-	tb->addAction(actionRedo);
-
-	menu->addSeparator();
 
 
 #ifndef QT_NO_CLIPBOARD
@@ -651,17 +650,26 @@ void TextEdit::removePresence(qint32 userId)
 
 /**************************** EDITOR UI/UX ****************************/
 /*
+*	Editor resize
 *	Close document msgbox
 *	Close editor
 *	Status bar messages
 *	Error messages
-*	Reset Undo/Redo
 *	Start timer
 *	Setting document filename, URI
 *	File print, Print Preview
 *	Save as PDF
 *	Share document URI
 */
+
+void TextEdit::resizeEditor(const QSizeF& newSize)
+{
+	int height = QApplication::desktop()->availableGeometry(this).height();
+	if (newSize.height() > height)
+		textEdit->setFixedHeight(newSize.height());
+	else
+		textEdit->setFixedHeight(height);
+}
 
 void TextEdit::askBeforeCloseDocument()
 {
@@ -676,7 +684,7 @@ void TextEdit::showStatusBarMessage(QString text)
 {
 	//Show status bar
 	statusBar()->show();
-	
+
 	//Shows message for 5"
 	statusBar()->showMessage(text, 5000);
 
@@ -719,11 +727,6 @@ void TextEdit::criticalError(QString error)
 	QMessageBox::StandardButton(QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok));
 }
 
-
-void TextEdit::resetUndoRedo()
-{
-	textEdit->document()->clearUndoRedoStacks();
-}
 
 void TextEdit::resetCursorPosition()
 {
@@ -847,7 +850,7 @@ void TextEdit::filePrintPdf()
 void TextEdit::fileShare()
 {
 	//Show created window
-	if(_shareUri->exec()==QDialog::Accepted)
+	if (_shareUri->exec() == QDialog::Accepted)
 		showStatusBarMessage(tr("URI copied into clipboards"));		//Show message to clipboard
 }
 
@@ -1348,6 +1351,7 @@ void TextEdit::clipboardDataChanged()
 		else
 			actionPaste->setEnabled(md->hasText());
 }
+
 #endif
 
 
