@@ -190,7 +190,7 @@ void WorkSpace::documentSave()
 	}
 }
 
-void WorkSpace::documentInsertSymbol(Symbol& symbol)
+void WorkSpace::documentInsertSymbol(Symbol symbol)
 {
 	doc->insert(symbol);
 }

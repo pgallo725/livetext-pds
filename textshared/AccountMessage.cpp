@@ -105,7 +105,7 @@ void AccountConfirmedMessage::readFrom(QDataStream& stream)
 	stream >> m_user;
 }
 
-User& AccountConfirmedMessage::getUserObj()
+const User& AccountConfirmedMessage::getUserObj() const
 {
 	return m_user;
 }

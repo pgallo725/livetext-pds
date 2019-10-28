@@ -23,12 +23,12 @@ void CharInsertMessage::readFrom(QDataStream& stream)
 	stream >> m_symbol >> m_flag;
 }
 
-Symbol& CharInsertMessage::getSymbol()
+Symbol CharInsertMessage::getSymbol() const
 {
 	return m_symbol;
 }
 
-bool CharInsertMessage::getIsLast()
+bool CharInsertMessage::getIsLast() const
 {
 	return m_flag;
 }

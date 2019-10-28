@@ -1,6 +1,8 @@
 #include "SocketBuffer.h"
 
-SocketBuffer::SocketBuffer() : mType(0), mSize(0)
+
+SocketBuffer::SocketBuffer() 
+	: mType(0), mSize(0)
 {
 };
 
@@ -18,17 +20,17 @@ void SocketBuffer::setDataSize(quint32 s)
 	mSize = s;
 };
 
-quint16 SocketBuffer::getType()
+quint16 SocketBuffer::getType() const
 { 
 	return mType;
 };
 
-quint32 SocketBuffer::getDataSize() 
+quint32 SocketBuffer::getDataSize() const
 {
 	return mSize; 
 };
 
-quint32 SocketBuffer::getReadDataSize() 
+quint32 SocketBuffer::getReadDataSize() const
 { 
 	return (quint32)buffer.size(); 
 };

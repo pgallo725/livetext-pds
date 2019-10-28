@@ -95,11 +95,13 @@ DocumentDismissedMessage::DocumentDismissedMessage()
 void DocumentDismissedMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
+	(void) stream;
 }
 
 void DocumentDismissedMessage::readFrom(QDataStream& stream)
 {
 	// NO CONTENT TO READ
+	(void) stream;
 }
 
 
@@ -141,11 +143,13 @@ DocumentCloseMessage::DocumentCloseMessage()
 void DocumentCloseMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
+	(void) stream;
 }
 
 void DocumentCloseMessage::readFrom(QDataStream& stream)
 {
 	// NO CONTENT TO READ
+	(void) stream;
 }
 
 
@@ -159,11 +163,13 @@ DocumentExitMessage::DocumentExitMessage()
 void DocumentExitMessage::writeTo(QDataStream& stream) const
 {
 	// NO CONTENT TO WRITE
+	(void) stream;
 }
 
 void DocumentExitMessage::readFrom(QDataStream& stream)
 {
 	// NO CONTENT TO READ
+	(void) stream;
 }
 
 

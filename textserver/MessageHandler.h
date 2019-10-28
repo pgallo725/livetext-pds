@@ -46,7 +46,7 @@ signals: MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName
 signals: MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
 signals: MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
-signals: void charInsert(Symbol& s);
+signals: void charInsert(Symbol s);
 signals: void charDelete(QVector<qint32> pos);
 signals: void charFormat(QVector<qint32> pos, QTextCharFormat fmt);
 signals: void blockEdit(TextBlockID id, QTextBlockFormat fmt);

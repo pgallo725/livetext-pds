@@ -24,7 +24,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
     QByteArrayData data[45];
-    char stringdata0[468];
+    char stringdata0[467];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -56,28 +56,28 @@ QT_MOC_LITERAL(19, 199, 6), // "docUri"
 QT_MOC_LITERAL(20, 206, 14), // "docJustCreated"
 QT_MOC_LITERAL(21, 221, 14), // "documentRemove"
 QT_MOC_LITERAL(22, 236, 10), // "charInsert"
-QT_MOC_LITERAL(23, 247, 7), // "Symbol&"
-QT_MOC_LITERAL(24, 255, 1), // "s"
-QT_MOC_LITERAL(25, 257, 10), // "charDelete"
-QT_MOC_LITERAL(26, 268, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(27, 284, 3), // "pos"
-QT_MOC_LITERAL(28, 288, 10), // "charFormat"
-QT_MOC_LITERAL(29, 299, 15), // "QTextCharFormat"
-QT_MOC_LITERAL(30, 315, 3), // "fmt"
-QT_MOC_LITERAL(31, 319, 9), // "blockEdit"
-QT_MOC_LITERAL(32, 329, 11), // "TextBlockID"
-QT_MOC_LITERAL(33, 341, 2), // "id"
-QT_MOC_LITERAL(34, 344, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(35, 361, 8), // "listEdit"
-QT_MOC_LITERAL(36, 370, 7), // "blockId"
-QT_MOC_LITERAL(37, 378, 10), // "TextListID"
-QT_MOC_LITERAL(38, 389, 6), // "listId"
-QT_MOC_LITERAL(39, 396, 15), // "QTextListFormat"
-QT_MOC_LITERAL(40, 412, 15), // "messageDispatch"
-QT_MOC_LITERAL(41, 428, 7), // "message"
-QT_MOC_LITERAL(42, 436, 6), // "sender"
-QT_MOC_LITERAL(43, 443, 13), // "documentClose"
-QT_MOC_LITERAL(44, 457, 10) // "userLogout"
+QT_MOC_LITERAL(23, 247, 6), // "Symbol"
+QT_MOC_LITERAL(24, 254, 1), // "s"
+QT_MOC_LITERAL(25, 256, 10), // "charDelete"
+QT_MOC_LITERAL(26, 267, 15), // "QVector<qint32>"
+QT_MOC_LITERAL(27, 283, 3), // "pos"
+QT_MOC_LITERAL(28, 287, 10), // "charFormat"
+QT_MOC_LITERAL(29, 298, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(30, 314, 3), // "fmt"
+QT_MOC_LITERAL(31, 318, 9), // "blockEdit"
+QT_MOC_LITERAL(32, 328, 11), // "TextBlockID"
+QT_MOC_LITERAL(33, 340, 2), // "id"
+QT_MOC_LITERAL(34, 343, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(35, 360, 8), // "listEdit"
+QT_MOC_LITERAL(36, 369, 7), // "blockId"
+QT_MOC_LITERAL(37, 377, 10), // "TextListID"
+QT_MOC_LITERAL(38, 388, 6), // "listId"
+QT_MOC_LITERAL(39, 395, 15), // "QTextListFormat"
+QT_MOC_LITERAL(40, 411, 15), // "messageDispatch"
+QT_MOC_LITERAL(41, 427, 7), // "message"
+QT_MOC_LITERAL(42, 435, 6), // "sender"
+QT_MOC_LITERAL(43, 442, 13), // "documentClose"
+QT_MOC_LITERAL(44, 456, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -86,7 +86,7 @@ QT_MOC_LITERAL(44, 457, 10) // "userLogout"
     "lientSocket\0nickname\0icon\0password\0"
     "accountUpdate\0documentCreate\0docName\0"
     "documentOpen\0URI\0docUri\0docJustCreated\0"
-    "documentRemove\0charInsert\0Symbol&\0s\0"
+    "documentRemove\0charInsert\0Symbol\0s\0"
     "charDelete\0QVector<qint32>\0pos\0"
     "charFormat\0QTextCharFormat\0fmt\0blockEdit\0"
     "TextBlockID\0id\0QTextBlockFormat\0"
@@ -245,6 +245,13 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< URI >(); break;
             }
             break;
+        case 8:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< Symbol >(); break;
+            }
+            break;
         case 9:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
@@ -349,7 +356,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = void (MessageHandler::*)(Symbol & );
+            using _t = void (MessageHandler::*)(Symbol );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::charInsert)) {
                 *result = 8;
                 return;
@@ -511,7 +518,7 @@ MessageCapsule MessageHandler::documentRemove(QSslSocket * _t1, URI _t2)
 }
 
 // SIGNAL 8
-void MessageHandler::charInsert(Symbol & _t1)
+void MessageHandler::charInsert(Symbol _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 8, _a);

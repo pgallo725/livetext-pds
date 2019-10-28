@@ -126,6 +126,9 @@ private:
 	void redrawAllCursors();
 	void drawGraphicCursor(Presence* p);
 
+	//Status bar messages
+	void showStatusBarMessage(QString text);
+
 	//DEBUG
 	void printDocumenText();
 
@@ -160,6 +163,7 @@ public:
 	void closeEditor();
 	void criticalError(QString error);
 	void resetUndoRedo();
+	void resetCursorPosition();
 
 	//User text highlighting
 	void updateUsersSelections();
