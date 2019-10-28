@@ -22,7 +22,7 @@ User::User(QString username, int userId, QString nickname, QString passwd, QImag
 		m_salt.append(nextChar);
 	}
 
-	QCryptographicHash hash(QCryptographicHash::Md5);
+	QCryptographicHash hash(QCryptographicHash::Sha512);
 
 	hash.addData(passwd.toUtf8());
 	hash.addData(m_salt);
@@ -117,7 +117,7 @@ void User::setPassword(QString newPassword)
 		m_salt.append(nextChar);
 	}
 
-	QCryptographicHash hash(QCryptographicHash::Md5);
+	QCryptographicHash hash(QCryptographicHash::Sha512);
 
 	hash.addData(newPassword.toUtf8());
 	hash.addData(m_salt);

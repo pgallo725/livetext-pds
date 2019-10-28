@@ -103,7 +103,7 @@ In this way all data flow in the network is encripted and no one can see what ar
 If SSL connection is not enough, we provide a simple way to exchange critical data, such as passwords, during Registration and Login operations. 
 We send to clients a random "nonce" within they hashed the password and sand it back to the server.
 
-User DataBase is also a critical point under security view, so we save all the passwords hashed with a "salt", which is also stored in the DataBase.
+User DataBase is also a critical point under security point of view, so we save all the passwords hashed with a random "salt", which is also stored in the DataBase.
 
 # Main functions code
 //TODO
