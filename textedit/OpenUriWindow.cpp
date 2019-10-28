@@ -22,6 +22,9 @@ OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) : QDialog(parent, Qt
 	//Connect for push buttons
 	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &OpenUriWindow::acceptClicked);
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &OpenUriWindow::rejectClicked);
+	
+	//Set keyboard focus
+	ui->lineEdit_uri->setFocus();
 }
 
 OpenUriWindow::~OpenUriWindow()

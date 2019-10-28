@@ -11,7 +11,7 @@
 
 const QString rsrcPath = ":/images";
 
-ShareUriWindow::ShareUriWindow(QString uri, QStatusBar* statusBar, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _statusBar(statusBar), _uri(uri) {
+ShareUriWindow::ShareUriWindow(QString uri, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _uri(uri) {
 	//Setup UI window and resize
 	ui->setupUi(this);
 
@@ -42,8 +42,5 @@ void ShareUriWindow::copyAndClose()
 	clipboard->setText(_uri);
 
 	//Close window
-	this->close();
-
-	//Show message to clipboard
-	_statusBar->showMessage(tr("URI copied into clipboards"), 2000);
+	this->done(QDialog::Accepted);
 }

@@ -26,6 +26,9 @@ NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(paren
 
 	//Validator to prevent insertion of '_' character in filename
 	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
+
+	//Set keyboard focus
+	ui->lineEdit_fileName->setFocus();
 }
 
 NewFileWindow::~NewFileWindow()

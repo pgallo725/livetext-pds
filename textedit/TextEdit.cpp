@@ -38,7 +38,7 @@
 #endif
 
 #include <QPrinter>
-
+#include <QTimer>
 #include <QLayout>
 
 #if QT_CONFIG(printpreviewdialog)
@@ -124,14 +124,12 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	actionPaste->setEnabled(false);
 #endif
 
-	//Makes keyboard focused on text editor
-	textEdit->setFocus();
-
 	//Setup cursor position
 	_currentCursorPosition = -1;
 
 	//Generate new presence for current user
 	newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
+
 }
 
 /**************************** GUI SETUP ****************************/
@@ -153,7 +151,6 @@ void TextEdit::setupMainWindow()
 	//Setting window icon
 	setWindowIcon(QIcon(rsrcPath + "/misc/logo.png"));
 
-
 	//Center and resizes window
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
 
@@ -165,16 +162,23 @@ void TextEdit::setupMainWindow()
 	textEdit->setMaximumWidth(width());
 
 	//Creates 3D effect of document
-	textEdit->setFrameStyle(QFrame::Panel);
-	textEdit->setFrameShadow(QFrame::Raised);
-	textEdit->setLineWidth(3);
+	textEdit->setFrameStyle(QFrame::Plain);
+	//textEdit->setFrameShadow(QFrame::Raised);
+	textEdit->setLineWidth(1);
 
 	//Set central widget and layout
 	QWidget* cntr = new QWidget(this);
 	QHBoxLayout* bl = new QHBoxLayout();
 
+	//Sets white background
+	cntr->setAutoFillBackground(true);
+	QPalette pal = cntr->palette();
+	pal.setColor(QPalette::Window, QColor(128, 128, 128));
+	cntr->setPalette(pal);
+
+
 	//Set top margin
-	bl->setContentsMargins(0, 15, 0, 0);
+	bl->setContentsMargins(0, 0, 0, 0);
 	//Set widget alignment
 	bl->setAlignment(Qt::AlignHCenter);
 
@@ -182,6 +186,12 @@ void TextEdit::setupMainWindow()
 	bl->addWidget(textEdit);
 	cntr->setLayout(bl);
 	setCentralWidget(cntr);
+
+	//Hide status bar
+	statusBar()->hide();
+
+	//Makes keyboard focused on text editor
+	textEdit->setFocus();
 }
 
 
@@ -643,6 +653,7 @@ void TextEdit::removePresence(qint32 userId)
 /*
 *	Close document msgbox
 *	Close editor
+*	Status bar messages
 *	Error messages
 *	Reset Undo/Redo
 *	Start timer
@@ -661,10 +672,21 @@ void TextEdit::askBeforeCloseDocument()
 	}
 }
 
+void TextEdit::showStatusBarMessage(QString text)
+{
+	//Show status bar
+	statusBar()->show();
+	
+	//Shows message for 5"
+	statusBar()->showMessage(text, 5000);
+
+	//Hides status bar after 5"
+	QTimer::singleShot(5000, [this] {statusBar()->hide(); });
+}
 
 void TextEdit::closeDocumentError(QString error)
 {
-	statusBar()->showMessage(error, 2000);
+	showStatusBarMessage(error);
 	startTimer(timerId);
 }
 
@@ -703,6 +725,12 @@ void TextEdit::resetUndoRedo()
 	textEdit->document()->clearUndoRedoStacks();
 }
 
+void TextEdit::resetCursorPosition()
+{
+	//Set new cursor
+	textEdit->setTextCursor(QTextCursor(textEdit->document()));
+}
+
 //	Handle timer event to send cursor position to the server
 void TextEdit::startCursorTimer()
 {
@@ -726,7 +754,7 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 	this->fileName = fileName;
 	this->URI = uri;
 
-	_shareUri = new ShareUriWindow(URI, statusBar());
+	_shareUri = new ShareUriWindow(URI);
 
 	//Sulla finestra appare nomeFile - nomeApplicazione
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
@@ -811,14 +839,16 @@ void TextEdit::filePrintPdf()
 	textEdit->document()->print(&printer);
 
 	//Show in status bar outcome of operation ("Exported path/to/file.pdf")
-	statusBar()->showMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)), 2000);
+
+	showStatusBarMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)));
 #endif
 }
 
 void TextEdit::fileShare()
 {
 	//Show created window
-	_shareUri->exec();
+	if(_shareUri->exec()==QDialog::Accepted)
+		showStatusBarMessage(tr("URI copied into clipboards"));		//Show message to clipboard
 }
 
 /**************************** LISTS ****************************/
