@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QDir>
 
+#include "ServerLogger.h"
 #include <MessageFactory.h>
 #include <SharedException.h>
 
@@ -21,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	qInfo().nospace() << "LiveText Server (version 0.9.2)" << endl
+	Logger(Info) << "LiveText Server (version 0.9.5)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -45,8 +46,8 @@ TcpServer::TcpServer(QObject* parent)
 	}
 	else
 	{
-		qInfo() << "Qt built with SSL version: " << QSslSocket::sslLibraryBuildVersionString();
-		qInfo() << "SSL version supported on this system: " << QSslSocket::supportsSsl() << endl;
+		Logger(Info) << "Qt built with SSL version: " << QSslSocket::sslLibraryBuildVersionString();
+		Logger(Info) << "SSL version supported on this system: " << QSslSocket::supportsSsl() << endl;
 
 		QSslCipher ECDHE_RSA_cipher;
 		for (QSslCipher cipher : QSslConfiguration::supportedCiphers())
@@ -69,12 +70,12 @@ TcpServer::TcpServer(QObject* parent)
 		QString ip_address = this->serverAddress().toString();
 		quint16 port = this->serverPort();
 		if (this->isListening()) {
-			qInfo() << "Reachable addresses: ";
+			Logger(Info) << "Reachable addresses: ";
 			for (const QHostAddress& address : ipAddressesList) {
 				if (address.protocol() == QAbstractSocket::IPv4Protocol)
 					qInfo().noquote() << " - " << address.toString();
 			}
-			qInfo() << endl << "Available on TCP/IP port:" << port << endl << endl;
+			Logger(Info) << endl << "Available on TCP/IP port:" << port << endl << endl;
 		}
 	}
 }
@@ -89,10 +90,10 @@ TcpServer::~TcpServer()
 /* Load users and documents */
 void TcpServer::initialize()
 {
-	qDebug() << "> BEGIN SERVER INITIALIZATION PROCEDURE...";
-	qDebug() << "> Checking SSL resources availability";
+	Logger() << "BEGIN SERVER INITIALIZATION PROCEDURE...";
+	Logger() << "Checking SSL resources availability";
 
-
+	// Check existence of the required SSL certificate files
 	if (!QFileInfo(QFile("server.key")).exists()) {
 		throw StartupException("Cannot find private key file: 'server.key'");
 	}
@@ -101,26 +102,26 @@ void TcpServer::initialize()
 	}
 
 	// Create a connection to the server's database
-	qDebug() << "> Opening connection to server database";
+	Logger() << "Opening connection to server database";
 	db.open("livetext.db3");
-	qDebug() << "> (COMPLETED)";
+	Logger() << "(COMPLETED)";
 
 
 	// Loading the documents index in the server memory
-	qDebug() << "> Loading documents index";
+	Logger() << "Loading documents index";
 	foreach(QString docURI, db.readDocumentURIs())
 	{
 		if (validateURI(docURI))
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 		else {
 			db.removeDoc(docURI);
-			qDebug() << "> Invalid URI" << docURI << "skipped and removed";
+			Logger(Warning) << "Invalid URI" << docURI << "skipped and removed";
 		}
 	}
-	qDebug() << "> (COMPLETED)";
+	Logger() << "(COMPLETED)";
 
-	qDebug() << "> Loading users database";
-
+	// Load all user information from the database
+	Logger() << "Loading users database";
 	for each (User user in db.readUsersList())
 	{
 		for each (URI docUri in db.readUserDocuments(user.getUsername()))
@@ -129,8 +130,7 @@ void TcpServer::initialize()
 		}
 		users.insert(user.getUsername(), user);
 	}
-
-	qDebug() << "> (COMPLETED)";
+	Logger() << "(COMPLETED)";
 
 	// Initialize the counter to assign user IDs
 	_userIdCounter = db.getMaxUserID();
@@ -138,14 +138,15 @@ void TcpServer::initialize()
 	// Check existence of (or create) the Documents folder
 	if (!QDir("Documents").exists()) 
 	{
-		qDebug() << "> Creating the server Documents folder";
+		Logger() << "Creating the server Documents folder";
 		if (!QDir().mkdir("Documents")) {
-			throw StartupException("Cannot create 'Documents' folder");
+			throw StartupException("Cannot create folder '.\\Documents'");
 		}
 	}
 
-	qDebug() << "> (INITIALIZATION COMPLETE)" << endl;
+	Logger() << "(INITIALIZATION COMPLETE)" << endl;
 }
+
 
 /* Generate the URI for a document */
 URI TcpServer::generateURI(QString authorName, QString docName) const
@@ -182,6 +183,7 @@ bool TcpServer::validateURI(URI uri) const
 	return uri == generateURI(uri.getAuthorName(), uri.getDocumentName());
 }
 
+
 /* Handle a new connection from a client */
 void TcpServer::newClientConnection()
 {
@@ -190,12 +192,13 @@ void TcpServer::newClientConnection()
 
 	/* check if there's a new connection or it was a windows signal */
 	if (socket == nullptr) {
-		qDebug() << "> (WARNING) Received fake connection signal from Windows\n";
+		Logger(Warning) << "Received fake connection signal from Windows";
 		return;
 	}
 
-	qDebug() << "> New connection from a client";
+	Logger() << "New connection from a client";
 
+	// Create a new client object 
 	QSharedPointer<Client> client(new Client(socket));
 	clients.insert(socket, client);
 
@@ -212,7 +215,7 @@ void TcpServer::clientDisconnection()
 
 	if (client->isLogged())
 	{
-		qDebug() << "> Client" << client->getUsername() << "disconnected";
+		Logger() << "Client " << client->getUsername() << " disconnected";
 		restoreUserAvaiable(client->getUsername());
 	}
 
@@ -228,12 +231,12 @@ void TcpServer::clientDisconnection()
 void TcpServer::sslSocketError(QAbstractSocket::SocketError error)
 {
 	if (error != QAbstractSocket::RemoteHostClosedError)
-		qDebug() << "> (ERROR) SslSocket error: " << error ;
+		Logger(Error) << "(SOCKET ERROR) " << error;
 }
 
 void TcpServer::sslSocketReady()
 {
-	qDebug() << "> SslSocket handshake successful, encryption setup completed";
+	Logger() << "SslSocket handshake successful, socket encrypted";
 }
 
 void TcpServer::incomingConnection(qintptr socketDescriptor)
@@ -253,7 +256,7 @@ void TcpServer::incomingConnection(qintptr socketDescriptor)
 	}
 	else
 	{
-		qDebug() << "> (ERROR) SslSocket creation failed, incoming connection was rejected";
+		Logger(Error) << "(SOCKET ERROR) SslSocket creation failed, connection rejected";
 		delete serverSocket;
 	}
 }
@@ -270,10 +273,10 @@ MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString us
  	if (users.contains(username))
 	{
 		if (client->isLogged())
-			return MessageFactory::LoginError("Your client is already logged in as '" + client->getUsername() + "'");
+			return MessageFactory::LoginError("Client already logged in as '" + client->getUsername() + "'");
 
 		if(usersNotAvailable.contains(username))
-			return MessageFactory::LoginError("This user is already logged in ");
+			return MessageFactory::LoginError("The requested user is already logged in");
 
 		return MessageFactory::LoginChallenge(users.find(username).value().getSalt(),
 			client->challenge(&(users.find(username).value())));
@@ -287,14 +290,14 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
 	if (client->isLogged())
-		return MessageFactory::LoginError("You are already logged in");
+		return MessageFactory::LoginError("You need to login before performing any operation");
 
 	if (usersNotAvailable.contains(client->getUsername()))
-		return MessageFactory::LoginError("This user is already logged in ");
+		return MessageFactory::LoginError("The requested user is already logged in");
 
 	if (client->authenticate(token))		// verify the user's account credentials
 	{
-		qDebug() << "> User" << client->getUsername() << "logged in";
+		Logger() << "User " << client->getUsername() << " logged in";
 
 		usersNotAvailable << client->getUsername();
 		client->login(client->getUser());
@@ -303,7 +306,7 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 	else
 	{
 		client->logout();
-		return MessageFactory::LoginError("Wrong username/password");
+		return MessageFactory::LoginError("Authentication failed:\n wrong username/password");
 	}
 }
 
@@ -313,31 +316,32 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 {
 	QSharedPointer<Client> client = clients.find(socket).value();
 	if (client->isLogged())
-		return MessageFactory::AccountError("You cannot create an account while being logged in as another user");
+		return MessageFactory::AccountError("Client already logged in as '" + client->getUsername() + "'");
 
 	/* check if username or password are nulls */
 	if (!username.compare("") || !password.compare(""))
-		return MessageFactory::AccountError("Username and/or password cannot be empty");
+		return MessageFactory::AccountError("Username and/or password fields cannot be empty");
 
 	/* check if this username is already used */
 	if (users.contains(username))
-		return MessageFactory::AccountError("That username is already taken");
+		return MessageFactory::AccountError("The requested username is already taken");
 
-	qDebug() << "> Creating new user account" << username;
+	Logger() << "Creating new user account " << username;
 	
 	User user(username, _userIdCounter++, nickname, password, icon);		/* create a new user		*/
 	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
 
 	client->login(&(*i));		// client is automatically logged in as the new user
 	
-	try {
+	try 
+	{	// Add the new user record to the server database
 		db.insertUser(user);
 	}
-	catch (DatabaseException & dbe) {
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot insert this new user: '" << user.getUsername() << "' - '" << user.getUserId() << "'";
+	catch (DatabaseException& dbe) {
+		Logger(Error) << dbe.what();
 		client->logout();
 		users.remove(username);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
+		return MessageFactory::AccountError("User creation failed due to an internal error");
 	}
 	
 	return MessageFactory::AccountConfirmed(user);
@@ -350,20 +354,21 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	User backupUser = *(client->getUser());
 
 	if (!client->isLogged())
-		return MessageFactory::AccountError("You are not logged in");
+		return MessageFactory::AccountError("You need to login before performing any operation");
 
-	qDebug() << "> Updating account information of user" << client->getUsername();
+	Logger() << "Updating account information of user " << client->getUsername();
 
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	try {
+	try 
+	{	// Update the user record in the server database
 		db.updateUser(*user);
 	}
-	catch (DatabaseException & dbe) {
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
+	catch (DatabaseException& dbe) {
+		Logger(Error) << dbe.what();
 		client->getUser()->rollback(backupUser);
-		return MessageFactory::AccountError("Users database update failed, please try again later");
+		return MessageFactory::AccountError("User account update failed due to an internal error");
 	}
 	
 	return MessageFactory::AccountConfirmed(*client->getUser());
@@ -376,21 +381,22 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	connect(this, &TcpServer::sendAccountUpdate, w, &WorkSpace::answerAccountUpdate);
 
 	if (!client->isLogged())
-		emit sendAccountUpdate(client, MessageFactory::AccountError("You are not logged in"));
+		emit sendAccountUpdate(client, MessageFactory::AccountError("You need to login before performing any operation"));
 
-	qDebug() << "> Updating account information of user" << client->getUsername() << "(inside Workspace)";
+	Logger() << "Updating account information of user " << client->getUsername() << " (inside Workspace)";
 
 	User backupUser = *(client->getUser());
 	User* user = client->getUser();
 	user->update(nickname, icon, password);
 
-	try {
+	try 
+	{	// Update the user record in the server database
 		db.updateUser(*user);
 	}
-	catch (DatabaseException & dbe) {
-		qDebug().noquote() << ">" << "(DB ERROR) Cannot update '" << user->getUsername();
+	catch (DatabaseException& dbe) {
+		Logger(Error) << dbe.what();
 		client->getUser()->rollback(backupUser);
-		emit sendAccountUpdate(client, MessageFactory::AccountError("Users database update failed, please try again later"));
+		emit sendAccountUpdate(client, MessageFactory::AccountError("User account update failed due to an internal error"));
 	}
 
 	emit sendAccountUpdate(client, MessageFactory::AccountConfirmed(*client->getUser()));
@@ -407,7 +413,7 @@ void TcpServer::logoutClient(QSslSocket* clientSocket)
 	restoreUserAvaiable(username);
 	c->logout();
 
-	qDebug() << "> User" << username << "logged out";
+	Logger() << "User " << username << " logged out";
 }
 
 /* Delete user from unavailable list when they logout or close connection */
@@ -433,13 +439,14 @@ void TcpServer::receiveClient(QSharedPointer<Client> client)
 
 /****************************** DOCUMENT METHODS ******************************/
 
+
 /* Create a new worskpace for a document */
 QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> document)
 {
 	QSharedPointer<WorkSpace> w = QSharedPointer<WorkSpace>(new WorkSpace(document));
 	workspaces.insert(document->getURI(), w);
 	
-	/* workspace will notify when clients quit editing the document and when it becomes empty */
+	/* Workspace will notify when clients quit editing the document and when it becomes empty */
 	connect(w.get(), &WorkSpace::returnClient, this, &TcpServer::receiveClient);
 	connect(w.get(), &WorkSpace::noEditors, this, &TcpServer::deleteWorkspace);
 	connect(w.get(), &WorkSpace::userDisconnected, this, &TcpServer::restoreUserAvaiable, Qt::QueuedConnection);
@@ -454,7 +461,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	QSharedPointer<Client> client = clients.find(author).value();
 
 	if (!client->isLogged())
-		return MessageFactory::DocumentError("You are not logged in");
+		return MessageFactory::DocumentError("You need to login before performing any operation");
 
 	URI docURI = generateURI(client->getUsername(), docName);
 
@@ -462,7 +469,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (documents.contains(docURI))
 		return MessageFactory::DocumentError("A document with the same URI already exists");
 
-	qDebug() << "> Creating new document" << docURI.toString();
+	Logger() << "Creating new document " << docURI.toString();
 
 	// create a copy of the User object before it gets modified, for rollback support
 	User* user = client->getUser();
@@ -483,18 +490,20 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		try {
 			db.addDocToUser(user->getUsername(), docURI.toString());
 		}
-		catch (DatabaseException & dbe) {
-			qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docURI.toString();
+		catch (DatabaseException& dbe) {
+			Logger(Error) << dbe.what();
 			doc->remove();
-			return MessageFactory::DocumentError("Document creation failed, please try again");
+			return MessageFactory::DocumentError("Document creation failed due to an internal error");
 		}
 	}
-	catch (DocumentException& de) {
+	catch (DocumentException& de) 
+	{
+		Logger(Error) << de.what();
 		doc->remove();
-		return MessageFactory::DocumentError("Document creation failed, please try again");
+		return MessageFactory::DocumentError("Document creation failed due to an internal error");
 	}
 
-	qDebug() << "> (DOCUMENT CREATED)";
+	Logger() << "(DOCUMENT CREATED)";
 
 	return openDocument(author, docURI, true);
 }
@@ -508,7 +517,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 	if (!docJustCreated)		// Avoid these operations if we're being called by createDocument
 	{
 		if (!client->isLogged())
-			return MessageFactory::DocumentError("You are not logged in");
+			return MessageFactory::DocumentError("You need to login before performing any operation");
 
 		/* check if this document doesn't exist */
 		if (!documents.contains(docUri))
@@ -518,7 +527,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 		User* user = client->getUser();
 		User backupUser = *(user);
 
-		qDebug() << "> User" << user->getUsername() << "requested document" << docUri.toString();
+		Logger() << "User " << user->getUsername() << " requested document " << docUri.toString();
 
 		/* check if it's the first time opening this document */
 		if (!user->hasDocument(docUri))
@@ -532,10 +541,10 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 			try {
 				db.addDocToUser(user->getUsername(), docUri.toString());
 			}
-			catch (DatabaseException & dbe) {
-				qDebug().noquote() << ">" << "(DB ERROR) Cannot insert: '" << user->getUsername() << " - " << docUri.toString();
+			catch (DatabaseException& dbe) {
+				Logger(Error) << dbe.what();
 				client->getUser()->rollback(backupUser);
-				return MessageFactory::DocumentError("Couldn't add the document to your account, please try again");
+				return MessageFactory::DocumentError("Unable to add the document to your account, please try again");
 			}
 		}
 	}
@@ -544,17 +553,18 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 	{
 		QSharedPointer<Document> doc = documents.find(docUri).value();
 
+		/* load the document into a new workspace or get the existing one */
 		ws = workspaces.contains(docUri) ?
 			workspaces.find(docUri).value() :
 			createWorkspace(doc);
 	}
 	catch (DocumentException& de)
 	{
-		qDebug().noquote() << ">" << de.what();
-		return MessageFactory::DocumentError("Document loading failed, please try again later");
+		Logger(Error) << de.what();
+		return MessageFactory::DocumentError("Document loading failed, please try again");
 	}
 
-	/* this thread will not recives more messages from client */
+	/* this thread will not receive any more messages from the client */
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
 	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
@@ -580,7 +590,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	QSharedPointer<Client> client = clients.find(clientSocket).value();
 
 	if (!client->isLogged())
-		return MessageFactory::DocumentError("You are not logged in");
+		return MessageFactory::DocumentError("You need to login before performing any operation");
 
 	if (!documents.contains(docUri))
 		return MessageFactory::DocumentError("The specified document does not exist (invalid URI)");
@@ -589,7 +599,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	User* user = client->getUser();
 	User backupUser = *(user);
 
-	qDebug() << "> Removing document" << docUri.toString() << "from user" << user->getUsername();
+	Logger() << "Removing document " << docUri.toString() << " from user " << user->getUsername();
 
 	if (user->hasDocument(docUri))
 	{
@@ -599,10 +609,10 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 		try {
 			db.removeDocFromUser(user->getUsername(), docUri.toString());
 		}
-		catch (DatabaseException & dbe) {
-			qDebug().noquote() << ">" << "(DB ERROR) Cannot remove: '" << docUri.toString() << "'";
+		catch (DatabaseException& dbe) {
+			Logger(Error) << dbe.what();
 			client->getUser()->rollback(backupUser);
-			return MessageFactory::DocumentError("Couldn't remove the document from your account, please try again");
+			return MessageFactory::DocumentError("Unable to remove the document from your account, please try again");
 		}
 	}
 	else 
@@ -611,16 +621,15 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	try 
 	{
 		if (!db.countDocEditors(docUri.toString())) {
-			// no one has access to this document --> must be erased
+			// no one has access to this document --> will be permanently deleted
 			documents.find(docUri).value()->remove();
 			documents.remove(docUri);
 
-			qDebug() << "> Permanently deleted document" << docUri.toString() << "file from disk";
+			Logger() << "Permanently deleted document " << docUri.toString() << " from disk";
 		}
 	}
-	catch (DatabaseException & de)
-	{
-		qDebug().noquote() << ">" << de.what();
+	catch (DatabaseException& dbe) {
+		Logger(Error) << dbe.what();
 	}
 	
 
@@ -634,11 +643,11 @@ void TcpServer::deleteWorkspace(URI document)
 	{
 		workspaces.remove(document);
 
-		qDebug().nospace().noquote() << "> Workspace (" << document.toString() << ") successfully closed";
+		Logger() << "Workspace (" << document.toString() << ") successfully closed";
 	}
 	catch (DocumentException& de)
 	{
-		qDebug().noquote() << ">" << de.what();
+		Logger(Error) << de.what();
 	}
 }
 
@@ -677,24 +686,15 @@ void TcpServer::readMessage()
 			{
 				messageHandler.process(message, socket);
 			}
-			else
-			{
-				qDebug() << "> (ERROR) Received unexpected message of type: " << mType;
-				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-				message->send(socket);
-			}
+			else Logger(Error) << "(MESSAGE ERROR) Received unexpected message of type: " << mType;
 		}
-		catch (MessageTypeException& mte) {
-			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-			message->send(socket);
-			qDebug().noquote() << ">" << mte.what();
-			socketBuffer.clear();
-		}
-		catch (MessageException& mre) {
-			qDebug().noquote() << ">" << mre.what();
+		catch (MessageException& me) 
+		{
+			MessageCapsule message = MessageFactory::Failure(me.what());
+			message->send(socket);												// Inform the client of the exception
+			Logger(Error) << me.what();
 			socketBuffer.clear();
 			return;
 		}
 	}
 }
-

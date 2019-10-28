@@ -8,9 +8,21 @@
 ServerLogger::ServerLogger(TcpServer* owner, LogType type)
 	: QDebug((QtMsgType)type)
 {
-	(this->noquote() << QDate::currentDate().toString(Qt::ISODate)
-		<< QTime::currentTime().toString(Qt::ISODateWithMs)).nospace()
-		<< " > ";
+	(void) owner;	// suppress "unused parameter" warning
+
+	if (type != Info)
+	{
+		(this->noquote() << QDate::currentDate().toString(Qt::ISODate)
+			<< QTime::currentTime().toString(Qt::ISODateWithMs)).nospace()
+			<< " |  Thread: " << qSetFieldWidth(7) << QThread::currentThreadId() 
+			<< qSetFieldWidth(0) << "  >  ";
+	}
+	else this->nospace();
+
+	if (type == Warning)
+	{
+		*this << "(WARNING) ";
+	}
 
 	if (type == Error)
 		this->noquote();	// Errors print exception messages as strings, avoid quoting
@@ -20,9 +32,21 @@ ServerLogger::ServerLogger(TcpServer* owner, LogType type)
 ServerLogger::ServerLogger(WorkSpace* owner, LogType type)
 	: QDebug((QtMsgType)type)
 {
-	(this->noquote() << QDate::currentDate().toString(Qt::ISODate)
-		<< QTime::currentTime().toString(Qt::ISODateWithMs)).nospace()
-		<< qSetFieldWidth(7) << " >> [TID:" << QThread::currentThreadId() << "] ";
+	(void) owner;
+
+	if (type != Info)
+	{
+		(this->noquote() << QDate::currentDate().toString(Qt::ISODate)
+			<< QTime::currentTime().toString(Qt::ISODateWithMs)).nospace()
+			<< " |  Thread: " << qSetFieldWidth(7) << QThread::currentThreadId() 
+			<< qSetFieldWidth(0) << "  >>  ";
+	}
+	else this->nospace();
+
+	if (type == Warning)
+	{
+		*this << "(WARNING) ";
+	}
 
 	if (type == Error)
 		this->noquote();	// Errors print exception messages as strings, avoid quoting
