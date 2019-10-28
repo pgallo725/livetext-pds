@@ -223,8 +223,8 @@ void Client::Login(QString usr, QString passwd) {
 	QByteArray nonce = loginChallenge->getNonce();
 	QByteArray salt = loginChallenge->getSalt();
 
-	QCryptographicHash hash1(QCryptographicHash::Md5);
-	QCryptographicHash hash2(QCryptographicHash::Md5);
+	QCryptographicHash hash1(QCryptographicHash::Sha512);
+	QCryptographicHash hash2(QCryptographicHash::Sha512);
 
 	hash1.addData(passwd.toUtf8());
 	hash1.addData(salt);

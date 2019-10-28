@@ -65,7 +65,7 @@ bool Client::isLogged()
 
 bool Client::authenticate(QByteArray token)
 {
-	QCryptographicHash hash(QCryptographicHash::Md5);
+	QCryptographicHash hash(QCryptographicHash::Sha512);
 
 	// Internally solve the challenge by MD5-hashing the nonce with
 	// the stored user password and compare the results

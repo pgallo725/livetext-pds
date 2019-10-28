@@ -43,7 +43,6 @@ void DocumentEditor::openDocument()
 	}
 
 
-	_textedit->resetUndoRedo();
 	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());
 	_textedit->startCursorTimer();
 	_textedit->resetCursorPosition();
