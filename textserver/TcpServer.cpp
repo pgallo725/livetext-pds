@@ -482,24 +482,23 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		doc = QSharedPointer<Document>(new Document(docURI, client->getUserId()));
 		doc->save();	// (creates the document file)
 
-		/* the user becomes the first editor of this document */
+		/* the user owns the document */
 		documents.insert(doc->getURI(), doc);
 		user->addDocument(doc->getURI());
-		doc->insertNewEditor(user->getUsername());
 
 		try {
 			db.addDocToUser(user->getUsername(), docURI.toString());
 		}
 		catch (DatabaseException& dbe) {
 			Logger(Error) << dbe.what();
-			doc->remove();
+			doc->erase();
 			return MessageFactory::DocumentError("Document creation failed due to an internal error");
 		}
 	}
 	catch (DocumentException& de) 
 	{
 		Logger(Error) << de.what();
-		doc->remove();
+		doc->erase();
 		return MessageFactory::DocumentError("Document creation failed due to an internal error");
 	}
 
@@ -534,9 +533,6 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 		{
 			/* add this document to those owned by the user */
 			user->addDocument(docUri);
-
-			/* and add the new editor to the document's list of editors */
-			documents.find(docUri).value()->insertNewEditor(user->getUsername());
 
 			try {
 				db.addDocToUser(user->getUsername(), docUri.toString());
@@ -622,7 +618,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	{
 		if (!db.countDocEditors(docUri.toString())) {
 			// no one has access to this document --> will be permanently deleted
-			documents.find(docUri).value()->remove();
+			documents.find(docUri).value()->erase();
 			documents.remove(docUri);
 
 			Logger() << "Permanently deleted document " << docUri.toString() << " from disk";

@@ -85,8 +85,6 @@ Document::Document()
 Document::Document(URI docURI, qint32 authorId) :
 	uri(docURI), _blockCounter(0), _listCounter(0)
 {
-	editors << getAuthor();
-
 	// Insert a ParagraphTerminator character inside a default block in the empty document
 	TextBlock defaultBlock = TextBlock(_blockCounter++, authorId, QTextBlockFormat());
 	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(),
@@ -105,17 +103,17 @@ Document::~Document()
 }
 
 
-URI Document::getURI()
+URI Document::getURI() const
 {
 	return uri;
 }
 
-QString Document::getName()
+QString Document::getName() const
 {
 	return uri.getDocumentName();
 }
 
-QString Document::getAuthor()
+QString Document::getAuthor() const
 {
 	return uri.getAuthorName();
 }
@@ -143,13 +141,6 @@ QString Document::toString()
 }
 
 
-void Document::insertNewEditor(QString edit)
-{
-	if (!editors.contains(edit))
-		editors << edit;
-}
-
-
 
 /************* DOCUMENT FILE METHODS *************/
 
@@ -164,8 +155,7 @@ void Document::load()
 
 		// Load the document content from file via deserialization
 		if (!docFileStream.atEnd())
-			docFileStream >> editors >> _blockCounter >> _blocks 
-				>> _listCounter >> _lists >> _text;
+			docFileStream >> _blockCounter >> _blocks >> _listCounter >> _lists >> _text;
 
 		if (docFileStream.status() != QDataStream::Status::Ok)
 		{	
@@ -183,7 +173,6 @@ void Document::load()
 void Document::unload()
 {
 	// Unload the Document object contents from memory
-	editors.clear();
 	_blocks.clear();
 	_text.clear();
 	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
@@ -198,8 +187,7 @@ void Document::save()
 		QDataStream docFileStream(&file);
 
 		// Write the the current document content to file
-		docFileStream << editors << _blockCounter << _blocks 
-			<< _listCounter << _lists << _text;
+		docFileStream << _blockCounter << _blocks << _listCounter << _lists << _text;
 
 		if (docFileStream.status() == QDataStream::Status::WriteFailed)
 		{
@@ -216,14 +204,9 @@ void Document::save()
 	}
 }
 
-void Document::remove()
+void Document::erase()
 {
 	QFile(DOCUMENTS_DIRNAME + uri.toString()).remove();
-}
-
-bool Document::exists()
-{
-	return QFileInfo(QFile(DOCUMENTS_DIRNAME + uri.toString())).exists();
 }
 
 
@@ -375,9 +358,12 @@ int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFor
 	}
 	else
 	{
-		// Remove the block from the list
-		TextList& list = _lists[block.getListId()];
-		removeBlockFromList(block, list);
+		if (block.getListId())
+		{
+			// Remove the block from the list
+			TextList& list = _lists[block.getListId()];
+			removeBlockFromList(block, list);
+		}
 	}
 
 	return getBlockPosition(blockId);
@@ -682,7 +668,7 @@ QVector<qint32> Document::fractionalPosEnd()
 QDataStream& operator>>(QDataStream& in, Document& doc)
 {
 	// Deserialization
-	in >> doc.uri >> doc.editors >> doc._blockCounter >> doc._blocks 
+	in >> doc.uri >> doc._blockCounter >> doc._blocks 
 		>> doc._listCounter >> doc._lists >> doc._text ;
 
 	return in;
@@ -691,7 +677,7 @@ QDataStream& operator>>(QDataStream& in, Document& doc)
 QDataStream& operator<<(QDataStream& out, const Document& doc)
 {
 	// Serialization
-	out << doc.uri << doc.editors << doc._blockCounter << doc._blocks 
+	out << doc.uri << doc._blockCounter << doc._blocks 
 		<< doc._listCounter << doc._lists << doc._text;
 
 	return out;
