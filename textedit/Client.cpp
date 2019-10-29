@@ -112,9 +112,6 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 {
 	QByteArray dataBuffer;
 
-	socketBuffer.clear();	// clear the buffer before starting reaeding
-							// TODO EDO: se faccio clear alla fine di ogni lettura/errore, il clear all'inizio si potrebbe togliere?
-
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
 		emit failureSignal(tr("Server not responding"));
@@ -213,9 +210,13 @@ void Client::Login(QString usr, QString passwd) {
 		emit loginFailed(loginError->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit loginFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		emit loginFailed(tr("Default path followed for Login"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 
@@ -255,9 +256,13 @@ void Client::Login(QString usr, QString passwd) {
 		emit loginFailed(loginerror->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit loginFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		emit loginFailed(tr("Default path followed for Login"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -291,9 +296,13 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 		emit registrationFailed(accountDenied->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit registrationFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		emit registrationFailed(tr("Default path followed for Register"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -344,9 +353,13 @@ void Client::openDocument(URI URI) {
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit fileOperationFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		emit fileOperationFailed(tr("Default path followed for OpenFile"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -386,9 +399,13 @@ void Client::createDocument(QString name) {
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit fileOperationFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		emit fileOperationFailed(tr("Default path followed for OpenFile"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -422,10 +439,13 @@ void Client::deleteDocument(URI URI) {
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
+	case Failure:
+	{
+		emit fileOperationFailed(tr("Server Error"));
+		return;
+	}
 	default:
-		//throw MessageUnknownTypeException();
-		//EMIT ?
-		emit fileOperationFailed(tr("Default choise selected for RemoveFile"));
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 
@@ -544,7 +564,6 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		switch (incomingMessage->getType()) {
 		case AccountConfirmed:
 		{
-			socketBuffer.clear();
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 			emit personalAccountModified(accountconfirmed->getUserObj());
@@ -552,18 +571,19 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 		}
 		case AccountError:
 		{
-			socketBuffer.clear();
 			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
 			emit accountModificationFail(accounterror->getErrorMessage());
 			return;
 		}
+		case Failure:
+		{
+			// TODO gestione failure
+		}
 		default:
 			messageHandler(incomingMessage);
 			break;
 		}
-
-		socketBuffer.clear();
 	}
 }
 
@@ -605,26 +625,26 @@ void Client::removeFromFile(qint32 myId) {
 		if (!incomingMessage)
 			return;
 
-		switch (socketBuffer.getType()) {
+		switch (incomingMessage->getType()) {
 		case DocumentExit:
 		{
-			socketBuffer.clear();
 			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
 			emit documentExitSuccess();
 			return;
 		}
 		case DocumentError:
 		{
-			socketBuffer.clear();
 			DocumentErrorMessage* accounterror = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 			emit documentExitFailed(accounterror->getErrorMessage());
 			return;
+		}
+		case Failure:
+		{
+			// TODO gestione Failure
 		}
 		default:
 			messageHandler(incomingMessage);
 			break;
 		}
-
-		socketBuffer.clear();
 	}
 }
