@@ -745,6 +745,7 @@ void TextEdit::resetCursorPosition()
 {
 	//Set new cursor
 	textEdit->setTextCursor(QTextCursor(textEdit->document()));
+	area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
 }
 
 //	Handle timer event to send cursor position to the server

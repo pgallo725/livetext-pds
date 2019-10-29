@@ -216,6 +216,10 @@ void LiveText::openEditor()
 {
 	//Show maximized
 	_textEdit->showMaximized();
+	QApplication::processEvents();	//Fully show text editor before reset cursor position
+
+	//Reset cursor position to top
+	_textEdit->resetCursorPosition();
 
 	//Close all window in landing page
 	_landingPage->closeAll();
