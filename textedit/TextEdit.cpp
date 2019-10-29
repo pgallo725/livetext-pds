@@ -109,7 +109,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	textFont.setPointSize(12);
 	textEdit->setFont(textFont);
 	textEdit->document()->setDefaultFont(textFont);
-	
+
 	//Disable undo/redo
 	textEdit->setUndoRedoEnabled(false);
 
@@ -158,20 +158,18 @@ void TextEdit::setupMainWindow()
 	//Center and resizes window
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
 
-	resize(availableGeometry.width() * 0.6, availableGeometry.height()*2/3);
+	resize(availableGeometry.width() * 0.6, availableGeometry.height() * 2 / 3);
 	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 
 	//Inizialize Qt text editor
 	textEdit = new QTextEdit();
 	textEdit->setMaximumWidth(width());
-	textEdit->setMinimumHeight(height());
 	textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
 	textEdit->setFrameStyle(QFrame::Plain);
 	//textEdit->setFrameShadow(QFrame::Raised);
 	textEdit->setLineWidth(1);
-
 
 	//Set central widget and layout
 	QWidget* cntr = new QWidget(this);
@@ -183,7 +181,7 @@ void TextEdit::setupMainWindow()
 	cntr->setPalette(pal);
 
 	//Generate scroll area to set QTextEditor
-	QScrollArea* area = new QScrollArea(this);
+	area = new QScrollArea(this);
 	area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	area->setWidgetResizable(true);
 	area->setWidget(cntr);
@@ -191,7 +189,7 @@ void TextEdit::setupMainWindow()
 
 	//Set layout to QScroll Area
 	QHBoxLayout* bl = new QHBoxLayout(area);
-	bl->setContentsMargins(0, 20, 0, 0);
+	bl->setContentsMargins(0, 20, 0, 20);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
 	bl->addWidget(textEdit);	//Add text editor to widget
 
@@ -676,10 +674,14 @@ void TextEdit::removePresence(qint32 userId)
 void TextEdit::resizeEditor(const QSizeF& newSize)
 {
 	int height = QApplication::desktop()->availableGeometry(this).height();
-	if (newSize.height() > height)
+	if (newSize.height() > height * 0.78) {
 		textEdit->setFixedHeight(newSize.height());
-	else
+		area->verticalScrollBar()->setValue(area->verticalScrollBar()->maximum());
+	}
+	else {
 		textEdit->setFixedHeight(height);
+		area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
+	}
 }
 
 void TextEdit::askBeforeCloseDocument()
@@ -1321,6 +1323,7 @@ void TextEdit::fontChanged(const QFont& f)
 	actionTextBold->setChecked(f.bold());
 	actionTextItalic->setChecked(f.italic());
 	actionTextUnderline->setChecked(f.underline());
+	actionTextStrikethrough->setChecked(f.strikeOut());
 }
 
 void TextEdit::colorChanged(const QColor& c)

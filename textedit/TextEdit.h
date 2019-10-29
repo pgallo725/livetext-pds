@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 
+
 #include <User.h>
 
 #include "Presence.h"
@@ -16,6 +17,7 @@ class QAction;
 class QComboBox;
 class QFontComboBox;
 class QTextEdit;
+class QScrollArea;
 class QTextCharFormat;
 class QMenu;
 class QPrinter;
@@ -85,6 +87,9 @@ private:
 
 	//Text editor
 	QTextEdit* textEdit;
+
+	//Scroll area widget to move document inside QMainWindow
+	QScrollArea* area;
 
 	//Timer event
 	int timerId;
