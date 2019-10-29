@@ -44,9 +44,44 @@ private:
 	QAction* listActions[9];
 
 	//GUI update and list style easy application
-	enum listType { standard, disc, circle, square, decimal, alpha, alphaupper, roman, romanupper };
-	QString listIconPath[9] = { "/editor/list.png", "/editor/disc.png", "/editor/circle.png", "/editor/square.png", "/editor/decimal.png", "/editor/alpha.png", "/editor/alphaupper.png", "/editor/roman.png", "/editor/romanupper.png" };
-	QTextListFormat::Style listStyles[9] = { QTextListFormat::ListStyleUndefined, QTextListFormat::ListDisc, QTextListFormat::ListCircle, QTextListFormat::ListSquare, QTextListFormat::ListDecimal, QTextListFormat::ListLowerAlpha, QTextListFormat::ListUpperAlpha, QTextListFormat::ListLowerRoman, QTextListFormat::ListUpperRoman };
+	enum listType 
+	{ 
+		standard,
+		disc,
+		circle,
+		square,
+		decimal,
+		alpha,
+		alphaupper,
+		roman,
+		romanupper 
+	};
+
+	QString listIconPath[9] = 
+	{ 
+		"/editor/list.png",
+		"/editor/disc.png",
+		"/editor/circle.png",
+		"/editor/square.png",
+		"/editor/decimal.png",
+		"/editor/alpha.png",
+		"/editor/alphaupper.png",
+		"/editor/roman.png",
+		"/editor/romanupper.png" 
+	};
+
+	QTextListFormat::Style listStyles[9] = 
+	{ 
+		QTextListFormat::ListStyleUndefined,
+		QTextListFormat::ListDisc,
+		QTextListFormat::ListCircle,
+		QTextListFormat::ListSquare,
+		QTextListFormat::ListDecimal,
+		QTextListFormat::ListLowerAlpha,
+		QTextListFormat::ListUpperAlpha,
+		QTextListFormat::ListLowerRoman,
+		QTextListFormat::ListUpperRoman
+	};
 
 	//Current cursor position
 	int _currentCursorPosition;
@@ -187,6 +222,8 @@ signals:
 	void charDeleted(int position);
 
 	//LOCAL: text block format changed
+	void blockFormatChanged(int start, int end, Qt::Alignment alignment);
+	void blockFormatChanged(int start, int end, qreal height, int heightType);
 	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
 
 	//LOCAL: character format changed

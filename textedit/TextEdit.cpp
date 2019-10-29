@@ -1184,8 +1184,10 @@ void TextEdit::textAlign(QAction* a)
 		textEdit->setAlignment(Qt::AlignJustify);
 
 	QTextCursor cursor = textEdit->textCursor();
-	//Sends new block format to server
-	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+
+	//Sends new block alignment to server
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
+		cursor.blockFormat().alignment());
 }
 
 
@@ -1240,9 +1242,11 @@ void TextEdit::setLineHeight(QAction* a)
 	//Sets block format
 	QTextCursor cursor = textEdit->textCursor();
 	cursor.mergeBlockFormat(fmt);
+	fmt = cursor.blockFormat();
 
-	//Sends new block format to server
-	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+	//Sends new block lineHeight to server
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
+		fmt.lineHeight(), fmt.lineHeightType());
 }
 
 /**************************** GUI UPDATE ****************************/
