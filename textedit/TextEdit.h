@@ -66,6 +66,7 @@ private:
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;
 	QAction* actionTextItalic;
+	QAction* actionTextStrikethrough;
 	QAction* actionTextColor;
 	QAction* actionAlignLeft;
 	QAction* actionAlignCenter;
@@ -230,6 +231,7 @@ private slots:
 	void textBold();
 	void textUnderline();
 	void textItalic();
+	void textStrikethrough();
 	void textFamily(const QString& f);
 	void textSize(const QString& p);
 	void incrementSize();

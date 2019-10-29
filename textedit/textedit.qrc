@@ -9,8 +9,6 @@
 	<file>images/editor/editcopy.png</file>
 	<file>images/editor/editcut.png</file>
 	<file>images/editor/editpaste.png</file>
-	<file>images/editor/editredo.png</file>
-	<file>images/editor/editundo.png</file>
 	<file>images/editor/exportpdf.png</file>
 	<file>images/editor/fileprint.png</file>
 	<file>images/editor/highlightusers.png</file>
@@ -28,6 +26,7 @@
 	<file>images/editor/textjustify.png</file>
 	<file>images/editor/textleft.png</file>
 	<file>images/editor/textright.png</file>
+	<file>images/editor/textstrikethrough.png</file>
 	<file>images/editor/textunder.png</file>
 	<file>images/editor/user.png</file>
 	

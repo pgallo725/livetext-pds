@@ -336,12 +336,23 @@ void TextEdit::setupTextActions()
 
 	tb->addAction(actionTextUnderline);
 
+	//Strikethrough
+	const QIcon strikeIcon = QIcon(rsrcPath + "/editor/textstrikethrough.png");
+	actionTextStrikethrough = menu->addAction(strikeIcon, tr("&Strikethrough"), this, &TextEdit::textStrikethrough);
+	actionTextStrikethrough->setPriority(QAction::LowPriority);
+	actionTextStrikethrough->setCheckable(true);
+
+	QFont strikethrough;
+	strikethrough.setStrikeOut(true);
+	actionTextStrikethrough->setFont(strikethrough);
+
+	tb->addAction(actionTextStrikethrough);
+
 	menu->addSeparator();
 	tb->addSeparator();
 
 
-	//Alignment
-
+	/***** ALIGNMENT *****/
 	//Left
 	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
@@ -1057,6 +1068,18 @@ void TextEdit::textItalic()
 	//Set Italic according to button
 	QTextCharFormat fmt;
 	fmt.setFontItalic(actionTextItalic->isChecked());
+
+	//Apply format
+	mergeFormatOnSelection(fmt);
+}
+
+void TextEdit::textStrikethrough()
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Set Strikethrough according to button
+	QTextCharFormat fmt;
+	fmt.setFontStrikeOut(actionTextStrikethrough->isChecked());
 
 	//Apply format
 	mergeFormatOnSelection(fmt);
