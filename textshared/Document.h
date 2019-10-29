@@ -50,7 +50,7 @@ class Document
 private:
 
 	URI uri;
-	QStringList editors;
+
 	QVector<Symbol> _text;		// Actual document contents
 
 	qint32 _blockCounter;
@@ -73,8 +73,7 @@ public:
 	void load();
 	void unload();
 	void save();
-	void remove();
-	bool exists();
+	void erase();
 
 	Symbol& operator[](QVector<qint32> fPos);
 	Symbol& operator[](int pos);
@@ -93,9 +92,9 @@ public:
 	QVector<qint32> fractionalPosAtIndex(int index);
 
 	/* getters */
-	URI getURI();
-	QString getName();
-	QString getAuthor();
+	URI getURI() const;
+	QString getName() const;
+	QString getAuthor() const;
 
 	int length();
 	QVector<Symbol> getContent();
@@ -110,8 +109,6 @@ public:
 	int getListPosition(TextListID listId);
 	TextListID getListAt(int index);
 	QList<TextBlockID> getListBlocksInOrder(TextListID listId);
-
-	void insertNewEditor(QString editor);
 
 private:
 

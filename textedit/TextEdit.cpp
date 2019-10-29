@@ -191,7 +191,7 @@ void TextEdit::setupMainWindow()
 
 	//Set layout to QScroll Area
 	QHBoxLayout* bl = new QHBoxLayout(area);
-	bl->setContentsMargins(0, 30, 0, 30);
+	bl->setContentsMargins(0, 20, 0, 0);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
 	bl->addWidget(textEdit);	//Add text editor to widget
 

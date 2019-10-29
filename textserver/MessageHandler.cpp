@@ -13,7 +13,7 @@
 
 
 MessageHandler::MessageHandler(WorkSpace* w)
-	: _usecase(OwnerType::Workspace)
+	: _useCase(Context::Workspace)
 {
 	// Connecting all signals to Workspace slots
 
@@ -30,7 +30,7 @@ MessageHandler::MessageHandler(WorkSpace* w)
 }
 
 MessageHandler::MessageHandler(TcpServer* s)
-	: _usecase(OwnerType::Server)
+	: _useCase(Context::Server)
 {
 	// Connecting signals to TcpServer slots
 
@@ -85,7 +85,7 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 
 	case AccountUpdate:
 	{
-		if (_usecase == Server) {
+		if (_useCase == Server) {
 			AccountUpdateMessage* accntUpdate = dynamic_cast<AccountUpdateMessage*>(message.get());
 			MessageCapsule response = emit accountUpdate(socket, accntUpdate->getNickname(),
 				accntUpdate->getIcon(), accntUpdate->getPassword());
