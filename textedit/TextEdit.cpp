@@ -189,7 +189,7 @@ void TextEdit::setupMainWindow()
 
 	//Set layout to QScroll Area
 	QHBoxLayout* bl = new QHBoxLayout(area);
-	bl->setContentsMargins(0, 20, 0, 20);
+	bl->setContentsMargins(0, 20, 0, 0);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
 	bl->addWidget(textEdit);	//Add text editor to widget
 
@@ -674,13 +674,11 @@ void TextEdit::removePresence(qint32 userId)
 void TextEdit::resizeEditor(const QSizeF& newSize)
 {
 	int height = QApplication::desktop()->availableGeometry(this).height();
-	if (newSize.height() > height * 0.78) {
+	if (newSize.height() > height) {
 		textEdit->setFixedHeight(newSize.height());
-		area->verticalScrollBar()->setValue(area->verticalScrollBar()->maximum());
 	}
 	else {
 		textEdit->setFixedHeight(height);
-		area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
 	}
 }
 
@@ -1281,6 +1279,17 @@ void TextEdit::cursorPositionChanged()
 	else {
 		toggleCheckList(standard);
 	}
+
+	//Update scrollbar position according to cursor position wiith offsets
+	int cursorPosition = textEdit->cursorRect().y();
+	int areaBottom = area->contentsRect().bottom();
+	int scrollValue = area->verticalScrollBar()->value();
+	int scrollOffset = areaBottom / 6;
+
+	if(cursorPosition >= areaBottom + scrollValue - 40)
+		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
+	else if (cursorPosition <= scrollValue + 25)
+		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
 }
 
 //Checks only listType menu entry in list menu
