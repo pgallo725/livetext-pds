@@ -216,7 +216,7 @@ void Client::Login(QString usr, QString passwd) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 
@@ -262,7 +262,7 @@ void Client::Login(QString usr, QString passwd) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -302,7 +302,7 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -359,7 +359,7 @@ void Client::openDocument(URI URI) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -405,7 +405,7 @@ void Client::createDocument(QString name) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 }
@@ -445,7 +445,7 @@ void Client::deleteDocument(URI URI) {
 		return;
 	}
 	default:
-		throw MessageTypeException(incomingMessage->getType);
+		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
 
