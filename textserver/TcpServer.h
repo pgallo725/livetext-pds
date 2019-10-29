@@ -15,7 +15,6 @@
 #include "SocketBuffer.h"
 
 
-
 class TcpServer : public QTcpServer
 {
 	Q_OBJECT

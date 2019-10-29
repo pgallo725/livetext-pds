@@ -20,17 +20,17 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_landingPage, &LandingPage::editProfile, this, &LiveText::openEditProfile);
 
 	//LANDINGPAGE - CLIENT
-	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect); //Connect
-	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login); //Login
-	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register); //Register
-	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout); //Logout
-	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument); //Create document
-	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument); //Remove document
-	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument); //Open document
+	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect);		// Connect
+	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login);				// Login
+	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register);		// Register
+	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout);			// Logout
+	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);		// Create document
+	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument);	// Remove document
+	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument);		// Open document
 
 	//CLIENT - LANDING PAGE
-	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished); //Connection estabilished
-	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect); //Impossibile to conncet
+	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished);	// Connection estabilished
+	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect);		// Impossibile to conncet
 	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation);
 
 
@@ -73,7 +73,7 @@ void LiveText::loginSuccess(User user)
 
 	_editProfile = new ProfileEditWindow(_user);
 
-	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate);
+	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
 	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
 
 	//Open logged page in landing page
@@ -131,7 +131,12 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::charDeleted, _docEditor, &DocumentEditor::deleteCharAtIndex);
 	connect(_textEdit, &TextEdit::charInserted, _docEditor, &DocumentEditor::addCharAtIndex);
 	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection);
-	connect(_textEdit, &TextEdit::blockFormatChanged, _docEditor, &DocumentEditor::changeBlockFormat);
+	connect(_textEdit, qOverload<int, int, Qt::Alignment>(&TextEdit::blockFormatChanged),
+		_docEditor, &DocumentEditor::changeBlockAlignment);
+	connect(_textEdit, qOverload<int, int, qreal, int>(&TextEdit::blockFormatChanged),
+		_docEditor, &DocumentEditor::changeBlockLineHeight);
+	connect(_textEdit, qOverload<int, int, QTextBlockFormat>(&TextEdit::blockFormatChanged),
+		_docEditor, &DocumentEditor::changeBlockFormat);
 	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
 	connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 	connect(_textEdit, &TextEdit::createNewList, _docEditor, &DocumentEditor::createList);
@@ -143,15 +148,15 @@ void LiveText::openDocumentCompleted(Document doc)
 
 
 	//CLIENT - TEXTEDIT
-	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged); //REMOTE: Cursor position recived
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);	//Add/Edit Presence
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);	//REMOTE: Cursor position received
+	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);					// Add/Edit Presence
 	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
-	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence); //Remove presence
-	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError); //Problem during close document
+	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);		// Remove presence
+	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);	// Problem during close document
 
 	//TEXTEDIT - CLIENT
 	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
-	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::removeFromFile);
+	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::removeFromFile, Qt::QueuedConnection);
 
 	//DOCUMENTEDITOR - CLIENT
 	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
@@ -216,6 +221,10 @@ void LiveText::openEditor()
 {
 	//Show maximized
 	_textEdit->showMaximized();
+	QApplication::processEvents();	//Fully show text editor before reset cursor position
+
+	//Reset cursor position to top
+	_textEdit->resetCursorPosition();
 
 	//Close all window in landing page
 	_landingPage->closeAll();

@@ -16,7 +16,7 @@ class MessageHandler : public QObject
 
 private:
 
-	enum OwnerType
+	enum Context
 	{
 		Server,
 		Workspace
@@ -24,7 +24,7 @@ private:
 
 private:
 
-	OwnerType _usecase;
+	Context _useCase;
 
 public:
 

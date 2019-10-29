@@ -45,7 +45,6 @@ void DocumentEditor::openDocument()
 
 	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());
 	_textedit->startCursorTimer();
-	_textedit->resetCursorPosition();
 }
 
 
@@ -129,6 +128,40 @@ void DocumentEditor::generateExtraSelection()
 }
 
 //Block format
+void DocumentEditor::changeBlockAlignment(int start, int end, Qt::Alignment alignment)
+{
+	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
+
+	foreach(TextBlockID textBlock, blocks) 
+	{
+		QTextBlockFormat fmt = _document.getBlock(textBlock).getFormat();
+		fmt.setAlignment(alignment);
+
+		qDebug().nospace() << "Local alignment change of block {" << textBlock.getBlockNumber()
+			<< ", " << textBlock.getAuthorId() << "}";
+
+		_document.formatBlock(textBlock, fmt);
+		emit blockFormatChanged(textBlock, fmt);
+	}
+}
+
+void DocumentEditor::changeBlockLineHeight(int start, int end, qreal height, int heightType)
+{
+	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
+
+	foreach(TextBlockID textBlock, blocks) 
+	{
+		QTextBlockFormat fmt = _document.getBlock(textBlock).getFormat();
+		fmt.setLineHeight(height, heightType);
+
+		qDebug().nospace() << "Local lineHeight change of block {" << textBlock.getBlockNumber()
+			<< ", " << textBlock.getAuthorId() << "}";
+
+		_document.formatBlock(textBlock, fmt);
+		emit blockFormatChanged(textBlock, fmt);
+	}
+}
+
 void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
 {
 	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
@@ -276,10 +309,10 @@ void DocumentEditor::removeBlockFromList(int blockPosition)
 	{
 		TextList& list = _document.getList(block.getListId());
 		_document.removeBlockFromList(block, list);
-	}
 
-	// Notify other clients
-	emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
+		// Notify other clients
+		emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
+	}
 }
 
 

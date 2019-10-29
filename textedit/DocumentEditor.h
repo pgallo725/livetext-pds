@@ -30,6 +30,8 @@ public slots:
 	void removeSymbol(QVector<int> position);
 	void deleteCharAtIndex(int position);
 
+	void changeBlockAlignment(int start, int end, Qt::Alignment alignment);
+	void changeBlockLineHeight(int start, int end, qreal height, int heightType);
 	void changeBlockFormat(int start, int end, QTextBlockFormat fmt);
 	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 

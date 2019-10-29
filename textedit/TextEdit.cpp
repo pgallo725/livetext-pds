@@ -109,7 +109,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	textFont.setPointSize(12);
 	textEdit->setFont(textFont);
 	textEdit->document()->setDefaultFont(textFont);
-	
+
 	//Disable undo/redo
 	textEdit->setUndoRedoEnabled(false);
 
@@ -158,20 +158,18 @@ void TextEdit::setupMainWindow()
 	//Center and resizes window
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
 
-	resize(availableGeometry.width() * 0.6, availableGeometry.height()*2/3);
+	resize(availableGeometry.width() * 0.6, availableGeometry.height() * 2 / 3);
 	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 
 	//Inizialize Qt text editor
 	textEdit = new QTextEdit();
 	textEdit->setMaximumWidth(width());
-	textEdit->setMinimumHeight(height());
 	textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
 	textEdit->setFrameStyle(QFrame::Plain);
 	//textEdit->setFrameShadow(QFrame::Raised);
 	textEdit->setLineWidth(1);
-
 
 	//Set central widget and layout
 	QWidget* cntr = new QWidget(this);
@@ -183,7 +181,7 @@ void TextEdit::setupMainWindow()
 	cntr->setPalette(pal);
 
 	//Generate scroll area to set QTextEditor
-	QScrollArea* area = new QScrollArea(this);
+	area = new QScrollArea(this);
 	area->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 	area->setWidgetResizable(true);
 	area->setWidget(cntr);
@@ -191,7 +189,7 @@ void TextEdit::setupMainWindow()
 
 	//Set layout to QScroll Area
 	QHBoxLayout* bl = new QHBoxLayout(area);
-	bl->setContentsMargins(0, 30, 0, 30);
+	bl->setContentsMargins(0, 20, 0, 20);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
 	bl->addWidget(textEdit);	//Add text editor to widget
 
@@ -336,12 +334,23 @@ void TextEdit::setupTextActions()
 
 	tb->addAction(actionTextUnderline);
 
+	//Strikethrough
+	const QIcon strikeIcon = QIcon(rsrcPath + "/editor/textstrikethrough.png");
+	actionTextStrikethrough = menu->addAction(strikeIcon, tr("&Strikethrough"), this, &TextEdit::textStrikethrough);
+	actionTextStrikethrough->setPriority(QAction::LowPriority);
+	actionTextStrikethrough->setCheckable(true);
+
+	QFont strikethrough;
+	strikethrough.setStrikeOut(true);
+	actionTextStrikethrough->setFont(strikethrough);
+
+	tb->addAction(actionTextStrikethrough);
+
 	menu->addSeparator();
 	tb->addSeparator();
 
 
-	//Alignment
-
+	/***** ALIGNMENT *****/
 	//Left
 	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
@@ -665,10 +674,14 @@ void TextEdit::removePresence(qint32 userId)
 void TextEdit::resizeEditor(const QSizeF& newSize)
 {
 	int height = QApplication::desktop()->availableGeometry(this).height();
-	if (newSize.height() > height)
+	if (newSize.height() > height * 0.78) {
 		textEdit->setFixedHeight(newSize.height());
-	else
+		area->verticalScrollBar()->setValue(area->verticalScrollBar()->maximum());
+	}
+	else {
 		textEdit->setFixedHeight(height);
+		area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
+	}
 }
 
 void TextEdit::askBeforeCloseDocument()
@@ -732,6 +745,7 @@ void TextEdit::resetCursorPosition()
 {
 	//Set new cursor
 	textEdit->setTextCursor(QTextCursor(textEdit->document()));
+	area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
 }
 
 //	Handle timer event to send cursor position to the server
@@ -1062,6 +1076,18 @@ void TextEdit::textItalic()
 	mergeFormatOnSelection(fmt);
 }
 
+void TextEdit::textStrikethrough()
+{
+	const QSignalBlocker blocker(textEdit->document());
+
+	//Set Strikethrough according to button
+	QTextCharFormat fmt;
+	fmt.setFontStrikeOut(actionTextStrikethrough->isChecked());
+
+	//Apply format
+	mergeFormatOnSelection(fmt);
+}
+
 
 void TextEdit::textFamily(const QString& f)
 {
@@ -1158,8 +1184,10 @@ void TextEdit::textAlign(QAction* a)
 		textEdit->setAlignment(Qt::AlignJustify);
 
 	QTextCursor cursor = textEdit->textCursor();
-	//Sends new block format to server
-	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+
+	//Sends new block alignment to server
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
+		cursor.blockFormat().alignment());
 }
 
 
@@ -1214,9 +1242,11 @@ void TextEdit::setLineHeight(QAction* a)
 	//Sets block format
 	QTextCursor cursor = textEdit->textCursor();
 	cursor.mergeBlockFormat(fmt);
+	fmt = cursor.blockFormat();
 
-	//Sends new block format to server
-	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(), cursor.blockFormat());
+	//Sends new block lineHeight to server
+	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
+		fmt.lineHeight(), fmt.lineHeightType());
 }
 
 /**************************** GUI UPDATE ****************************/
@@ -1298,6 +1328,7 @@ void TextEdit::fontChanged(const QFont& f)
 	actionTextBold->setChecked(f.bold());
 	actionTextItalic->setChecked(f.italic());
 	actionTextUnderline->setChecked(f.underline());
+	actionTextStrikethrough->setChecked(f.strikeOut());
 }
 
 void TextEdit::colorChanged(const QColor& c)

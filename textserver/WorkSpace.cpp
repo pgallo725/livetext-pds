@@ -2,18 +2,20 @@
 
 #include <QCoreApplication>
 
+#include "ServerLogger.h"
 #include <MessageFactory.h>
 #include <SharedException.h>
+
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
 {
-	qDebug() << endl << ">> Loading document" << doc->getURI().toString();
+	Logger() << "Loading document" << doc->getURI().toString();
 
 	// Load the document contents
 	doc->load();
 
-	qDebug() << ">> (LOAD COMPLETED)";
+	Logger() << "(LOAD COMPLETED)";
 
 	// Start the auto-save timer
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
@@ -32,17 +34,18 @@ WorkSpace::~WorkSpace()
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
 
-	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Saving and unloading document " << doc->getURI().toString();
+	Logger() << "Saving and unloading document " << doc->getURI().toString();
 
 	doc->save();			// Saving changes to the document before closing the workspace
 	doc->unload();			// Unload the document contents from memory until it gets re-opened
 
-	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (COMPLETED)" << endl;
+	Logger() << "(COMPLETED)" << endl;
 }
+
 
 /****************************** CLIENT METHODS ******************************/
 
-/* TcpServer send to Workspace a new client to edit the document */
+/* TcpServer sends to the Workspace a new client to edit the document */
 void WorkSpace::newClient(QSharedPointer<Client> client)
 {
 	/* Get the active socket from the Client object */
@@ -68,7 +71,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	editors.insert(socket, client);
 
-	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] User " << client->getUsername() << " opened the document";
+	Logger() << "User " << client->getUsername() << " opened the document";
 }
 
 /* Read an incoming message on the workspace socket and process it */
@@ -101,21 +104,13 @@ void WorkSpace::readMessage()
 			{
 				messageHandler.process(message, socket);
 			}
-			else
-			{
-				qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (ERROR) Received unexpected message of type: " << mType;
-				message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-				message->send(socket);
-			}
+			else Logger(Error) << "(MESSAGE ERROR) Received unexpected message of type: " << mType;
 		}
-		catch (MessageTypeException & mte) {
-			MessageCapsule message = MessageFactory::Failure(QString("Unknown message type : ") + QString::number(mType));
-			message->send(socket);
-			qDebug().noquote().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] " << mte.what();
-			socketBuffer.clear();
-		}
-		catch (MessageException & mre) {
-			qDebug().noquote().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] " << mre.what();
+		catch (MessageException& me) 
+		{
+			MessageCapsule message = MessageFactory::Failure(me.what());
+			message->send(socket);												// Inform the client of the exception
+			Logger(Error) << me.what();
 			socketBuffer.clear();
 			return;
 		}
@@ -143,9 +138,9 @@ void WorkSpace::clientDisconnection()
 	editors.remove(socket);
 	socket->close();
 	socket->deleteLater();
-	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Connection from client " << c->getUsername() << " was closed abruptly";
+	Logger() << "Connection from client " << c->getUsername() << " was terminated";
 
-	// Make this user avaiable to be logged again	
+	// Make this user avaiable to be logged-in again	
 	emit userDisconnected(c->getUsername());
 
 	// Send to other clients that this client is disconnected
@@ -160,31 +155,30 @@ void WorkSpace::clientDisconnection()
 void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	if (socketError != QAbstractSocket::RemoteHostClosedError)
-		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (ERROR) Socket error: " << socketError;
+		Logger(Error) << "(SOCKET ERROR) " << socketError;
 }
+
 
 /****************************** DOCUMENT METHODS ******************************/
 
-/* Save document, if something went wrong thows exception after #fails */
+/* Save document, if something goes wrong throw exception after MAX_FAILS */
 void WorkSpace::documentSave()
 {
 	try
 	{
 		// Save the document's contents to file
-		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] Saving document " << doc->getURI().toString();
+		Logger() << "Saving document " << doc->getURI().toString();
 		doc->save();
 
-		qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] (SAVE COMPLETED)";
+		Logger() << "(SAVE COMPLETED)";
 		nFails = 0;
 	}
-	catch (DocumentException & de)
+	catch (DocumentException& de)
 	{
-		qDebug().noquote().nospace() << qSetFieldWidth(7) << "> [TID:" << QThread::currentThreadId() << "] " << de.what() << ", fails count = " << nFails;
+		Logger(Error) << de.what() << ", fails count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
-			// Move Workspace clients back to TcpServer
-			for (QSharedPointer<Client> client : editors.values()) {
-				clientQuit(client->getSocket());
-			}
+			// Send Failure message to all clients in the workspace
+			dispatchMessage(MessageFactory::Failure(de.what()), nullptr);
 		}
 		nFails++;
 	}
@@ -214,6 +208,7 @@ void WorkSpace::documentEditList(TextBlockID blockId, TextListID listId, QTextLi
 {
 	doc->editBlockList(blockId, listId, format);
 }
+
 
 /****************************** ACCOUNT METHODS ******************************/
 
@@ -249,7 +244,7 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	qDebug().nospace() << qSetFieldWidth(7) << ">> [TID:" << QThread::currentThreadId() << "] User " << client->getUsername() << " closed the document";
+	Logger() << "User " << client->getUsername() << " closed the document";
 
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
@@ -257,9 +252,9 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket)
 	// Send the DocumentExit confirmation to the client
 	MessageFactory::DocumentExit()->send(clientSocket);
 
-	// Delete the client's socket in the current thread
+	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
-	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);		// to avoid removing the socket twice
+	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);	
 	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 
 	// Move the socket object back to the main server thread
