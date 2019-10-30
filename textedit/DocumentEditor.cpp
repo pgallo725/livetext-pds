@@ -308,11 +308,11 @@ void DocumentEditor::removeBlockFromList(int blockPosition)
 	if (block.getListId())
 	{
 		TextList& list = _document.getList(block.getListId());
-		_document.removeBlockFromList(block, list);
-
-		// Notify other clients
-		emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
+		_document.removeBlockFromList(block, list);	
 	}
+
+	// Notify other clients
+	emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
 }
 
 

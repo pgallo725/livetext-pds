@@ -269,6 +269,9 @@ int Document::insert(Symbol& s)
 			addCharToBlock(s2, prevBlock);
 			_text.insert(_text.begin() + insertPos, s2);
 
+			// The new paragraph inherits the format attributes from the previous one
+			block.setFormat(prevBlock.getFormat());
+
 			// Migrate the list belonging from the previous to the new block
 			if (prevBlock.getListId())
 			{
