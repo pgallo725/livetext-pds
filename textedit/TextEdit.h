@@ -156,6 +156,7 @@ private:
 	void alignmentChanged(Qt::Alignment a);
 	void lineHeightChanged(qreal height);
 	void toggleCheckList(int listType);
+	void GUIUpdate(QTextCursor cursor);
 
 	//User text highlighting
 	void handleMultipleSelections();

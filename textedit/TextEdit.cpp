@@ -69,7 +69,6 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	/**************************** CONNECTS ****************************/
 
 	//GUI update in case of format change or cursor position changed
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::currentCharFormatChanged);
 	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
 
 
@@ -163,7 +162,7 @@ void TextEdit::setupMainWindow()
 
 	//Inizialize Qt text editor
 	textEdit = new QTextEdit();
-	textEdit->setMaximumWidth(width());
+	textEdit->setMaximumWidth(width()*0.9);
 	textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
@@ -924,7 +923,7 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
-	cursorPositionChanged();
+	GUIUpdate(textEdit->textCursor());
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
@@ -962,7 +961,8 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Sends new block format to server
 	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
-	cursorPositionChanged();
+	//GUI update
+	GUIUpdate(textEdit->textCursor());
 }
 
 void TextEdit::addBlockToList(int blockPosition, int listPosition)
@@ -988,7 +988,7 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 	currentList->add(blk);
 
 	//GUI update
-	cursorPositionChanged();
+	GUIUpdate(textEdit->textCursor());
 }
 
 
@@ -1021,7 +1021,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	alignmentChanged(fmt.alignment());
 
 	//GUI update
-	cursorPositionChanged();
+	GUIUpdate(textEdit->textCursor());
 }
 
 
@@ -1255,46 +1255,18 @@ void TextEdit::setLineHeight(QAction* a)
 //Updates GUI if cursor changes it's position
 void TextEdit::cursorPositionChanged()
 {
-	//Users cursors
-	redrawAllCursors();
+	QTextCursor cursor = textEdit->textCursor();
 
-	//User text higlighting
-	updateUsersSelections();
+	//If there's a selection and the selection is from right to left
+	//It take the format of the first character of the selection
+	if (cursor.hasSelection() && (cursor.selectionStart() == cursor.position()))
+		cursor.setPosition(cursor.position() + 1); //Format is taken from the char left to the cursor
 
-	//Alignment
-	alignmentChanged(textEdit->alignment());
+	//GUI update
+	GUIUpdate(cursor);
 
-	//Line height
-	lineHeightChanged(textEdit->textCursor().blockFormat().lineHeight());
-
-	//Lists
-	QTextList* list = textEdit->textCursor().currentList();
-
-	//Checks list format (if in list) and updates GUI according to format
-	if (list) {
-		for (int i = 0; i < 9; i++) {
-			if (list->format().style() == listStyles[i]) {
-				//Find list format to update GUI correctly
-				toggleCheckList(i);
-				break;
-			}
-		}
-	}
-	else {
-		toggleCheckList(standard);
-	}
-
-	//Update scrollbar position according to cursor position wiith offsets
-	int cursorPosition = textEdit->cursorRect().y();
-	int areaBottom = area->contentsRect().bottom();
-	int scrollValue = area->verticalScrollBar()->value();
-	int scrollOffset = areaBottom / 6;
-
-	if(cursorPosition >= areaBottom + scrollValue - 40)
-		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
-	else if (cursorPosition <= scrollValue + 25)
-		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
 }
+
 
 //Checks only listType menu entry in list menu
 void TextEdit::toggleCheckList(int listType)
@@ -1316,6 +1288,54 @@ void TextEdit::toggleCheckList(int listType)
 	listButton->setIcon(QIcon(rsrcPath + listIconPath[listType]));
 }
 
+void TextEdit::GUIUpdate(QTextCursor cursor)
+{
+	//Users cursors
+	redrawAllCursors();
+
+	//User text higlighting
+	updateUsersSelections();
+
+	//Block format
+	QTextBlockFormat blockFmt = cursor.blockFormat();
+	
+	//Alignment
+	alignmentChanged(blockFmt.alignment());
+
+	//Line height
+	lineHeightChanged(blockFmt.lineHeight());
+
+	//Text format
+	currentCharFormatChanged(cursor.charFormat());
+
+	//Lists
+	QTextList* list = cursor.currentList();
+
+	//Checks list format (if in list) and updates GUI according to format
+	if (list) {
+		for (int i = 0; i < 9; i++) {
+			if (list->format().style() == listStyles[i]) {
+				//Find list format to update GUI correctly
+				toggleCheckList(i);
+				break;
+			}
+		}
+	}
+	else {
+		toggleCheckList(standard);
+	}
+
+	//Update scrollbar position according to cursor position wiith offsets
+	int cursorPosition = textEdit->cursorRect().y();
+	int areaBottom = area->contentsRect().bottom();
+	int scrollValue = area->verticalScrollBar()->value();
+	int scrollOffset = areaBottom / 6;
+
+	if (cursorPosition >= areaBottom + scrollValue - 40)
+		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
+	else if (cursorPosition <= scrollValue + 25)
+		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
+}
 
 
 
@@ -1489,6 +1509,9 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 
 	//Insert character at position
 	_extraCursor->insertText(ch);
+
+	//GUI update
+	GUIUpdate(textEdit->textCursor());
 }
 
 void TextEdit::removeChar(int position)
@@ -1499,6 +1522,9 @@ void TextEdit::removeChar(int position)
 
 	//Delete character
 	_extraCursor->deleteChar();
+
+	//GUI update
+	GUIUpdate(textEdit->textCursor());
 }
 
 /**************************** EXTRA CURSORS ****************************/
@@ -1522,6 +1548,7 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 	}
 
 	drawGraphicCursor(p);
+	GUIUpdate(textEdit->textCursor());
 }
 
 //Redraw all cursor in case of window update (scroll, resize...)
@@ -1658,6 +1685,7 @@ void TextEdit::updateUsersSelections()
 
 	emit generateExtraSelection();
 
+	//Shows user text highlight
 	handleMultipleSelections();
 }
 
