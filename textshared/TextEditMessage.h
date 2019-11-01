@@ -2,8 +2,7 @@
 
 #include "Message.h"
 #include "Symbol.h"
-#include "TextBlock.h"
-#include "TextList.h"
+#include "TextElement.h"
 
 
 class CharInsertMessage : public Message

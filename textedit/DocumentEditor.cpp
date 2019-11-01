@@ -2,7 +2,6 @@
 
 #include <QDebug>
 
-
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
@@ -23,13 +22,12 @@ void DocumentEditor::openDocument()
 		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
 	}
 	   
-	foreach(TextListID id, _document._lists) {
-		TextList& lst = _document.getList(id);
-		QList<TextBlockID> blocks = lst.getBlocks();
-
+	foreach(TextList list, _document._lists.values()) 
+	{
+		QList<TextBlockID> blocks = list.getBlocks();
 		int firstListBlockPosition = _document.getBlockPosition(blocks.first());
 
-		_textedit->createList(firstListBlockPosition, lst.getFormat());
+		_textedit->createList(firstListBlockPosition, list.getFormat());
 		blocks.removeFirst();
 
 		foreach(TextBlockID id, blocks) {
@@ -37,9 +35,8 @@ void DocumentEditor::openDocument()
 		}
 	}
 
-	foreach(TextBlockID id, _document._blocks) {
-		TextBlock& blk = _document.getBlock(id);
-		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
+	foreach(TextBlock block, _document._blocks.values()) {
+		_textedit->applyBlockFormat(_document.getBlockPosition(block.getId()), block.getFormat());
 	}
 
 
@@ -82,16 +79,7 @@ void DocumentEditor::deleteCharAtIndex(int position)
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)
 {
-	Symbol s;
-	if (position == 0) {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosBegin());
-	}
-	else if (position == _document.length()) {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosEnd());
-	}
-	else {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
-	}
+	Symbol s(ch, fmt, _user.getUserId(), _document.newFractionalPos(position));
 
 	qDebug().nospace() << "Local char insertion: " << s.getChar();
 
@@ -196,8 +184,8 @@ void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)
 
 	qDebug().nospace() << "Local format change of character: " << s.getChar();
 
-	_document.formatSymbol(s._fPos, fmt);
-	emit symbolFormatChanged(s._fPos, fmt);
+	_document.formatSymbol(s.getPosition(), fmt);
+	emit symbolFormatChanged(s.getPosition(), fmt);
 }
 
 void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)
@@ -337,7 +325,7 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 	{
 		TextList& oldList = _document.getList(listId);
 		TextListID newListId;
-		QList<TextBlockID> listBlocks = _document.getListBlocksInOrder(listId);
+		QList<TextBlockID> listBlocks = _document.getOrderedListBlocks(listId);
 		bool selectionBegun = false;
 		bool selectionEnded = false;
 

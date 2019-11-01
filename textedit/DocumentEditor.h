@@ -4,7 +4,7 @@
 #include <QObject>
 #include <Document.h>
 #include <User.h>
-#include "textedit.h"
+#include "TextEdit.h"
 
 class DocumentEditor : public QObject
 {
@@ -24,22 +24,23 @@ public:
 
 public slots:
 
+	// Char operations
 	void addSymbol(Symbol s, bool isLast);
-	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
-
 	void removeSymbol(QVector<int> position);
+	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
 	void deleteCharAtIndex(int position);
+	void changeSymbolFormat(int position, QTextCharFormat fmt);
+	void applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt);
 
+	void generateExtraSelection();		// Text highlighting update
+
+	// Block operations
 	void changeBlockAlignment(int start, int end, Qt::Alignment alignment);
 	void changeBlockLineHeight(int start, int end, qreal height, int heightType);
 	void changeBlockFormat(int start, int end, QTextBlockFormat fmt);
 	void applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 
-	void changeSymbolFormat(int position, QTextCharFormat fmt);
-	void applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt);
-
-	void generateExtraSelection();
-
+	// List operations
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 	void createList(int position, QTextListFormat fmt);
 	void assignBlockToList(int blockPosition, int listPosition);
