@@ -6,6 +6,7 @@
 #include <User.h>
 #include "TextEdit.h"
 
+
 class DocumentEditor : public QObject
 {
 	Q_OBJECT
@@ -15,7 +16,6 @@ private:
 	Document _document;
 	User& _user;
 	TextEdit* _textedit;
-
 
 public:
 
