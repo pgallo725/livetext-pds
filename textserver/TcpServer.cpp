@@ -331,7 +331,8 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	User user(username, _userIdCounter++, nickname, password, icon);		/* create a new user		*/
 	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
 
-	client->login(&(*i));		// client is automatically logged in as the new user
+	client->login(&(*i));			// client is automatically logged in as the new user
+	usersNotAvailable << username;
 	
 	try 
 	{	// Add the new user record to the server database
