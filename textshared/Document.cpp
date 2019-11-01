@@ -314,7 +314,8 @@ int Document::insert(Symbol& s)
 int Document::remove(QVector<qint32> fPos)
 {
 	int pos = positionIndex(fPos);	// looks for the symbol with that fractional position
-	assert(pos >= 0);				// must be a valid index
+	if (pos < 0)
+		return -1;					// Early out if the symbol has already been deleted
 
 	Symbol& s = _text[pos];
 	TextBlock& block = _blocks[s.getBlockId()];
