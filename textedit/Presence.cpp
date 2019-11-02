@@ -7,15 +7,25 @@ Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* te
 	_userCursor = new QTextCursor(textedit->document());
 	_label = new QLabel(textedit);
 
-	//Setting up user icon
+	//Setting up background to draw a rectangle
 	QPixmap background(32, 32);
-	background.fill(_color);
 
-	//Setting-up background
+	//Setting-up painter
 	QPainter painter(&background);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	//Set up painter's pen
+	QPen pen(Qt::NoBrush, 6);
+	pen.setColor(_color);
+	painter.setPen(pen);
+
+	//Draw rectangle on background
+	painter.drawRect(0, 0, 32, 32);
 
 	//Build user-icon with colored frame
-	painter.drawPixmap(3, 3, 26, 26, profilePic.scaled(26, 26, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	painter.drawPixmap(4, 4, 24, 24, profilePic.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 	painter.end();
 
 	_profilePicture = background;

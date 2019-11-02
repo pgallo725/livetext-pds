@@ -1169,13 +1169,13 @@ a.a 2018/2019</string>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_3">
               <property name="spacing">
-               <number>2</number>
+               <number>6</number>
               </property>
               <property name="topMargin">
                <number>0</number>
               </property>
               <property name="rightMargin">
-               <number>12</number>
+               <number>10</number>
               </property>
               <item>
                <spacer name="verticalSpacer_13">
@@ -1303,7 +1303,7 @@ a.a 2018/2019</string>
               <property name="topMargin">
                <number>0</number>
               </property>
-              <item alignment="Qt::AlignRight">
+              <item alignment="Qt::AlignHCenter">
                <widget class="QLabel" name="label_userProfilePhoto">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1313,14 +1313,14 @@ a.a 2018/2019</string>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>80</width>
-                  <height>80</height>
+                  <width>65</width>
+                  <height>65</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>80</width>
-                  <height>80</height>
+                  <width>65</width>
+                  <height>65</height>
                  </size>
                 </property>
                 <property name="frameShape">
@@ -1334,7 +1334,7 @@ a.a 2018/2019</string>
                 </property>
                </widget>
               </item>
-              <item alignment="Qt::AlignRight">
+              <item alignment="Qt::AlignHCenter">
                <widget class="QPushButton" name="pushButton_editProfile">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
