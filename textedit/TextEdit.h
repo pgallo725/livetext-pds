@@ -25,6 +25,18 @@ class QLabel;
 class QToolButton;
 
 
+
+//This class is necessary to prevent pasting / drag & drop images inside editors
+class QTextEditWrapper : public QTextEdit {
+
+protected:
+	virtual void insertFromMimeData(const QMimeData* source);
+	bool canInsertFromMimeData(const QMimeData* source) const;
+};
+
+
+
+//Main editor class
 class TextEdit : public QMainWindow
 {
 	Q_OBJECT
@@ -44,8 +56,8 @@ private:
 	QAction* listActions[9];
 
 	//GUI update and list style easy application
-	enum listType 
-	{ 
+	enum listType
+	{
 		standard,
 		disc,
 		circle,
@@ -54,11 +66,11 @@ private:
 		alpha,
 		alphaupper,
 		roman,
-		romanupper 
+		romanupper
 	};
 
-	QString listIconPath[9] = 
-	{ 
+	QString listIconPath[9] =
+	{
 		"/editor/list.png",
 		"/editor/disc.png",
 		"/editor/circle.png",
@@ -67,11 +79,11 @@ private:
 		"/editor/alpha.png",
 		"/editor/alphaupper.png",
 		"/editor/roman.png",
-		"/editor/romanupper.png" 
+		"/editor/romanupper.png"
 	};
 
-	QTextListFormat::Style listStyles[9] = 
-	{ 
+	QTextListFormat::Style listStyles[9] =
+	{
 		QTextListFormat::ListStyleUndefined,
 		QTextListFormat::ListDisc,
 		QTextListFormat::ListCircle,
@@ -121,7 +133,7 @@ private:
 #endif
 
 	//Text editor
-	QTextEdit* textEdit;
+	QTextEditWrapper* _textEdit;
 
 	//Scroll area widget to move document inside QMainWindow
 	QScrollArea* area;
@@ -156,7 +168,7 @@ private:
 	void alignmentChanged(Qt::Alignment a);
 	void lineHeightChanged(qreal height);
 	void toggleCheckList(int listType);
-	void GUIUpdate(QTextCursor cursor);
+
 
 	//User text highlighting
 	void handleMultipleSelections();
@@ -290,7 +302,7 @@ private slots:
 
 	//GUI update according to format and cursor position
 	void currentCharFormatChanged(const QTextCharFormat& format);
-	void cursorPositionChanged();
+	void updateEditorSelectedActions();
 
 	//Clipboard filter
 	void clipboardDataChanged();
