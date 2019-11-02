@@ -115,9 +115,16 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	//User Icon
 	QPixmap userPix(rsrcPath + "/misc/defaultProfile.png");
-	w = ui->label_UsrIcon->width();
-	h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+
+	//Qt/SSL logo
+	QPixmap qtlogo(rsrcPath + "/misc/qtlogo.png");
+	ui->label_qtlogo->setPixmap(qtlogo.scaled(ui->label_qtlogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	QPixmap ssllogo(rsrcPath + "/misc/SSLlogo.png");
+	ui->label_ssllogo->setPixmap(ssllogo.scaled(ui->label_ssllogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	
 
 
 	//Index to 0 for stackedWidget (Home page)
