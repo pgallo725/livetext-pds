@@ -42,6 +42,7 @@ private:
 	//Register/Login methods
 	void Register();
 	void Login();
+	void setupUserProfilePicture(QPixmap userPix);
 
 public:
 	LandingPage(QWidget* parent = nullptr);

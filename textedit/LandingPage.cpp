@@ -12,6 +12,7 @@
 #include <QTextStream>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QPainterPath>
 
 
 #define DEFAULT_IP "127.0.0.1"
@@ -19,13 +20,13 @@
 
 const QString rsrcPath = ":/images";
 
-LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)){
+LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) {
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
-	
+
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
 		mngr.centerAndResize(0.7, 0.8);
@@ -46,7 +47,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_new->setIcon(QIcon(rsrcPath + "/landingPage/new.png"));
 
 	//Tab widget icons
-	ui->tabWidget->setTabIcon(0,QIcon(rsrcPath + "/landingPage/login.png"));
+	ui->tabWidget->setTabIcon(0, QIcon(rsrcPath + "/landingPage/login.png"));
 	ui->tabWidget->setTabIcon(1, QIcon(rsrcPath + "/landingPage/register.png"));
 	ui->tabWidget->setIconSize(QSize(40, 65));
 
@@ -71,7 +72,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	
+
 
 	/******************* CONNECTS *******************/
 	/*
@@ -240,6 +241,7 @@ void LandingPage::Login()
 	emit(serverLogin(username, password));
 }
 
+
 void LandingPage::Register()
 {
 	//Get data from fields
@@ -287,17 +289,31 @@ void LandingPage::LoginSuccessful(User* user)
 
 void LandingPage::updateUserInfo()
 {
-	//Set username and nickname
-	ui->label_userNick->setText(_user->getNickname());
-	ui->label_userUsername->setText(_user->getUsername());
+	//Set username and nickname (if present)
+	if (_user->getNickname().isEmpty()) {
+		//Set nickname label text
+		ui->label_userNick->setText(_user->getUsername());
+
+		//Setup username#userId text
+		QString username;
+		username = "#" + QString::number(_user->getUserId()).rightJustified(4, '0');
+		ui->label_userUsername->setText(username);
+	}
+	else {
+		ui->label_userNick->setText(_user->getNickname());
+
+		QString username;
+		username = _user->getUsername() + "#" + QString::number(_user->getUserId()).rightJustified(4, '0');
+		ui->label_userUsername->setText(username);
+	}
+
+
 
 	//Set user profile picture
-	int w = ui->label_userProfilePhoto->width();
-	int h = ui->label_userProfilePhoto->height();
 	QPixmap userPix;
 	userPix.convertFromImage(_user->getIcon());
 
-	ui->label_userProfilePhoto->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	setupUserProfilePicture(userPix.scaled(ui->label_userProfilePhoto->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void LandingPage::setupFileList()
@@ -321,7 +337,7 @@ void LandingPage::setupFileList()
 		//Makes this item not selectable
 		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
 	}
-		
+
 
 	//Set default behaviour of theese push buttons (disabled)
 	ui->pushButton_remove->setEnabled(false);
@@ -338,6 +354,28 @@ void LandingPage::setupFileList()
 *	Close all windows
 *	User profile picture preview
 */
+
+void LandingPage::setupUserProfilePicture(QPixmap userPix)
+{
+	//Create a base pixmap
+	QPixmap base(ui->label_userProfilePhoto->size());
+	base.fill(Qt::transparent);
+
+	//Initialize painter to create a rounded profile picture
+	QPainter painter(&base);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	//Create a round shape to set label rounded
+	QPainterPath path;
+	path.addRoundedRect(0, 0, ui->label_userProfilePhoto->width(), ui->label_userProfilePhoto->height(), ui->label_userProfilePhoto->width() / 2, ui->label_userProfilePhoto->height() / 2);
+	painter.setClipPath(path);
+
+	//Draw profile picture in the new shape
+	painter.drawPixmap(0, 0, userPix);
+	ui->label_userProfilePhoto->setPixmap(base);
+}
 
 void LandingPage::resetFields()
 {
@@ -522,7 +560,7 @@ void LandingPage::pushButtonOpenUriClicked()
 	//Show and lanch dialog
 	if (openURIWindow->exec() == QDialog::Accepted) {
 		mngr.showLoadingScreen(loading, tr("Open document from URI..."));
-		
+
 		//Adds document recived from open uri
 		emit openDocument(URI(_buffer));
 	};

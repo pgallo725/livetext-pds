@@ -71,6 +71,7 @@ void LiveText::loginSuccess(User user)
 	//Sets logged user
 	_user = user;
 
+	//Initialize edit Profile window
 	_editProfile = new ProfileEditWindow(_user);
 
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
@@ -108,6 +109,7 @@ void LiveText::forceLogout()
 		closeEditor();
 	}
 	else
+		//Show error on landing page
 		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
 }
 
@@ -137,6 +139,7 @@ void LiveText::openDocumentCompleted(Document doc)
 		_docEditor, &DocumentEditor::changeBlockLineHeight);
 	connect(_textEdit, qOverload<int, int, QTextBlockFormat>(&TextEdit::blockFormatChanged),
 		_docEditor, &DocumentEditor::changeBlockFormat);
+
 	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
 	connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 	connect(_textEdit, &TextEdit::createNewList, _docEditor, &DocumentEditor::createList);
@@ -255,6 +258,7 @@ void LiveText::closeEditor()
 
 void LiveText::openEditProfile()
 {
+	//Update edit profile window info
 	_editProfile->updateInfo();
 	_editProfile->exec();
 }
