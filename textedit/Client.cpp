@@ -209,9 +209,14 @@ void Client::Login(QString usr, QString passwd) {
 
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(usr);
-
+	try {
 	loginRequest->send(socket);
-
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit loginFailed(tr("MessageWriteException raised"));
+		return;
+	}
 	QDataStream in(socket);
 
 	connect(this, &Client::failureSignal, this, &Client::loginFailed);
@@ -256,8 +261,14 @@ void Client::Login(QString usr, QString passwd) {
 	hash2.addData(nonce);
 
 	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(hash2.result());
-
+	try{
 	loginUnlock->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit loginFailed(tr("MessageWriteException raised"));
+		return;
+	}
 
 	// NOT DO: connect(this, &Client::failureSignal, this, &Client::loginFailed);
 	incomingMessage = readMessage(in);
@@ -296,7 +307,14 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 	// Link the stream to the socke and send the byte
 
 	MessageCapsule accountCreate = MessageFactory::AccountCreate(usr, nick, img, passwd);
+	try{
 	accountCreate->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit registrationFailed(tr("MessageWriteException raised"));
+		return;
+	}
 
 	//wait the response from the server
 	connect(this, &Client::failureSignal, this, &Client::registrationFailed);
@@ -332,7 +350,14 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 void Client::Logout() {
 
 	MessageCapsule logoutRequest = MessageFactory::Logout();
-	logoutRequest->send(socket);
+	try {
+		logoutRequest->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit logoutFailed(tr("MessageWriteException raised"));
+		return;
+	}
 
 	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->disconnectFromHost();
@@ -348,8 +373,14 @@ void Client::openDocument(URI URI) {
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
+	try {
 	openDocument->send(socket);
-
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit fileOperationFailed(tr("MessageWriteException raised"));
+		return;
+	}
 	//wait the response from the server
 
 	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
@@ -394,7 +425,14 @@ void Client::createDocument(QString name) {
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
+	try{
 	newDocument->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit fileOperationFailed(tr("MessageWriteException raised"));
+		return;
+	}
 
 	//wait the response from the server
 
@@ -440,8 +478,14 @@ void Client::deleteDocument(URI URI) {
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
+	try{
 	removeDocument->send(socket);
-
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit fileOperationFailed(tr("MessageWriteException raised"));
+		return;
+	}
 	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
 	incomingMessage = readMessage(in);
 	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
@@ -484,7 +528,12 @@ void Client::sendCursor(qint32 userId, qint32 position) {
 
 	// Link the stream to the socket and send the byte
 	MessageCapsule moveCursor = MessageFactory::CursorMove(userId, position);
+	try{
 	moveCursor->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
 	return;
 }
 
@@ -500,31 +549,57 @@ void Client::receiveCursor(MessageCapsule message) {
 void Client::sendChar(Symbol character, bool isLast) {
 
 	MessageCapsule sendChar = MessageFactory::CharInsert(character, isLast);
+	try{
 	sendChar->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
 }
 
 void Client::removeChar(QVector<int> position)
 {
 	MessageCapsule removeChar = MessageFactory::CharDelete(position);
+	try{
 	removeChar->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
 }
 
 void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
 {
 	MessageCapsule charFormat = MessageFactory::CharFormat(position, fmt);
+	try {
 	charFormat->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
 }
 
 void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
 {
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt);
-	blockEdit->send(socket);
+	try {
+		blockEdit->send(socket);
+	} 
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
 }
 
 void Client::listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
 {
 	MessageCapsule listEdit = MessageFactory::ListEdit(blockId, listId, fmt);
+	try {
 	listEdit->send(socket);
+	} 
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+	}
+
 }
 
 
@@ -571,7 +646,14 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 	
+	try {
 	accountUpdate->send(socket); //Start the Account Update sequence of messages
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit accountModificationFail(tr("MessageWriteException raised")); 
+		return;
+	}
 
 
 	while (true) {
@@ -637,7 +719,14 @@ void Client::removeFromFile(qint32 myId) {
 	
 	MessageCapsule closeDocument = MessageFactory::DocumentClose();
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
+	try {
 	closeDocument->send(socket);
+	}
+	catch (MessageWriteException we) {
+		qDebug() << "Messagge Write Exception " << we.what();
+		emit documentExitFailed(tr("MessageWriteException raised"));
+	}
+
 
 	while (true) {
 
