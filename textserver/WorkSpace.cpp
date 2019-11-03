@@ -134,7 +134,7 @@ void WorkSpace::clientDisconnection()
 	/* Close the socket where the signal was sent */
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 
-	QSharedPointer<Client> c = editors.find(socket).value();
+	QSharedPointer<Client> c = editors[socket];
 	editors.remove(socket);
 	socket->close();
 	socket->deleteLater();
@@ -215,7 +215,7 @@ void WorkSpace::documentEditList(TextBlockID blockId, TextListID listId, QTextLi
 /* Forwards to the main TcpServer the user request for an account update */
 void WorkSpace::handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
-	QSharedPointer<Client> client = editors.find(clientSocket).value();
+	QSharedPointer<Client> client = editors[clientSocket];
 
 	emit requestAccountUpdate(client, nickname, icon, password);
 }
@@ -240,7 +240,7 @@ void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsul
 /* Client close the document, must be re-send to TcpServer */
 void WorkSpace::clientQuit(QSslSocket* clientSocket)
 {
-	QSharedPointer<Client> client = editors.find(clientSocket).value();
+	QSharedPointer<Client> client = editors[clientSocket];
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 

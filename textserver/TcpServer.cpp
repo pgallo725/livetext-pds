@@ -211,7 +211,7 @@ void TcpServer::newClientConnection()
 void TcpServer::clientDisconnection()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
-	QSharedPointer<Client> client = clients.find(socket).value();
+	QSharedPointer<Client> client = clients[socket];
 
 	if (client->isLogged())
 	{
@@ -268,7 +268,7 @@ void TcpServer::incomingConnection(qintptr socketDescriptor)
 /* Create a new client and send nonce to be solved for authentication */
 MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString username)
 {
-	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	QSharedPointer<Client> client = clients[clientSocket];
 
  	if (users.contains(username))
 	{
@@ -278,8 +278,8 @@ MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString us
 		if(usersNotAvailable.contains(username))
 			return MessageFactory::LoginError("The requested user is already logged in");
 
-		return MessageFactory::LoginChallenge(users.find(username).value().getSalt(),
-			client->challenge(&(users.find(username).value())));
+		return MessageFactory::LoginChallenge(users[username].getSalt(),
+			client->challenge(&users[username]));
 	}
 	else return MessageFactory::LoginError("The specified username is not registered on the server");
 }
@@ -287,7 +287,7 @@ MessageCapsule TcpServer::serveLoginRequest(QSslSocket* clientSocket, QString us
 /* Authenticate the client's User and apply the login */
 MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray token)
 {
-	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	QSharedPointer<Client> client = clients[clientSocket];
 
 	if (client->isLogged())
 		return MessageFactory::LoginError("You need to login before performing any operation");
@@ -314,7 +314,7 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 /* Create a new User and register it on the server */
 MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QString nickname, QImage icon, QString password)
 {
-	QSharedPointer<Client> client = clients.find(socket).value();
+	QSharedPointer<Client> client = clients[socket];
 	if (client->isLogged())
 		return MessageFactory::AccountError("Client already logged in as '" + client->getUsername() + "'");
 
@@ -331,7 +331,8 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	User user(username, _userIdCounter++, nickname, password, icon);		/* create a new user		*/
 	QMap<QString, User>::iterator i = users.insert(username, user);			/* insert new user in map	*/
 
-	client->login(&(*i));		// client is automatically logged in as the new user
+	client->login(&(*i));			// client is automatically logged in as the new user
+	usersNotAvailable << username;
 	
 	try 
 	{	// Add the new user record to the server database
@@ -350,7 +351,7 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 /* Check and update user's fields and return response message for the client in TcpServer */
 MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickname, QImage icon, QString password)
 {
-	Client* client = clients.find(clientSocket).value().get();
+	Client* client = clients[clientSocket].get();
 	User backupUser = *(client->getUser());
 
 	if (!client->isLogged())
@@ -408,7 +409,7 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 /* Changes the state of a Client object to "logged out" */
 void TcpServer::logoutClient(QSslSocket* clientSocket)
 {
-	QSharedPointer<Client> c = clients.find(clientSocket).value();
+	QSharedPointer<Client> c = clients[clientSocket];
 	QString username = c->getUsername();
 	restoreUserAvaiable(username);
 	c->logout();
@@ -458,7 +459,7 @@ QSharedPointer<WorkSpace> TcpServer::createWorkspace(QSharedPointer<Document> do
 /* Create a new Document */
 MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 {
-	QSharedPointer<Client> client = clients.find(author).value();
+	QSharedPointer<Client> client = clients[author];
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
@@ -510,7 +511,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 /* Open an existing Document */
 MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, bool docJustCreated)
 {
-	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	QSharedPointer<Client> client = clients[clientSocket];
 	QSharedPointer<WorkSpace> ws;
 
 	if (!docJustCreated)		// Avoid these operations if we're being called by createDocument
@@ -546,13 +547,9 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 	}
 	
 	try
-	{
-		QSharedPointer<Document> doc = documents.find(docUri).value();
-
-		/* load the document into a new workspace or get the existing one */
+	{	/* load the document into a new workspace or get the existing one */
 		ws = workspaces.contains(docUri) ?
-			workspaces.find(docUri).value() :
-			createWorkspace(doc);
+			workspaces[docUri] : createWorkspace(documents[docUri]);
 	}
 	catch (DocumentException& de)
 	{
@@ -583,7 +580,7 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 /* Delete a document from the client's list */
 MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 {
-	QSharedPointer<Client> client = clients.find(clientSocket).value();
+	QSharedPointer<Client> client = clients[clientSocket];
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
@@ -618,7 +615,7 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 	{
 		if (!db.countDocEditors(docUri.toString())) {
 			// no one has access to this document --> will be permanently deleted
-			documents.find(docUri).value()->erase();
+			documents[docUri]->erase();
 			documents.remove(docUri);
 
 			Logger() << "Permanently deleted document " << docUri.toString() << " from disk";

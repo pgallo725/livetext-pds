@@ -54,6 +54,7 @@
 
 const QString rsrcPath = ":/images";
 
+
 TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
 {
 	/**************************** GUI SETUP ****************************/
@@ -69,37 +70,37 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	/**************************** CONNECTS ****************************/
 
 	//GUI update in case of format change or cursor position changed
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::currentCharFormatChanged);
-	connect(textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
+	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateEditorSelectedActions);
 
 
 	//Online users cursor redraw in case of window aspect, char format, cursor position changed
-	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
-	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
+	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
+	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
-	connect(textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
-	connect(textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
-	connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
+	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
+	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
-	connect(textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
+	connect(_textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
 	//Adapt textEditor layout according to document
-	connect(textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
+	connect(_textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
+
 
 
 	//If i can use clipboard setup connects from QTextEdit of cut/copy and clipboard management
 #ifndef QT_NO_CLIPBOARD
-	connect(textEdit, &QTextEdit::copyAvailable, actionCut, &QAction::setEnabled);
-	connect(textEdit, &QTextEdit::copyAvailable, actionCopy, &QAction::setEnabled);
+	connect(_textEdit, &QTextEdit::copyAvailable, actionCut, &QAction::setEnabled);
+	connect(_textEdit, &QTextEdit::copyAvailable, actionCopy, &QAction::setEnabled);
 	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &TextEdit::clipboardDataChanged);
 #endif
 
 	//Setup extra cursor
-	_extraCursor = new QTextCursor(textEdit->document());
+	_extraCursor = new QTextCursor(_textEdit->document());
 
 	/**************************** EDITOR INITIALIZATION ****************************/
 
@@ -107,19 +108,19 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-
 	QFont textFont("Helvetica");
 	textFont.setStyleHint(QFont::SansSerif);
 	textFont.setPointSize(12);
-	textEdit->setFont(textFont);
-	textEdit->document()->setDefaultFont(textFont);
+	_textEdit->setFont(textFont);
+	_textEdit->document()->setDefaultFont(textFont);
 
 	//Disable undo/redo
-	textEdit->setUndoRedoEnabled(false);
+	_textEdit->setUndoRedoEnabled(false);
 
 	//Set document margin
-	textEdit->document()->setDocumentMargin(64);
+	_textEdit->document()->setDocumentMargin(64);
 
 	//Initialize GUI, activating buttons according to current conditions
-	fontChanged(textEdit->font());
-	colorChanged(textEdit->textColor());
-	alignmentChanged(textEdit->alignment());
+	fontChanged(_textEdit->font());
+	colorChanged(_textEdit->textColor());
+	alignmentChanged(_textEdit->alignment());
 
 #ifndef QT_NO_CLIPBOARD
 	//Initialize copy/cut/paste actions
@@ -162,14 +163,14 @@ void TextEdit::setupMainWindow()
 	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 
 	//Inizialize Qt text editor
-	textEdit = new QTextEdit();
-	textEdit->setMaximumWidth(width());
-	textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	_textEdit = new QTextEditWrapper();
+	_textEdit->setMaximumWidth(width() * 0.9);
+	_textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
-	textEdit->setFrameStyle(QFrame::Plain);
-	//textEdit->setFrameShadow(QFrame::Raised);
-	textEdit->setLineWidth(1);
+	_textEdit->setFrameStyle(QFrame::Plain);
+	//_textEdit->setFrameShadow(QFrame::Raised);
+	_textEdit->setLineWidth(1);
 
 	//Set central widget and layout
 	QWidget* cntr = new QWidget(this);
@@ -189,9 +190,9 @@ void TextEdit::setupMainWindow()
 
 	//Set layout to QScroll Area
 	QHBoxLayout* bl = new QHBoxLayout(area);
-	bl->setContentsMargins(0, 20, 0, 20);
+	bl->setContentsMargins(0, 24, 0, 0);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
-	bl->addWidget(textEdit);	//Add text editor to widget
+	bl->addWidget(_textEdit);	//Add text editor to widget
 
 	//set widget layout
 	cntr->setLayout(bl);
@@ -203,7 +204,7 @@ void TextEdit::setupMainWindow()
 	statusBar()->hide();
 
 	//Makes keyboard focused on text editor
-	textEdit->setFocus();
+	_textEdit->setFocus();
 }
 
 
@@ -260,21 +261,21 @@ void TextEdit::setupEditActions()
 #ifndef QT_NO_CLIPBOARD
 	//Cut
 	const QIcon cutIcon = QIcon(rsrcPath + "/editor/editcut.png");
-	actionCut = menu->addAction(cutIcon, tr("Cu&t"), textEdit, &QTextEdit::cut);
+	actionCut = menu->addAction(cutIcon, tr("Cu&t"), _textEdit, &QTextEdit::cut);
 	actionCut->setPriority(QAction::LowPriority);
 	actionCut->setShortcut(QKeySequence::Cut);
 	tb->addAction(actionCut);
 
 	//Copy
 	const QIcon copyIcon = QIcon(rsrcPath + "/editor/editcopy.png");
-	actionCopy = menu->addAction(copyIcon, tr("&Copy"), textEdit, &QTextEdit::copy);
+	actionCopy = menu->addAction(copyIcon, tr("&Copy"), _textEdit, &QTextEdit::copy);
 	actionCopy->setPriority(QAction::LowPriority);
 	actionCopy->setShortcut(QKeySequence::Copy);
 	tb->addAction(actionCopy);
 
 	//Paste
 	const QIcon pasteIcon = QIcon(rsrcPath + "/editor/editpaste.png");
-	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), textEdit, &QTextEdit::paste);
+	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), _textEdit, &QTextEdit::paste);
 	actionPaste->setPriority(QAction::LowPriority);
 	actionPaste->setShortcut(QKeySequence::Paste);
 	tb->addAction(actionPaste);
@@ -626,7 +627,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	}
 
 	//Insert presence in editor
-	onlineUsers.insert(userId, new Presence(username, color, userPic, textEdit));
+	onlineUsers.insert(userId, new Presence(username, color, userPic, _textEdit));
 
 	//Redraw of the onlineUsers toolbar
 	setupOnlineUsersActions();
@@ -674,13 +675,11 @@ void TextEdit::removePresence(qint32 userId)
 void TextEdit::resizeEditor(const QSizeF& newSize)
 {
 	int height = QApplication::desktop()->availableGeometry(this).height();
-	if (newSize.height() > height * 0.78) {
-		textEdit->setFixedHeight(newSize.height());
-		area->verticalScrollBar()->setValue(area->verticalScrollBar()->maximum());
+	if (newSize.height() > height) {
+		_textEdit->setFixedHeight(newSize.height());
 	}
 	else {
-		textEdit->setFixedHeight(height);
-		area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
+		_textEdit->setFixedHeight(height);
 	}
 }
 
@@ -714,13 +713,13 @@ void TextEdit::closeDocumentError(QString error)
 
 void TextEdit::closeEditor()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Clear all users
 	onlineUsers.clear();
 
 	//Clear document (editor one, which allow user to write in)
-	textEdit->document()->clear();
+	_textEdit->document()->clear();
 
 	//Kill timer
 	if (timerId > 0)
@@ -744,7 +743,7 @@ void TextEdit::criticalError(QString error)
 void TextEdit::resetCursorPosition()
 {
 	//Set new cursor
-	textEdit->setTextCursor(QTextCursor(textEdit->document()));
+	_textEdit->setTextCursor(QTextCursor(_textEdit->document()));
 	area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
 }
 
@@ -759,9 +758,9 @@ void TextEdit::startCursorTimer()
 void TextEdit::timerEvent(QTimerEvent* event)
 {
 	//Sends cursor position only if it's different from previous sent position
-	//if (textEdit->textCursor().position() != _currentCursorPosition) {
-	_currentCursorPosition = textEdit->textCursor().position();
-	emit newCursorPosition(_user.getUserId(), textEdit->textCursor().position());
+	//if (_textEdit->textCursor().position() != _currentCursorPosition) {
+	_currentCursorPosition = _textEdit->textCursor().position();
+	emit newCursorPosition(_user.getUserId(), _textEdit->textCursor().position());
 	//}
 }
 
@@ -788,14 +787,14 @@ void TextEdit::filePrint()
 	QPrintDialog* dlg = new QPrintDialog(&printer, this);
 
 	//Enable option to print only selection
-	if (textEdit->textCursor().hasSelection())
+	if (_textEdit->textCursor().hasSelection())
 		dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
 
 	//Open print document window
 	dlg->setWindowTitle(tr("Print Document"));
 	if (dlg->exec() == QDialog::Accepted)
 		//If answer is yes, start printing
-		textEdit->print(&printer);
+		_textEdit->print(&printer);
 	delete dlg;
 #endif
 }
@@ -823,7 +822,7 @@ void TextEdit::printPreview(QPrinter* printer)
 	Q_UNUSED(printer);
 #else
 	//Print from print preview
-	textEdit->print(printer);
+	_textEdit->print(printer);
 #endif
 }
 
@@ -853,7 +852,7 @@ void TextEdit::filePrintPdf()
 	printer.setOutputFileName(fileName);
 
 	//Print document
-	textEdit->document()->print(&printer);
+	_textEdit->document()->print(&printer);
 
 	//Show in status bar outcome of operation ("Exported path/to/file.pdf")
 
@@ -878,13 +877,13 @@ void TextEdit::fileShare()
 
 void TextEdit::listStyle(int styleIndex)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//New list format
 	QTextListFormat listFmt;
 
 	//Getting document cursor
-	QTextCursor cursor = textEdit->textCursor();
+	QTextCursor cursor = _textEdit->textCursor();
 
 
 	//Create standard style (undefined)
@@ -909,7 +908,7 @@ void TextEdit::listStyle(int styleIndex)
 
 void TextEdit::createList(int position, QTextListFormat fmt)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Moving to desired position to create the list
 	_extraCursor->setPosition(position);
@@ -926,12 +925,12 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
-	cursorPositionChanged();
+	updateEditorSelectedActions();
 }
 
 void TextEdit::removeBlockFromList(int blockPosition)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Moving to target block
 	_extraCursor->setPosition(blockPosition);
@@ -964,12 +963,13 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Sends new block format to server
 	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
-	cursorPositionChanged();
+	//GUI update
+	updateEditorSelectedActions();
 }
 
 void TextEdit::addBlockToList(int blockPosition, int listPosition)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	qDebug() << "Add block at position " << blockPosition << " to list at position " << listPosition;
 
@@ -990,7 +990,7 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 	currentList->add(blk);
 
 	//GUI update
-	cursorPositionChanged();
+	updateEditorSelectedActions();
 }
 
 
@@ -1001,7 +1001,7 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 
 void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	_extraCursor->setPosition(position);
 
@@ -1023,7 +1023,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	alignmentChanged(fmt.alignment());
 
 	//GUI update
-	cursorPositionChanged();
+	updateEditorSelectedActions();
 }
 
 
@@ -1041,7 +1041,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 void TextEdit::textBold()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	QTextCharFormat fmt;
 
@@ -1054,7 +1054,7 @@ void TextEdit::textBold()
 
 void TextEdit::textUnderline()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set Underline according to button
 	QTextCharFormat fmt;
@@ -1066,7 +1066,7 @@ void TextEdit::textUnderline()
 
 void TextEdit::textItalic()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set Italic according to button
 	QTextCharFormat fmt;
@@ -1078,7 +1078,7 @@ void TextEdit::textItalic()
 
 void TextEdit::textStrikethrough()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set Strikethrough according to button
 	QTextCharFormat fmt;
@@ -1091,7 +1091,7 @@ void TextEdit::textStrikethrough()
 
 void TextEdit::textFamily(const QString& f)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set font family
 	QTextCharFormat fmt;
@@ -1104,10 +1104,10 @@ void TextEdit::textFamily(const QString& f)
 
 void TextEdit::textSize(const QString& p)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set keyboard focus
-	textEdit->setFocus();
+	_textEdit->setFocus();
 
 	//Casting point size to float
 	qreal pointSize = p.toFloat();
@@ -1148,10 +1148,10 @@ void TextEdit::decrementSize()
 
 void TextEdit::textColor()
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Open dialog window for colors
-	QColor col = QColorDialog::getColor(textEdit->textColor(), this);
+	QColor col = QColorDialog::getColor(_textEdit->textColor(), this);
 
 	//Checks if color is valid
 	if (!col.isValid())
@@ -1171,19 +1171,19 @@ void TextEdit::textColor()
 
 void TextEdit::textAlign(QAction* a)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	//Sets alignment according to what button is pressed
 	if (a == actionAlignLeft)
-		textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
+		_textEdit->setAlignment(Qt::AlignLeft | Qt::AlignAbsolute);
 	else if (a == actionAlignCenter)
-		textEdit->setAlignment(Qt::AlignHCenter);
+		_textEdit->setAlignment(Qt::AlignHCenter);
 	else if (a == actionAlignRight)
-		textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
+		_textEdit->setAlignment(Qt::AlignRight | Qt::AlignAbsolute);
 	else if (a == actionAlignJustify)
-		textEdit->setAlignment(Qt::AlignJustify);
+		_textEdit->setAlignment(Qt::AlignJustify);
 
-	QTextCursor cursor = textEdit->textCursor();
+	QTextCursor cursor = _textEdit->textCursor();
 
 	//Sends new block alignment to server
 	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
@@ -1195,10 +1195,10 @@ void TextEdit::textAlign(QAction* a)
 void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 {
 	//Getting document cursor
-	QTextCursor cursor = textEdit->textCursor();
+	QTextCursor cursor = _textEdit->textCursor();
 
-	//Apply format to the document, if the cursor (textEdit->textCursor()) has a selection, apply format to the selection
-	textEdit->mergeCurrentCharFormat(format);
+	//Apply format to the document, if the cursor (_textEdit->textCursor()) has a selection, apply format to the selection
+	_textEdit->mergeCurrentCharFormat(format);
 
 	//Sends new char format to server (in case of selection it sends the updated format of every character because they can be different
 	for (int i = cursor.selectionStart(); i < cursor.selectionEnd(); ++i) {
@@ -1210,7 +1210,7 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 
 void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	_extraCursor->setPosition(position);
 	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
@@ -1219,13 +1219,13 @@ void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
 	_extraCursor->setCharFormat(fmt);
 
 	//Update GUI buttons according to new format
-	currentCharFormatChanged(textEdit->textCursor().charFormat());
+	currentCharFormatChanged(_textEdit->textCursor().charFormat());
 }
 
 
 void TextEdit::setLineHeight(QAction* a)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	QTextBlockFormat fmt;
 
@@ -1240,7 +1240,7 @@ void TextEdit::setLineHeight(QAction* a)
 		fmt.setLineHeight(200, QTextBlockFormat::ProportionalHeight);;
 
 	//Sets block format
-	QTextCursor cursor = textEdit->textCursor();
+	QTextCursor cursor = _textEdit->textCursor();
 	cursor.mergeBlockFormat(fmt);
 	fmt = cursor.blockFormat();
 
@@ -1254,23 +1254,35 @@ void TextEdit::setLineHeight(QAction* a)
 *	If there's a change in current format it updates buttons/comboboxes according to new format
 */
 
-//Updates GUI if cursor changes it's position
-void TextEdit::cursorPositionChanged()
+void TextEdit::updateEditorSelectedActions()
 {
+	QTextCursor cursor = _textEdit->textCursor();
+
+	//If there's a selection and the selection is from right to left
+	//It take the format of the first character of the selection
+	if (cursor.hasSelection() && (cursor.selectionStart() == cursor.position()))
+		cursor.setPosition(cursor.position() + 1); //Format is taken from the char left to the cursor
+
 	//Users cursors
 	redrawAllCursors();
 
 	//User text higlighting
 	updateUsersSelections();
 
+	//Block format
+	QTextBlockFormat blockFmt = cursor.blockFormat();
+
 	//Alignment
-	alignmentChanged(textEdit->alignment());
+	alignmentChanged(blockFmt.alignment());
 
 	//Line height
-	lineHeightChanged(textEdit->textCursor().blockFormat().lineHeight());
+	lineHeightChanged(blockFmt.lineHeight());
+
+	//Text format
+	currentCharFormatChanged(cursor.charFormat());
 
 	//Lists
-	QTextList* list = textEdit->textCursor().currentList();
+	QTextList* list = cursor.currentList();
 
 	//Checks list format (if in list) and updates GUI according to format
 	if (list) {
@@ -1285,7 +1297,19 @@ void TextEdit::cursorPositionChanged()
 	else {
 		toggleCheckList(standard);
 	}
+
+	//Update scrollbar position according to cursor position wiith offsets
+	int cursorPosition = _textEdit->cursorRect().y();
+	int areaBottom = area->contentsRect().bottom();
+	int scrollValue = area->verticalScrollBar()->value();
+	int scrollOffset = areaBottom / 6;
+
+	if (cursorPosition >= areaBottom + scrollValue - 40)
+		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
+	else if (cursorPosition <= scrollValue + 25)
+		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
 }
+
 
 //Checks only listType menu entry in list menu
 void TextEdit::toggleCheckList(int listType)
@@ -1306,8 +1330,6 @@ void TextEdit::toggleCheckList(int listType)
 	listButton->setChecked(listType != standard);
 	listButton->setIcon(QIcon(rsrcPath + listIconPath[listType]));
 }
-
-
 
 
 void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
@@ -1375,16 +1397,26 @@ void TextEdit::lineHeightChanged(qreal height)
 void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
+
 	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
 	if (const QMimeData* md = QApplication::clipboard()->mimeData())
-		if (md->hasImage())
-			QApplication::clipboard()->clear();
-		else
-			actionPaste->setEnabled(md->hasText());
-}
+		actionPaste->setEnabled(!md->hasImage());
 
 #endif
+}
 
+
+//Disable drag&drop images
+bool QTextEditWrapper::canInsertFromMimeData(const QMimeData* source) const {
+	return !(source->hasImage() || source->hasUrls());
+}
+
+
+//Prevent pasting images overload of QTextEdit function
+void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
+	if (!source->hasImage())
+		QTextEdit::insertFromMimeData(source);
+}
 
 
 /**************************** CONTENTS CHANGE ****************************/
@@ -1417,12 +1449,12 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		blockFmt = _extraCursor->blockFormat();
 
 		//Getting inserted character
-		QChar ch = textEdit->document()->characterAt(i);
+		QChar ch = _textEdit->document()->characterAt(i);
 
 		//Emit signal to DocumentEditor to insert a character if is not a null character '\0'
 		if (ch != QChar::Null) {
 			//Boolean flag to check id it's last '8233' of the document (eof)
-			bool isLast = (ch == QChar::ParagraphSeparator) && (i == textEdit->document()->characterCount() - 1);
+			bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
 			emit charInserted(ch, fmt, i, isLast);
 		}
 
@@ -1471,7 +1503,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 
 void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	_extraCursor->setPosition(position);
 
@@ -1480,16 +1512,22 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 
 	//Insert character at position
 	_extraCursor->insertText(ch);
+
+	//GUI update
+	updateEditorSelectedActions();
 }
 
 void TextEdit::removeChar(int position)
 {
-	const QSignalBlocker blocker(textEdit->document());
+	const QSignalBlocker blocker(_textEdit->document());
 
 	_extraCursor->setPosition(position);
 
 	//Delete character
 	_extraCursor->deleteChar();
+
+	//GUI update
+	updateEditorSelectedActions();
 }
 
 /**************************** EXTRA CURSORS ****************************/
@@ -1504,15 +1542,16 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 	//Finds the Presence
 	Presence* p = onlineUsers.find(user).value();
 
-	if (position < textEdit->document()->characterCount()) {
+	if (position < _textEdit->document()->characterCount()) {
 		//Change user's cursor position
 		p->cursor()->setPosition(position);
 	}
 	else {
-		p->cursor()->setPosition(textEdit->document()->characterCount() - 1);
+		p->cursor()->setPosition(_textEdit->document()->characterCount() - 1);
 	}
 
 	drawGraphicCursor(p);
+	updateEditorSelectedActions();
 }
 
 //Redraw all cursor in case of window update (scroll, resize...)
@@ -1541,7 +1580,7 @@ void TextEdit::drawGraphicCursor(Presence* p)
 	userCursorLabel->close();
 
 	//Getting cursor rectangle (x,y) position of the window
-	const QRect qRect = textEdit->cursorRect(*cursor);
+	const QRect qRect = _textEdit->cursorRect(*cursor);
 
 	//Draw the cursor (Pixmap)
 	QPixmap pix(qRect.width() * 2.5, qRect.height());
@@ -1584,7 +1623,7 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
-		QTextCursor cursor(textEdit->document());
+		QTextCursor cursor(_textEdit->document());
 
 		//Text selection
 		cursor.setPosition(selection.first);
@@ -1608,7 +1647,7 @@ void TextEdit::handleMultipleSelections()
 {
 	//Clear all extra selections
 	QList<QTextEdit::ExtraSelection> usersSelections;
-	textEdit->setExtraSelections(usersSelections);
+	_textEdit->setExtraSelections(usersSelections);
 
 	QMap<qint32, Presence*>::iterator it;
 
@@ -1635,7 +1674,7 @@ void TextEdit::handleMultipleSelections()
 	}
 
 	//Sets the formatted selections in the editor
-	textEdit->setExtraSelections(usersSelections);
+	_textEdit->setExtraSelections(usersSelections);
 }
 
 
@@ -1649,6 +1688,7 @@ void TextEdit::updateUsersSelections()
 
 	emit generateExtraSelection();
 
+	//Shows user text highlight
 	handleMultipleSelections();
 }
 
@@ -1660,8 +1700,8 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::printDocumenText()
 {
-	for (int i = 0; i < textEdit->document()->characterCount(); i++) {
-		qDebug() << textEdit->document()->characterAt(i);
+	for (int i = 0; i < _textEdit->document()->characterCount(); i++) {
+		qDebug() << _textEdit->document()->characterAt(i);
 	}
 }
 

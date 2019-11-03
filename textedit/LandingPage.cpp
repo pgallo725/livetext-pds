@@ -12,6 +12,9 @@
 #include <QTextStream>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QPainterPath>
+#include <QFrame>
+#include <QTableWidget>
 
 
 #define DEFAULT_IP "127.0.0.1"
@@ -19,13 +22,13 @@
 
 const QString rsrcPath = ":/images";
 
-LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)){
+LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) {
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
 
 	//Setup delle varie finestre ui
 	ui->setupUi(this);
-	
+
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
 		mngr.centerAndResize(0.7, 0.8);
@@ -46,7 +49,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_new->setIcon(QIcon(rsrcPath + "/landingPage/new.png"));
 
 	//Tab widget icons
-	ui->tabWidget->setTabIcon(0,QIcon(rsrcPath + "/landingPage/login.png"));
+	ui->tabWidget->setTabIcon(0, QIcon(rsrcPath + "/landingPage/login.png"));
 	ui->tabWidget->setTabIcon(1, QIcon(rsrcPath + "/landingPage/register.png"));
 	ui->tabWidget->setIconSize(QSize(40, 65));
 
@@ -71,7 +74,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	w = ui->label_logo->width();
 	h = ui->label_logo->height();
 	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	
+
 
 	/******************* CONNECTS *******************/
 	/*
@@ -102,8 +105,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->lineEdit_regUsr, &QLineEdit::returnPressed, this, &LandingPage::pushButtonConfirmOperationClicked);
 
 	//Document list
-	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &LandingPage::pushButtonOpenClicked);
-	connect(ui->listWidget, &QListWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
+	connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
+	connect(ui->tableWidget, &QTableWidget::itemActivated, this, &LandingPage::pushButtonOpenClicked);
 
 	//User profile picture preview
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
@@ -114,9 +117,16 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	//User Icon
 	QPixmap userPix(rsrcPath + "/misc/defaultProfile.png");
-	w = ui->label_UsrIcon->width();
-	h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+
+	//Qt/SSL logo
+	QPixmap qtlogo(rsrcPath + "/misc/qtlogo.png");
+	ui->label_qtlogo->setPixmap(qtlogo.scaled(ui->label_qtlogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	QPixmap ssllogo(rsrcPath + "/misc/SSLlogo.png");
+	ui->label_ssllogo->setPixmap(ssllogo.scaled(ui->label_ssllogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
 
 
 	//Index to 0 for stackedWidget (Home page)
@@ -151,6 +161,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Setup loading message Label
 	loading = new QLabel(this);
 	mngr.setupLoadingInfo(loading);
+
+
 }
 
 LandingPage::~LandingPage()
@@ -240,6 +252,7 @@ void LandingPage::Login()
 	emit(serverLogin(username, password));
 }
 
+
 void LandingPage::Register()
 {
 	//Get data from fields
@@ -287,17 +300,31 @@ void LandingPage::LoginSuccessful(User* user)
 
 void LandingPage::updateUserInfo()
 {
-	//Set username and nickname
-	ui->label_userNick->setText(_user->getNickname());
-	ui->label_userUsername->setText(_user->getUsername());
+	//Set username and nickname (if present)
+	if (_user->getNickname().isEmpty()) {
+		//Set nickname label text
+		ui->label_userNick->setText(_user->getUsername());
+
+		//Setup username#userId text
+		QString username;
+		username = "#" + QString::number(_user->getUserId()).rightJustified(4, '0');
+		ui->label_userUsername->setText(username);
+	}
+	else {
+		ui->label_userNick->setText(_user->getNickname());
+
+		QString username;
+		username = _user->getUsername() + "#" + QString::number(_user->getUserId()).rightJustified(4, '0');
+		ui->label_userUsername->setText(username);
+	}
+
+
 
 	//Set user profile picture
-	int w = ui->label_userProfilePhoto->width();
-	int h = ui->label_userProfilePhoto->height();
 	QPixmap userPix;
 	userPix.convertFromImage(_user->getIcon());
 
-	ui->label_userProfilePhoto->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	setupUserProfilePicture(userPix.scaled(ui->label_userProfilePhoto->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void LandingPage::setupFileList()
@@ -306,22 +333,68 @@ void LandingPage::setupFileList()
 	QList<URI> documents = _user->getDocuments();
 
 	//Clear document list
-	ui->listWidget->clear();
+	ui->tableWidget->clear();
 
-	//Add every document to the list
-	QList<URI>::iterator it;
-	for (it = documents.begin(); it != documents.end(); it++) {
-		ui->listWidget->addItem(new QListWidgetItem(QIcon(rsrcPath + "/landingPage/richtext.png"), it->getDocumentName() + " (" + it->getAuthorName() + ")"));
-	}
+	//Reset row/column count
+	ui->tableWidget->setRowCount(0);
 
-	//If there are no files list dislays "<No files found>"
-	if (ui->listWidget->count() == 0) {
-		ui->listWidget->addItem("<No files found>");
 
-		//Makes this item not selectable
-		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
-	}
+	//If user has no documents
+	if (documents.isEmpty()) {
+		//Hide table headers
+		ui->tableWidget->horizontalHeader()->setVisible(false);
+		ui->tableWidget->verticalHeader()->setVisible(false);
+
+		//Set only one column to contain "<No documents found>"
+		ui->tableWidget->setColumnCount(1);
+
+		//Insert new row
+		ui->tableWidget->insertRow(0);
+
+		//Create "<No documents found>" element
+		QTableWidgetItem* noDocuments = new QTableWidgetItem("<No documents found>");
 		
+		//Setting item style
+		noDocuments->setTextAlignment(Qt::AlignCenter);
+		noDocuments->setFont(QFont("Helvetica", 12));
+		noDocuments->setTextColor(Qt::darkGray);
+		noDocuments->setFlags(noDocuments->flags() & ~Qt::ItemIsSelectable);
+
+		//Set item in the table
+		ui->tableWidget->setItem(0, 0, noDocuments);
+	}
+	else
+	{
+		//Show table headers
+		ui->tableWidget->horizontalHeader()->setVisible(true);
+		ui->tableWidget->verticalHeader()->setVisible(true);
+		
+		//Set column count to 3 (Name/Author/URI)
+		ui->tableWidget->setColumnCount(3);
+
+		//Generating horizontal header
+		QStringList headerLabels;
+		headerLabels.append("Name");
+		headerLabels.append("Author");
+		headerLabels.append("URI");
+		ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+		
+
+		//Add every document to the table
+		QList<URI>::iterator it;
+		for (it = documents.begin(); it != documents.end(); it++) {
+			
+			//Inserting new row in table
+			int rowCount = ui->tableWidget->rowCount();
+			ui->tableWidget->insertRow(rowCount);
+
+			//Add items in table
+			ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(it->getDocumentName()));		//Document name
+			ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(it->getAuthorName()));		//Document author
+			ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(it->toString()));			//Document URI
+			ui->tableWidget->item(rowCount, 0)->setIcon(QIcon(rsrcPath + "/landingPage/richtext.png"));	//Icon
+		}
+	}
 
 	//Set default behaviour of theese push buttons (disabled)
 	ui->pushButton_remove->setEnabled(false);
@@ -338,6 +411,28 @@ void LandingPage::setupFileList()
 *	Close all windows
 *	User profile picture preview
 */
+
+void LandingPage::setupUserProfilePicture(QPixmap userPix)
+{
+	//Create a base pixmap
+	QPixmap base(ui->label_userProfilePhoto->size());
+	base.fill(Qt::transparent);
+
+	//Initialize painter to create a rounded profile picture
+	QPainter painter(&base);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	//Create a round shape to set label rounded
+	QPainterPath path;
+	path.addRoundedRect(0, 0, ui->label_userProfilePhoto->width(), ui->label_userProfilePhoto->height(), ui->label_userProfilePhoto->width() / 2, ui->label_userProfilePhoto->height() / 2);
+	painter.setClipPath(path);
+
+	//Draw profile picture in the new shape
+	painter.drawPixmap(0, 0, userPix);
+	ui->label_userProfilePhoto->setPixmap(base);
+}
 
 void LandingPage::resetFields()
 {
@@ -410,7 +505,7 @@ void LandingPage::documentDismissed()
 void LandingPage::enablePushButtonOpen()
 {
 	//Disables push buttons if document list is empty
-	if (ui->listWidget->item(0)->text() != "<No files found>")
+	if (ui->tableWidget->item(0, 0)->text() != "<No documents found>")
 	{
 		ui->pushButton_open->setEnabled(true);
 		ui->pushButton_remove->setEnabled(true);
@@ -493,26 +588,26 @@ void LandingPage::pushButtonBrowseClicked()
 
 void LandingPage::pushButtonOpenClicked()
 {
-	//Open only if is not "<No files found>" element
-	QString fileSelected = ui->listWidget->currentItem()->text();
-	if (fileSelected != "<No files found>") {
+	//Open only if is not "<No documents found>" element
+	QString fileSelected = ui->tableWidget->currentItem()->text();
+	if (fileSelected != "<No documents found>") {
 		mngr.showLoadingScreen(loading, tr("Opening document..."));
 
 		//Send request to open file to server
-		emit openDocument(_user->getURIat(ui->listWidget->currentRow()));
+		emit openDocument(_user->getURIat(ui->tableWidget->currentRow()));
 	}
 
 }
 
 void LandingPage::pushButtonRemoveClicked()
 {
-	QString fileSelected = ui->listWidget->currentItem()->text();
-
-	if (fileSelected != "<No files found>") {
+	//Remove only if is not "<No documetts found>" element
+	QString fileSelected = ui->tableWidget->currentItem()->text();
+	if (fileSelected != "<No documents found>") {
 		mngr.showLoadingScreen(loading, tr("Removing document..."));
 
 		//Send request to remove file to server
-		emit removeDocument(_user->getURIat(ui->listWidget->currentRow()));
+		emit removeDocument(_user->getURIat(ui->tableWidget->currentRow()));
 	}
 }
 
@@ -522,7 +617,7 @@ void LandingPage::pushButtonOpenUriClicked()
 	//Show and lanch dialog
 	if (openURIWindow->exec() == QDialog::Accepted) {
 		mngr.showLoadingScreen(loading, tr("Open document from URI..."));
-		
+
 		//Adds document recived from open uri
 		emit openDocument(URI(_buffer));
 	};

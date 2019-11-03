@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
-    <height>656</height>
+    <width>1046</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -54,7 +54,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_2">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -333,6 +333,138 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_12">
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item alignment="Qt::AlignRight">
+                 <widget class="QLabel" name="label_10">
+                  <property name="palette">
+                   <palette>
+                    <active>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>112</red>
+                        <green>112</green>
+                        <blue>112</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </active>
+                    <inactive>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>112</red>
+                        <green>112</green>
+                        <blue>112</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </inactive>
+                    <disabled>
+                     <colorrole role="WindowText">
+                      <brush brushstyle="SolidPattern">
+                       <color alpha="255">
+                        <red>120</red>
+                        <green>120</green>
+                        <blue>120</blue>
+                       </color>
+                      </brush>
+                     </colorrole>
+                    </disabled>
+                   </palette>
+                  </property>
+                  <property name="text">
+                   <string>Powered by</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>80</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_11">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_qtlogo">
+                  <property name="minimumSize">
+                   <size>
+                    <width>40</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_ssllogo">
+                  <property name="minimumSize">
+                   <size>
+                    <width>100</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -970,19 +1102,79 @@ a.a 2018/2019</string>
              </font>
             </property>
             <property name="title">
-             <string>Open existing file</string>
+             <string>Open existing document</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_12">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_11">
                <item>
-                <widget class="QListWidget" name="listWidget">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                <widget class="QTableWidget" name="tableWidget">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
                  </property>
+                 <property name="tabKeyNavigation">
+                  <bool>true</bool>
+                 </property>
+                 <property name="showDropIndicator" stdset="0">
+                  <bool>false</bool>
+                 </property>
+                 <property name="dragDropOverwriteMode">
+                  <bool>false</bool>
+                 </property>
+                 <property name="alternatingRowColors">
+                  <bool>true</bool>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectRows</enum>
+                 </property>
+                 <property name="showGrid">
+                  <bool>false</bool>
+                 </property>
+                 <attribute name="horizontalHeaderVisible">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderCascadingSectionResizes">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderMinimumSectionSize">
+                  <number>30</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderDefaultSectionSize">
+                  <number>80</number>
+                 </attribute>
+                 <attribute name="horizontalHeaderHighlightSections">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="horizontalHeaderStretchLastSection">
+                  <bool>true</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderMinimumSectionSize">
+                  <number>20</number>
+                 </attribute>
+                 <attribute name="verticalHeaderDefaultSectionSize">
+                  <number>25</number>
+                 </attribute>
+                 <attribute name="verticalHeaderHighlightSections">
+                  <bool>false</bool>
+                 </attribute>
+                 <column>
+                  <property name="text">
+                   <string>Name</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Author</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>URI</string>
+                  </property>
+                 </column>
                 </widget>
                </item>
                <item>
@@ -1144,21 +1336,59 @@ a.a 2018/2019</string>
           </property>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <property name="topMargin">
              <number>0</number>
             </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>58</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="spacing">
+               <number>6</number>
+              </property>
               <property name="topMargin">
                <number>0</number>
               </property>
+              <property name="rightMargin">
+               <number>10</number>
+              </property>
+              <item>
+               <spacer name="verticalSpacer_13">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>10</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
               <item>
                <widget class="QLabel" name="label_userNick">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1181,14 +1411,51 @@ a.a 2018/2019</string>
               <item>
                <widget class="QLabel" name="label_userUsername">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="palette">
+                 <palette>
+                  <active>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>102</red>
+                      <green>102</green>
+                      <blue>102</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                  </active>
+                  <inactive>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>102</red>
+                      <green>102</green>
+                      <blue>102</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                  </inactive>
+                  <disabled>
+                   <colorrole role="WindowText">
+                    <brush brushstyle="SolidPattern">
+                     <color alpha="255">
+                      <red>120</red>
+                      <green>120</green>
+                      <blue>120</blue>
+                     </color>
+                    </brush>
+                   </colorrole>
+                  </disabled>
+                 </palette>
+                </property>
                 <property name="font">
                  <font>
-                  <pointsize>11</pointsize>
+                  <pointsize>10</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -1199,7 +1466,67 @@ a.a 2018/2019</string>
                 </property>
                </widget>
               </item>
-              <item alignment="Qt::AlignRight">
+              <item>
+               <spacer name="verticalSpacer_12">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::MinimumExpanding</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>30</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item alignment="Qt::AlignHCenter">
+               <widget class="QLabel" name="label_userProfilePhoto">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>65</width>
+                  <height>65</height>
+                 </size>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="pushButton_editProfile">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1252,6 +1579,7 @@ a.a 2018/2019</string>
                 </property>
                 <property name="font">
                  <font>
+                  <pointsize>10</pointsize>
                   <underline>true</underline>
                  </font>
                 </property>
@@ -1259,7 +1587,7 @@ a.a 2018/2019</string>
                  <enum>Qt::NoFocus</enum>
                 </property>
                 <property name="text">
-                 <string>Edit profile...</string>
+                 <string>Edit profile</string>
                 </property>
                 <property name="flat">
                  <bool>true</bool>
@@ -1267,31 +1595,6 @@ a.a 2018/2019</string>
                </widget>
               </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_userProfilePhoto">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>80</height>
-               </size>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::Box</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
             </item>
            </layout>
           </item>

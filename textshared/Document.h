@@ -3,8 +3,7 @@
 #include <QString>
 
 #include "Symbol.h"
-#include "TextBlock.h"
-#include "TextList.h"
+#include "TextElement.h"
 
 
 class URI
@@ -51,15 +50,13 @@ private:
 
 	URI uri;
 
-	QVector<Symbol> _text;		// Actual document contents
+	QVector<Symbol> _text;
 
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
 
 	qint32 _listCounter;
 	QMap<TextListID, TextList> _lists;
-
-	static const int fPosGapSize = 4;
 
 protected:
 
@@ -70,28 +67,24 @@ public:
 	Document(URI uri, qint32 authorId = -1);
 	~Document();
 
+	/* File methods */
 	void load();
 	void unload();
 	void save();
 	void erase();
 
-	Symbol& operator[](QVector<qint32> fPos);
-	Symbol& operator[](int pos);
-
+	/* Editing methods */
 	int insert(Symbol& s);
 	int remove(QVector<qint32> fPos);
 	QVector<qint32> removeAtIndex(int index);
-	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);	// adds or removes the block from the list (creating it if new)
+
+	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);
 	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 	int formatList(TextListID id, QTextListFormat fmt);
+	
 
-	QVector<qint32> fractionalPosBegin();
-	QVector<qint32> fractionalPosEnd();
-	QVector<qint32> fractionalPosBetween(int prev_i, int next_i);
-	QVector<qint32> fractionalPosAtIndex(int index);
-
-	/* getters */
+	/* Getters */
 	URI getURI() const;
 	QString getName() const;
 	QString getAuthor() const;
@@ -100,24 +93,38 @@ public:
 	QVector<Symbol> getContent();
 	QString toString();				// returns a printable representation of the document's contents
 
+	// The [] array operator works with both indexes and fractional positions, and it
+	// returns the corresponding symbols in the document
+	Symbol& operator[](QVector<qint32> fPos);
+	Symbol& operator[](int pos);
+
+	/* Block accessor methods */
 	TextBlock& getBlock(TextBlockID id);
 	int getBlockPosition(TextBlockID blockId);
 	TextBlockID getBlockAt(int index);
 	QList<TextBlockID> getBlocksBetween(int start, int end);
 
+	/* List accessor methods */
 	TextList& getList(TextListID id);
 	int getListPosition(TextListID listId);
 	TextListID getListAt(int index);
-	QList<TextBlockID> getListBlocksInOrder(TextListID listId);
+	QList<TextBlockID> getOrderedListBlocks(TextListID listId);
+
 
 private:
 
-	int binarySearch(QVector<qint32> position);
+	/* Binary search methods to translate from a fractional position to an integer index */
+	int positionIndex(QVector<qint32> position);
+	int insertionIndex(QVector<qint32> position);
 
+	/* Fractional position algorithm */
+	QVector<qint32> newFractionalPos(int index);
+
+	// Internal handling of chars and blocks relationships
 	void addCharToBlock(Symbol& s, TextBlock& b);
 	void removeCharFromBlock(Symbol& s, TextBlock& b);
 
+	// Internal handling of blocks and lists relationships
 	void addBlockToList(TextBlock& b, TextList& l);
 	void removeBlockFromList(TextBlock& b, TextList& l);
 };
-

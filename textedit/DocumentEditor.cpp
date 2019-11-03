@@ -17,19 +17,21 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<QVector<qint32>>("QVector<qint32>");
 }
 
+
 void DocumentEditor::openDocument()
 {
+	// Insert all symbols in the document
 	for (int i = 0; i < _document.length() - 1; i++) {
 		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
 	}
 	   
-	foreach(TextListID id, _document._lists) {
-		TextList& lst = _document.getList(id);
-		QList<TextBlockID> blocks = lst.getBlocks();
-
+	// Create lists
+	foreach(TextList list, _document._lists.values()) 
+	{
+		QList<TextBlockID> blocks = list.getBlocks();
 		int firstListBlockPosition = _document.getBlockPosition(blocks.first());
 
-		_textedit->createList(firstListBlockPosition, lst.getFormat());
+		_textedit->createList(firstListBlockPosition, list.getFormat());
 		blocks.removeFirst();
 
 		foreach(TextBlockID id, blocks) {
@@ -37,67 +39,76 @@ void DocumentEditor::openDocument()
 		}
 	}
 
-	foreach(TextBlockID id, _document._blocks) {
-		TextBlock& blk = _document.getBlock(id);
-		_textedit->applyBlockFormat(_document.getBlockPosition(id), blk.getFormat());
+	// Apply block-specific formats
+	foreach(TextBlock block, _document._blocks.values()) {
+		_textedit->applyBlockFormat(_document.getBlockPosition(block.getId()), block.getFormat());
 	}
-
 
 	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());
 	_textedit->startCursorTimer();
 }
 
 
-//From Server to Client
-void DocumentEditor::addSymbol(Symbol s, bool isLast)
+/************ CHAR OPERATIONS ************/
+
+void DocumentEditor::addSymbol(Symbol s, bool isLast)	// REMOTE
 {
-	qDebug().nospace() << "Remote char insertion: " << s.getChar();
 	int position = _document.insert(s);
-	if (!isLast) {	// skip inserting this char in the Qt document, because it inserts one automatically
+	if (!isLast) 
+	{	// skip inserting the terminating char in the Qt document, because it has one already
 		_textedit->newChar(s.getChar(), s.getFormat(), position);
 		_textedit->updateUsersSelections();
 	}
 }
 
-void DocumentEditor::removeSymbol(QVector<int> position)
+void DocumentEditor::removeSymbol(QVector<int> position)	// REMOTE
 {
-	qDebug().nospace() << "Remote char deletion: " << _document[position].getChar();
 	int pos = _document.remove(position);
-	_textedit->removeChar(pos);
-	_textedit->updateUsersSelections();
+	if (pos >= 0) {
+		_textedit->removeChar(pos);
+		_textedit->updateUsersSelections();
+	}
 }
 
-//From Client to Server
-void DocumentEditor::deleteCharAtIndex(int position)
+
+void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)	// LOCAL
 {
-	if (position >= _document.length()) {
-		qDebug() << "Skipped deletion of out-of-range symbol, pos =" << position;
-		return;
-	}
-
-	qDebug().nospace() << "Local char deletion: " << _document[position].getChar();
-	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
-	emit deleteChar(fractionalPosition);
-}
-
-void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)
-{
-	Symbol s;
-	if (position == 0) {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosBegin());
-	}
-	else if (position == _document.length()) {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosEnd());
-	}
-	else {
-		s = Symbol(ch, fmt, _user.getUserId(), _document.fractionalPosAtIndex(position));
-	}
-
-	qDebug().nospace() << "Local char insertion: " << s.getChar();
+	Symbol s(ch, fmt, _user.getUserId(), _document.newFractionalPos(position));
 
 	_document.insert(s);
 	emit insertChar(s, isLast);
 }
+
+void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
+{
+	if (position < 0 || position >= _document.length())		// Skip if out-of-range
+		return;
+
+	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
+	emit deleteChar(fractionalPosition);
+}
+
+
+void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)		// LOCAL
+{
+	Symbol& s = _document[position];
+
+	_document.formatSymbol(s.getPosition(), fmt);
+	emit symbolFormatChanged(s.getPosition(), fmt);
+}
+
+void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)	 // REMOTE
+{
+	// Early out if the local state is already aligned with the server's
+	if (_document[position].getFormat() == fmt)
+		return;
+
+	int pos = _document.formatSymbol(position, fmt);
+	if (pos >= 0) {
+		_textedit->applyCharFormat(pos, fmt);
+	}
+}
+
 
 
 //Generating extra selections for user
@@ -127,96 +138,66 @@ void DocumentEditor::generateExtraSelection()
 	}
 }
 
-//Block format
-void DocumentEditor::changeBlockAlignment(int start, int end, Qt::Alignment alignment)
-{
-	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
 
-	foreach(TextBlockID textBlock, blocks) 
+
+/************ BLOCK OPERATIONS ************/
+
+void DocumentEditor::changeBlockAlignment(int start, int end, Qt::Alignment alignment)		// LOCAL
+{
+	// Apply the format separately to each block of the selection
+	foreach(TextBlockID textBlock, _document.getBlocksBetween(start, end))		
 	{
 		QTextBlockFormat fmt = _document.getBlock(textBlock).getFormat();
 		fmt.setAlignment(alignment);
 
-		qDebug().nospace() << "Local alignment change of block {" << textBlock.getBlockNumber()
-			<< ", " << textBlock.getAuthorId() << "}";
-
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt);
 	}
 }
 
-void DocumentEditor::changeBlockLineHeight(int start, int end, qreal height, int heightType)
+void DocumentEditor::changeBlockLineHeight(int start, int end, qreal height, int heightType)	// LOCAL
 {
-	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
-
-	foreach(TextBlockID textBlock, blocks) 
+	foreach(TextBlockID textBlock, _document.getBlocksBetween(start, end))
 	{
 		QTextBlockFormat fmt = _document.getBlock(textBlock).getFormat();
 		fmt.setLineHeight(height, heightType);
 
-		qDebug().nospace() << "Local lineHeight change of block {" << textBlock.getBlockNumber()
-			<< ", " << textBlock.getAuthorId() << "}";
-
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt);
 	}
 }
 
-void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)
+void DocumentEditor::changeBlockFormat(int start, int end, QTextBlockFormat fmt)	// LOCAL
 {
-	QList<TextBlockID> blocks = _document.getBlocksBetween(start, end);
-
-	foreach(TextBlockID textBlock, blocks) {
-		qDebug().nospace() << "Local format change of block {" << textBlock.getBlockNumber()
-			<< ", " << textBlock.getAuthorId() << "}";
-
+	// Overwrites the current block format for each block in the selection
+	foreach(TextBlockID textBlock, _document.getBlocksBetween(start, end)) 
+	{
 		_document.formatBlock(textBlock, fmt);
 		emit blockFormatChanged(textBlock, fmt);
 	}
 }
 
-void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)
+void DocumentEditor::applyBlockFormat(TextBlockID blockId, QTextBlockFormat fmt)	// REMOTE
 {
 	// Early out if the local state is already aligned with the server's
 	if (_document.getBlock(blockId).getFormat() == fmt)
 		return;
 
-	qDebug().nospace() << "Remote format change of block {" << blockId.getBlockNumber()
-		<< ", " << blockId.getAuthorId() << "}";
-
 	int position = _document.formatBlock(blockId, fmt);
-	_textedit->applyBlockFormat(position, fmt);
+	if (position >= 0) {
+		_textedit->applyBlockFormat(position, fmt);
+	}
 }
 
 
-//Symbol format
-void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)
+/************ LIST OPERATIONS ************/
+
+void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt)		// REMOTE
 {
-	Symbol s = _document[position];
-
-	qDebug().nospace() << "Local format change of character: " << s.getChar();
-
-	_document.formatSymbol(s._fPos, fmt);
-	emit symbolFormatChanged(s._fPos, fmt);
-}
-
-void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)
-{
-	// Early out if the local state is already aligned with the server's
-	if (_document[position].getFormat() == fmt)
+	// Early out if the block doesn't exist anymore (locally)
+	if (!_document._blocks.contains(blockId))
 		return;
 
-	qDebug().nospace() << "Remote format change of character: " << _document[position].getChar();
-
-	int pos = _document.formatSymbol(position, fmt);
-	_textedit->applyCharFormat(pos, fmt);
-}
-
-
-
-//List editing
-void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
-{
 	// Early out if the local state is already aligned with the server's
 	if (_document.getBlock(blockId).getListId() == listId)
 	{
@@ -226,10 +207,6 @@ void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QText
 
 		return;
 	}
-
-	qDebug().nospace() << "Remote assignment of block {" << blockId.getBlockNumber()
-		<< ", " << blockId.getAuthorId() << "} to list {" << listId.getListNumber()
-		<< ", " << listId.getAuthorId() << "}";;
 
 	int blockPos = _document.getBlockPosition(blockId);
 
@@ -254,8 +231,8 @@ void DocumentEditor::listEditBlock(TextBlockID blockId, TextListID listId, QText
 }
 
 
-// Called by textedit when creating a new list that will include the current block
-void DocumentEditor::createList(int position, QTextListFormat fmt)
+// Called to create a new list that will include the current block
+void DocumentEditor::createList(int position, QTextListFormat fmt)		// LOCAL
 {
 	// Create a new TextList
 	TextListID newListId(_document._listCounter++, _user.getUserId());
@@ -264,42 +241,32 @@ void DocumentEditor::createList(int position, QTextListFormat fmt)
 	TextList& list = _document.getList(newListId);
 	TextBlock& block = _document.getBlock(_document.getBlockAt(position));
 
-	qDebug().nospace() << "Local list creation for block {" << block.getId().getBlockNumber()
-		<< ", " << block.getId().getAuthorId() << "}";
-
 	_document.addBlockToList(block, list);
 
 	// Notify other clients
-	emit blockListChanged(block.getId(), list.getId(), fmt);
+	emit blockListChanged(block.getId(), newListId, fmt);
 }
 
 
 // Called by textedit when assigning a recently inserted block to a list
-void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)
+void DocumentEditor::assignBlockToList(int blockPosition, int listPosition)		// LOCAL
 {
 	// Get the specified block and the list
 	TextBlockID blockId = _document.getBlockAt(blockPosition);
 	TextListID listId = _document.getListAt(listPosition);
 
-	qDebug().nospace() << "Local addition of block {" << blockId.getBlockNumber()
-		<< ", " << blockId.getAuthorId() << "} to list {" << listId.getListNumber()
-		<< ", " << listId.getAuthorId() << "}";
+	TextBlock& block = _document.getBlock(blockId);
+	TextList& list = _document.getList(listId);
 
-	if (listId)
-	{
-		TextBlock& block = _document.getBlock(blockId);
-		TextList& list = _document.getList(listId);
+	_document.addBlockToList(block, list);
 
-		_document.addBlockToList(block, list);
-
-		// Notify other clients
-		emit blockListChanged(blockId, listId, list.getFormat());
-	}
+	// Notify other clients
+	emit blockListChanged(blockId, listId, list.getFormat());
 }
 
 
-// Called by textedit when a block is set to not be part of a list
-void DocumentEditor::removeBlockFromList(int blockPosition)
+// Called when a block is set to not be part of a list
+void DocumentEditor::removeBlockFromList(int blockPosition)		// LOCAL
 {
 	// Get the specified block
 	TextBlockID blockId = _document.getBlockAt(blockPosition);
@@ -308,16 +275,16 @@ void DocumentEditor::removeBlockFromList(int blockPosition)
 	if (block.getListId())
 	{
 		TextList& list = _document.getList(block.getListId());
-		_document.removeBlockFromList(block, list);
-
-		// Notify other clients
-		emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
+		_document.removeBlockFromList(block, list);	
 	}
+
+	// Notify other clients
+	emit blockListChanged(blockId, TextListID(nullptr), QTextListFormat());
 }
 
 
 // Handle the press of the list button in the editor
-void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
+void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)	// LOCAL
 {
 	// Get all the blocks inside the user selection
 	QList<TextBlockID> selectedBlocks = _document.getBlocksBetween(start, end);
@@ -337,7 +304,7 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 	{
 		TextList& oldList = _document.getList(listId);
 		TextListID newListId;
-		QList<TextBlockID> listBlocks = _document.getListBlocksInOrder(listId);
+		QList<TextBlockID> listBlocks = _document.getOrderedListBlocks(listId);
 		bool selectionBegun = false;
 		bool selectionEnded = false;
 
@@ -434,5 +401,4 @@ void DocumentEditor::toggleList(int start, int end, QTextListFormat fmt)
 			emit blockListChanged(blockId, newListId, fmt);
 		}
 	}
-
 }
