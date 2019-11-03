@@ -13,6 +13,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QPainterPath>
+#include <QFrame>
+#include <QTableWidget>
 
 
 #define DEFAULT_IP "127.0.0.1"
@@ -103,8 +105,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->lineEdit_regUsr, &QLineEdit::returnPressed, this, &LandingPage::pushButtonConfirmOperationClicked);
 
 	//Document list
-	connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &LandingPage::pushButtonOpenClicked);
-	connect(ui->listWidget, &QListWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
+	connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
+	connect(ui->tableWidget, &QTableWidget::itemActivated, this, &LandingPage::pushButtonOpenClicked);
 
 	//User profile picture preview
 	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
@@ -124,7 +126,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	QPixmap ssllogo(rsrcPath + "/misc/SSLlogo.png");
 	ui->label_ssllogo->setPixmap(ssllogo.scaled(ui->label_ssllogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	
+
 
 
 	//Index to 0 for stackedWidget (Home page)
@@ -159,6 +161,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Setup loading message Label
 	loading = new QLabel(this);
 	mngr.setupLoadingInfo(loading);
+
+
 }
 
 LandingPage::~LandingPage()
@@ -329,22 +333,68 @@ void LandingPage::setupFileList()
 	QList<URI> documents = _user->getDocuments();
 
 	//Clear document list
-	ui->listWidget->clear();
+	ui->tableWidget->clear();
 
-	//Add every document to the list
-	QList<URI>::iterator it;
-	for (it = documents.begin(); it != documents.end(); it++) {
-		ui->listWidget->addItem(new QListWidgetItem(QIcon(rsrcPath + "/landingPage/richtext.png"), it->getDocumentName() + " (" + it->getAuthorName() + ")"));
+	//Reset row/column count
+	ui->tableWidget->setRowCount(0);
+
+
+	//If user has no documents
+	if (documents.isEmpty()) {
+		//Hide table headers
+		ui->tableWidget->horizontalHeader()->setVisible(false);
+		ui->tableWidget->verticalHeader()->setVisible(false);
+
+		//Set only one column to contain "<No documents found>"
+		ui->tableWidget->setColumnCount(1);
+
+		//Insert new row
+		ui->tableWidget->insertRow(0);
+
+		//Create "<No documents found>" element
+		QTableWidgetItem* noDocuments = new QTableWidgetItem("<No documents found>");
+		
+		//Setting item style
+		noDocuments->setTextAlignment(Qt::AlignCenter);
+		noDocuments->setFont(QFont("Helvetica", 12));
+		noDocuments->setTextColor(Qt::darkGray);
+		noDocuments->setFlags(noDocuments->flags() & ~Qt::ItemIsSelectable);
+
+		//Set item in the table
+		ui->tableWidget->setItem(0, 0, noDocuments);
 	}
+	else
+	{
+		//Show table headers
+		ui->tableWidget->horizontalHeader()->setVisible(true);
+		ui->tableWidget->verticalHeader()->setVisible(true);
+		
+		//Set column count to 3 (Name/Author/URI)
+		ui->tableWidget->setColumnCount(3);
 
-	//If there are no files list dislays "<No files found>"
-	if (ui->listWidget->count() == 0) {
-		ui->listWidget->addItem("<No files found>");
+		//Generating horizontal header
+		QStringList headerLabels;
+		headerLabels.append("Name");
+		headerLabels.append("Author");
+		headerLabels.append("URI");
+		ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+		
 
-		//Makes this item not selectable
-		ui->listWidget->item(0)->flags() & ~Qt::ItemIsSelectable;
+		//Add every document to the table
+		QList<URI>::iterator it;
+		for (it = documents.begin(); it != documents.end(); it++) {
+			
+			//Inserting new row in table
+			int rowCount = ui->tableWidget->rowCount();
+			ui->tableWidget->insertRow(rowCount);
+
+			//Add items in table
+			ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(it->getDocumentName()));		//Document name
+			ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(it->getAuthorName()));		//Document author
+			ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(it->toString()));			//Document URI
+			ui->tableWidget->item(rowCount, 0)->setIcon(QIcon(rsrcPath + "/landingPage/richtext.png"));	//Icon
+		}
 	}
-
 
 	//Set default behaviour of theese push buttons (disabled)
 	ui->pushButton_remove->setEnabled(false);
@@ -455,7 +505,7 @@ void LandingPage::documentDismissed()
 void LandingPage::enablePushButtonOpen()
 {
 	//Disables push buttons if document list is empty
-	if (ui->listWidget->item(0)->text() != "<No files found>")
+	if (ui->tableWidget->item(0, 0)->text() != "<No documents found>")
 	{
 		ui->pushButton_open->setEnabled(true);
 		ui->pushButton_remove->setEnabled(true);
@@ -538,26 +588,26 @@ void LandingPage::pushButtonBrowseClicked()
 
 void LandingPage::pushButtonOpenClicked()
 {
-	//Open only if is not "<No files found>" element
-	QString fileSelected = ui->listWidget->currentItem()->text();
-	if (fileSelected != "<No files found>") {
+	//Open only if is not "<No documents found>" element
+	QString fileSelected = ui->tableWidget->currentItem()->text();
+	if (fileSelected != "<No documents found>") {
 		mngr.showLoadingScreen(loading, tr("Opening document..."));
 
 		//Send request to open file to server
-		emit openDocument(_user->getURIat(ui->listWidget->currentRow()));
+		emit openDocument(_user->getURIat(ui->tableWidget->currentRow()));
 	}
 
 }
 
 void LandingPage::pushButtonRemoveClicked()
 {
-	QString fileSelected = ui->listWidget->currentItem()->text();
-
-	if (fileSelected != "<No files found>") {
+	//Remove only if is not "<No documetts found>" element
+	QString fileSelected = ui->tableWidget->currentItem()->text();
+	if (fileSelected != "<No documents found>") {
 		mngr.showLoadingScreen(loading, tr("Removing document..."));
 
 		//Send request to remove file to server
-		emit removeDocument(_user->getURIat(ui->listWidget->currentRow()));
+		emit removeDocument(_user->getURIat(ui->tableWidget->currentRow()));
 	}
 }
 
