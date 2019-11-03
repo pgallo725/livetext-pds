@@ -42,6 +42,7 @@ void Client::serverDisconnection() {
 
 void Client::readBuffer() {
 
+
 	QByteArray dataBuffer;
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	QDataStream in(socket);
@@ -61,12 +62,24 @@ void Client::readBuffer() {
 
 		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-		message->read(dataStream);
+
+		try {
+			message->read(dataStream);
+		}
+		catch (MessageReadException re) {
+			qDebug() << "MessageReadException raised " << re.what();
+			socketBuffer.clear();
+			return;
+		}
 
 		messageHandler(message);
 
 		socketBuffer.clear();
 	}
+
+
+
+
 }
 
 void Client::messageHandler(MessageCapsule message) {
@@ -112,6 +125,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 {
 	QByteArray dataBuffer;
 
+
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
 
 		emit failureSignal(tr("Server not responding"));
@@ -123,8 +137,9 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 	stream >> socketBuffer;
 
 	dataBuffer = socket->read(socketBuffer.getDataSize());
-
-	socketBuffer.append(dataBuffer);
+	socketBuffer.append(dataBuffer);	
+		
+		
 	/* If not all bytes were received with the first chunk, wait for the next chunks
 	to arrive on the socket and append their content to the read buffer */
 	while (!socketBuffer.bufferReadyRead()) {
@@ -142,12 +157,19 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 		socketBuffer.append(dataBuffer);
 
 	}
-
+	
 	// Read all the available message data from the socket
 
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
 	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-	message->read(dataStream);
+	try {
+		message->read(dataStream);
+	}
+	catch (MessageReadException re) {
+		qDebug() << "MessageReadException raised " << re.what();
+		socketBuffer.clear();
+		return MessageCapsule();
+	}
 
 	socketBuffer.clear();
 
