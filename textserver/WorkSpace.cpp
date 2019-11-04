@@ -108,8 +108,7 @@ void WorkSpace::readMessage()
 		}
 		catch (MessageException& me) 
 		{
-			MessageCapsule message = MessageFactory::Failure(me.what());
-			message->send(socket);												// Inform the client of the exception
+			clientQuit(socket, true);					// Remove the client from the document
 			Logger(Error) << me.what();
 			socketBuffer.clear();
 			return;
@@ -178,7 +177,8 @@ void WorkSpace::documentSave()
 		Logger(Error) << de.what() << ", fails count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Send Failure message to all clients in the workspace
-			dispatchMessage(MessageFactory::Failure(de.what()), nullptr);
+			for each (QSslSocket * client in editors.keys())
+				clientQuit(client, true);
 		}
 		nFails++;
 	}
@@ -238,19 +238,29 @@ void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsul
 }
 
 /* Client close the document, must be re-send to TcpServer */
-void WorkSpace::clientQuit(QSslSocket* clientSocket)
+void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 {
 	QSharedPointer<Client> client = editors[clientSocket];
 
 	editors.remove(clientSocket);			// Remove the client from the WorkSpace
 
-	Logger() << "User " << client->getUsername() << " closed the document";
-
 	// Notify everyone else that this client exited the workspace
 	dispatchMessage(MessageFactory::PresenceRemove(client->getUserId()), nullptr);
 
-	// Send the DocumentExit confirmation to the client
-	MessageFactory::DocumentExit()->send(clientSocket);
+	if (isForced)
+	{
+		Logger() << "User " << client->getUsername() << " was removed from the document";
+
+		// Send the Failure notification to the client
+		MessageFactory::Failure("Server encountered an error")->send(clientSocket);
+	}
+	else
+	{
+		Logger() << "User " << client->getUsername() << " closed the document";
+
+		// Send the DocumentExit confirmation to the client
+		MessageFactory::DocumentExit()->send(clientSocket);
+	}
 
 	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);

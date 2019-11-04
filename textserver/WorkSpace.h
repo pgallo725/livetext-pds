@@ -42,7 +42,7 @@ public slots:
 
 	void newClient(QSharedPointer<Client> client);
 	void clientDisconnection();
-	void clientQuit(QSslSocket* clientSocket);
+	void clientQuit(QSslSocket* clientSocket, bool isForced);
 	void socketErr(QAbstractSocket::SocketError socketError);
 
 	void readMessage();

@@ -1545,7 +1545,6 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 	}
 
 	drawGraphicCursor(p);
-	updateEditorSelectedActions();
 }
 
 //Redraw all cursor in case of window update (scroll, resize...)

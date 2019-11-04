@@ -24,8 +24,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
-    QByteArrayData data[48];
-    char stringdata0[611];
+    QByteArrayData data[49];
+    char stringdata0[620];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -53,35 +53,36 @@ QT_MOC_LITERAL(15, 160, 19), // "clientDisconnection"
 QT_MOC_LITERAL(16, 180, 10), // "clientQuit"
 QT_MOC_LITERAL(17, 191, 11), // "QSslSocket*"
 QT_MOC_LITERAL(18, 203, 12), // "clientSocket"
-QT_MOC_LITERAL(19, 216, 9), // "socketErr"
-QT_MOC_LITERAL(20, 226, 28), // "QAbstractSocket::SocketError"
-QT_MOC_LITERAL(21, 255, 11), // "socketError"
-QT_MOC_LITERAL(22, 267, 11), // "readMessage"
-QT_MOC_LITERAL(23, 279, 15), // "dispatchMessage"
-QT_MOC_LITERAL(24, 295, 14), // "MessageCapsule"
-QT_MOC_LITERAL(25, 310, 7), // "message"
-QT_MOC_LITERAL(26, 318, 6), // "sender"
-QT_MOC_LITERAL(27, 325, 12), // "documentSave"
-QT_MOC_LITERAL(28, 338, 20), // "documentInsertSymbol"
-QT_MOC_LITERAL(29, 359, 6), // "Symbol"
-QT_MOC_LITERAL(30, 366, 6), // "symbol"
-QT_MOC_LITERAL(31, 373, 20), // "documentDeleteSymbol"
-QT_MOC_LITERAL(32, 394, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(33, 410, 8), // "position"
-QT_MOC_LITERAL(34, 419, 18), // "documentEditSymbol"
-QT_MOC_LITERAL(35, 438, 15), // "QTextCharFormat"
-QT_MOC_LITERAL(36, 454, 6), // "format"
-QT_MOC_LITERAL(37, 461, 17), // "documentEditBlock"
-QT_MOC_LITERAL(38, 479, 11), // "TextBlockID"
-QT_MOC_LITERAL(39, 491, 7), // "blockId"
-QT_MOC_LITERAL(40, 499, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(41, 516, 16), // "documentEditList"
-QT_MOC_LITERAL(42, 533, 10), // "TextListID"
-QT_MOC_LITERAL(43, 544, 6), // "listId"
-QT_MOC_LITERAL(44, 551, 15), // "QTextListFormat"
-QT_MOC_LITERAL(45, 567, 19), // "handleAccountUpdate"
-QT_MOC_LITERAL(46, 587, 19), // "answerAccountUpdate"
-QT_MOC_LITERAL(47, 607, 3) // "msg"
+QT_MOC_LITERAL(19, 216, 8), // "isForced"
+QT_MOC_LITERAL(20, 225, 9), // "socketErr"
+QT_MOC_LITERAL(21, 235, 28), // "QAbstractSocket::SocketError"
+QT_MOC_LITERAL(22, 264, 11), // "socketError"
+QT_MOC_LITERAL(23, 276, 11), // "readMessage"
+QT_MOC_LITERAL(24, 288, 15), // "dispatchMessage"
+QT_MOC_LITERAL(25, 304, 14), // "MessageCapsule"
+QT_MOC_LITERAL(26, 319, 7), // "message"
+QT_MOC_LITERAL(27, 327, 6), // "sender"
+QT_MOC_LITERAL(28, 334, 12), // "documentSave"
+QT_MOC_LITERAL(29, 347, 20), // "documentInsertSymbol"
+QT_MOC_LITERAL(30, 368, 6), // "Symbol"
+QT_MOC_LITERAL(31, 375, 6), // "symbol"
+QT_MOC_LITERAL(32, 382, 20), // "documentDeleteSymbol"
+QT_MOC_LITERAL(33, 403, 15), // "QVector<qint32>"
+QT_MOC_LITERAL(34, 419, 8), // "position"
+QT_MOC_LITERAL(35, 428, 18), // "documentEditSymbol"
+QT_MOC_LITERAL(36, 447, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(37, 463, 6), // "format"
+QT_MOC_LITERAL(38, 470, 17), // "documentEditBlock"
+QT_MOC_LITERAL(39, 488, 11), // "TextBlockID"
+QT_MOC_LITERAL(40, 500, 7), // "blockId"
+QT_MOC_LITERAL(41, 508, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(42, 525, 16), // "documentEditList"
+QT_MOC_LITERAL(43, 542, 10), // "TextListID"
+QT_MOC_LITERAL(44, 553, 6), // "listId"
+QT_MOC_LITERAL(45, 560, 15), // "QTextListFormat"
+QT_MOC_LITERAL(46, 576, 19), // "handleAccountUpdate"
+QT_MOC_LITERAL(47, 596, 19), // "answerAccountUpdate"
+QT_MOC_LITERAL(48, 616, 3) // "msg"
 
     },
     "WorkSpace\0requestAccountUpdate\0\0"
@@ -89,18 +90,18 @@ QT_MOC_LITERAL(47, 607, 3) // "msg"
     "icon\0password\0returnClient\0userDisconnected\0"
     "username\0noEditors\0URI\0documentURI\0"
     "newClient\0clientDisconnection\0clientQuit\0"
-    "QSslSocket*\0clientSocket\0socketErr\0"
-    "QAbstractSocket::SocketError\0socketError\0"
-    "readMessage\0dispatchMessage\0MessageCapsule\0"
-    "message\0sender\0documentSave\0"
-    "documentInsertSymbol\0Symbol\0symbol\0"
-    "documentDeleteSymbol\0QVector<qint32>\0"
-    "position\0documentEditSymbol\0QTextCharFormat\0"
-    "format\0documentEditBlock\0TextBlockID\0"
-    "blockId\0QTextBlockFormat\0documentEditList\0"
-    "TextListID\0listId\0QTextListFormat\0"
-    "handleAccountUpdate\0answerAccountUpdate\0"
-    "msg"
+    "QSslSocket*\0clientSocket\0isForced\0"
+    "socketErr\0QAbstractSocket::SocketError\0"
+    "socketError\0readMessage\0dispatchMessage\0"
+    "MessageCapsule\0message\0sender\0"
+    "documentSave\0documentInsertSymbol\0"
+    "Symbol\0symbol\0documentDeleteSymbol\0"
+    "QVector<qint32>\0position\0documentEditSymbol\0"
+    "QTextCharFormat\0format\0documentEditBlock\0"
+    "TextBlockID\0blockId\0QTextBlockFormat\0"
+    "documentEditList\0TextListID\0listId\0"
+    "QTextListFormat\0handleAccountUpdate\0"
+    "answerAccountUpdate\0msg"
 };
 #undef QT_MOC_LITERAL
 
@@ -126,18 +127,18 @@ static const uint qt_meta_data_WorkSpace[] = {
  // slots: name, argc, parameters, tag, flags
       14,    1,  122,    2, 0x0a /* Public */,
       15,    0,  125,    2, 0x0a /* Public */,
-      16,    1,  126,    2, 0x0a /* Public */,
-      19,    1,  129,    2, 0x0a /* Public */,
-      22,    0,  132,    2, 0x0a /* Public */,
-      23,    2,  133,    2, 0x0a /* Public */,
-      27,    0,  138,    2, 0x0a /* Public */,
-      28,    1,  139,    2, 0x0a /* Public */,
-      31,    1,  142,    2, 0x0a /* Public */,
-      34,    2,  145,    2, 0x0a /* Public */,
-      37,    2,  150,    2, 0x0a /* Public */,
-      41,    3,  155,    2, 0x0a /* Public */,
-      45,    4,  162,    2, 0x0a /* Public */,
-      46,    2,  171,    2, 0x0a /* Public */,
+      16,    2,  126,    2, 0x0a /* Public */,
+      20,    1,  131,    2, 0x0a /* Public */,
+      23,    0,  134,    2, 0x0a /* Public */,
+      24,    2,  135,    2, 0x0a /* Public */,
+      28,    0,  140,    2, 0x0a /* Public */,
+      29,    1,  141,    2, 0x0a /* Public */,
+      32,    1,  144,    2, 0x0a /* Public */,
+      35,    2,  147,    2, 0x0a /* Public */,
+      38,    2,  152,    2, 0x0a /* Public */,
+      42,    3,  157,    2, 0x0a /* Public */,
+      46,    4,  164,    2, 0x0a /* Public */,
+      47,    2,  173,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, QMetaType::QString, QMetaType::QImage, QMetaType::QString,    4,    5,    6,    7,
@@ -148,18 +149,18 @@ static const uint qt_meta_data_WorkSpace[] = {
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 17,   18,
-    QMetaType::Void, 0x80000000 | 20,   21,
+    QMetaType::Void, 0x80000000 | 17, QMetaType::Bool,   18,   19,
+    QMetaType::Void, 0x80000000 | 21,   22,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 24, 0x80000000 | 17,   25,   26,
+    QMetaType::Void, 0x80000000 | 25, 0x80000000 | 17,   26,   27,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 29,   30,
-    QMetaType::Void, 0x80000000 | 32,   33,
-    QMetaType::Void, 0x80000000 | 32, 0x80000000 | 35,   33,   36,
-    QMetaType::Void, 0x80000000 | 38, 0x80000000 | 40,   39,   36,
-    QMetaType::Void, 0x80000000 | 38, 0x80000000 | 42, 0x80000000 | 44,   39,   43,   36,
+    QMetaType::Void, 0x80000000 | 30,   31,
+    QMetaType::Void, 0x80000000 | 33,   34,
+    QMetaType::Void, 0x80000000 | 33, 0x80000000 | 36,   34,   37,
+    QMetaType::Void, 0x80000000 | 39, 0x80000000 | 41,   40,   37,
+    QMetaType::Void, 0x80000000 | 39, 0x80000000 | 43, 0x80000000 | 45,   40,   44,   37,
     QMetaType::Void, 0x80000000 | 17, QMetaType::QString, QMetaType::QImage, QMetaType::QString,   18,    5,    6,    7,
-    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 24,    4,   47,
+    QMetaType::Void, 0x80000000 | 3, 0x80000000 | 25,    4,   48,
 
        0        // eod
 };
@@ -176,7 +177,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 3: _t->noEditors((*reinterpret_cast< URI(*)>(_a[1]))); break;
         case 4: _t->newClient((*reinterpret_cast< QSharedPointer<Client>(*)>(_a[1]))); break;
         case 5: _t->clientDisconnection(); break;
-        case 6: _t->clientQuit((*reinterpret_cast< QSslSocket*(*)>(_a[1]))); break;
+        case 6: _t->clientQuit((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< bool(*)>(_a[2]))); break;
         case 7: _t->socketErr((*reinterpret_cast< QAbstractSocket::SocketError(*)>(_a[1]))); break;
         case 8: _t->readMessage(); break;
         case 9: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;

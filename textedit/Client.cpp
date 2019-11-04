@@ -112,7 +112,7 @@ void Client::messageHandler(MessageCapsule message) {
 	case ListEdit:
 		editList(message);
 		break;
-	case DocumentExit:
+	case Failure:
 		forceDocumentClose();
 		break;
 	default:

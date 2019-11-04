@@ -53,7 +53,7 @@ signals: void blockEdit(TextBlockID id, QTextBlockFormat fmt);
 signals: void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 signals: void messageDispatch(MessageCapsule message, QSslSocket* sender);
 
-signals: void documentClose(QSslSocket* clientSocket);
+signals: void documentClose(QSslSocket* clientSocket, bool forced = false);
 signals: void userLogout(QSslSocket* clientSocket);
 
 };
