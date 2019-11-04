@@ -10,7 +10,7 @@
 #include "Presence.h"
 #include "ShareUriWindow.h"
 
-#define CURSOR_SEND_INTERVAL 100
+#define CURSOR_SEND_INTERVAL 250
 
 //Method encapsulation
 class QAction;

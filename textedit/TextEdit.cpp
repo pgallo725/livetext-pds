@@ -754,14 +754,14 @@ void TextEdit::startCursorTimer()
 	qDebug() << "Started timer with ID = " << timerId;
 }
 
-//TODO: Uncomment before release
+
 void TextEdit::timerEvent(QTimerEvent* event)
 {
 	//Sends cursor position only if it's different from previous sent position
-	//if (_textEdit->textCursor().position() != _currentCursorPosition) {
-	_currentCursorPosition = _textEdit->textCursor().position();
-	emit newCursorPosition(_user.getUserId(), _textEdit->textCursor().position());
-	//}
+	if (_textEdit->textCursor().position() != _currentCursorPosition) {
+		_currentCursorPosition = _textEdit->textCursor().position();
+		emit newCursorPosition(_user.getUserId(), _textEdit->textCursor().position());
+	}
 }
 
 
@@ -917,8 +917,6 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	if (_extraCursor->currentList())
 		removeBlockFromList(position);
 
-	qDebug() << "Creating list at position " << position;
-
 	//Setting list indentation to 1 step
 	fmt.setIndent(1);
 
@@ -942,8 +940,6 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
 
 	if (currentList) {
-		qDebug() << "Removing block at position " << blockPosition;
-
 		//Getting current block
 		QTextBlock blk = _extraCursor->block();
 
@@ -970,8 +966,6 @@ void TextEdit::removeBlockFromList(int blockPosition)
 void TextEdit::addBlockToList(int blockPosition, int listPosition)
 {
 	const QSignalBlocker blocker(_textEdit->document());
-
-	qDebug() << "Add block at position " << blockPosition << " to list at position " << listPosition;
 
 	//Getting block at blockPosition
 	_extraCursor->setPosition(blockPosition);
