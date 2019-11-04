@@ -698,10 +698,10 @@ void TextEdit::showStatusBarMessage(QString text)
 	statusBar()->show();
 
 	//Shows message for 5"
-	statusBar()->showMessage(text, 5000);
+	statusBar()->showMessage(text, STATUSBAR_MSG_DURATION);
 
 	//Hides status bar after 5"
-	QTimer::singleShot(5000, [this] {statusBar()->hide(); });
+	QTimer::singleShot(STATUSBAR_MSG_DURATION, [this] {statusBar()->hide(); });
 }
 
 void TextEdit::closeDocumentError(QString error)
@@ -949,15 +949,15 @@ void TextEdit::removeBlockFromList(int blockPosition)
 
 	//Makes the index of the blockFormat object -1 --> Reset block format to default
 	blkFormat.setObjectIndex(-1);
+	blkFormat.setIndent(0);
 
 	//Apply new format (is applied anyway)
 	_extraCursor->setBlockFormat(blkFormat);
 
 	//Reload updated block format to send it to the server
-	blkFormat = _extraCursor->blockFormat();
-
+	//blkFormat = _extraCursor->blockFormat();
 	//Sends new block format to server
-	emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
+	//emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
 	//GUI update
 	updateEditorSelectedActions();
@@ -1477,14 +1477,16 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 						QTextBlock otherListBlock = textList->item(1);
 						emit assignBlockToList(currentBlock.position(), otherListBlock.position());
 					}
-					else emit createNewList(currentBlock.position(), textList->format());
+					else
+						emit createNewList(currentBlock.position(), textList->format());
 				}
 
 				//Else assign current block to his proper list
 				else
 					emit assignBlockToList(currentBlock.position(), firstListBlock.position());
 			}
-			else emit setBlockNoList(currentBlock.position());
+			else
+				emit setBlockNoList(currentBlock.position());
 		}
 	}
 
@@ -1492,6 +1494,10 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	if (charsAdded > 1) {
 		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
 	}
+
+
+	//Update GUI after some insertion/deletion
+	updateEditorSelectedActions();
 }
 
 
@@ -1684,17 +1690,3 @@ void TextEdit::updateUsersSelections()
 	//Shows user text highlight
 	handleMultipleSelections();
 }
-
-
-/**************************** DEBUG ****************************/
-/*
-*	Print document Text
-*/
-
-void TextEdit::printDocumenText()
-{
-	for (int i = 0; i < _textEdit->document()->characterCount(); i++) {
-		qDebug() << _textEdit->document()->characterAt(i);
-	}
-}
-
