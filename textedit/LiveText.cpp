@@ -30,7 +30,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 
 	//CLIENT - LANDING PAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished);	// Connection estabilished
-	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::impossibleToConnect);		// Impossibile to conncet
+	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::incorrectOperation);		// Impossibile to conncet
 	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation);
 
 

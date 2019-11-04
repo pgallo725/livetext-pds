@@ -219,12 +219,6 @@ void LandingPage::pushButtonConfirmOperationClicked()
 }
 
 
-void LandingPage::impossibleToConnect()
-{
-	incorrectOperation(tr("Invalid server/port"));
-}
-
-
 void LandingPage::connectionEstabilished()
 {
 	//Based on what screen we are we proceed to Login/Register

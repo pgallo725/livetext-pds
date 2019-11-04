@@ -37,7 +37,7 @@
 #include <Document.h>
 
 
-#define READYREAD_TIMEOUT 10000
+#define READYREAD_TIMEOUT 5000
 
 class Client : public QObject
 {
@@ -52,7 +52,7 @@ signals:
 
 	// Connection Signal
 	void connectionEstablished();
-	void impossibleToConnect();
+	void impossibleToConnect(QString errorType);
 	void abortConnection();
 
 	// Login, Logout & Register

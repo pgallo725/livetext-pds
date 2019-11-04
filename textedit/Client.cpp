@@ -137,9 +137,9 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 	stream >> socketBuffer;
 
 	dataBuffer = socket->read(socketBuffer.getDataSize());
-	socketBuffer.append(dataBuffer);	
-		
-		
+	socketBuffer.append(dataBuffer);
+
+
 	/* If not all bytes were received with the first chunk, wait for the next chunks
 	to arrive on the socket and append their content to the read buffer */
 	while (!socketBuffer.bufferReadyRead()) {
@@ -157,7 +157,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 		socketBuffer.append(dataBuffer);
 
 	}
-	
+
 	// Read all the available message data from the socket
 
 	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
@@ -184,18 +184,16 @@ void Client::Connect(QString ipAddress, quint16 port) {
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
 	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
 
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-		[&](QAbstractSocket::SocketError socketError) {
-			emit impossibleToConnect();						// Error in connection
-			socket->abort();
-		});
-
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->connectToHostEncrypted(ipAddress, port);
 	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
 		emit connectionEstablished();
 	else
-		emit impossibleToConnect();
+	{
+		QString error = socket->error() == QAbstractSocket::UnknownSocketError ?
+			tr("Invalid server/port") : socket->errorString();
+		emit impossibleToConnect(error);
+	}
 }
 
 void Client::Disconnect() {
@@ -210,7 +208,7 @@ void Client::Login(QString usr, QString passwd) {
 	MessageCapsule incomingMessage;
 	MessageCapsule loginRequest = MessageFactory::LoginRequest(usr);
 	try {
-	loginRequest->send(socket);
+		loginRequest->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -261,8 +259,8 @@ void Client::Login(QString usr, QString passwd) {
 	hash2.addData(nonce);
 
 	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(hash2.result());
-	try{
-	loginUnlock->send(socket);
+	try {
+		loginUnlock->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -307,8 +305,8 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 	// Link the stream to the socke and send the byte
 
 	MessageCapsule accountCreate = MessageFactory::AccountCreate(usr, nick, img, passwd);
-	try{
-	accountCreate->send(socket);
+	try {
+		accountCreate->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -374,7 +372,7 @@ void Client::openDocument(URI URI) {
 
 	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
 	try {
-	openDocument->send(socket);
+		openDocument->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -395,7 +393,7 @@ void Client::openDocument(URI URI) {
 		// Open Succeded
 		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-		if (socket->encryptedBytesAvailable() > 0) 
+		if (socket->encryptedBytesAvailable() > 0)
 			readBuffer();	//simulate the signal due to some byte arrived between Login and bind of the handler
 		emit openFileCompleted(documentOpened->getDocument());
 		return;
@@ -425,8 +423,8 @@ void Client::createDocument(QString name) {
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
-	try{
-	newDocument->send(socket);
+	try {
+		newDocument->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -478,8 +476,8 @@ void Client::deleteDocument(URI URI) {
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
 
 	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
-	try{
-	removeDocument->send(socket);
+	try {
+		removeDocument->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -528,8 +526,8 @@ void Client::sendCursor(qint32 userId, qint32 position) {
 
 	// Link the stream to the socket and send the byte
 	MessageCapsule moveCursor = MessageFactory::CursorMove(userId, position);
-	try{
-	moveCursor->send(socket);
+	try {
+		moveCursor->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -549,8 +547,8 @@ void Client::receiveCursor(MessageCapsule message) {
 void Client::sendChar(Symbol character, bool isLast) {
 
 	MessageCapsule sendChar = MessageFactory::CharInsert(character, isLast);
-	try{
-	sendChar->send(socket);
+	try {
+		sendChar->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -560,8 +558,8 @@ void Client::sendChar(Symbol character, bool isLast) {
 void Client::removeChar(QVector<int> position)
 {
 	MessageCapsule removeChar = MessageFactory::CharDelete(position);
-	try{
-	removeChar->send(socket);
+	try {
+		removeChar->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -572,7 +570,7 @@ void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
 {
 	MessageCapsule charFormat = MessageFactory::CharFormat(position, fmt);
 	try {
-	charFormat->send(socket);
+		charFormat->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
@@ -584,7 +582,7 @@ void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
 	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt);
 	try {
 		blockEdit->send(socket);
-	} 
+	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
 	}
@@ -594,8 +592,8 @@ void Client::listModified(TextBlockID blockId, TextListID listId, QTextListForma
 {
 	MessageCapsule listEdit = MessageFactory::ListEdit(blockId, listId, fmt);
 	try {
-	listEdit->send(socket);
-	} 
+		listEdit->send(socket);
+	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
 	}
@@ -624,7 +622,7 @@ void Client::editChar(MessageCapsule message) {
 void Client::editBlock(MessageCapsule message) {
 
 	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockId(),blockedit->getBlockFormat());
+	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat());
 }
 
 void Client::editList(MessageCapsule message)
@@ -645,13 +643,13 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
 	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
 
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
-	
+
 	try {
-	accountUpdate->send(socket); //Start the Account Update sequence of messages
+		accountUpdate->send(socket); //Start the Account Update sequence of messages
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();
-		emit accountModificationFail(tr("MessageWriteException raised")); 
+		emit accountModificationFail(tr("MessageWriteException raised"));
 		return;
 	}
 
@@ -716,11 +714,11 @@ void Client::removeFromFile(qint32 myId) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
-	
+
 	MessageCapsule closeDocument = MessageFactory::DocumentClose();
 	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
 	try {
-	closeDocument->send(socket);
+		closeDocument->send(socket);
 	}
 	catch (MessageWriteException we) {
 		qDebug() << "Messagge Write Exception " << we.what();

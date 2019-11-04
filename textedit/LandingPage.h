@@ -54,9 +54,6 @@ public:
 	//Updates user info in main page
 	void updateUserInfo();
 
-	//Home page error
-	void incorrectOperation(QString error);
-
 	//Document list update (remove/add document)
 	void documentDismissed();
 	void setupFileList();
@@ -88,9 +85,9 @@ signals:
 
 public slots:
 	void connectionEstabilished();
-	void impossibleToConnect();
 	void incorrectFileOperation(QString error);
 	void pushButtonBackClicked();
+	void incorrectOperation(QString error);
 
 private slots:
 	//GUI push buttons slots
