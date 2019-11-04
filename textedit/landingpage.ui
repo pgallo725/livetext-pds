@@ -343,73 +343,6 @@
                <number>0</number>
               </property>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_12">
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <item alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="label_10">
-                  <property name="palette">
-                   <palette>
-                    <active>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>112</red>
-                        <green>112</green>
-                        <blue>112</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </active>
-                    <inactive>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>112</red>
-                        <green>112</green>
-                        <blue>112</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </inactive>
-                    <disabled>
-                     <colorrole role="WindowText">
-                      <brush brushstyle="SolidPattern">
-                       <color alpha="255">
-                        <red>120</red>
-                        <green>120</green>
-                        <blue>120</blue>
-                       </color>
-                      </brush>
-                     </colorrole>
-                    </disabled>
-                   </palette>
-                  </property>
-                  <property name="text">
-                   <string>Powered by</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_4">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeType">
-                   <enum>QSizePolicy::Fixed</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>80</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <property name="spacing">
                  <number>4</number>
@@ -431,36 +364,100 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_qtlogo">
-                  <property name="minimumSize">
-                   <size>
-                    <width>40</width>
-                    <height>40</height>
-                   </size>
+                 <layout class="QVBoxLayout" name="verticalLayout_5">
+                  <property name="topMargin">
+                   <number>0</number>
                   </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>16777215</height>
-                   </size>
+                  <property name="rightMargin">
+                   <number>0</number>
                   </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_ssllogo">
-                  <property name="minimumSize">
-                   <size>
-                    <width>100</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                 </widget>
+                  <item>
+                   <widget class="QLabel" name="label_10">
+                    <property name="palette">
+                     <palette>
+                      <active>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>112</red>
+                          <green>112</green>
+                          <blue>112</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </active>
+                      <inactive>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>112</red>
+                          <green>112</green>
+                          <blue>112</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </inactive>
+                      <disabled>
+                       <colorrole role="WindowText">
+                        <brush brushstyle="SolidPattern">
+                         <color alpha="255">
+                          <red>120</red>
+                          <green>120</green>
+                          <blue>120</blue>
+                         </color>
+                        </brush>
+                       </colorrole>
+                      </disabled>
+                     </palette>
+                    </property>
+                    <property name="text">
+                     <string>Powered by</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_13">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="label_qtlogo">
+                      <property name="minimumSize">
+                       <size>
+                        <width>35</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>16777215</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_ssllogo">
+                      <property name="minimumSize">
+                       <size>
+                        <width>100</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </item>
@@ -1140,7 +1137,7 @@ a.a 2018/2019</string>
                   <number>30</number>
                  </attribute>
                  <attribute name="horizontalHeaderDefaultSectionSize">
-                  <number>80</number>
+                  <number>70</number>
                  </attribute>
                  <attribute name="horizontalHeaderHighlightSections">
                   <bool>false</bool>
