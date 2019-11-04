@@ -11,6 +11,7 @@
 #include "ShareUriWindow.h"
 
 #define CURSOR_SEND_INTERVAL 250
+#define STATUSBAR_MSG_DURATION 5000
 
 //Method encapsulation
 class QAction;
@@ -179,9 +180,6 @@ private:
 
 	//Status bar messages
 	void showStatusBarMessage(QString text);
-
-	//DEBUG
-	void printDocumenText();
 
 protected:
 	void timerEvent(QTimerEvent* event);

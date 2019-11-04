@@ -698,10 +698,10 @@ void TextEdit::showStatusBarMessage(QString text)
 	statusBar()->show();
 
 	//Shows message for 5"
-	statusBar()->showMessage(text, 5000);
+	statusBar()->showMessage(text, STATUSBAR_MSG_DURATION);
 
 	//Hides status bar after 5"
-	QTimer::singleShot(5000, [this] {statusBar()->hide(); });
+	QTimer::singleShot(STATUSBAR_MSG_DURATION, [this] {statusBar()->hide(); });
 }
 
 void TextEdit::closeDocumentError(QString error)
@@ -1690,17 +1690,3 @@ void TextEdit::updateUsersSelections()
 	//Shows user text highlight
 	handleMultipleSelections();
 }
-
-
-/**************************** DEBUG ****************************/
-/*
-*	Print document Text
-*/
-
-void TextEdit::printDocumenText()
-{
-	for (int i = 0; i < _textEdit->document()->characterCount(); i++) {
-		qDebug() << _textEdit->document()->characterAt(i);
-	}
-}
-
