@@ -193,6 +193,7 @@
     </QtUic>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AboutWindow.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="DocumentEditor.cpp" />
     <ClCompile Include="LandingPage.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="WidgetsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="AboutWindow.h" />
     <ClInclude Include="WidgetsManager.h" />
     <QtMoc Include="Client.h">
     </QtMoc>
@@ -263,6 +265,7 @@
     <ClInclude Include="ui_profileeditwindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="aboutwindow.ui" />
     <QtUic Include="landingpage.ui">
     </QtUic>
     <QtUic Include="newdocumentwindow.ui" />

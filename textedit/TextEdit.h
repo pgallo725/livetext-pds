@@ -10,6 +10,7 @@
 
 #include "Presence.h"
 #include "ShareUriWindow.h"
+#include "AboutWindow.h"
 
 #define CURSOR_SEND_INTERVAL 250
 #define STATUSBAR_MSG_DURATION 5000
@@ -145,6 +146,9 @@ private:
 
 	//Share URI window
 	ShareUriWindow* _shareUri;
+
+	//About dialog
+	AboutWindow* _aboutwindow;
 
 
 	/* ----------------------- METHODS ----------------------- */
@@ -306,6 +310,9 @@ private slots:
 
 	//Widget resize
 	void resizeEditor(const QSizeF& newSize);
+
+	//About
+	void linkPressed();
 };
 
 #endif // TEXTEDIT_H

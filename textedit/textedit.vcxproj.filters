@@ -83,6 +83,9 @@
     <ClCompile Include="NewDocumentWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AboutWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Client.h">
@@ -113,6 +116,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="NewDocumentWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="AboutWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -147,6 +153,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="newdocumentwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="aboutwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

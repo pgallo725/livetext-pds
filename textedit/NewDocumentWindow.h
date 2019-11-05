@@ -3,8 +3,6 @@
 
 #include <QDialog>
 
-class LandingPage;
-
 namespace Ui {
 	class NewDocumentWindow;
 }

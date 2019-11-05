@@ -30,6 +30,7 @@
 #include <QToolButton>
 #include <QScrollArea>
 #include <QTimer>
+#include <QDesktopServices>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -58,6 +59,11 @@ const QString rsrcPath = ":/images";
 
 TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(user)
 {
+
+	//About widget
+	_aboutwindow = new AboutWindow();
+
+
 	/**************************** GUI SETUP ****************************/
 
 	setupMainWindow();
@@ -131,7 +137,6 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 
 	//Generate new presence for current user
 	newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
-
 }
 
 /**************************** GUI SETUP ****************************/
@@ -576,6 +581,11 @@ void TextEdit::setupEditorActions()
 	connect(a, &QAction::triggered, this, &TextEdit::decrementSize);
 
 	tb->addAction(a);
+
+	/********** FONT AND SIZE **********/
+	menu = menuBar()->addMenu(tr("About"));
+	menu->addAction(tr("About..."), _aboutwindow, &AboutWindow::exec);
+	menu->addAction(tr("Project repository..."), this, &TextEdit::linkPressed);
 }
 
 
@@ -1698,4 +1708,16 @@ void TextEdit::updateUsersSelections()
 
 	//Shows user text highlight
 	handleMultipleSelections();
+}
+
+/**************************** ABOUT ****************************/
+/*
+*	Open about dialog
+*	Open repository main page
+*/
+
+
+void TextEdit::linkPressed()
+{
+	QDesktopServices::openUrl(QUrl("https://github.com/paolo257428/livetext-pds"));
 }
