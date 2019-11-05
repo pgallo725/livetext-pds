@@ -93,7 +93,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->pushButton_openuri, &QPushButton::clicked, this, &LandingPage::pushButtonOpenUriClicked);
 	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::pushButtonBackClicked);
 	connect(ui->pushButton_back, &QPushButton::clicked, this, &LandingPage::serverLogout);
-	connect(ui->pushButton_editProfile, &QPushButton::clicked, this, &LandingPage::editProfile);
+	connect(ui->pushButton_editProfile, &QPushButton::clicked, this, &LandingPage::openEditProfile);
 
 	connect(ui->lineEdit_psw, &QLineEdit::returnPressed, this, &LandingPage::pushButtonConfirmOperationClicked);
 	connect(ui->lineEdit_usr, &QLineEdit::returnPressed, this, &LandingPage::pushButtonConfirmOperationClicked);

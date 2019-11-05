@@ -17,7 +17,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	/************************ CONNECTS ************************/
 
 	//LANDINGPAGE - LIVETEXT
-	connect(_landingPage, &LandingPage::editProfile, this, &LiveText::openEditProfile);
+	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
 
 	//LANDINGPAGE - CLIENT
 	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect);		// Connect
@@ -147,7 +147,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::setBlockNoList, _docEditor, &DocumentEditor::removeBlockFromList);
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile);
+	connect(_textEdit, &TextEdit::openEditProfile, this, [this] {openEditProfile(false); });
 
 
 	//CLIENT - TEXTEDIT
@@ -256,9 +256,10 @@ void LiveText::closeEditor()
 */
 
 
-void LiveText::openEditProfile()
+void LiveText::openEditProfile(bool fromEditor)
 {
 	//Update edit profile window info
+	_editProfile->setFromEditor(fromEditor);
 	_editProfile->updateInfo();
 	_editProfile->exec();
 }

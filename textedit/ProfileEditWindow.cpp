@@ -120,7 +120,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 
 
 	//Sends new info to server
-	emit(accountUpdate(nick, userIcon, newPassword));
+	emit accountUpdate(nick, userIcon, newPassword, _fromEditor);
 }
 
 /* ---------------- GUI UPDATE ----------------*/
@@ -186,4 +186,9 @@ void ProfileEditWindow::updateInfo()
 	//Set username
 	ui->label_username->setText(_user.getUsername());
 	ui->lineEdit_editNick->setText(_user.getNickname());
+}
+
+void ProfileEditWindow::setFromEditor(bool fromEditor)
+{
+	_fromEditor = fromEditor;
 }
