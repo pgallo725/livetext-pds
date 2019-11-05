@@ -35,25 +35,28 @@ public:
 
 	~MessageHandler();
 
+signals:
 
-signals: MessageCapsule loginRequest(QSslSocket* clientSocket, QString username);
-signals: MessageCapsule loginUnlock(QSslSocket* clientSocket, QByteArray token);
+	MessageCapsule loginRequest(QSslSocket* clientSocket, QString username);
+	MessageCapsule loginUnlock(QSslSocket* clientSocket, QByteArray token);
 
-signals: MessageCapsule accountCreate(QSslSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
-signals: MessageCapsule accountUpdate(QSslSocket* çlientSocket, QString nickname, QImage icon, QString password);
+	MessageCapsule accountCreate(QSslSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
+	MessageCapsule accountUpdate(QSslSocket* çlientSocket, QString nickname, QImage icon, QString password);
 
-signals: MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName);
-signals: MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
-signals: MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
+	MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName);
+	MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
+	MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
-signals: void charInsert(Symbol s);
-signals: void charDelete(QVector<qint32> pos);
-signals: void charFormat(QVector<qint32> pos, QTextCharFormat fmt);
-signals: void blockEdit(TextBlockID id, QTextBlockFormat fmt);
-signals: void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
-signals: void messageDispatch(MessageCapsule message, QSslSocket* sender);
+	void charInsert(Symbol s);
+	void charDelete(QVector<qint32> pos);
+	void charFormat(QVector<qint32> pos, QTextCharFormat fmt);
+	void bulkInsert(QList<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
+	void bulkDelete(QList<QVector<qint32>> poss);
+	void blockEdit(TextBlockID id, QTextBlockFormat fmt);
+	void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
+	void messageDispatch(MessageCapsule message, QSslSocket* sender);
 
-signals: void documentClose(QSslSocket* clientSocket, bool forced = false);
-signals: void userLogout(QSslSocket* clientSocket);
+	void documentClose(QSslSocket* clientSocket, bool forced = false);
+	void userLogout(QSslSocket* clientSocket);
 
 };

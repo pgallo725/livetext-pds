@@ -35,6 +35,8 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 	case MessageType::CharInsert:			return new CharInsertMessage();
 	case MessageType::CharDelete:			return new CharDeleteMessage();
 	case MessageType::CharFormat:			return new CharFormatMessage();
+	case MessageType::BulkInsert:			return new BulkInsertMessage();
+	case MessageType::BulkDelete:			return new BulkDeleteMessage();
 	case MessageType::BlockEdit:			return new BlockEditMessage();
 	case MessageType::ListEdit:				return new ListEditMessage();
 	case MessageType::CursorMove:			return new CursorMoveMessage();
@@ -153,6 +155,16 @@ MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)
 MessageCapsule MessageFactory::CharFormat(QVector<qint32> position, QTextCharFormat fmt)
 {
 	return new CharFormatMessage(position, fmt);
+}
+
+MessageCapsule MessageFactory::BulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+{
+	return new BulkInsertMessage(symbols, isLast, bId, blkFmt);
+}
+
+MessageCapsule MessageFactory::BulkDelete(QList<QVector<qint32>> positions)
+{
+	return new BulkDeleteMessage(positions);
 }
 
 MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat fmt)

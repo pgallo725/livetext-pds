@@ -22,6 +22,8 @@ MessageHandler::MessageHandler(WorkSpace* w)
 	connect(this, &MessageHandler::charInsert, w, &WorkSpace::documentInsertSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charDelete, w, &WorkSpace::documentDeleteSymbol, Qt::DirectConnection);
 	connect(this, &MessageHandler::charFormat, w, &WorkSpace::documentEditSymbol, Qt::DirectConnection);
+	connect(this, &MessageHandler::bulkInsert, w, &WorkSpace::documentBulkInsert, Qt::DirectConnection);
+	connect(this, &MessageHandler::bulkDelete, w, &WorkSpace::documentBulkDelete, Qt::DirectConnection);
 	connect(this, &MessageHandler::blockEdit, w, &WorkSpace::documentEditBlock, Qt::DirectConnection);
 	connect(this, &MessageHandler::listEdit, w, &WorkSpace::documentEditList, Qt::DirectConnection);
 	connect(this, &MessageHandler::messageDispatch, w, &WorkSpace::dispatchMessage, Qt::DirectConnection);
@@ -160,6 +162,22 @@ void MessageHandler::process(MessageCapsule message, QSslSocket* socket)
 		// We want to achieve a server-enforced global ordering of format changes, therefore
 		// the CharFormat message is sent back to all editors by not specifying a sender [nullptr]
 		emit messageDispatch(message, nullptr);
+		break;
+	}
+
+	case BulkInsert:
+	{
+		BulkInsertMessage* blkInsertMsg = dynamic_cast<BulkInsertMessage*>(message.get());
+		emit bulkInsert(blkInsertMsg->getSymbols(), blkInsertMsg->getBlockId(), blkInsertMsg->getBlockFormat());
+		emit messageDispatch(message, socket);
+		break;
+	}
+
+	case BulkDelete:
+	{
+		BulkDeleteMessage* blkDeleteMsg = dynamic_cast<BulkDeleteMessage*>(message.get());
+		emit bulkDelete(blkDeleteMsg->getPositions());
+		emit messageDispatch(message, socket);
 		break;
 	}
 

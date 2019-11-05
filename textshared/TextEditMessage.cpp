@@ -4,7 +4,7 @@
 /*************** CHAR INSERT MESSAGE ***************/
 
 CharInsertMessage::CharInsertMessage()
-	: Message(CharInsert)
+	: Message(CharInsert), m_flag(false)
 {
 }
 
@@ -95,6 +95,77 @@ QTextCharFormat CharFormatMessage::getCharFormat() const
 }
 
 
+/*************** BULK INSERT MESSAGE ***************/
+
+BulkInsertMessage::BulkInsertMessage()
+	: Message(BulkInsert), m_flag(false)
+{
+}
+
+BulkInsertMessage::BulkInsertMessage(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+	: Message(BulkInsert), m_symbols(symbols), m_blockId(bId), m_blockFmt(blkFmt), m_flag(isLast)
+{
+}
+
+void BulkInsertMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_symbols << m_blockId << m_blockFmt << m_flag;
+}
+
+void BulkInsertMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_symbols >> m_blockId >> m_blockFmt >> m_flag;
+}
+
+QList<Symbol> BulkInsertMessage::getSymbols() const
+{
+	return m_symbols;
+}
+
+TextBlockID BulkInsertMessage::getBlockId() const
+{
+	return m_blockId;
+}
+
+QTextBlockFormat BulkInsertMessage::getBlockFormat() const
+{
+	return m_blockFmt;
+}
+
+bool BulkInsertMessage::getIsLast() const
+{
+	return m_flag;
+}
+
+
+/*************** BULK DELETE MESSAGE ***************/
+
+BulkDeleteMessage::BulkDeleteMessage()
+	: Message(BulkDelete)
+{
+}
+
+BulkDeleteMessage::BulkDeleteMessage(QList<QVector<qint32>> positions)
+	: Message(BulkDelete), m_fPositions(positions)
+{
+}
+
+void BulkDeleteMessage::writeTo(QDataStream& stream) const
+{
+	stream << m_fPositions;
+}
+
+void BulkDeleteMessage::readFrom(QDataStream& stream)
+{
+	stream >> m_fPositions;
+}
+
+QList<QVector<qint32>> BulkDeleteMessage::getPositions() const
+{
+	return m_fPositions;
+}
+
+
 /*************** BLOCK FORMAT EDIT MESSAGE ***************/
 
 BlockEditMessage::BlockEditMessage()
@@ -126,6 +197,9 @@ QTextBlockFormat BlockEditMessage::getBlockFormat() const
 {
 	return m_blockFmt;
 }
+
+
+/*************** LIST BLOCKS EDIT MESSAGE ***************/
 
 ListEditMessage::ListEditMessage()
 	: Message(ListEdit), m_blockId(TextBlockID(nullptr)), m_listId(0)

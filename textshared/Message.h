@@ -36,6 +36,8 @@ enum MessageType : quint16
 	CharInsert,
 	CharDelete,
 	CharFormat,
+	BulkInsert,
+	BulkDelete,
 	BlockEdit,
 	ListEdit,
 

@@ -194,6 +194,24 @@ void WorkSpace::documentDeleteSymbol(QVector<qint32> position)
 	doc->remove(position);
 }
 
+void WorkSpace::documentBulkInsert(QList<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
+{
+	for each (Symbol symbol in symbols)
+	{
+		doc->insert(symbol);
+	}
+
+	doc->formatBlock(blockId, blockFmt);
+}
+
+void WorkSpace::documentBulkDelete(QList<QVector<qint32>> positions)
+{
+	for each (QVector<qint32> position in positions)
+	{
+		doc->remove(position);
+	}
+}
+
 void WorkSpace::documentEditSymbol(QVector<qint32> position, QTextCharFormat format)
 {
 	doc->formatSymbol(position, format);

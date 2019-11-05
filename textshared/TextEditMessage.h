@@ -87,6 +87,64 @@ public:
 };
 
 
+class BulkInsertMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QList<Symbol> m_symbols;
+	TextBlockID m_blockId;
+	QTextBlockFormat m_blockFmt;
+	bool m_flag;
+	
+protected:
+
+	BulkInsertMessage();	// empty constructor
+
+	// Constructor for BulkInsert messages, carrying the list of symbols in a block and its format
+	BulkInsertMessage(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+
+	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
+
+public:
+
+	~BulkInsertMessage() {};
+
+	QList<Symbol> getSymbols() const;
+	TextBlockID getBlockId() const;
+	QTextBlockFormat getBlockFormat() const;
+	bool getIsLast() const;
+};
+
+
+class BulkDeleteMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QList<QVector<qint32>> m_fPositions;
+
+protected:
+
+	BulkDeleteMessage();	// empty constructor
+
+	// Constructor for BulkDelete messages, with the fractional positions to delete
+	BulkDeleteMessage(QList<QVector<qint32>> positions);
+
+	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
+
+public:
+
+	~BulkDeleteMessage() {};
+
+	QList<QVector<qint32>> getPositions() const;
+};
+
+
 class BlockEditMessage : public Message
 {
 	friend MessageFactory;

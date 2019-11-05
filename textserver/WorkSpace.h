@@ -51,6 +51,8 @@ public slots:
 	void documentSave();
 	void documentInsertSymbol(Symbol symbol);
 	void documentDeleteSymbol(QVector<qint32> position);
+	void documentBulkInsert(QList<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt);
+	void documentBulkDelete(QList<QVector<qint32>> positions);
 	void documentEditSymbol(QVector<qint32> position, QTextCharFormat format);
 	void documentEditBlock(TextBlockID blockId, QTextBlockFormat format);
 	void documentEditList(TextBlockID blockId, TextListID listId, QTextListFormat format);
@@ -58,10 +60,12 @@ public slots:
 	void handleAccountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
 	void answerAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg);
 
-signals: void requestAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
-signals: void returnClient(QSharedPointer<Client> client);
-signals: void userDisconnected(QString username);
-signals: void noEditors(URI documentURI);
+signals:
+
+	void requestAccountUpdate(QSharedPointer<Client> client, QString nickname, QImage icon, QString password);
+	void returnClient(QSharedPointer<Client> client);
+	void userDisconnected(QString username);
+	void noEditors(URI documentURI);
 
 };
 
