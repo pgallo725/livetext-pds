@@ -6,17 +6,17 @@
 class LandingPage;
 
 namespace Ui {
-	class NewFileWindow;
+	class NewDocumentWindow;
 }
 
-class NewFileWindow : public QDialog
+class NewDocumentWindow : public QDialog
 {
 	Q_OBJECT
 
 public:
-	Ui::NewFileWindow* ui;
-	NewFileWindow(QString& filename, QWidget* parent = nullptr);
-	~NewFileWindow();
+	Ui::NewDocumentWindow* ui;
+	NewDocumentWindow(QString& filename, QWidget* parent = nullptr);
+	~NewDocumentWindow();
 
 	//Show an error
 	void incorrectOperation(QString error);

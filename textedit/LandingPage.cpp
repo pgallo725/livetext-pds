@@ -37,7 +37,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 
 	//Creates new file window
-	newFileWindow = new NewFileWindow(_buffer);
+	newFileWindow = new NewDocumentWindow(_buffer);
 
 	//Create open from URI window
 	openURIWindow = new OpenUriWindow(_buffer);
@@ -491,6 +491,9 @@ void LandingPage::documentDismissed()
 {
 	mngr.hideLoadingScreen(loading);
 
+	//Reset error messages
+	resetFields();
+
 	//Recompute file list
 	setupFileList();
 }
@@ -515,6 +518,9 @@ void LandingPage::enablePushButtonOpen()
 void LandingPage::closeAll()
 {
 	mngr.hideLoadingScreen(loading);
+
+	//Reset error messages
+	resetFields();
 
 	//Close all LandingPage
 	openURIWindow->close();

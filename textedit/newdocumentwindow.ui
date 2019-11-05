@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewFileWindow</class>
- <widget class="QDialog" name="NewFileWindow">
+ <class>NewDocumentWindow</class>
+ <widget class="QDialog" name="NewDocumentWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>New File</string>
+   <string>New Document</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -46,7 +46,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Choose filename to create a new document</string>
+      <string>Choose the name of your new document</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -69,7 +69,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Filename</string>
+        <string>Document name</string>
        </property>
       </widget>
      </item>

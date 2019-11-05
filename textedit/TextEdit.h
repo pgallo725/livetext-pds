@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include <QTimer>
 
 
 #include <User.h>
@@ -116,7 +117,7 @@ private:
 	QAction* actionTextBold;
 	QAction* actionTextUnderline;
 	QAction* actionTextItalic;
-	QAction* actionTextStrikethrough;
+	QAction* actionTextStrikeout;
 	QAction* actionTextColor;
 	QAction* actionAlignLeft;
 	QAction* actionAlignCenter;
@@ -140,7 +141,7 @@ private:
 	QScrollArea* area;
 
 	//Timer event
-	int timerId;
+	QTimer _cursorTimer;
 
 	//Share URI window
 	ShareUriWindow* _shareUri;
@@ -150,11 +151,7 @@ private:
 
 	//GUI Setup
 	void setupMainWindow();
-	void setupFileActions();
-	void setupEditActions();
-	void setupTextActions();
-	void setupShareActions();
-	void setupUserActions();
+	void setupEditorActions();
 	void setupOnlineUsersActions();
 
 	//Warning message before closing document
@@ -170,6 +167,8 @@ private:
 	void lineHeightChanged(qreal height);
 	void toggleCheckList(int listType);
 
+	//GUI update
+	void updateEditorSelectedActions();
 
 	//User text highlighting
 	void handleMultipleSelections();
@@ -182,7 +181,7 @@ private:
 	void showStatusBarMessage(QString text);
 
 protected:
-	void timerEvent(QTimerEvent* event);
+	void cursorTimerEvent();
 
 public:
 	TextEdit(User& user, QWidget* parent = 0);
@@ -284,7 +283,7 @@ private slots:
 	void textBold();
 	void textUnderline();
 	void textItalic();
-	void textStrikethrough();
+	void textStrikeout();
 	void textFamily(const QString& f);
 	void textSize(const QString& p);
 	void incrementSize();
@@ -300,7 +299,7 @@ private slots:
 
 	//GUI update according to format and cursor position
 	void currentCharFormatChanged(const QTextCharFormat& format);
-	void updateEditorSelectedActions();
+	void cursorPositionChanged();
 
 	//Clipboard filter
 	void clipboardDataChanged();

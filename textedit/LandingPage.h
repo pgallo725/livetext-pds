@@ -9,7 +9,7 @@
 #include <User.h>
 
 #include "OpenUriWindow.h"
-#include "NewFileWindow.h"
+#include "NewDocumentWindow.h"
 #include "WidgetsManager.h"
 
 
@@ -35,7 +35,7 @@ private:
 
 	//Dialogs to open/create a file
 	OpenUriWindow* openURIWindow;
-	NewFileWindow* newFileWindow;
+	NewDocumentWindow* newFileWindow;
 	//Service buffer for filename or URI
 	QString _buffer;
 

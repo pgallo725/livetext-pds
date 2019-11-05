@@ -182,7 +182,6 @@ void Client::Connect(QString ipAddress, quint16 port) {
 
 	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
 	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-	connect(socket, SIGNAL(error(QAbstractSocket::SocketError socketError)), this, SLOT(errorHandler(QAbstractSocket::SocketError)));
 
 	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
 	socket->connectToHostEncrypted(ipAddress, port);

@@ -197,7 +197,7 @@
     <ClCompile Include="DocumentEditor.cpp" />
     <ClCompile Include="LandingPage.cpp" />
     <ClCompile Include="LiveText.cpp" />
-    <ClCompile Include="NewFileWindow.cpp" />
+    <ClCompile Include="NewDocumentWindow.cpp" />
     <ClCompile Include="OpenUriWindow.cpp" />
     <ClCompile Include="Presence.cpp" />
     <ClCompile Include="ProfileEditWindow.cpp" />
@@ -215,7 +215,7 @@
     <QtMoc Include="LandingPage.h">
     </QtMoc>
     <ClInclude Include="LiveText.h" />
-    <QtMoc Include="NewFileWindow.h">
+    <QtMoc Include="NewDocumentWindow.h">
     </QtMoc>
     <QtMoc Include="OpenUriWindow.h">
     </QtMoc>
@@ -259,15 +259,13 @@
       </AdditionalInputs>
     </CustomBuild>
     <ClInclude Include="ui_landingpage.h" />
-    <ClInclude Include="ui_newfilewindow.h" />
     <ClInclude Include="ui_openuriwindow.h" />
     <ClInclude Include="ui_profileeditwindow.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="landingpage.ui">
     </QtUic>
-    <QtUic Include="newfilewindow.ui">
-    </QtUic>
+    <QtUic Include="newdocumentwindow.ui" />
     <QtUic Include="openuriwindow.ui">
     </QtUic>
     <QtUic Include="profileeditwindow.ui">

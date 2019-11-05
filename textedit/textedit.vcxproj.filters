@@ -59,9 +59,6 @@
     <ClCompile Include="LiveText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NewFileWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OpenUriWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,6 +80,9 @@
     <ClCompile Include="WidgetsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NewDocumentWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Client.h">
@@ -97,9 +97,6 @@
     <ClInclude Include="LiveText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="NewFileWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="OpenUriWindow.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -115,6 +112,9 @@
     <QtMoc Include="TextEdit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="NewDocumentWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -124,9 +124,6 @@
       <Filter>Generated Files</Filter>
     </CustomBuild>
     <ClInclude Include="ui_landingpage.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_newfilewindow.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui_openuriwindow.h">
@@ -140,9 +137,6 @@
     <QtUic Include="landingpage.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="newfilewindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="openuriwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -150,6 +144,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="shareuriwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="newdocumentwindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

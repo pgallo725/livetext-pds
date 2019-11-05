@@ -1,5 +1,5 @@
-#include "NewFileWindow.h"
-#include "ui_newfilewindow.h"
+#include "NewDocumentWindow.h"
+#include "ui_newdocumentwindow.h"
 
 #include <QWidget>
 #include <QStyle>
@@ -9,9 +9,9 @@
 
 #include "WidgetsManager.h"
 
-NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewFileWindow), _filename(filename) {
+NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewDocumentWindow), _filename(filename) {
 	//Window name
-	setWindowTitle(tr("New file"));
+	setWindowTitle(tr("New document"));
 
 	//UI setup
 	ui->setupUi(this);
@@ -21,8 +21,8 @@ NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(paren
 	mngr.centerAndResize(0.3, 0.15);
 
 	//Connect for push buttons
-	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewFileWindow::acceptClicked);
-	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewFileWindow::rejectClicked);
+	connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &NewDocumentWindow::acceptClicked);
+	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewDocumentWindow::rejectClicked);
 
 	//Validator to prevent insertion of '_' character in filename
 	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
@@ -31,25 +31,25 @@ NewFileWindow::NewFileWindow(QString& filename, QWidget* parent) : QDialog(paren
 	ui->lineEdit_fileName->setFocus();
 }
 
-NewFileWindow::~NewFileWindow()
+NewDocumentWindow::~NewDocumentWindow()
 {
 	delete ui;
 }
 
-void NewFileWindow::incorrectOperation(QString error)
+void NewDocumentWindow::incorrectOperation(QString error)
 {
 	//Sets error
 	ui->label_incorrectFilename->setText(error);
 }
 
-void NewFileWindow::resetFields()
+void NewDocumentWindow::resetFields()
 {
 	//Reset all fields
 	ui->lineEdit_fileName->setText("");
 	ui->label_incorrectFilename->setText("");
 }
 
-void NewFileWindow::acceptClicked()
+void NewDocumentWindow::acceptClicked()
 {
 	//Gets filename
 	_filename = ui->lineEdit_fileName->text();
@@ -58,10 +58,10 @@ void NewFileWindow::acceptClicked()
 	if (!_filename.isEmpty())
 		this->done(QDialog::Accepted);
 	else
-		incorrectOperation(tr("Please insert a valid filename"));
+		incorrectOperation(tr("Please insert a valid document name"));
 }
 
-void NewFileWindow::rejectClicked()
+void NewDocumentWindow::rejectClicked()
 {
 	//Reset fields and closes
 	resetFields();

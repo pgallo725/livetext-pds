@@ -29,6 +29,7 @@
 #include <QRectF>
 #include <QToolButton>
 #include <QScrollArea>
+#include <QTimer>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
@@ -55,22 +56,18 @@
 const QString rsrcPath = ":/images";
 
 
-TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), timerId(-1), _user(user)
+TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(user)
 {
 	/**************************** GUI SETUP ****************************/
 
 	setupMainWindow();
-	setupFileActions();
-	setupEditActions();
-	setupTextActions();
-	setupShareActions();
-	setupUserActions();
+	setupEditorActions();
 
 
 	/**************************** CONNECTS ****************************/
 
 	//GUI update in case of format change or cursor position changed
-	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::updateEditorSelectedActions);
+	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
 
 
 	//Online users cursor redraw in case of window aspect, char format, cursor position changed
@@ -159,12 +156,13 @@ void TextEdit::setupMainWindow()
 	//Center and resizes window
 	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
 
-	resize(availableGeometry.width() * 0.6, availableGeometry.height() * 2 / 3);
+	int screenWidth = availableGeometry.width() * 0.6;
+	resize(screenWidth + 100, availableGeometry.height() * 0.75);
 	move((availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2);
 
 	//Inizialize Qt text editor
 	_textEdit = new QTextEditWrapper();
-	_textEdit->setMaximumWidth(width() * 0.9);
+	_textEdit->setMaximumWidth(screenWidth);
 	_textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	//Creates 3D effect of document
@@ -209,20 +207,29 @@ void TextEdit::setupMainWindow()
 
 
 
-void TextEdit::setupFileActions()
+void TextEdit::setupEditorActions()
 {
+	/********** DOCUMENT MENU **********/
+
 	//New toolbar
-	QToolBar* tb = addToolBar(tr("File Actions"));
+	QToolBar* tb = addToolBar(tr("Document Actions"));
 
 	//New menu
-	QMenu* menu = menuBar()->addMenu(tr("&File"));
+	QMenu* menu = menuBar()->addMenu(tr("&Document"));
+
+	//Share URI, opens a box with URI pasted inside
+	const QIcon shareIcon = QIcon(rsrcPath + "/editor/share.png");
+	QAction* a = menu->addAction(shareIcon, tr("Share URI"), this, &TextEdit::fileShare);
+	tb->addAction(a);
+
+	menu->addSeparator();
 
 	//If the print plugin is enabled
 #ifndef QT_NO_PRINTER
 
 	//Export document in PDF
 	const QIcon exportPdfIcon = QIcon(rsrcPath + "/editor/exportpdf.png");
-	QAction* a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
+	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
 	a->setPriority(QAction::LowPriority);
 	a->setShortcut(Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
@@ -236,26 +243,19 @@ void TextEdit::setupFileActions()
 	a->setShortcut(QKeySequence::Print);
 	tb->addAction(a);
 
-	menu->addSeparator();
 #endif
-}
+	menu->addSeparator();
 
-void TextEdit::setupShareActions()
-{
-	QToolBar* tb = addToolBar(tr("Share"));
-	QMenu* menu = menuBar()->addMenu(tr("&Share"));
-
-	//Share URI, opens a box with URI pasted inside
-	const QIcon shareIcon = QIcon(rsrcPath + "/editor/share.png");
-	QAction* a = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
-	tb->addAction(a);
-}
+	//Close document
+	const QIcon closeDocumentIcon(rsrcPath + "/misc/logout.png");
+	QAction* closeDocoumentAction = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
 
 
-void TextEdit::setupEditActions()
-{
-	QToolBar* tb = addToolBar(tr("Edit Actions"));
-	QMenu* menu = menuBar()->addMenu(tr("&Edit"));
+
+	/********** EDIT MENU **********/
+	
+	tb = addToolBar(tr("Edit Actions"));
+	menu = menuBar()->addMenu(tr("&Edit"));
 
 
 #ifndef QT_NO_CLIPBOARD
@@ -283,16 +283,21 @@ void TextEdit::setupEditActions()
 	//Checks if there's some items in the clipboards
 	clipboardDataChanged();
 #endif
-}
 
-void TextEdit::setupTextActions()
-{
-	QToolBar* tb = addToolBar(tr("Format Actions"));
-	QMenu* menu = menuBar()->addMenu(tr("F&ormat"));
+	//Select all
+	menu->addSeparator();
+	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
+
+
+
+	/********** FORMAT MENU **********/
+
+	tb = addToolBar(tr("Format Actions"));
+	QMenu* formatMenu = menuBar()->addMenu(tr("F&ormat"));
 
 	//Bold
 	const QIcon boldIcon = QIcon(rsrcPath + "/editor/textbold.png");
-	actionTextBold = menu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
+	actionTextBold = formatMenu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
 	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
 	actionTextBold->setPriority(QAction::LowPriority);
 
@@ -310,7 +315,7 @@ void TextEdit::setupTextActions()
 
 	//Italic
 	const QIcon italicIcon = QIcon(rsrcPath + "/editor/textitalic.png");
-	actionTextItalic = menu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
+	actionTextItalic = formatMenu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
 	actionTextItalic->setPriority(QAction::LowPriority);
 	actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
 	actionTextItalic->setCheckable(true);
@@ -324,7 +329,7 @@ void TextEdit::setupTextActions()
 
 	//Underline
 	const QIcon underlineIcon = QIcon(rsrcPath + "/editor/textunder.png");
-	actionTextUnderline = menu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
+	actionTextUnderline = formatMenu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
 	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
 	actionTextUnderline->setPriority(QAction::LowPriority);
 	actionTextUnderline->setCheckable(true);
@@ -337,43 +342,50 @@ void TextEdit::setupTextActions()
 
 	//Strikethrough
 	const QIcon strikeIcon = QIcon(rsrcPath + "/editor/textstrikethrough.png");
-	actionTextStrikethrough = menu->addAction(strikeIcon, tr("&Strikethrough"), this, &TextEdit::textStrikethrough);
-	actionTextStrikethrough->setPriority(QAction::LowPriority);
-	actionTextStrikethrough->setCheckable(true);
+	actionTextStrikeout = formatMenu->addAction(strikeIcon, tr("&Strikeout"), this, &TextEdit::textStrikeout);
+	actionTextStrikeout->setPriority(QAction::LowPriority);
+	actionTextStrikeout->setCheckable(true);
 
 	QFont strikethrough;
 	strikethrough.setStrikeOut(true);
-	actionTextStrikethrough->setFont(strikethrough);
+	actionTextStrikeout->setFont(strikethrough);
 
-	tb->addAction(actionTextStrikethrough);
+	tb->addAction(actionTextStrikeout);
 
-	menu->addSeparator();
+	formatMenu->addSeparator();
+	tb->addSeparator();
+
+	//Color
+	QPixmap pix(rsrcPath + "/editor/textcolor.png");
+	actionTextColor = formatMenu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
+	tb->addAction(actionTextColor);
+
+	formatMenu->addSeparator();
 	tb->addSeparator();
 
 
-	/***** ALIGNMENT *****/
-	//Left
+	//Align Left
 	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 	actionAlignLeft->setPriority(QAction::LowPriority);
 
-	//Center
+	//Align Center
 	const QIcon centerIcon = QIcon(rsrcPath + "/editor/textcenter.png");
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 	actionAlignCenter->setPriority(QAction::LowPriority);
 
-	//Right
+	//Align Right
 	const QIcon rightIcon = QIcon(rsrcPath + "/editor/textright.png");
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 	actionAlignRight->setPriority(QAction::LowPriority);
 
-	//Justify
+	//Align Justify
 	const QIcon fillIcon = QIcon(rsrcPath + "/editor/textjustify.png");
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
@@ -399,7 +411,7 @@ void TextEdit::setupTextActions()
 
 	//Add all actions to toolbar
 	tb->addActions(alignGroup->actions());
-	menu->addActions(alignGroup->actions());
+	formatMenu->addActions(alignGroup->actions());
 
 	tb->addSeparator();
 
@@ -497,16 +509,13 @@ void TextEdit::setupTextActions()
 
 	tb->addWidget(lineHeightButton);
 
-	menu->addSeparator();
-	tb->addSeparator();
+	formatMenu->addSeparator();
 
-	//Color
-	QPixmap pix(rsrcPath + "/editor/textcolor.png");
-	actionTextColor = menu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
-	tb->addAction(actionTextColor);
+	/********** ACCOUNT MENU **********/
+	addToolBarBreak(Qt::TopToolBarArea);
 
-	menu->addSeparator();
-	tb->addSeparator();
+	tb = addToolBar(tr("&Account"));
+	menu = menuBar()->addMenu(tr("&Account"));
 
 	//Highlight user text
 	const QIcon HighlightUsersIcon(rsrcPath + "/editor/highlightusers.png");
@@ -514,11 +523,23 @@ void TextEdit::setupTextActions()
 	tb->addAction(actionHighlightUsers);
 	actionHighlightUsers->setCheckable(true);
 
+	//Edit profile
+	const QIcon userIcon(rsrcPath + "/editor/user.png");
+	a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
+	tb->addAction(a);
+
+	//Close document
+	tb->addAction(closeDocoumentAction);
+	
+	//Online users toolbar
+	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
+
+	/********** FONT AND SIZE **********/
 
 	//Font and Size
 	tb = addToolBar(tr("Font and Size"));
 	tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-	addToolBarBreak(Qt::TopToolBarArea);
 	addToolBar(tb);
 
 	//Combobox setup
@@ -544,7 +565,7 @@ void TextEdit::setupTextActions()
 
 
 	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/editor/incrementsize.png");
-	QAction* a = new QAction(incrementSizeIcon, tr("Increment text size"), this);
+	a = new QAction(incrementSizeIcon, tr("Increment text size"), this);
 	connect(a, &QAction::triggered, this, &TextEdit::incrementSize);
 
 	tb->addAction(a);
@@ -557,25 +578,6 @@ void TextEdit::setupTextActions()
 	tb->addAction(a);
 }
 
-void TextEdit::setupUserActions()
-{
-	QToolBar* tb = addToolBar(tr("&Account"));
-	QMenu* menu = menuBar()->addMenu(tr("&Account"));
-
-	//Edit profile
-	const QIcon userIcon(rsrcPath + "/editor/user.png");
-	QAction* a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
-	tb->addAction(a);
-
-	//Close document
-	const QIcon closeDocumentIcon(rsrcPath + "/misc/logout.png");
-	a = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
-	tb->addAction(a);
-
-	//Online users toolbar
-	onlineUsersToolbar = new QToolBar(tr("&Online users"));
-	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
-}
 
 
 /**************************** ONLINE USERS ****************************/
@@ -606,7 +608,6 @@ void TextEdit::setupOnlineUsersActions()
 		p->setAction(onlineAction);
 	}
 }
-
 
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
@@ -687,7 +688,7 @@ void TextEdit::askBeforeCloseDocument()
 {
 	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
 	if (reply == QMessageBox::Yes) {
-		killTimer(timerId);
+		_cursorTimer.stop();
 		emit closeDocument(_user.getUserId());
 	}
 }
@@ -707,7 +708,8 @@ void TextEdit::showStatusBarMessage(QString text)
 void TextEdit::closeDocumentError(QString error)
 {
 	showStatusBarMessage(error);
-	startTimer(timerId);
+	//Restart timer to send
+	_cursorTimer.start();
 }
 
 
@@ -722,8 +724,7 @@ void TextEdit::closeEditor()
 	_textEdit->document()->clear();
 
 	//Kill timer
-	if (timerId > 0)
-		killTimer(timerId);
+	_cursorTimer.stop();
 
 	if (_shareUri->isVisible()) {
 		_shareUri->close();
@@ -750,12 +751,12 @@ void TextEdit::resetCursorPosition()
 //	Handle timer event to send cursor position to the server
 void TextEdit::startCursorTimer()
 {
-	timerId = startTimer(CURSOR_SEND_INTERVAL);
-	qDebug() << "Started timer with ID = " << timerId;
+	_cursorTimer.callOnTimeout<TextEdit*>(this, &TextEdit::cursorTimerEvent);
+	_cursorTimer.start(CURSOR_SEND_INTERVAL);
 }
 
 
-void TextEdit::timerEvent(QTimerEvent* event)
+void TextEdit::cursorTimerEvent()
 {
 	//Sends cursor position only if it's different from previous sent position
 	if (_textEdit->textCursor().position() != _currentCursorPosition) {
@@ -855,7 +856,6 @@ void TextEdit::filePrintPdf()
 	_textEdit->document()->print(&printer);
 
 	//Show in status bar outcome of operation ("Exported path/to/file.pdf")
-
 	showStatusBarMessage(tr("Exported \"%1\"").arg(QDir::toNativeSeparators(fileName)));
 #endif
 }
@@ -1070,13 +1070,13 @@ void TextEdit::textItalic()
 	mergeFormatOnSelection(fmt);
 }
 
-void TextEdit::textStrikethrough()
+void TextEdit::textStrikeout()
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
 	//Set Strikethrough according to button
 	QTextCharFormat fmt;
-	fmt.setFontStrikeOut(actionTextStrikethrough->isChecked());
+	fmt.setFontStrikeOut(actionTextStrikeout->isChecked());
 
 	//Apply format
 	mergeFormatOnSelection(fmt);
@@ -1248,6 +1248,26 @@ void TextEdit::setLineHeight(QAction* a)
 *	If there's a change in current format it updates buttons/comboboxes according to new format
 */
 
+void TextEdit::cursorPositionChanged()
+{
+
+	//Update scrollbar position according to cursor position wiith offsets
+	int cursorPosition = _textEdit->cursorRect().y();
+	int areaBottom = area->contentsRect().bottom();
+	int scrollValue = area->verticalScrollBar()->value();
+	int scrollOffset = areaBottom / 6;
+
+	if (_textEdit->textCursor().position() == 0)
+		area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
+	else if (cursorPosition >= areaBottom + scrollValue - 40)
+		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
+	else if (cursorPosition && cursorPosition <= scrollValue + 25)
+		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
+
+	updateEditorSelectedActions();
+}
+
+
 void TextEdit::updateEditorSelectedActions()
 {
 	QTextCursor cursor = _textEdit->textCursor();
@@ -1292,16 +1312,6 @@ void TextEdit::updateEditorSelectedActions()
 		toggleCheckList(standard);
 	}
 
-	//Update scrollbar position according to cursor position wiith offsets
-	int cursorPosition = _textEdit->cursorRect().y();
-	int areaBottom = area->contentsRect().bottom();
-	int scrollValue = area->verticalScrollBar()->value();
-	int scrollOffset = areaBottom / 6;
-
-	if (cursorPosition >= areaBottom + scrollValue - 40)
-		area->verticalScrollBar()->setValue(scrollValue + scrollOffset);
-	else if (cursorPosition <= scrollValue + 25)
-		area->verticalScrollBar()->setValue(scrollValue - scrollOffset);
 }
 
 
@@ -1333,7 +1343,6 @@ void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
 	colorChanged(format.foreground().color());
 }
 
-
 void TextEdit::fontChanged(const QFont& f)
 {
 	//Adapt size and font combobox according to current format
@@ -1344,7 +1353,7 @@ void TextEdit::fontChanged(const QFont& f)
 	actionTextBold->setChecked(f.bold());
 	actionTextItalic->setChecked(f.italic());
 	actionTextUnderline->setChecked(f.underline());
-	actionTextStrikethrough->setChecked(f.strikeOut());
+	actionTextStrikeout->setChecked(f.strikeOut());
 }
 
 void TextEdit::colorChanged(const QColor& c)
@@ -1497,7 +1506,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 
 
 	//Update GUI after some insertion/deletion
-	updateEditorSelectedActions();
+	cursorPositionChanged();
 }
 
 
