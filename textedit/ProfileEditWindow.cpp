@@ -112,9 +112,6 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 
 
 	//Check if some fields are unchanged it emits empty ones
-	if (nick == _user.getNickname())
-		nick = QString();
-	
 	if (userIcon == _user.getIcon())
 		userIcon = QImage();
 
