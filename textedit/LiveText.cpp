@@ -147,7 +147,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::setBlockNoList, _docEditor, &DocumentEditor::removeBlockFromList);
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::openEditProfile, this, [this] {openEditProfile(false); });
+	connect(_textEdit, &TextEdit::openEditProfile, this, [this] {openEditProfile(true); });
 
 
 	//CLIENT - TEXTEDIT
