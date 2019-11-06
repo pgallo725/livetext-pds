@@ -127,8 +127,7 @@ void User::setPassword(QString newPassword)
 
 void User::update(QString nickname, QImage icon, QString password)
 {
-	if (!nickname.isEmpty())
-		setNickname(nickname);
+	setNickname(nickname);
 	if (!icon.isNull())
 		setIcon(icon);
 	if (!password.isEmpty())

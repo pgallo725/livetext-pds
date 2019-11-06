@@ -54,7 +54,7 @@ private slots:
 
 	//User profile editing
 	void accountUpdated(User user);
-	void openEditProfile();
+	void openEditProfile(bool fromEditor);
 
 	//Server connection
 	void loginSuccess(User user);

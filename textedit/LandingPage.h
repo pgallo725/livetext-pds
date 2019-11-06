@@ -81,7 +81,7 @@ signals:
 	void serverLogout();
 	
 	//Open edit profile window
-	void editProfile();
+	void openEditProfile();
 
 public slots:
 	void connectionEstabilished();

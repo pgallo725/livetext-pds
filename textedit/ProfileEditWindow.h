@@ -28,6 +28,9 @@ private:
 
 	Ui::ProfileEditWindow* ui;
 
+	//Checks if window is open from editor (true) or from LandingPage (false)
+	bool _fromEditor;
+
 	//Methods
 	void resetFields();
 	
@@ -40,10 +43,11 @@ public:
 	void updateSuccessful();
 	void updateFailed(QString error);
 	void updateInfo();
+	void setFromEditor(bool fromEditor);
 
 signals:
 	//LOCAL: Account modified
-	void accountUpdate(QString name, QImage image, QString password);
+	void accountUpdate(QString name, QImage image, QString password, bool fromEditor);
 
 private slots:
 	//Push buttons
