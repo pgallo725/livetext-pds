@@ -1189,6 +1189,10 @@ void TextEdit::textAlign(QAction* a)
 
 	QTextCursor cursor = _textEdit->textCursor();
 
+	//Reset previous cursor position so it is sent as soon as possible, to avoid issues
+	//where the cursor is not properly positioned in the text after changing the alignment
+	_currentCursorPosition = -1;
+
 	//Sends new block alignment to server
 	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
 		cursor.blockFormat().alignment());
