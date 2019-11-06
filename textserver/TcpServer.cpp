@@ -306,7 +306,7 @@ MessageCapsule TcpServer::authenticateUser(QSslSocket* clientSocket, QByteArray 
 	else
 	{
 		client->logout();
-		return MessageFactory::LoginError("Authentication failed:\n wrong username/password");
+		return MessageFactory::LoginError("Wrong username/password");
 	}
 }
 
