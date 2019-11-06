@@ -1,43 +1,27 @@
 #pragma once
 
-#include <qobject.h>
-#include <qtcpsocket.h>
-#include <QtNetwork>
 #include <QObject>
+#include <QtNetwork>
 
-#include <signal.h>
-#include <sys/types.h>
-#include <time.h>
-#include <csignal>
-#include <stdio.h>
-
-#include <string>
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
-
-#include <vector>
-
-// File to handle Message with the server
-#include <AccountMessage.h>
+//Include headers to handle server Messages
 #include <Message.h>
+#include <MessageFactory.h>
+#include <AccountMessage.h>
 #include <LoginMessage.h>
 #include <LogoutMessage.h>
 #include <PresenceMessage.h>
 #include <DocumentMessage.h>
-#include <MessageFactory.h>
 #include <TextEditMessage.h>
+#include <FailureMessage.h>
 #include <SocketBuffer.h>
 
-
-//File for DataStructure
+//Include headers for Document DataStructure
 #include <User.h>
 #include <Symbol.h>
 #include <Document.h>
 
-
 #define READYREAD_TIMEOUT 5000
+
 
 class Client : public QObject
 {
@@ -48,9 +32,65 @@ private:
 	QSslSocket* socket;
 	SocketBuffer socketBuffer;
 
+public:
+
+	Client(QObject* parent = 0);
+	~Client();
+
+	// Generic message reader and handler
+	MessageCapsule readMessage(QDataStream& stream);
+	void messageHandler(MessageCapsule message);
+
+
+public slots:
+
+	// User registration and login/logout
+	void Login(QString usr, QString passwd);
+	void Register(QString usr, QString passwd, QString nick, QImage img);
+	void Logout();
+
+	// Server connection handlers
+	void Connect(QString ipAddress, quint16 port);
+	void Disconnect();
+	void serverDisconnection();
+	void handleSslErrors(const QList<QSslError>& sslErrors);
+	void readBuffer();
+
+	// Document methods
+	void openDocument(URI URI);
+	void createDocument(QString name);
+	void deleteDocument(URI URI);
+	void closeDocument();
+
+	// TextEditor message handlers
+	void handleCursor(MessageCapsule message);
+	void handleCharInsert(MessageCapsule message);
+	void handleCharRemove(MessageCapsule message);
+	void handleBulkInsert(MessageCapsule message);
+	void handleBulkDelete(MessageCapsule message);
+	void handleCharFormat(MessageCapsule message);
+	void handleBlockFormat(MessageCapsule message);
+	void handleListEdit(MessageCapsule message);
+
+	// Send TextEditor messages to server
+	void sendCursor(qint32 userId, qint32 position);
+	void sendCharInsert(Symbol character, bool isLast);
+	void sendCharRemove(QVector<int> position);
+	void sendBulkInsert();
+	void sendBulkDelete();
+	void sendCharFormat(QVector<qint32> position, QTextCharFormat fmt);
+	void sendBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
+	void sendListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
+
+	// Account and Presence operations handlers
+	void sendAccountUpdate(QString nickname, QImage image, QString password, bool inEditor);
+	void handleAddPresence(MessageCapsule message);
+	void handleUpdatePresence(MessageCapsule message);
+	void handleRemovePresence(MessageCapsule message);
+
 signals:
 
-	// Connection Signal
+	// Connection Signals
 	void connectionEstablished();
 	void impossibleToConnect(QString errorType);
 	void abortConnection();
@@ -63,92 +103,31 @@ signals:
 	void logoutCompleted();
 	void logoutFailed(QString errorType);
 
-	// Presence Signals
-	void cursorMoved(qint32 position, qint32 user);
-	void userPresence(qint32 userId, QString username, QImage image);	
-	void cancelUserPresence(qint32 userId);
-	void accountModified(qint32 userId, QString username, QImage image);
-
-	// Account signals
-	void personalAccountModified(User user);
-	void accountModificationFail(QString error);
-	
 	// Document Signals
 	void openFileCompleted(Document document);
 	void fileOperationFailed(QString errorType);
 	void documentDismissed(URI URI);
-	void documentExitSuccess(bool isForced = false);
+	void documentExitComplete(bool isForced = false);
 	void documentExitFailed(QString errorType);
 	
 	// TextEdit Signals
-	void recivedSymbol(Symbol character, bool isLast);
-	void removeSymbol(QVector<int> position);
+	void insertSymbol(Symbol character, bool isLast);
+	void removeSymbol(QVector<qint32> position);
+	void insertBulk();
+	void removeBulk();
 	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
-	// Generic Signals
-	void failureSignal(QString errorType);
+	// Presence Signals
+	void cursorMoved(qint32 position, qint32 user);
+	void newUserPresence(qint32 userId, QString username, QImage image);
+	void removeUserPresence(qint32 userId);
+	void updateUserPresence(qint32 userId, QString username, QImage image);
 
-public:
+	// Account signals
+	void accountUpdateComplete(User user);
+	void accountUpdateFailed(QString error);
 
-	Client(QObject* parent = 0);
-	~Client();
-	
-	// Message handler
-	void messageHandler(MessageCapsule message);
-	MessageCapsule readMessage(QDataStream& stream);
-
-	// Document handler
-	void forceDocumentClose();
-
-	// Server connection
-	void Disconnect();
-
-public slots:
-	// User connection
-	void Login(QString usr, QString passwd);
-	void Register(QString usr, QString passwd, QString nick, QImage img);
-	void Logout();
-
-	// Server connection
-	void Connect(QString ipAddress, quint16 port);
-
-	// Signals handler
-	void serverConnection();
-	void readBuffer();
-	void serverDisconnection();
-	void handleSslErrors(const QList<QSslError>& sslErrors);
-
-	// Data Exchange
-	void receiveCursor(MessageCapsule message);
-	void receiveChar(MessageCapsule message);
-	void deleteChar(MessageCapsule message);
-	void editChar(MessageCapsule message);
-	void editBlock(MessageCapsule message);
-	void editList(MessageCapsule message);
-
-	// Local to remote
-	void sendCursor(qint32 userId, qint32 position);
-	void sendChar(Symbol character, bool isLast);
-	void removeChar(QVector<int> position);
-	void charModified(QVector<qint32> position, QTextCharFormat fmt);
-	void blockModified(TextBlockID blockId, QTextBlockFormat fmt);
-	void listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
-
-	// Account handler
-	void newUserPresence(MessageCapsule message);
-	void updateUserPresence(MessageCapsule message);
-	void deleteUserPresence(MessageCapsule message);
-
-	// Local to remote
-	void removeFromFile(qint32 myId);
-	void sendAccountUpdate(QString nickname, QImage image, QString password);
-
-	// Document handler
-	void openDocument(URI URI);
-	void createDocument(QString name);
-	void deleteDocument(URI URI);
-	
 };
 

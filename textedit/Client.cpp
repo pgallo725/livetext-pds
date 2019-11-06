@@ -2,15 +2,171 @@
 
 #include <SharedException.h>
 
-Client::Client(QObject* parent) : QObject(parent)
+
+Client::Client(QObject* parent) 
+	: QObject(parent), socket(nullptr)
 {
 }
-
 
 Client::~Client()
 {
-	// TODO
+	// NOTHING TO DO
 }
+
+
+/*--------------------------- SOCKET READ AND MESSAGE HANDLERS --------------------------------*/
+
+void Client::readBuffer() 
+{
+	QByteArray dataBuffer;
+	QDataStream in(socket);
+
+	if (!socketBuffer.getDataSize())
+	{
+		// Begin reading a new message
+		in >> socketBuffer;
+	}
+
+	// Read all the available message data from the socket
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
+
+	socketBuffer.append(dataBuffer);
+
+	// If the message has been completely received it, proceed to handle it
+	// otherwise wait for more chunks to arrive
+	if (socketBuffer.bufferReadyRead()) 
+	{
+		try 
+		{
+			QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+			MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
+			message->read(dataStream);
+
+			messageHandler(message);
+
+			socketBuffer.clear();
+		}
+		catch (MessageException& me) {
+			qDebug() << me.what();
+			socketBuffer.clear();
+		}
+	}
+}
+
+
+MessageCapsule Client::readMessage(QDataStream& stream)
+{
+	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) 
+	{
+		socketBuffer.clear();
+		return MessageCapsule();
+	}
+
+	stream >> socketBuffer;
+
+	QByteArray dataBuffer = socket->read(socketBuffer.getDataSize());
+	socketBuffer.append(dataBuffer);
+
+	/* If not all bytes were received with the first chunk, wait for the next chunks
+	to arrive on the socket and append their content to the read buffer */
+	while (!socketBuffer.bufferReadyRead()) 
+	{
+		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
+			socketBuffer.clear();
+			return MessageCapsule();
+		}
+
+		dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
+		socketBuffer.append(dataBuffer);
+	}
+
+	try 
+	{	// Read all the available message data from the socket
+		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
+		message->read(dataStream);
+
+		socketBuffer.clear();
+
+		return message;
+	}
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		socketBuffer.clear();
+		return MessageCapsule();
+	}
+}
+
+
+void Client::messageHandler(MessageCapsule message) 
+{
+	switch (message->getType()) {
+	case CursorMove:
+		handleCursor(message);
+		break;
+	case PresenceAdd:
+		handleAddPresence(message);
+		break;
+	case PresenceRemove:
+		handleRemovePresence(message);
+		break;
+	case PresenceUpdate:
+		handleUpdatePresence(message);
+		break;
+	case CharInsert:
+		handleCharInsert(message);
+		break;
+	case CharDelete:
+		handleCharRemove(message);
+		break;
+	case CharFormat:
+		handleCharFormat(message);
+		break;
+	case BulkInsert:
+		handleBulkInsert(message);
+		break;
+	case BulkDelete:
+		handleBulkDelete(message);
+		break;
+	case BlockEdit:
+		handleBlockFormat(message);
+		break;
+	case ListEdit:
+		handleListEdit(message);
+		break;
+	case Failure:
+		disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		emit documentExitComplete(true);
+		break;
+	default:
+		throw MessageTypeException(message->getType());
+		break;
+	}
+}
+
+
+/*--------------------------- CONNECTION METHODS --------------------------------*/
+
+void Client::Connect(QString ipAddress, quint16 port) 
+{
+	socket = new QSslSocket(this);
+
+	// Attach the client slots to the socket's state signals
+	connect(socket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors), this, &Client::handleSslErrors);
+	connect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
+
+	socket->connectToHostEncrypted(ipAddress, port);	// Attempt server connection
+	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
+		emit connectionEstablished();
+	else
+	{
+		// Report the connection error to the program
+		QString error = socket->error() == QAbstractSocket::UnknownSocketError ?
+			tr("Invalid server/port") : socket->errorString();
+		emit impossibleToConnect(error);
+	}
+}
+
 
 void Client::handleSslErrors(const QList<QSslError>& sslErrors)
 {
@@ -29,214 +185,67 @@ void Client::handleSslErrors(const QList<QSslError>& sslErrors)
 	}
 }
 
-void Client::serverConnection() {
-	qDebug() << "Connection established";
+
+void Client::Disconnect() {
+
+	disconnect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
+	socket->disconnectFromHost();
+	qDebug() << "Closed server connection";
 }
 
-void Client::serverDisconnection() {
-	qDebug() << "Server closed the connection";
+
+void Client::serverDisconnection()
+{
+	qDebug() << "Disconnected from server";
 	emit abortConnection();
 	socket->abort();
 	socket->deleteLater();
 }
 
-void Client::readBuffer() {
 
 
-	QByteArray dataBuffer;
-	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
-	QDataStream in(socket);
+/*--------------------------- REGISTRATION/LOGIN/LOGOUT METHODS --------------------------------*/
 
-	if (!socketBuffer.getDataSize())
-	{
-		// Begin reading a new message
-		in >> socketBuffer;
-	}
-
-	// Read all the available message data from the socket
-	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
-
-	socketBuffer.append(dataBuffer);
-
-	if (socketBuffer.bufferReadyRead()) {
-
-		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
-		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-
-		try {
-			message->read(dataStream);
-		}
-		catch (MessageReadException re) {
-			qDebug() << "MessageReadException raised " << re.what();
-			socketBuffer.clear();
-			return;
-		}
-
-		messageHandler(message);
-
-		socketBuffer.clear();
-	}
-
-
-
-
-}
-
-void Client::messageHandler(MessageCapsule message) {
-
-	switch (message->getType()) {
-	case CursorMove:
-		receiveCursor(message);
-		break;
-	case PresenceAdd:
-		newUserPresence(message);
-		break;
-	case PresenceRemove:
-		deleteUserPresence(message);
-		break;
-	case PresenceUpdate:
-		updateUserPresence(message);
-		break;
-	case CharInsert:
-		receiveChar(message);
-		break;
-	case CharDelete:
-		deleteChar(message);
-		break;
-	case CharFormat:
-		editChar(message);
-		break;
-	case BlockEdit:
-		editBlock(message);
-		break;
-	case ListEdit:
-		editList(message);
-		break;
-	case Failure:
-		forceDocumentClose();
-		break;
-	default:
-		throw MessageTypeException(message->getType());
-		break;
-	}
-}
-
-MessageCapsule Client::readMessage(QDataStream& stream)
+void Client::Login(QString usr, QString passwd) 
 {
-	QByteArray dataBuffer;
-
-
-	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
-
-		emit failureSignal(tr("Server not responding"));
-
-		socketBuffer.clear();
-		return MessageCapsule();
+	try 
+	{	// Send the LoginRequest message to the server
+		MessageFactory::LoginRequest(usr)->send(socket);
 	}
-
-	stream >> socketBuffer;
-
-	dataBuffer = socket->read(socketBuffer.getDataSize());
-	socketBuffer.append(dataBuffer);
-
-
-	/* If not all bytes were received with the first chunk, wait for the next chunks
-	to arrive on the socket and append their content to the read buffer */
-	while (!socketBuffer.bufferReadyRead()) {
-
-		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
-
-			emit failureSignal(tr("Server not responding"));
-
-			socketBuffer.clear();
-			return MessageCapsule();
-		}
-
-		dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
-
-		socketBuffer.append(dataBuffer);
-
-	}
-
-	// Read all the available message data from the socket
-
-	QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
-	MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
-	try {
-		message->read(dataStream);
-	}
-	catch (MessageReadException re) {
-		qDebug() << "MessageReadException raised " << re.what();
-		socketBuffer.clear();
-		return MessageCapsule();
-	}
-
-	socketBuffer.clear();
-
-	return message;
-}
-
-void Client::Connect(QString ipAddress, quint16 port) {
-
-	socket = new QSslSocket(this);
-
-	connect(socket, SIGNAL(connected()), this, SLOT(serverConnection()));
-	connect(socket, SIGNAL(sslErrors(const QList<QSslError>&)), this, SLOT(handleSslErrors(const QList<QSslError>&)));
-
-	connect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-	socket->connectToHostEncrypted(ipAddress, port);
-	if (socket->waitForEncrypted(READYREAD_TIMEOUT))
-		emit connectionEstablished();
-	else
-	{
-		QString error = socket->error() == QAbstractSocket::UnknownSocketError ?
-			tr("Invalid server/port") : socket->errorString();
-		emit impossibleToConnect(error);
-	}
-}
-
-void Client::Disconnect() {
-
-	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-	socket->disconnectFromHost();
-	qDebug() << "Connection closed by client";
-}
-
-void Client::Login(QString usr, QString passwd) {
-
-	MessageCapsule incomingMessage;
-	MessageCapsule loginRequest = MessageFactory::LoginRequest(usr);
-	try {
-		loginRequest->send(socket);
-	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit loginFailed(tr("MessageWriteException raised"));
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit loginFailed(tr("MessageException raised"));
 		return;
 	}
+
 	QDataStream in(socket);
+	MessageCapsule incomingMessage = readMessage(in);
 
-	connect(this, &Client::failureSignal, this, &Client::loginFailed);
-	incomingMessage = readMessage(in);
-	// NOT DO: disconnect(this, &Client::failureSignal, this, &Client::loginFailed);
-
-	if (!incomingMessage)
+	if (!incomingMessage)	// readMessage() returns an empty capsule in case of errors
+	{
+		emit loginFailed(tr("Server communication error"));
 		return;
+	}
+		
 
-	// switch to check the correctness of the type of Message
+	// Switch to check the correctness of the type of Message
 	switch (incomingMessage->getType()) {
 	case LoginChallenge:
+	{
+		// Do not return, continue with the normal code path
 		break;
+	}
 	case LoginError:
 	{
-		// user not exist
+		// Server denied the login
 		LoginErrorMessage* loginError = dynamic_cast<LoginErrorMessage*>(incomingMessage.get());
 		emit loginFailed(loginError->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit loginFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit loginFailed(failure->getDescription());
 		return;
 	}
 	default:
@@ -245,50 +254,50 @@ void Client::Login(QString usr, QString passwd) {
 	}
 
 	LoginChallengeMessage* loginChallenge = dynamic_cast<LoginChallengeMessage*>(incomingMessage.get());
-	QByteArray nonce = loginChallenge->getNonce();
-	QByteArray salt = loginChallenge->getSalt();
-
 	QCryptographicHash hash1(QCryptographicHash::Sha512);
 	QCryptographicHash hash2(QCryptographicHash::Sha512);
 
 	hash1.addData(passwd.toUtf8());
-	hash1.addData(salt);
-
+	hash1.addData(loginChallenge->getSalt());			// "Solve" the authentication challenge by hashing the nonce
+														// with the inserted password and user's salt
 	hash2.addData(hash1.result());
-	hash2.addData(nonce);
+	hash2.addData(loginChallenge->getNonce());
 
-	MessageCapsule loginUnlock = MessageFactory::LoginUnlock(hash2.result());
-	try {
-		loginUnlock->send(socket);
+	try 
+	{	// Send the second message of the authentication protocol to the 
+		// server, this contains the answer to the server's challenge
+		MessageFactory::LoginUnlock(hash2.result())->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit loginFailed(tr("MessageWriteException raised"));
+	catch (MessageException& we) {
+		qDebug() << we.what();
+		emit loginFailed(tr("MessageException raised"));
 		return;
 	}
 
-	// NOT DO: connect(this, &Client::failureSignal, this, &Client::loginFailed);
-	incomingMessage = readMessage(in);
-	disconnect(this, &Client::failureSignal, this, &Client::loginFailed);
-
+	incomingMessage = readMessage(in);		// returns an empty MessageCapsule if any error occurs
 	if (!incomingMessage)
+	{
+		emit loginFailed(tr("Server communication error"));
 		return;
+	}
 
 	switch (incomingMessage->getType()) {
-	case LoginGranted: {
+	case LoginGranted: 
+	{
 		LoginGrantedMessage* loginGranted = dynamic_cast<LoginGrantedMessage*>(incomingMessage.get());
 		emit loginSuccess(loginGranted->getLoggedUser());
-		return;
 	}
-	case LoginError: {
-		// user not exist
+	case LoginError: 
+	{
+		// Server denied the login
 		LoginErrorMessage* loginerror = dynamic_cast<LoginErrorMessage*>(incomingMessage.get());
 		emit loginFailed(loginerror->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit loginFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit loginFailed(failure->getDescription());
 		return;
 	}
 	default:
@@ -297,45 +306,47 @@ void Client::Login(QString usr, QString passwd) {
 	}
 }
 
+
 void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
-	// Link the stream to the socke and send the byte
 
-	MessageCapsule accountCreate = MessageFactory::AccountCreate(usr, nick, img, passwd);
-	try {
-		accountCreate->send(socket);
+	try 
+	{	// Send the account creation request (with all user info) to the server
+		MessageFactory::AccountCreate(usr, nick, img, passwd)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit registrationFailed(tr("MessageWriteException raised"));
+	catch (MessageException& we) {
+		qDebug() << we.what();
+		emit registrationFailed(tr("MessageException raised"));
 		return;
 	}
 
-	//wait the response from the server
-	connect(this, &Client::failureSignal, this, &Client::registrationFailed);
+	// Wait for the response from the server
 	incomingMessage = readMessage(in);
-	disconnect(this, &Client::failureSignal, this, &Client::registrationFailed);
-
-	if (!incomingMessage)
+	if (!incomingMessage)					// returns an empty MessageCapsule if any error occurs
+	{
+		emit registrationFailed(tr("Server communication error"));
 		return;
+	}
 
 	switch (incomingMessage->getType()) {
-	case AccountConfirmed: {
+	case AccountConfirmed: 
+	{
 		AccountConfirmedMessage* accountConfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 		emit registrationCompleted(accountConfirmed->getUserObj());
-		return;
 	}
-	case AccountError: {
-		// impossible to create the account
+	case AccountError: 
+	{
+		// Server denied the account creation
 		AccountErrorMessage* accountDenied = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
 		emit registrationFailed(accountDenied->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit registrationFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit registrationFailed(failure->getDescription());
 		return;
 	}
 	default:
@@ -343,69 +354,72 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 		return;
 	}
 }
+
 
 void Client::Logout() {
 
-	MessageCapsule logoutRequest = MessageFactory::Logout();
-	try {
-		logoutRequest->send(socket);
+	try 
+	{	// Send the logout notification message to the server, then disconnect
+		MessageFactory::Logout()->send(socket);
+		Disconnect();
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit logoutFailed(tr("MessageWriteException raised"));
-		return;
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit logoutFailed(tr("MessageException raised"));
 	}
-
-	disconnect(socket, SIGNAL(disconnected()), this, SLOT(serverDisconnection()));
-	socket->disconnectFromHost();
 }
+
 
 /*--------------------------- DOCUMENT HANDLER --------------------------------*/
 
-void Client::openDocument(URI URI) {
-
+void Client::openDocument(URI URI) 
+{
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
-
-	MessageCapsule openDocument = MessageFactory::DocumentOpen(URI.toString());
-	try {
-		openDocument->send(socket);
+	try 
+	{	// Request the document to the server
+		MessageFactory::DocumentOpen(URI.toString())->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit fileOperationFailed(tr("MessageWriteException raised"));
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit fileOperationFailed(tr("MessageException raised"));
 		return;
 	}
-	//wait the response from the server
-
-	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+	
+	// Wait the response from the server
 	incomingMessage = readMessage(in);
-	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
-
-	if (!incomingMessage)
-		return;
-
-	switch (incomingMessage->getType()) {
-	case DocumentReady: {
-		// Open Succeded
-		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
-		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-		if (socket->encryptedBytesAvailable() > 0)
-			readBuffer();	//simulate the signal due to some byte arrived between Login and bind of the handler
-		emit openFileCompleted(documentOpened->getDocument());
+	if (!incomingMessage)				 // returns a null MessageCapsule in case of error
+	{
+		emit fileOperationFailed(tr("Server communication error"));
 		return;
 	}
-	case DocumentError: {
-		// impossible to open the Document
+
+	// Check the received Message type
+	switch (incomingMessage->getType()) {
+	case DocumentReady: 
+	{
+		// Server successfully answered with the document
+		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
+
+		// Connect the function which will read messages from the socket inside the editor
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->encryptedBytesAvailable() > 0)
+			readBuffer();								// Check if some bytes are already available on the socket
+
+		emit openFileCompleted(documentReady->getDocument());
+	}
+	case DocumentError: 
+	{
+		// Server denied access to the document
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit fileOperationFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit fileOperationFailed(failure->getDescription());
 		return;
 	}
 	default:
@@ -414,51 +428,54 @@ void Client::openDocument(URI URI) {
 	}
 }
 
-void Client::createDocument(QString name) {
 
+void Client::createDocument(QString name) 
+{
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
-
-	MessageCapsule newDocument = MessageFactory::DocumentCreate(name);
-	try {
-		newDocument->send(socket);
+	try 
+	{	// Send the document creation request to the server
+		MessageFactory::DocumentCreate(name)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit fileOperationFailed(tr("MessageWriteException raised"));
+	catch (MessageException& we) {
+		qDebug() << we.what();
+		emit fileOperationFailed(tr("MessageException raised"));
 		return;
 	}
 
-	//wait the response from the server
-
-	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+	// Wait the response from the server
 	incomingMessage = readMessage(in);
-	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
-
-	if (!incomingMessage)
-		return;
-
-	switch (incomingMessage->getType()) {
-	case DocumentReady: {
-		//Document successfully opened
-		DocumentReadyMessage* documentOpened = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
-		connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-		if (socket->encryptedBytesAvailable() > 0)
-			readBuffer();	//simulate the signal due to some byte arrived between Login and bind of the handler
-		emit openFileCompleted(documentOpened->getDocument());
+	if (!incomingMessage)				 // returns a null MessageCapsule in case of error
+	{
+		emit fileOperationFailed(tr("Server communication error"));
 		return;
 	}
-	case DocumentError: {
-		// impossible to open the document
+
+	// Check the received Message type
+	switch (incomingMessage->getType()) {
+	case DocumentReady: 
+	{
+		//Document successfully created (and opened)
+		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
+
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->encryptedBytesAvailable() > 0)
+			readBuffer();								// Check if some bytes are already available on the socket
+
+		emit openFileCompleted(documentReady->getDocument());
+	}
+	case DocumentError:
+	{
+		// Server denied the document creation
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit fileOperationFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit fileOperationFailed(failure->getDescription());
 		return;
 	}
 	default:
@@ -467,292 +484,326 @@ void Client::createDocument(QString name) {
 	}
 }
 
-void Client::deleteDocument(URI URI) {
 
+void Client::deleteDocument(URI URI) 
+{
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
-
-	MessageCapsule removeDocument = MessageFactory::DocumentRemove(URI.toString());
-	try {
-		removeDocument->send(socket);
+	try 
+	{	// Send the document delete request to the server
+		MessageFactory::DocumentRemove(URI.toString())->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit fileOperationFailed(tr("MessageWriteException raised"));
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit fileOperationFailed(tr("MessageException raised"));
 		return;
 	}
-	connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
+
+	// Wait the response from the server
 	incomingMessage = readMessage(in);
-	disconnect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
-
-	if (!incomingMessage)
+	if (!incomingMessage)				 // returns an empty MessageCapsule in case of error
+	{
+		emit fileOperationFailed(tr("Server communication error"));
 		return;
+	}
 
 	switch (incomingMessage->getType()) {
-	case DocumentDismissed: {
+	case DocumentDismissed: 
+	{
 		//Document successfully removed
 		emit documentDismissed(URI);
 		return;
 	}
-	case DocumentError: {
-		// impossible to remove the document
+	case DocumentError: 
+	{
+		// Server denied document removal from account
 		DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
 		emit fileOperationFailed(documentError->getErrorMessage());
 		return;
 	}
 	case Failure:
 	{
-		emit fileOperationFailed(tr("Server Error"));
+		FailureMessage* failure = dynamic_cast<FailureMessage*>(incomingMessage.get());
+		emit fileOperationFailed(failure->getDescription());
 		return;
 	}
 	default:
 		throw MessageTypeException(incomingMessage->getType());
 		return;
 	}
-
 }
 
-void Client::forceDocumentClose()
+
+void Client::closeDocument() 
 {
-	emit documentExitSuccess(true);
+	QDataStream in(socket);
+	MessageCapsule incomingMessage;
+
+	try 
+	{	// Send the DocumentClose request to the server
+		MessageFactory::DocumentClose()->send(socket);
+	}
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit documentExitFailed(tr("MessageException raised"));
+		return;
+	}
+
+	// Disconnect the regular function that reads asynchronous TextEdit or Presence messages
+	disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+
+	while (true) 
+	{
+		// Wait the response from the server
+		incomingMessage = readMessage(in);
+		if (!incomingMessage)				 // returns an empty MessageCapsule if any error occurs
+		{
+			emit documentExitFailed(tr("Server communication error"));
+			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+			while (socket->encryptedBytesAvailable() > 0)
+				readBuffer();								// Handle any byte received on the socket in the meantime
+			return;
+		}
+
+		switch (incomingMessage->getType()) {
+		case DocumentExit:
+		{
+			// The client is allowed to close the document
+			emit documentExitComplete();
+			return;
+		}
+		case DocumentError:
+		{
+			// Server denied permission to leave the editor
+			DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
+			emit documentExitFailed(documentError->getErrorMessage());
+
+			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+			while (socket->encryptedBytesAvailable() > 0)
+				readBuffer();								// Handle any byte received on the socket in the meantime
+			return;
+		}
+		default:
+			// This operation is done while still inside the editor, therefore it's possible that other TextEdit messages
+			// are arriving to the client's socket and they need to be handled properly
+			messageHandler(incomingMessage);
+			break;
+		}
+		// NOTE: Failure message is not caught explicitly here because it is already handled by messageHandler
+	}
 }
 
-/*--------------------------- CURSOR HANDLER --------------------------------*/
 
-void Client::sendCursor(qint32 userId, qint32 position) {
+/*--------------------------- CURSOR HANDLERS --------------------------------*/
 
-	// Link the stream to the socket and send the byte
-	MessageCapsule moveCursor = MessageFactory::CursorMove(userId, position);
-	try {
-		moveCursor->send(socket);
+void Client::sendCursor(qint32 userId, qint32 position) 
+{
+	try 
+	{	// Send the cursor position to the server with CursorMove message
+		MessageFactory::CursorMove(userId, position)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
-	return;
 }
 
-void Client::receiveCursor(MessageCapsule message) {
-
+void Client::handleCursor(MessageCapsule message) 
+{
 	CursorMoveMessage* movecursor = dynamic_cast<CursorMoveMessage*>(message.get());
 	emit cursorMoved(movecursor->getCursorPosition(), movecursor->getUserId());
 }
 
 
-/*--------------------------- CHARACTER HANDLER --------------------------------*/
+/*--------------------------- TEXTEDIT MESSAGE METHODS --------------------------------*/
 
-void Client::sendChar(Symbol character, bool isLast) {
 
-	MessageCapsule sendChar = MessageFactory::CharInsert(character, isLast);
-	try {
-		sendChar->send(socket);
+/* Send messages to server */
+
+void Client::sendCharInsert(Symbol character, bool isLast) {
+
+	try 
+	{
+		MessageFactory::CharInsert(character, isLast)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
 }
 
-void Client::removeChar(QVector<int> position)
+void Client::sendCharRemove(QVector<qint32> position)
 {
-	MessageCapsule removeChar = MessageFactory::CharDelete(position);
-	try {
-		removeChar->send(socket);
+	try 
+	{
+		MessageFactory::CharDelete(position)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
 }
 
-void Client::charModified(QVector<qint32> position, QTextCharFormat fmt)
+void Client::sendCharFormat(QVector<qint32> position, QTextCharFormat fmt)
 {
-	MessageCapsule charFormat = MessageFactory::CharFormat(position, fmt);
-	try {
-		charFormat->send(socket);
+	try 
+	{
+		MessageFactory::CharFormat(position, fmt)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
 }
 
-void Client::blockModified(TextBlockID blockId, QTextBlockFormat fmt)
+void Client::sendBlockFormat(TextBlockID blockId, QTextBlockFormat fmt) 
 {
-	MessageCapsule blockEdit = MessageFactory::BlockEdit(blockId, fmt);
-	try {
-		blockEdit->send(socket);
+	try 
+	{
+		MessageFactory::BlockEdit(blockId, fmt)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
 }
 
-void Client::listModified(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
+void Client::sendListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt)
 {
-	MessageCapsule listEdit = MessageFactory::ListEdit(blockId, listId, fmt);
-	try {
-		listEdit->send(socket);
+	try 
+	{
+		MessageFactory::ListEdit(blockId, listId, fmt)->send(socket);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
+	catch (MessageException& me) {
+		qDebug() << me.what();
 	}
-
 }
 
 
-void Client::receiveChar(MessageCapsule message) {
+/* Handle messages received from server */
 
-	CharInsertMessage* recivechar = dynamic_cast<CharInsertMessage*>(message.get());
-	emit recivedSymbol(recivechar->getSymbol(), recivechar->getIsLast());
-}
-
-void Client::deleteChar(MessageCapsule message) {
-
-	CharDeleteMessage* deletechar = dynamic_cast<CharDeleteMessage*>(message.get());
-	emit removeSymbol(deletechar->getPosition());
-}
-
-void Client::editChar(MessageCapsule message) {
-
-	CharFormatMessage* charformat = dynamic_cast<CharFormatMessage*>(message.get());
-	emit formatSymbol(charformat->getPosition(), charformat->getCharFormat());
-}
-
-void Client::editBlock(MessageCapsule message) {
-
-	BlockEditMessage* blockedit = dynamic_cast<BlockEditMessage*>(message.get());
-	emit formatBlock(blockedit->getBlockId(), blockedit->getBlockFormat());
-}
-
-void Client::editList(MessageCapsule message)
+void Client::handleCharInsert(MessageCapsule message) 
 {
-	ListEditMessage* listedit = dynamic_cast<ListEditMessage*>(message.get());
-	emit listEditBlock(listedit->getBlockId(), listedit->getListId(), listedit->getListFormat());
+	CharInsertMessage* insertCharMsg = dynamic_cast<CharInsertMessage*>(message.get());
+	emit insertSymbol(insertCharMsg->getSymbol(), insertCharMsg->getIsLast());
 }
 
+void Client::handleCharRemove(MessageCapsule message) 
+{
+	CharDeleteMessage* deleteCharMsg = dynamic_cast<CharDeleteMessage*>(message.get());
+	emit removeSymbol(deleteCharMsg->getPosition());
+}
+
+void Client::handleCharFormat(MessageCapsule message) 
+{
+	CharFormatMessage* charFormatMsg = dynamic_cast<CharFormatMessage*>(message.get());
+	emit formatSymbol(charFormatMsg->getPosition(), charFormatMsg->getCharFormat());
+}
+
+void Client::handleBlockFormat(MessageCapsule message) 
+{
+	BlockEditMessage* blockEditMsg = dynamic_cast<BlockEditMessage*>(message.get());
+	emit formatBlock(blockEditMsg->getBlockId(), blockEditMsg->getBlockFormat());
+}
+
+void Client::handleListEdit(MessageCapsule message)
+{
+	ListEditMessage* listEditMsg = dynamic_cast<ListEditMessage*>(message.get());
+	emit listEditBlock(listEditMsg->getBlockId(), listEditMsg->getListId(), listEditMsg->getListFormat());
+}
+
+
+/*--------------------------- PRESENCE HANDLERS --------------------------------*/
+
+void Client::handleAddPresence(MessageCapsule message)
+{
+	PresenceAddMessage* presenceAddMsg = dynamic_cast<PresenceAddMessage*>(message.get());
+	emit newUserPresence(presenceAddMsg->getUserId(), presenceAddMsg->getNickname(), presenceAddMsg->getIcon());
+}
+
+void Client::handleRemovePresence(MessageCapsule message)
+{
+	PresenceRemoveMessage* presenceRemoveMsg = dynamic_cast<PresenceRemoveMessage*>(message.get());
+	emit removeUserPresence(presenceRemoveMsg->getUserId());
+}
+
+void Client::handleUpdatePresence(MessageCapsule message)
+{
+	PresenceUpdateMessage* presenceUpdateMsg = dynamic_cast<PresenceUpdateMessage*>(message.get());
+	emit updateUserPresence(presenceUpdateMsg->getUserId(), presenceUpdateMsg->getNickname(),
+		presenceUpdateMsg->getIcon());
+}
 
 
 /*--------------------------- ACCOUNT HANDLER --------------------------------*/
 
-void Client::sendAccountUpdate(QString nickname, QImage image, QString password)
+void Client::sendAccountUpdate(QString nickname, QImage image, QString password, bool inEditor)
 {
 	QDataStream in(socket);
-	QByteArray dataBuffer;
-	MessageCapsule incomingMessage;
-	MessageCapsule accountUpdate = MessageFactory::AccountUpdate(nickname, image, QByteArray(password.toStdString().c_str()));
+	MessageCapsule message = MessageFactory::AccountUpdate(nickname, image, password.toUtf8());
 
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer())); // dicconect function for Asyncronous Messages
-
-	try {
-		accountUpdate->send(socket); //Start the Account Update sequence of messages
+	if (inEditor)
+	{
+		// Disconnect the regular function that reads asynchronous TextEdit or Presence messages
+		disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
 	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit accountModificationFail(tr("MessageWriteException raised"));
+	
+	try 
+	{	// Start the sequence of AccountUpdate messages
+		message->send(socket); 
+	}
+	catch (MessageException& me) {
+		qDebug() << me.what();
+		emit accountUpdateFailed(tr("MessageException raised"));
 		return;
 	}
 
-
-	while (true) {
-
-		connect(this, &Client::failureSignal, this, &Client::accountModificationFail);
-		incomingMessage = readMessage(in);
-		disconnect(this, &Client::failureSignal, this, &Client::accountModificationFail);
-
-		if (!incomingMessage)
+	while (true) 
+	{
+		// Wait the response from the server
+		message = readMessage(in);
+		if (!message)				 // returns a null MessageCapsule if any error occurs
+		{
+			emit accountUpdateFailed(tr("Server communication error"));
 			return;
+		}
 
-		switch (incomingMessage->getType()) {
+		switch (message->getType()) {
 		case AccountConfirmed:
 		{
-			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
-			emit personalAccountModified(accountconfirmed->getUserObj());
+			if (inEditor) {
+				connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+			}
+			AccountConfirmedMessage* accountconfirmed = dynamic_cast<AccountConfirmedMessage*>(message.get());
+			emit accountUpdateComplete(accountconfirmed->getUserObj());
 			return;
 		}
 		case AccountError:
 		{
-			connect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(incomingMessage.get());
-			emit accountModificationFail(accounterror->getErrorMessage());
+			if (inEditor) {
+				connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+			}
+			AccountErrorMessage* accounterror = dynamic_cast<AccountErrorMessage*>(message.get());
+			emit accountUpdateFailed(accounterror->getErrorMessage());
 			return;
 		}
 		case Failure:
 		{
-			// TODO gestione failure
+			if (inEditor)
+				messageHandler(message);	// NOTE: Failure message is handled by messageHandler when the TextEditor is opened
+			else
+			{
+				FailureMessage* failure = dynamic_cast<FailureMessage*>(message.get());
+				emit accountUpdateFailed(failure->getDescription());
+			}
 		}
 		default:
-			messageHandler(incomingMessage);
-			break;
-		}
-	}
-}
-
-
-/*--------------------------- PRESENCE HANDLER --------------------------------*/
-
-void Client::newUserPresence(MessageCapsule message) {
-
-	PresenceAddMessage* newaccountpresence = dynamic_cast<PresenceAddMessage*>(message.get());
-	emit userPresence(newaccountpresence->getUserId(), newaccountpresence->getNickname(), newaccountpresence->getIcon());
-}
-
-void Client::deleteUserPresence(MessageCapsule message) {
-
-	PresenceRemoveMessage* userpresence = dynamic_cast<PresenceRemoveMessage*>(message.get());
-	emit cancelUserPresence(userpresence->getUserId());
-}
-
-void Client::updateUserPresence(MessageCapsule message) {
-
-	PresenceUpdateMessage* presenceupdate = dynamic_cast<PresenceUpdateMessage*>(message.get());
-	emit accountModified(presenceupdate->getUserId(), presenceupdate->getNickname(), presenceupdate->getIcon());
-}
-
-void Client::removeFromFile(qint32 myId) {
-
-	QDataStream in(socket);
-	MessageCapsule incomingMessage;
-
-	MessageCapsule closeDocument = MessageFactory::DocumentClose();
-	disconnect(socket, SIGNAL(readyRead()), this, SLOT(readBuffer()));
-	try {
-		closeDocument->send(socket);
-	}
-	catch (MessageWriteException we) {
-		qDebug() << "Messagge Write Exception " << we.what();
-		emit documentExitFailed(tr("MessageWriteException raised"));
-	}
-
-
-	while (true) {
-
-		connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
-		incomingMessage = readMessage(in);
-		connect(this, &Client::failureSignal, this, &Client::fileOperationFailed);
-		if (!incomingMessage)
-			return;
-
-		switch (incomingMessage->getType()) {
-		case DocumentExit:
 		{
-			DocumentExitMessage* accountconfirmed = dynamic_cast<DocumentExitMessage*>(incomingMessage.get());
-			emit documentExitSuccess();
-			return;
+			if (inEditor) {
+				messageHandler(message);
+				break;
+			}
+			else {
+				throw MessageTypeException(message->getType());
+				return;
+			}
 		}
-		case DocumentError:
-		{
-			DocumentErrorMessage* accounterror = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-			emit documentExitFailed(accounterror->getErrorMessage());
-			return;
-		}
-		case Failure:
-		{
-			// TODO gestione Failure
-		}
-		default:
-			messageHandler(incomingMessage);
-			break;
 		}
 	}
 }

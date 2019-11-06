@@ -39,10 +39,10 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_client, &Client::registrationFailed, this, &LiveText::operationFailed);
 	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
 	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess);
-	connect(_client, &Client::personalAccountModified, this, &LiveText::accountUpdated);
+	connect(_client, &Client::accountUpdateComplete, this, &LiveText::accountUpdated);
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
-	connect(_client, &Client::documentExitSuccess, this, &LiveText::closeDocumentCompleted);
+	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted);
 	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 }
 
@@ -75,7 +75,7 @@ void LiveText::loginSuccess(User user)
 	_editProfile = new ProfileEditWindow(_user);
 
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
-	connect(_client, &Client::accountModificationFail, _editProfile, &ProfileEditWindow::updateFailed);
+	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed);
 
 	//Open logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
@@ -152,25 +152,25 @@ void LiveText::openDocumentCompleted(Document doc)
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);	//REMOTE: Cursor position received
-	connect(_client, &Client::userPresence, _textEdit, &TextEdit::newPresence);					// Add/Edit Presence
-	connect(_client, &Client::accountModified, _textEdit, &TextEdit::newPresence);
-	connect(_client, &Client::cancelUserPresence, _textEdit, &TextEdit::removePresence);		// Remove presence
+	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence);					// Add/Edit Presence
+	connect(_client, &Client::updateUserPresence, _textEdit, &TextEdit::newPresence);
+	connect(_client, &Client::removeUserPresence, _textEdit, &TextEdit::removePresence);		// Remove presence
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);	// Problem during close document
 
 	//TEXTEDIT - CLIENT
 	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
-	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::removeFromFile, Qt::QueuedConnection);
+	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::closeDocument, Qt::QueuedConnection);
 
 	//DOCUMENTEDITOR - CLIENT
-	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::removeChar);
-	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendChar);
-	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::blockModified);
-	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::charModified);
-	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::listModified);
+	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::sendCharRemove);
+	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendCharInsert);
+	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::sendBlockFormat);
+	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::sendCharFormat);
+	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::sendListEdit);
 
 
 	//CLIENT - DOCUMENTEDITOR
-	connect(_client, &Client::recivedSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
+	connect(_client, &Client::insertSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol, Qt::QueuedConnection);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat, Qt::QueuedConnection);
 	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);

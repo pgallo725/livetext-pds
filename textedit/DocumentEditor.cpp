@@ -1,7 +1,5 @@
 #include "DocumentEditor.h"
 
-#include <QDebug>
-
 
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
