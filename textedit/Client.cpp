@@ -286,6 +286,7 @@ void Client::Login(QString usr, QString passwd)
 	{
 		LoginGrantedMessage* loginGranted = dynamic_cast<LoginGrantedMessage*>(incomingMessage.get());
 		emit loginSuccess(loginGranted->getLoggedUser());
+		return;
 	}
 	case LoginError: 
 	{
@@ -335,6 +336,7 @@ void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
 	{
 		AccountConfirmedMessage* accountConfirmed = dynamic_cast<AccountConfirmedMessage*>(incomingMessage.get());
 		emit registrationCompleted(accountConfirmed->getUserObj());
+		return;
 	}
 	case AccountError: 
 	{
@@ -408,6 +410,7 @@ void Client::openDocument(URI URI)
 			readBuffer();								// Check if some bytes are already available on the socket
 
 		emit openFileCompleted(documentReady->getDocument());
+		return;
 	}
 	case DocumentError: 
 	{
@@ -464,6 +467,7 @@ void Client::createDocument(QString name)
 			readBuffer();								// Check if some bytes are already available on the socket
 
 		emit openFileCompleted(documentReady->getDocument());
+		return;
 	}
 	case DocumentError:
 	{
