@@ -76,8 +76,8 @@ public slots:
 	void sendCursor(qint32 userId, qint32 position);
 	void sendCharInsert(Symbol character, bool isLast);
 	void sendCharRemove(QVector<int> position);
-	void sendBulkInsert();
-	void sendBulkDelete();
+	void sendBulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void sendBulkDelete(QList<QVector<qint32>> positions);
 	void sendCharFormat(QVector<qint32> position, QTextCharFormat fmt);
 	void sendBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 	void sendListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
@@ -113,8 +113,8 @@ signals:
 	// TextEdit Signals
 	void insertSymbol(Symbol character, bool isLast);
 	void removeSymbol(QVector<qint32> position);
-	void insertBulk();
-	void removeBulk();
+	void insertBulk(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void removeBulk(QList<QVector<qint32>> positions);
 	void formatSymbol(QVector<qint32> position, QTextCharFormat fmt);
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);

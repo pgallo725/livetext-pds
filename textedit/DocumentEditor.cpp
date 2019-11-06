@@ -74,7 +74,7 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position,
 	Symbol s(ch, fmt, _user.getUserId(), _document.newFractionalPos(position));
 
 	_document.insert(s);
-	emit insertChar(s, isLast);
+	emit charAdded(s, isLast);
 }
 
 void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
@@ -83,7 +83,26 @@ void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 		return;
 
 	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
-	emit deleteChar(fractionalPosition);
+	emit charDeleted(fractionalPosition);
+}
+
+
+void DocumentEditor::bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+{
+}
+
+void DocumentEditor::bulkDelete(QList<QVector<qint32>> positions)
+{
+}
+
+void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt)
+{
+	// emit charGroupAdded
+}
+
+void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
+{
+	// emit charGroupDeleted
 }
 
 

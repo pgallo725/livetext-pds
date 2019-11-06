@@ -642,6 +642,28 @@ void Client::sendCharRemove(QVector<qint32> position)
 	}
 }
 
+void Client::sendBulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+{
+	try
+	{
+		MessageFactory::BulkInsert(symbols, isLast, bId, blkFmt)->send(socket);
+	}
+	catch (MessageException & me) {
+		qDebug() << me.what();
+	}
+}
+
+void Client::sendBulkDelete(QList<QVector<qint32>> positions)
+{
+	try
+	{
+		MessageFactory::BulkDelete(positions)->send(socket);
+	}
+	catch (MessageException & me) {
+		qDebug() << me.what();
+	}
+}
+
 void Client::sendCharFormat(QVector<qint32> position, QTextCharFormat fmt)
 {
 	try 
@@ -688,6 +710,19 @@ void Client::handleCharRemove(MessageCapsule message)
 {
 	CharDeleteMessage* deleteCharMsg = dynamic_cast<CharDeleteMessage*>(message.get());
 	emit removeSymbol(deleteCharMsg->getPosition());
+}
+
+void Client::handleBulkInsert(MessageCapsule message)
+{
+	BulkInsertMessage* bulkInsertMsg = dynamic_cast<BulkInsertMessage*>(message.get());
+	emit insertBulk(bulkInsertMsg->getSymbols(), bulkInsertMsg->getIsLast(),
+		bulkInsertMsg->getBlockId(), bulkInsertMsg->getBlockFormat());
+}
+
+void Client::handleBulkDelete(MessageCapsule message)
+{
+	BulkDeleteMessage* bulkDeleteMsg = dynamic_cast<BulkDeleteMessage*>(message.get());
+	emit removeBulk(bulkDeleteMsg->getPositions());
 }
 
 void Client::handleCharFormat(MessageCapsule message) 

@@ -152,7 +152,7 @@ void LiveText::openDocumentCompleted(Document doc)
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);	//REMOTE: Cursor position received
-	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence);					// Add/Edit Presence
+	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence);				// Add/Edit Presence
 	connect(_client, &Client::updateUserPresence, _textEdit, &TextEdit::newPresence);
 	connect(_client, &Client::removeUserPresence, _textEdit, &TextEdit::removePresence);		// Remove presence
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);	// Problem during close document
@@ -161,17 +161,21 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
 	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::closeDocument, Qt::QueuedConnection);
 
+
 	//DOCUMENTEDITOR - CLIENT
-	connect(_docEditor, &DocumentEditor::deleteChar, _client, &Client::sendCharRemove);
-	connect(_docEditor, &DocumentEditor::insertChar, _client, &Client::sendCharInsert);
+	connect(_docEditor, &DocumentEditor::charDeleted, _client, &Client::sendCharRemove);
+	connect(_docEditor, &DocumentEditor::charAdded, _client, &Client::sendCharInsert);
+	connect(_docEditor, &DocumentEditor::charGroupDeleted, _client, &Client::sendBulkDelete);
+	connect(_docEditor, &DocumentEditor::charGroupInserted, _client, &Client::sendBulkInsert);
 	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::sendBlockFormat);
 	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::sendCharFormat);
 	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::sendListEdit);
 
-
 	//CLIENT - DOCUMENTEDITOR
 	connect(_client, &Client::insertSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
 	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol, Qt::QueuedConnection);
+	connect(_client, &Client::insertBulk, _docEditor, &DocumentEditor::bulkInsert, Qt::QueuedConnection);
+	connect(_client, &Client::removeBulk, _docEditor, &DocumentEditor::bulkDelete, Qt::QueuedConnection);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat, Qt::QueuedConnection);
 	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
 	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
