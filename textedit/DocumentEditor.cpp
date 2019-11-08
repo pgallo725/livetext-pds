@@ -13,6 +13,8 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
 	qRegisterMetaType<QVector<qint32>>("QVector<qint32>");
+	qRegisterMetaType<QVector<qint32>>("QList<Symbol>");
+	qRegisterMetaType<QVector<qint32>>("QList<QVector<qint32>>");
 }
 
 
