@@ -583,10 +583,10 @@ void TextEdit::setupEditorActions()
 	tb->addAction(a);
 
 	/********** FONT AND SIZE **********/
-	menu = menuBar()->addMenu(tr("About"));
-	menu->addAction(tr("About..."), _aboutwindow, &AboutWindow::exec);
-	menu->addAction(tr("Project repository..."), this, &TextEdit::linkPressed);
-}
+	menu = menuBar()->addMenu(tr("?"));
+	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
+	menu->addSeparator();
+	menu->addAction(tr("About LiveText..."), _aboutwindow, &AboutWindow::exec);}
 
 
 
@@ -1096,6 +1096,9 @@ void TextEdit::textStrikeout()
 void TextEdit::textFamily(const QString& f)
 {
 	const QSignalBlocker blocker(_textEdit->document());
+
+	//Set keyboard focus
+	_textEdit->setFocus();
 
 	//Set font family
 	QTextCharFormat fmt;
@@ -1723,5 +1726,5 @@ void TextEdit::updateUsersSelections()
 
 void TextEdit::linkPressed()
 {
-	QDesktopServices::openUrl(QUrl("https://github.com/paolo257428/livetext-pds"));
+	QDesktopServices::openUrl(QUrl("https://github.com/paolo257428/livetext-pds/blob/master/README.md"));
 }

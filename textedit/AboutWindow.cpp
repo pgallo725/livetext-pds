@@ -17,7 +17,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QDialog(parent, Qt::WindowCloseButto
 
 	//Center and resize window
 	WidgetsManager mngr(this);
-	mngr.centerAndResize(0.4, 0.3);
+	mngr.centerAndResize(0.4, 0.35);
 
 	//Setup label logo
 	QPixmap logoPix(rsrcPath + "/misc/logo.png");
