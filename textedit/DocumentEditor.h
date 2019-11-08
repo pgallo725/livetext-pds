@@ -26,7 +26,7 @@ public slots:
 
 	// Char operations
 	void addSymbol(Symbol s, bool isLast);
-	void removeSymbol(QVector<int> position);
+	void removeSymbol(QVector<qint32> position);
 	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
 	void deleteCharAtIndex(int position);
 	void bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);

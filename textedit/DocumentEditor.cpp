@@ -59,7 +59,7 @@ void DocumentEditor::addSymbol(Symbol s, bool isLast)	// REMOTE
 	}
 }
 
-void DocumentEditor::removeSymbol(QVector<int> position)	// REMOTE
+void DocumentEditor::removeSymbol(QVector<qint32> position)		// REMOTE
 {
 	int pos = _document.remove(position);
 	if (pos >= 0) {
@@ -79,7 +79,7 @@ void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position,
 
 void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 {
-	if (position < 0 || position >= _document.length())		// Skip if out-of-range
+	if (position < 0 || position >= _document.length())		// Skip if out-of-range (needed ?)
 		return;
 
 	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
@@ -89,20 +89,78 @@ void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 
 void DocumentEditor::bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
+	QList<Symbol>::iterator s = symbols.begin();
+
+	for (; s < symbols.end() - 1; s++)
+	{
+		int position = _document.insert(*s);
+		_textedit->newChar(s->getChar(), s->getFormat(), position);
+	}
+
+	if (s < symbols.end())	// Handle the last symbol separately (to avoid checking isLast at every iteration)
+	{
+		int position = _document.insert(*s);
+		if (!isLast)
+		{
+			// skip inserting the terminating char in the Qt document
+			_textedit->newChar(s->getChar(), s->getFormat(), position);
+		}
+	}
+
+	int blockPos = _document.formatBlock(bId, blkFmt);		// Format the block according to the received QTextBlockFormat
+	if (blockPos >= 0) {
+		_textedit->applyBlockFormat(blockPos, blkFmt);
+	}
+
+	_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
 void DocumentEditor::bulkDelete(QList<QVector<qint32>> positions)
 {
+	for each (QVector<qint32> pos in positions)
+	{
+		int index = _document.remove(pos);
+		if (index >= 0)
+			_textedit->removeChar(index);
+	}
+
+	_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
 }
 
 void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt)
 {
-	// emit charGroupAdded
+	QList<Symbol> symbols;
+	QList<QChar>::iterator i = chars.begin();
+	QList<QTextCharFormat>::iterator j = fmts.begin();
+
+	// Add all the provided chars to the document as symbols and to the list
+	// of symbols that will have to be inserted by other clients
+	for (int n = 0; i < chars.end() && j < fmts.end(); i++, j++, n++)
+	{
+		Symbol s(*i, *j, _user.getUserId(), _document.newFractionalPos(pos + n));
+		symbols.append(s);
+
+		_document.insert(s);
+	}
+
+	TextBlockID blkId = _document.getBlockAt(pos);		// Format the block with the provided QTextBlockFormat
+	_document.formatBlock(blkId, blkFmt);
+	
+	emit charGroupInserted(symbols, isLast, blkId, blkFmt);
 }
 
 void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
 {
-	// emit charGroupDeleted
+	QList<QVector<qint32>> fPositions;
+
+	for (int i = 0; i < charCount && position < _document.length(); i++)
+	{
+		// Delete the symbols one by one from the document, inserting their fractional positions
+		// in the list of those that need to be removed by other clients
+		fPositions.append(_document.removeAtIndex(position));
+	}
+
+	emit charGroupDeleted(fPositions);
 }
 
 

@@ -132,6 +132,8 @@ void LiveText::openDocumentCompleted(Document doc)
 	//TEXTEDIT - DOCUMENTEDITOR
 	connect(_textEdit, &TextEdit::charDeleted, _docEditor, &DocumentEditor::deleteCharAtIndex);
 	connect(_textEdit, &TextEdit::charInserted, _docEditor, &DocumentEditor::addCharAtIndex);
+	connect(_textEdit, &TextEdit::charGroupDeleted, _docEditor, &DocumentEditor::deleteCharGroupAtIndex);
+	connect(_textEdit, &TextEdit::charGroupInserted, _docEditor, &DocumentEditor::addCharGroupAtIndex);
 	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection);
 	connect(_textEdit, qOverload<int, int, Qt::Alignment>(&TextEdit::blockFormatChanged),
 		_docEditor, &DocumentEditor::changeBlockAlignment);
