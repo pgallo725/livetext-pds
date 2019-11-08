@@ -1460,7 +1460,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	{
 		for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
 		{
-			emit charGroupDeleted(position + i, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
+			emit charGroupDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 		}
 	}
 
