@@ -107,6 +107,8 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 
 	/**************************** EDITOR INITIALIZATION ****************************/
 
+	const QSignalBlocker blocker(_textEdit->document());
+
 	//Set default character and size
 	QFont textFont("Helvetica");
 	textFont.setStyleHint(QFont::SansSerif);
@@ -1448,14 +1450,127 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
 
 void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 {
-	//Handle character deletion
-	for (int i = 0; i < charsRemoved; ++i) {
+	/*************** CHARACTER DELETION ***************/
+
+	if (charsRemoved == 1)
+	{
 		emit charDeleted(position);
 	}
+	else // if (charsRemoved > 1)
+	{
+		for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
+		{
+			emit charGroupDeleted(position + i, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
+		}
+	}
 
-	QTextBlockFormat blockFmt;
+	/*************** CHARACTER INSERTION ***************/
 
-	for (int i = position; i < position + charsAdded; ++i) {
+	if (charsAdded == 1)
+	{
+		//Cursor position is set to i + 1 to get correct character format
+		_extraCursor->setPosition(position + 1);
+
+		//Getting QTextCharFormat from cursor
+		QTextCharFormat fmt = _extraCursor->charFormat();
+
+		//Reset position to i to get blockformat
+		_extraCursor->setPosition(position);
+
+		//Getting QTextBlockFormat from cursor
+		QTextBlockFormat blockFmt = _extraCursor->blockFormat();
+
+		//Getting inserted character
+		QChar ch = _textEdit->document()->characterAt(position);
+
+		emit charInserted(ch, fmt, position, false);
+
+		//If it is a paragraph separator ('8233')
+		if (ch == QChar::ParagraphSeparator) 
+		{
+			//Update block format to server
+			emit blockFormatChanged(position, position, blockFmt);
+		}
+	}
+	else // if (charsAdded > 1)
+	{
+		QList<QChar> bulkChars;
+		QList<QTextCharFormat> bulkFormats;
+
+		for (int i = position, pos = position; i < position + charsAdded; i++)
+		{
+			//Cursor position is set to i + 1 to get correct character format
+			_extraCursor->setPosition(i + 1);
+
+			//Getting QTextCharFormat from cursor
+			QTextCharFormat fmt = _extraCursor->charFormat();
+
+			//Reset position to i to get blockformat
+			_extraCursor->setPosition(i);
+
+			//Getting inserted character
+			QChar ch = _textEdit->document()->characterAt(i);
+
+			//Skip null characters '\0'
+			if (ch != QChar::Null)
+			{
+				bulkChars.append(ch);
+				bulkFormats.append(fmt);
+
+				// Send a group of characters either if the end of the block or the buffer size value is reached
+				if (ch == QChar::ParagraphSeparator || bulkChars.length() == BULK_EDIT_SIZE || i == position + charsAdded - 1)
+				{
+					//Getting QTextBlockFormat from cursor
+					QTextBlockFormat blockFmt = _extraCursor->blockFormat();
+
+					//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
+					bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
+					emit charGroupInserted(bulkChars, bulkFormats, pos, isLast, blockFmt);
+
+					pos += bulkChars.length();
+					bulkChars.clear();			 // Clear buffers before the next iteration (block to be inserted)
+					bulkFormats.clear();
+				}
+
+				//If it is a paragraph separator ('8233')
+				if (ch == QChar::ParagraphSeparator)
+				{
+					//Getting current block and list (if present)
+					QTextBlock currentBlock = _extraCursor->block();
+					QTextList* textList = _extraCursor->currentList();
+
+					if (textList)
+					{
+						//Getting first block of the list
+						QTextBlock firstListBlock = textList->item(0);
+
+						//If the current block is the beginning of a new list emit the signal to create a new one
+						if (currentBlock == firstListBlock)
+						{
+							// It's not actually a new list in this case, but the re-insertion of a block
+							if (textList->count() > 1 && i == position + charsAdded - 1)
+							{
+								QTextBlock otherListBlock = textList->item(1);
+								emit assignBlockToList(currentBlock.position(), otherListBlock.position());
+							}
+							else
+								emit createNewList(currentBlock.position(), textList->format());
+						}
+
+						//Else assign current block to his proper list
+						else
+							emit assignBlockToList(currentBlock.position(), firstListBlock.position());
+					}
+					else
+						emit setBlockNoList(currentBlock.position());
+				}
+			}
+		}
+
+	}
+
+
+	/*for (int i = position; i < position + charsAdded; ++i) {
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(i + 1);
 
@@ -1519,7 +1634,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	//If in my insertion there's not a 8233 (\n), i apply the correct block format
 	if (charsAdded > 1) {
 		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
-	}
+	}*/
 
 
 	//Update GUI after some insertion/deletion

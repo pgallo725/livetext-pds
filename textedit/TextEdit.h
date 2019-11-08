@@ -14,6 +14,7 @@
 
 #define CURSOR_SEND_INTERVAL 250
 #define STATUSBAR_MSG_DURATION 5000
+#define BULK_EDIT_SIZE 256
 
 //Method encapsulation
 class QAction;
@@ -234,6 +235,8 @@ signals:
 	//LOCAL: character insertion/deletion
 	void charInserted(QChar ch, QTextCharFormat format, int position, bool isLast);
 	void charDeleted(int position);
+	void charGroupInserted(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
+	void charGroupDeleted(int position, int count);
 
 	//LOCAL: text block format changed
 	void blockFormatChanged(int start, int end, Qt::Alignment alignment);
