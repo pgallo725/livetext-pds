@@ -150,6 +150,7 @@ void Client::messageHandler(MessageCapsule message)
 void Client::Connect(QString ipAddress, quint16 port) 
 {
 	socket = new QSslSocket(this);
+	socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 
 	// Attach the client slots to the socket's state signals
 	connect(socket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors), this, &Client::handleSslErrors);
