@@ -52,7 +52,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	QSslSocket* socket = client->getSocket();
 	socket->setParent(this);
 
-	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage, Qt::QueuedConnection);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 

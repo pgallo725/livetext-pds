@@ -75,7 +75,7 @@ TcpServer::TcpServer(QObject* parent)
 				if (address.protocol() == QAbstractSocket::IPv4Protocol)
 					qInfo().noquote() << " - " << address.toString();
 			}
-			Logger(Info) << endl << "Available on TCP/IP port:" << port << endl << endl;
+			Logger(Info) << endl << "Available on TCP/IP port: " << port << endl << endl;
 		}
 	}
 }
