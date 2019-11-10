@@ -67,11 +67,6 @@ QLabel* Presence::label()
 	return _label;
 }
 
-QList<QTextEdit::ExtraSelection> Presence::userText()
-{
-	return _userText;
-}
-
 QAction* Presence::actionHighlightText()
 {
 	return _iconPressedAction;
@@ -79,16 +74,6 @@ QAction* Presence::actionHighlightText()
 
 
 /************************ TEXT HIGHLIGHTING ************************/
-void Presence::addUserText(QTextEdit::ExtraSelection selection)
-{
-	_userText.append(selection);
-}
-
-void Presence::clearSelections()
-{
-	//Clears all highlighted text
-	_userText.clear();
-}
 
 void Presence::setAction(QAction* action)
 {
