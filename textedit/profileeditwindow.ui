@@ -188,6 +188,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="maxLength">
+               <number>50</number>
+              </property>
              </widget>
             </item>
             <item row="2" column="0">
@@ -212,6 +215,9 @@ password</string>
                 <height>16777215</height>
                </size>
               </property>
+              <property name="maxLength">
+               <number>100</number>
+              </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -232,6 +238,9 @@ password</string>
                 <width>16777215</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="maxLength">
+               <number>100</number>
               </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>

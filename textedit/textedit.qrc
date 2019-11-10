@@ -43,8 +43,6 @@
 	<file>images/misc/logo_red.png</file>
 	<file>images/misc/defaultProfile.png</file>
 	<file>images/misc/logout.png</file>
-	<file>images/misc/qtlogo.png</file>
-	<file>images/misc/SSLlogo.png</file>
-
+	<file>images/misc/logos.png</file>
 </qresource>
 </RCC>

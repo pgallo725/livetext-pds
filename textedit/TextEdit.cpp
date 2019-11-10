@@ -1497,7 +1497,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		QList<QChar> bulkChars;
 		QList<QTextCharFormat> bulkFormats;
 
-		for (int i = position, pos = position; i < position + charsAdded; i++)
+		for (int i = position, pos = position; i < position + charsAdded; ++i)
 		{
 			//Cursor position is set to i + 1 to get correct character format
 			_extraCursor->setPosition(i + 1);

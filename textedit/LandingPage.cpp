@@ -121,11 +121,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 
 	//Qt/SSL logo
-	QPixmap qtlogo(rsrcPath + "/misc/qtlogo.png");
-	ui->label_qtlogo->setPixmap(qtlogo.scaled(ui->label_qtlogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-	QPixmap ssllogo(rsrcPath + "/misc/SSLlogo.png");
-	ui->label_ssllogo->setPixmap(ssllogo.scaled(ui->label_ssllogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap logos(rsrcPath + "/misc/logos.png");
+	ui->label_logos->setPixmap(logos.scaled(ui->label_logos->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
 
@@ -138,8 +135,10 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_confirmOperation->setText(tr("Login"));	//Change puh button text according
 
 
-	//Validator per non inserire lettere nei campi server/port
-	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
+	//Validator for server port
+	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 65535, this));
+	//Validator for server IP
+	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"), this));
 
 
 	//Loads user login infos
