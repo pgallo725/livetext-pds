@@ -438,7 +438,8 @@ void LandingPage::setupUserProfilePicture(QPixmap userPix)
 
 	//Create a round shape to set label rounded
 	QPainterPath path;
-	path.addRoundedRect(0, 0, ui->label_userProfilePhoto->width(), ui->label_userProfilePhoto->height(), ui->label_userProfilePhoto->width() / 2, ui->label_userProfilePhoto->height() / 2);
+	path.addRoundedRect(0, 0, ui->label_userProfilePhoto->width(), ui->label_userProfilePhoto->height() - 1,
+		ui->label_userProfilePhoto->width() / 2, ui->label_userProfilePhoto->height() / 2);
 	painter.setClipPath(path);
 
 	//Draw profile picture in the new shape
