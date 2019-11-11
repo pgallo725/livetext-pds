@@ -54,7 +54,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page_2">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1176,7 +1176,7 @@ a.a 2018/2019</string>
                   <bool>false</bool>
                  </attribute>
                  <attribute name="horizontalHeaderMinimumSectionSize">
-                  <number>30</number>
+                  <number>35</number>
                  </attribute>
                  <attribute name="horizontalHeaderDefaultSectionSize">
                   <number>70</number>
