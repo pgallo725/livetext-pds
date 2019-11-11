@@ -600,14 +600,11 @@ void TextEdit::setupEditorActions()
 
 void TextEdit::setupOnlineUsersActions()
 {
-	QMap<qint32, Presence*>::iterator it;
-
 	//Clear online users toolbar
 	onlineUsersToolbar->clear();
 
 	//Generate user toolbar for every user logged
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence* p = it.value();
+	foreach(Presence * p, onlineUsers.values()) {
 
 		QAction* onlineAction = new QAction(QIcon(p->profilePicture()), p->name().toStdString().c_str(), this);
 		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
@@ -638,7 +635,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	}
 
 	//Insert presence in editor
-	onlineUsers.insert(userId, new Presence(username, color, userPic, _textEdit));
+	onlineUsers.insert(userId, new Presence(userId, username, color, userPic, _textEdit));
 
 	//Redraw of the onlineUsers toolbar
 	setupOnlineUsersActions();
@@ -653,20 +650,22 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 //Remove presence in the document
 void TextEdit::removePresence(qint32 userId)
 {
-	Presence* p = onlineUsers.find(userId).value();
+	if (onlineUsers.contains(userId)) {
+		Presence* p = onlineUsers.find(userId).value();
 
-	//Hide user cursor
-	p->label()->clear();
+		//Hide user cursor
+		p->label()->clear();
 
-	//Remove frome editor
-	onlineUsers.remove(userId);
+		//Remove frome editor
+		onlineUsers.remove(userId);
 
-	//Redraw of the onlineUsers toolbar
-	setupOnlineUsersActions();
+		//Redraw of the onlineUsers toolbar
+		setupOnlineUsersActions();
 
-	//Clean pointers
-	delete p;
-	p = nullptr;
+		//Clean pointers
+		delete p;
+		p = nullptr;
+	}
 }
 
 /**************************** EDITOR UI/UX ****************************/
@@ -1692,32 +1691,26 @@ void TextEdit::removeChar(int position)
 
 void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
-	//Finds the Presence
-	Presence* p = onlineUsers.find(user).value();
+	if (onlineUsers.contains(user)) {
+		//Finds the Presence
+		Presence* p = onlineUsers.find(user).value();
 
-	if (position < _textEdit->document()->characterCount()) {
-		//Change user's cursor position
-		p->cursor()->setPosition(position);
-	}
-	else {
-		p->cursor()->setPosition(_textEdit->document()->characterCount() - 1);
-	}
+		if (position < _textEdit->document()->characterCount())
+			//Change user's cursor position
+			p->cursor()->setPosition(position);
+		else
+			p->cursor()->setPosition(_textEdit->document()->characterCount() - 1);
 
-	drawGraphicCursor(p);
+		drawGraphicCursor(p);
+	}
 }
 
 //Redraw all cursor in case of window update (scroll, resize...)
 void TextEdit::redrawAllCursors() {
 
-	QMap<qint32, Presence*>::iterator it;
-
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		if (it.key() != _user.getUserId()) {
-
-			Presence* p = it.value();
-
+	foreach(Presence * p, onlineUsers.values()) {
+		if (p->id() != _user.getUserId())
 			drawGraphicCursor(p);
-		}
 	}
 }
 
@@ -1757,15 +1750,10 @@ void TextEdit::drawGraphicCursor(Presence* p)
 
 void TextEdit::highlightUsersText()
 {
-
-	QMap<qint32, Presence*>::iterator it;
-
 	//For every user it's check/uncheck his selection to be displayed
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence* p = it.value();
-
+	foreach(Presence * p, onlineUsers.values())
 		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
-	}
+
 
 	updateUsersSelections();
 }

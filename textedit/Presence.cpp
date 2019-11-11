@@ -2,7 +2,7 @@
 
 #include <QPainter>
 
-Presence::Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _name(name), _nickname(nickname), _color(color)
+Presence::Presence(qint32 id, QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _id(id), _name(name), _nickname(nickname), _color(color)
 {
 	_userCursor = new QTextCursor(textedit->document());
 	_label = new QLabel(textedit);
@@ -70,6 +70,11 @@ QLabel* Presence::label()
 QAction* Presence::actionHighlightText()
 {
 	return _iconPressedAction;
+}
+
+qint32 Presence::id()
+{
+	return _id;
 }
 
 

@@ -21,9 +21,10 @@ private:
 	QLabel* _label;
 	QTextCursor* _userCursor;
 	QAction* _iconPressedAction;
+	qint32 _id;
 
 public:
-	Presence(QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
+	Presence(qint32 id, QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname = "");
 	~Presence();
 
 	//Getters
@@ -34,6 +35,7 @@ public:
 	QTextCursor* cursor();
 	QLabel* label();
 	QAction* actionHighlightText();
+	qint32 id();
 	
 	//Text highlighting
 	void setAction(QAction* action);
