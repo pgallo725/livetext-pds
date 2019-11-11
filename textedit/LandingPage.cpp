@@ -108,11 +108,13 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
 	connect(ui->tableWidget, &QTableWidget::itemActivated, this, &LandingPage::pushButtonOpenClicked);
 
-	//User profile picture preview
-	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &LandingPage::showUserIcon);
 
 	//tabWidget
 	connect(ui->tabWidget, &QTabWidget::currentChanged, this, &LandingPage::currentTabChanged);
+
+	//Radio button
+	connect(ui->radioButton_customAvatar, &QRadioButton::toggled, this, &LandingPage::radioButtonPressed);
+	connect(ui->radioButton_defaultAvatar, &QRadioButton::toggled, this, &LandingPage::radioButtonPressed);
 
 
 	//User Icon
@@ -121,11 +123,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 
 	//Qt/SSL logo
-	QPixmap qtlogo(rsrcPath + "/misc/qtlogo.png");
-	ui->label_qtlogo->setPixmap(qtlogo.scaled(ui->label_qtlogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-
-	QPixmap ssllogo(rsrcPath + "/misc/SSLlogo.png");
-	ui->label_ssllogo->setPixmap(ssllogo.scaled(ui->label_ssllogo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap logos(rsrcPath + "/misc/logos.png");
+	ui->label_logos->setPixmap(logos.scaled(ui->label_logos->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
 
@@ -138,8 +137,10 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_confirmOperation->setText(tr("Login"));	//Change puh button text according
 
 
-	//Validator per non inserire lettere nei campi server/port
-	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 10000, this));
+	//Validator for server port
+	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 65535, this));
+	//Validator for server IP
+	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"), this));
 
 
 	//Loads user login infos
@@ -216,6 +217,23 @@ void LandingPage::pushButtonConfirmOperationClicked()
 
 	//Emit connection signal to server
 	emit(connectToServer(serverIP, serverPort.toShort()));
+}
+
+void LandingPage::radioButtonPressed()
+{
+	if (ui->radioButton_customAvatar->isChecked()) {
+		ui->pushButton_browse->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_browse->setEnabled(false);
+		ui->label_incorrect_operation->setText("");
+		ui->label_imageSize->setText("");
+
+		//Load default profile picture
+		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	}
 }
 
 
@@ -347,7 +365,7 @@ void LandingPage::setupFileList()
 
 		//Create "<No documents found>" element
 		QTableWidgetItem* noDocuments = new QTableWidgetItem("<No documents found>");
-		
+
 		//Setting item style
 		noDocuments->setTextAlignment(Qt::AlignCenter);
 		noDocuments->setFont(QFont("Helvetica", 12));
@@ -362,7 +380,7 @@ void LandingPage::setupFileList()
 		//Show table headers
 		ui->tableWidget->horizontalHeader()->setVisible(true);
 		ui->tableWidget->verticalHeader()->setVisible(true);
-		
+
 		//Set column count to 3 (Name/Author/URI)
 		ui->tableWidget->setColumnCount(3);
 
@@ -372,12 +390,12 @@ void LandingPage::setupFileList()
 		headerLabels.append("Author");
 		headerLabels.append("URI");
 		ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
-		
+
 
 		//Add every document to the table
 		QList<URI>::iterator it;
 		for (it = documents.begin(); it != documents.end(); it++) {
-			
+
 			//Inserting new row in table
 			int rowCount = ui->tableWidget->rowCount();
 			ui->tableWidget->insertRow(rowCount);
@@ -436,7 +454,7 @@ void LandingPage::resetFields()
 	ui->lineEdit_regNick->setText("");
 	ui->lineEdit_regPsw->setText("");
 	ui->lineEdit_regPswConf->setText("");
-	ui->lineEdit_UsrIconPath->setText("");
+	//ui->lineEdit_UsrIconPath->setText("");
 	ui->label_incorrect_operation->setText("");
 	ui->label_incorrect_file_operation->setText("");
 
@@ -529,7 +547,7 @@ void LandingPage::closeAll()
 }
 
 
-void LandingPage::showUserIcon(QString path)
+void LandingPage::updateUserAvatarPreview(QString path)
 {
 	QFileInfo file(path);
 
@@ -539,17 +557,28 @@ void LandingPage::showUserIcon(QString path)
 	//Check if file in path exist and if it is a valid image file
 	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
-
-		if (!userPix.isNull()) {
-			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-			ui->label_incorrect_operation->setText("");
-			return;
+		if (userPix.isNull()) {
+			//Shows error
+			incorrectOperation(tr("Please choose a valid image file"));
+			ui->label_imageSize->setText("");
 		}
+		else
+		{
+			qint64 fileSize = file.size();
+			ui->label_imageSize->setText("Image size: " + QString::number(fileSize / 1024) + " KB");
 
+			if (fileSize > 1048576) {
+				//Shows error
+				incorrectOperation(tr("Choosen image is too big, please select another one"));
+			}
+			else {
+				ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+				ui->label_incorrect_operation->setText("");
+				return;
+			}
+		}
 	}
 
-	//Shows error
-	ui->label_incorrect_operation->setText("Please choose a valid image file");
 
 	//Load default profile picture
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
@@ -581,8 +610,10 @@ void LandingPage::pushButtonBrowseClicked()
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
 		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
 
-	//Set choosen filename
-	ui->lineEdit_UsrIconPath->setText(filename);
+	if (!filename.isEmpty()) {
+		//Set choosen filename
+		updateUserAvatarPreview(filename);
+	}
 }
 
 

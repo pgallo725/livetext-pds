@@ -20,7 +20,6 @@ private:
 	QPixmap _profilePicture;
 	QLabel* _label;
 	QTextCursor* _userCursor;
-	QList<QTextEdit::ExtraSelection> _userText;
 	QAction* _iconPressedAction;
 
 public:
@@ -34,12 +33,9 @@ public:
 	QPixmap profilePicture();
 	QTextCursor* cursor();
 	QLabel* label();
-	QList<QTextEdit::ExtraSelection> userText();
 	QAction* actionHighlightText();
 	
 	//Text highlighting
-	void addUserText(QTextEdit::ExtraSelection selection);
-	void clearSelections();
 	void setAction(QAction* action);
 };
 

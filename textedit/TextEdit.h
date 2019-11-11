@@ -151,6 +151,8 @@ private:
 	//About dialog
 	AboutWindow* _aboutwindow;
 
+	//Text highlighting
+	QList<QTextEdit::ExtraSelection> _usersText;
 
 	/* ----------------------- METHODS ----------------------- */
 
@@ -177,6 +179,7 @@ private:
 
 	//User text highlighting
 	void handleMultipleSelections();
+	bool areUserIconActive();
 
 	//Graphic cursors
 	void redrawAllCursors();

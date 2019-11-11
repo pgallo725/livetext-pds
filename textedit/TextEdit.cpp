@@ -79,12 +79,9 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//Online users cursor redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
-
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
-	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
-	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::updateUsersSelections);
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
@@ -260,7 +257,7 @@ void TextEdit::setupEditorActions()
 
 
 	/********** EDIT MENU **********/
-	
+
 	tb = addToolBar(tr("Edit Actions"));
 	menu = menuBar()->addMenu(tr("&Edit"));
 
@@ -537,7 +534,7 @@ void TextEdit::setupEditorActions()
 
 	//Close document
 	tb->addAction(closeDocoumentAction);
-	
+
 	//Online users toolbar
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
@@ -588,7 +585,8 @@ void TextEdit::setupEditorActions()
 	menu = menuBar()->addMenu(tr("?"));
 	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
 	menu->addSeparator();
-	menu->addAction(tr("About LiveText..."), _aboutwindow, &AboutWindow::exec);}
+	menu->addAction(tr("About LiveText..."), _aboutwindow, &AboutWindow::exec);
+}
 
 
 
@@ -1018,7 +1016,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	//Set format lineheight, if not present sets default one
 	format.setIndent(fmt.indent());
 	if (fmt.lineHeight() == 0)
-		format.setLineHeight(115, QTextBlockFormat::ProportionalHeight);
+		format.setLineHeight(100, QTextBlockFormat::ProportionalHeight);
 	else
 		format.setLineHeight(fmt.lineHeight(), QTextBlockFormat::ProportionalHeight);
 
@@ -1299,9 +1297,6 @@ void TextEdit::updateEditorSelectedActions()
 	//Users cursors
 	redrawAllCursors();
 
-	//User text higlighting
-	updateUsersSelections();
-
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
@@ -1401,14 +1396,15 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
 void TextEdit::lineHeightChanged(qreal height)
 {
 	//Checks line height button according to Alignment a
-	if (height == 100)
-		actionLineHeight100->setChecked(true);
-	else if (height == 115)
+	if (height == 115)
 		actionLineHeight115->setChecked(true);
 	else if (height == 150)
 		actionLineHeight150->setChecked(true);
 	else if (height == 200)
 		actionLineHeight200->setChecked(true);
+	else //Default line height
+		actionLineHeight100->setChecked(true);
+
 }
 
 /**************************** PASTE EVENT ****************************/
@@ -1452,7 +1448,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 {
 	/*************** CHARACTER DELETION ***************/
 
-	if (charsRemoved == 1)
+	/*if (charsRemoved == 1)
 	{
 		emit charDeleted(position);
 	}
@@ -1462,11 +1458,11 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		{
 			emit charGroupDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 		}
-	}
+	}*/
 
 	/*************** CHARACTER INSERTION ***************/
 
-	if (charsAdded == 1)
+	/*if (charsAdded == 1)
 	{
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(position + 1);
@@ -1486,7 +1482,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		emit charInserted(ch, fmt, position, false);
 
 		//If it is a paragraph separator ('8233')
-		if (ch == QChar::ParagraphSeparator) 
+		if (ch == QChar::ParagraphSeparator)
 		{
 			//Update block format to server
 			emit blockFormatChanged(position, position, blockFmt);
@@ -1497,7 +1493,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		QList<QChar> bulkChars;
 		QList<QTextCharFormat> bulkFormats;
 
-		for (int i = position, pos = position; i < position + charsAdded; i++)
+		for (int i = position, pos = position; i < position + charsAdded; ++i)
 		{
 			//Cursor position is set to i + 1 to get correct character format
 			_extraCursor->setPosition(i + 1);
@@ -1522,6 +1518,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 				{
 					//Getting QTextBlockFormat from cursor
 					QTextBlockFormat blockFmt = _extraCursor->blockFormat();
+					blockFmt.lineHeight();
 
 					//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
 					bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
@@ -1567,10 +1564,16 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 			}
 		}
 
+	}*/
+
+	for (int i = 0; i < charsRemoved; ++i) {
+		emit charDeleted(position);
 	}
 
+	QTextBlockFormat blockFmt;
 
-	/*for (int i = position; i < position + charsAdded; ++i) {
+
+	for (int i = position; i < position + charsAdded; ++i) {
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(i + 1);
 
@@ -1634,11 +1637,14 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	//If in my insertion there's not a 8233 (\n), i apply the correct block format
 	if (charsAdded > 1) {
 		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
-	}*/
+	}
 
 
 	//Update GUI after some insertion/deletion
 	cursorPositionChanged();
+
+	//User text higlighting
+	updateUsersSelections();
 }
 
 
@@ -1656,6 +1662,9 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 
 	//GUI update
 	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
 }
 
 void TextEdit::removeChar(int position)
@@ -1669,6 +1678,9 @@ void TextEdit::removeChar(int position)
 
 	//GUI update
 	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
 }
 
 /**************************** EXTRA CURSORS ****************************/
@@ -1755,30 +1767,52 @@ void TextEdit::highlightUsersText()
 		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 	}
 
-	handleMultipleSelections();
+	updateUsersSelections();
+}
+
+void TextEdit::updateUsersSelections()
+{
+	if (areUserIconActive()) {
+		_usersText.clear();
+
+		//Generate extraSelections according to users text
+		emit generateExtraSelection();
+
+		//Shows user text highlight
+		handleMultipleSelections();
+	}
+	else {
+		//Clear all extra selections
+		_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
+
+	}
 }
 
 //Sets and save all extra selections in the document
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
+
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
-		QTextCursor cursor(_textEdit->document());
 
-		//Text selection
-		cursor.setPosition(selection.first);
-		cursor.setPosition(selection.second, QTextCursor::KeepAnchor);
+		if (p->actionHighlightText()->isChecked()) {
+			QTextCursor cursor(_textEdit->document());
 
-		QTextEdit::ExtraSelection userText;
+			//Text selection
+			cursor.setPosition(selection.first);
+			cursor.setPosition(selection.second, QTextCursor::KeepAnchor);
 
-		//Sets format of extra selection
-		QColor color = p->color();
-		color.setAlpha(70);
-		userText.format.setBackground(color);
-		userText.cursor = cursor;
+			QTextEdit::ExtraSelection userText;
 
-		//Add extra selection to Presence
-		p->addUserText(userText);
+			//Sets format of extra selection
+			QColor color = p->color();
+			color.setAlpha(70);
+			userText.format.setBackground(color);
+			userText.cursor = cursor;
+
+			//Add extra selection to Presence
+			_usersText.append(userText);
+		}
 	}
 }
 
@@ -1786,22 +1820,13 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 void TextEdit::handleMultipleSelections()
 {
 	//Clear all extra selections
-	QList<QTextEdit::ExtraSelection> usersSelections;
-	_textEdit->setExtraSelections(usersSelections);
+	_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
 
-	QMap<qint32, Presence*>::iterator it;
 
-	//To check if all actions are checked
 	int actionsChecked = 0;
-
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		Presence* p = it.value();
-
-		if (p->actionHighlightText()->isChecked()) {
-			//Append to list current Presence selection
-			usersSelections.append(p->userText());
+	foreach(Presence * p, onlineUsers.values()) {
+		if (p->actionHighlightText()->isChecked())
 			actionsChecked++;
-		}
 	}
 
 	//Check/Uncheck of actionHighlightUsers based on single highlight checked
@@ -1814,23 +1839,21 @@ void TextEdit::handleMultipleSelections()
 	}
 
 	//Sets the formatted selections in the editor
-	_textEdit->setExtraSelections(usersSelections);
+	_textEdit->setExtraSelections(_usersText);
 }
 
-
-void TextEdit::updateUsersSelections()
+bool TextEdit::areUserIconActive()
 {
-	//Clear all selections and recompute new ones
-	QMap<qint32, Presence*>::iterator it;
-	for (it = onlineUsers.begin(); it != onlineUsers.end(); it++) {
-		it.value()->clearSelections();
+	foreach(Presence * p, onlineUsers.values()) {
+		if (p->actionHighlightText()->isChecked())
+			return true;
 	}
 
-	emit generateExtraSelection();
-
-	//Shows user text highlight
-	handleMultipleSelections();
+	return false;
 }
+
+
+
 
 /**************************** ABOUT ****************************/
 /*
