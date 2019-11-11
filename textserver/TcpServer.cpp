@@ -199,7 +199,7 @@ void TcpServer::newClientConnection()
 	Logger() << "New connection from a client";
 
 	// Avoid buffers
-	socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+	//socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 
 	// Create a new client object 
 	QSharedPointer<Client> client(new Client(socket));
