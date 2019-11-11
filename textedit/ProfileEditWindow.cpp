@@ -153,9 +153,6 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 {
 	QFileInfo file(path);
 
-	int w = ui->label_UsrIcon->width();
-	int h = ui->label_UsrIcon->height();
-
 	//Check if file in path exist and if it is a valid image file
 	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
@@ -171,10 +168,11 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 
 			if (fileSize > 1048576) {
 				//Shows error
-				ui->label_incorrect_edit->setText(tr("Choosen image is too big, please select another one"));
+				ui->label_incorrect_edit->setText(tr("Choosen image is too big, please select another one (Maximum size: 1MB)"));
+				return;
 			}
 			else {
-				ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+				ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 				ui->label_incorrect_edit->setText("");
 				return;
 			}
@@ -184,7 +182,7 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 
 	//Load default profile picture
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -195,6 +193,13 @@ void ProfileEditWindow::resetFields()
 	ui->lineEdit_editNick->setText("");
 	ui->lineEdit_editPsw->setText("");
 	ui->lineEdit_editPswConf->setText("");
+
+	//Load default profile picture
+	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	//Check radio-button
+	ui->radioButton_customAvatar->setChecked(true);
 }
 
 void ProfileEditWindow::updateInfo()

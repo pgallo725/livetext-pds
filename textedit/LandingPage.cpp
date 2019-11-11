@@ -454,13 +454,21 @@ void LandingPage::resetFields()
 	ui->lineEdit_regNick->setText("");
 	ui->lineEdit_regPsw->setText("");
 	ui->lineEdit_regPswConf->setText("");
-	//ui->lineEdit_UsrIconPath->setText("");
+
 	ui->label_incorrect_operation->setText("");
 	ui->label_incorrect_file_operation->setText("");
+	ui->label_imageSize->setText("");
 
 	//Reset also additional windows fields
 	newFileWindow->resetFields();
 	openURIWindow->resetFields();
+
+	//Reset user avatar preview
+	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	//Check radio-button
+	ui->radioButton_defaultAvatar->setChecked(true);
 }
 
 
@@ -551,9 +559,6 @@ void LandingPage::updateUserAvatarPreview(QString path)
 {
 	QFileInfo file(path);
 
-	int w = ui->label_UsrIcon->width();
-	int h = ui->label_UsrIcon->height();
-
 	//Check if file in path exist and if it is a valid image file
 	if (file.exists() && file.isFile()) {
 		QPixmap userPix(path);
@@ -569,10 +574,11 @@ void LandingPage::updateUserAvatarPreview(QString path)
 
 			if (fileSize > 1048576) {
 				//Shows error
-				incorrectOperation(tr("Choosen image is too big, please select another one"));
+				incorrectOperation(tr("Choosen image is too big, please select another one (Maximum size: 1MB)"));
+				return;
 			}
 			else {
-				ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+				ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 				ui->label_incorrect_operation->setText("");
 				return;
 			}
@@ -582,7 +588,7 @@ void LandingPage::updateUserAvatarPreview(QString path)
 
 	//Load default profile picture
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
