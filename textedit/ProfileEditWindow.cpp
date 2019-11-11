@@ -210,9 +210,7 @@ void ProfileEditWindow::updateInfo()
 	QPixmap userPix;
 	userPix.convertFromImage(_user.getIcon());
 
-	int w = ui->label_UsrIcon->width();
-	int h = ui->label_UsrIcon->height();
-	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	
 	//Set username

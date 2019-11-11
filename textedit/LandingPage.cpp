@@ -43,9 +43,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	openURIWindow = new OpenUriWindow(_buffer);
 
 	//New file push button icon
-	int w = ui->pushButton_new->width();
-	int h = ui->pushButton_new->height();
-	ui->pushButton_new->setIconSize(QSize::QSize(w, h));
+	ui->pushButton_new->setIconSize(ui->pushButton_new->size());
 	ui->pushButton_new->setIcon(QIcon(rsrcPath + "/landingPage/new.png"));
 
 	//Tab widget icons
@@ -57,7 +55,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/landingPage/fileopen.png"));
 
 	//Open from URI push button icon
-	ui->pushButton_openuri->setIconSize(QSize::QSize(w, h));
+	ui->pushButton_openuri->setIconSize(ui->pushButton_openuri->size());
 	ui->pushButton_openuri->setIcon(QIcon(rsrcPath + "/landingPage/openuri.png"));
 
 	//Logout
@@ -71,9 +69,7 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 
 	//LiveText main page logo
 	QPixmap logoPix(rsrcPath + "/misc/logo.png");
-	w = ui->label_logo->width();
-	h = ui->label_logo->height();
-	ui->label_logo->setPixmap(logoPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	ui->label_logo->setPixmap(logoPix.scaled(ui->label_logo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
 	/******************* CONNECTS *******************/
