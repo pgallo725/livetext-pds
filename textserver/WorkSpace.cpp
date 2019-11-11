@@ -87,7 +87,7 @@ void WorkSpace::readMessage()
 	if (!socketBuffer.getDataSize()) {
 		streamIn >> socketBuffer;
 
-		if (!socketBuffer.getDataSize())
+		if (!socketBuffer.getType() && !socketBuffer.getDataSize())
 			return;
 	}
 
