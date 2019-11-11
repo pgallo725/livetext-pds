@@ -55,8 +55,11 @@ private slots:
 	void pushButtonBrowseClicked();
 	void pushButtonCancelClicked();
 
+	//Radio button
+	void radioButtonPressed();
+
 	//GUI update
-	void showUserIcon(QString path);
+	void updateUserAvatarPreview(QString path);
 };
 
 

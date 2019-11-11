@@ -98,6 +98,9 @@ private slots:
 	void pushButtonRemoveClicked();
 	void pushButtonOpenUriClicked();
 	void pushButtonConfirmOperationClicked();
+
+	//Radio button
+	void radioButtonPressed();
 	
 	//Enable/Disable push button (open/remove) when a selection in list changes
 	void enablePushButtonOpen();
@@ -106,7 +109,7 @@ private slots:
 	void currentTabChanged(int index);
 
 	//User profile picture preview
-	void showUserIcon(QString path);
+	void updateUserAvatarPreview(QString path);
 };
 
 #endif // LANDINGPAGE_H

@@ -20,7 +20,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
-		mngr.centerAndResize(0.6, 0.75);
+		mngr.centerAndResize(0.55, 0.7);
 	else
 		mngr.centerAndResize(0.5, 0.55);
 
@@ -35,8 +35,15 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 	connect(ui->lineEdit_editPswConf, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 
+	//Radio button
+	connect(ui->radioButton_customAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
+	connect(ui->radioButton_defaultAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
+
 	//Update GUI according to user info
 	updateInfo();
+
+	//Browse icon
+	ui->pushButton_browse->setIcon(QIcon(rsrcPath + "/landingPage/fileopen.png"));
 
 	//Setups splash screen to show loading informations
 	loading = new QLabel(this);
@@ -80,7 +87,9 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
 
 	//Sets in path box correct path
-	ui->lineEdit_UsrIconPath->setText(filename);
+	if (!filename.isEmpty()) {
+		updateUserAvatarPreview(filename);
+	}
 }
 
 void ProfileEditWindow::pushButtonCancelClicked()
@@ -88,7 +97,6 @@ void ProfileEditWindow::pushButtonCancelClicked()
 	resetFields();
 	this->close();
 }
-
 
 void ProfileEditWindow::pushButtonUpdateClicked()
 {
@@ -102,7 +110,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	//Check if all password are the same (if setted)
 	if (!newPassword.isEmpty() || !newPasswordConf.isEmpty()) {
 		if (newPassword != newPasswordConf) {
-			ui->label_incorrect_edit->setText("Passwords does not match");
+			ui->label_incorrect_edit->setText(tr("Passwords does not match"));
 			return;
 		}
 	}
@@ -120,35 +128,61 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	emit accountUpdate(nick, userIcon, newPassword, _fromEditor);
 }
 
+
+void ProfileEditWindow::radioButtonPressed()
+{
+	if (ui->radioButton_customAvatar->isChecked()) {
+		ui->pushButton_browse->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_browse->setEnabled(false);
+		ui->label_incorrect_edit->setText("");
+		ui->label_imageSize->setText("");
+
+		//Load default profile picture
+		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	}
+}
+
+
 /* ---------------- GUI UPDATE ----------------*/
 
-void ProfileEditWindow::showUserIcon(QString path)
+void ProfileEditWindow::updateUserAvatarPreview(QString path)
 {
-
 	QFileInfo file(path);
 
-	//Preview size
 	int w = ui->label_UsrIcon->width();
 	int h = ui->label_UsrIcon->height();
 
-	//Checks if file is an existing and if it is vaild
+	//Check if file in path exist and if it is a valid image file
 	if (file.exists() && file.isFile()) {
-		//Create a pixmap from choosen path
 		QPixmap userPix(path);
-
-		//If the path is a valid image file sets the preview and clears all error
-		if (!userPix.isNull()) {
-			ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-			ui->label_incorrect_edit->setText("");
-			return;
+		if (userPix.isNull()) {
+			//Shows error
+			ui->label_incorrect_edit->setText(tr("Please choose a valid image file"));
+			ui->label_imageSize->setText("");
 		}
+		else
+		{
+			qint64 fileSize = file.size();
+			ui->label_imageSize->setText("Image size: " + QString::number(fileSize / 1024) + " KB");
 
+			if (fileSize > 1048576) {
+				//Shows error
+				ui->label_incorrect_edit->setText(tr("Choosen image is too big, please select another one"));
+			}
+			else {
+				ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+				ui->label_incorrect_edit->setText("");
+				return;
+			}
+		}
 	}
 
-	//If the file is not an image or is corrupted it shows an error message
-	ui->label_incorrect_edit->setText("Please choose a valid image file");
 
-	//And resets default profile icon
+	//Load default profile picture
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
@@ -161,7 +195,6 @@ void ProfileEditWindow::resetFields()
 	ui->lineEdit_editNick->setText("");
 	ui->lineEdit_editPsw->setText("");
 	ui->lineEdit_editPswConf->setText("");
-	ui->lineEdit_UsrIconPath->setText("");
 }
 
 void ProfileEditWindow::updateInfo()
@@ -176,10 +209,7 @@ void ProfileEditWindow::updateInfo()
 	int h = ui->label_UsrIcon->height();
 	ui->label_UsrIcon->setPixmap(userPix.scaled(w, h, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-	//Any changes in user profile picture path triggers a functions that updates preview
-	connect(ui->lineEdit_UsrIconPath, &QLineEdit::textChanged, this, &ProfileEditWindow::showUserIcon);
-
-
+	
 	//Set username
 	ui->label_username->setText(_user.getUsername());
 	ui->lineEdit_editNick->setText(_user.getNickname());
