@@ -52,7 +52,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	QSslSocket* socket = client->getSocket();
 	socket->setParent(this);
 
-	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage, Qt::QueuedConnection);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
 	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
 
@@ -78,11 +78,17 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 void WorkSpace::readMessage()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
+	if (socket == nullptr)
+		return;
+
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	QByteArray dataBuffer;
 
 	if (!socketBuffer.getDataSize()) {
 		streamIn >> socketBuffer;
+
+		if (!socketBuffer.getDataSize())
+			return;
 	}
 
 	// Read all the available message data from the socket
