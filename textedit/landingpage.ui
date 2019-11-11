@@ -64,7 +64,7 @@
            <enum>QTabWidget::West</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -98,7 +98,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Enter your credentials to login into your account</string>
+               <string>Login to your LiveText account</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -119,7 +119,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>20</height>
+                <height>32</height>
                </size>
               </property>
              </spacer>
@@ -205,7 +205,7 @@
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>70</height>
+                <height>60</height>
                </size>
               </property>
              </spacer>
@@ -339,10 +339,13 @@
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Expanding</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>15</height>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -355,13 +358,16 @@
               <property name="topMargin">
                <number>0</number>
               </property>
-              <item alignment="Qt::AlignRight">
+              <item alignment="Qt::AlignLeft">
                <widget class="QLabel" name="label_logos">
                 <property name="minimumSize">
                  <size>
-                  <width>180</width>
-                  <height>72</height>
+                  <width>120</width>
+                  <height>48</height>
                  </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
                 </property>
                 <property name="text">
                  <string/>
@@ -404,7 +410,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Please fill the form with required information to create your account</string>
+               <string>Fill the form with the required information to create your account</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -1094,7 +1100,7 @@ a.a 2018/2019</string>
            <number>40</number>
           </property>
           <property name="rightMargin">
-           <number>40</number>
+           <number>30</number>
           </property>
           <item>
            <spacer name="verticalSpacer_17">
@@ -1132,7 +1138,7 @@ a.a 2018/2019</string>
              </font>
             </property>
             <property name="title">
-             <string>Open existing document</string>
+             <string>Your documents</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_12">
              <item>
@@ -1211,6 +1217,22 @@ a.a 2018/2019</string>
                 </widget>
                </item>
                <item>
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Preferred</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>360</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
                   <widget class="QPushButton" name="pushButton_remove">
@@ -1218,7 +1240,7 @@ a.a 2018/2019</string>
                     <bool>false</bool>
                    </property>
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -1235,26 +1257,13 @@ a.a 2018/2019</string>
                      <pointsize>10</pointsize>
                     </font>
                    </property>
+                   <property name="layoutDirection">
+                    <enum>Qt::LeftToRight</enum>
+                   </property>
                    <property name="text">
                     <string>Remove selected</string>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeType">
-                    <enum>QSizePolicy::Preferred</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>100</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_open">
@@ -1304,7 +1313,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>20</height>
+              <height>25</height>
              </size>
             </property>
            </spacer>
@@ -1328,7 +1337,7 @@ a.a 2018/2019</string>
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>30</height>
+                <height>36</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -1362,7 +1371,7 @@ a.a 2018/2019</string>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <property name="leftMargin">
-           <number>40</number>
+           <number>30</number>
           </property>
           <property name="rightMargin">
            <number>40</number>
@@ -1510,7 +1519,7 @@ a.a 2018/2019</string>
                 <property name="sizeHint" stdset="0">
                  <size>
                   <width>20</width>
-                  <height>30</height>
+                  <height>32</height>
                  </size>
                 </property>
                </spacer>
@@ -1528,7 +1537,7 @@ a.a 2018/2019</string>
               <property name="topMargin">
                <number>0</number>
               </property>
-              <item alignment="Qt::AlignHCenter">
+              <item alignment="Qt::AlignHCenter|Qt::AlignTop">
                <widget class="QLabel" name="label_userProfilePhoto">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1559,7 +1568,7 @@ a.a 2018/2019</string>
                 </property>
                </widget>
               </item>
-              <item>
+              <item alignment="Qt::AlignBottom">
                <widget class="QPushButton" name="pushButton_editProfile">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1642,13 +1651,16 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>30</height>
+              <height>50</height>
              </size>
             </property>
            </spacer>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <property name="topMargin">
              <number>0</number>
             </property>
@@ -1662,8 +1674,8 @@ a.a 2018/2019</string>
               </property>
               <property name="minimumSize">
                <size>
-                <width>228</width>
-                <height>100</height>
+                <width>256</width>
+                <height>110</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -1710,8 +1722,8 @@ a.a 2018/2019</string>
               </property>
               <property name="minimumSize">
                <size>
-                <width>228</width>
-                <height>100</height>
+                <width>256</width>
+                <height>110</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -1738,7 +1750,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>40</height>
+              <height>45</height>
              </size>
             </property>
            </spacer>
@@ -1870,7 +1882,7 @@ a.a 2018/2019</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>49</height>
+              <height>50</height>
              </size>
             </property>
            </spacer>
