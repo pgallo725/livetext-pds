@@ -37,8 +37,8 @@ public:
 	static MessageCapsule CharInsert(Symbol symbol, bool isLast);
 	static MessageCapsule CharDelete(Position position);
 	static MessageCapsule CharFormat(Position position, QTextCharFormat fmt);
-	static MessageCapsule BulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	static MessageCapsule BulkDelete(QList<Position> positions);
+	static MessageCapsule BulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	static MessageCapsule BulkDelete(QVector<Position> positions);
 	static MessageCapsule BlockEdit(TextBlockID blockId, QTextBlockFormat fmt);
 	static MessageCapsule ListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 

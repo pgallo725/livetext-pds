@@ -1489,8 +1489,8 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	}
 	else // if (charsAdded > 1)
 	{
-		QList<QChar> bulkChars;
-		QList<QTextCharFormat> bulkFormats;
+		QVector<QChar> bulkChars;
+		QVector<QTextCharFormat> bulkFormats;
 
 		for (int i = position, pos = position; i < position + charsAdded; ++i)
 		{

@@ -238,7 +238,7 @@ signals:
 	//LOCAL: character insertion/deletion
 	void charInserted(QChar ch, QTextCharFormat format, int position, bool isLast);
 	void charDeleted(int position);
-	void charGroupInserted(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
+	void charGroupInserted(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
 	void charGroupDeleted(int position, int count);
 
 	//LOCAL: text block format changed

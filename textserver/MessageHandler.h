@@ -50,8 +50,8 @@ signals:
 	void charInsert(Symbol s);
 	void charDelete(Position pos);
 	void charFormat(Position pos, QTextCharFormat fmt);
-	void bulkInsert(QList<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
-	void bulkDelete(QList<Position> poss);
+	void bulkInsert(QVector<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
+	void bulkDelete(QVector<Position> poss);
 	void blockEdit(TextBlockID id, QTextBlockFormat fmt);
 	void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 	void messageDispatch(MessageCapsule message, QSslSocket* sender);

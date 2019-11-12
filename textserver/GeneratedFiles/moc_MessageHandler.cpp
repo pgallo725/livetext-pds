@@ -10,7 +10,7 @@
 #include "../MessageHandler.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
-#include <QtCore/QList>
+#include <QtCore/QVector>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'MessageHandler.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
@@ -24,7 +24,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MessageHandler_t {
     QByteArrayData data[54];
-    char stringdata0[540];
+    char stringdata0[544];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -65,28 +65,28 @@ QT_MOC_LITERAL(28, 280, 10), // "charFormat"
 QT_MOC_LITERAL(29, 291, 15), // "QTextCharFormat"
 QT_MOC_LITERAL(30, 307, 3), // "fmt"
 QT_MOC_LITERAL(31, 311, 10), // "bulkInsert"
-QT_MOC_LITERAL(32, 322, 13), // "QList<Symbol>"
-QT_MOC_LITERAL(33, 336, 4), // "syms"
-QT_MOC_LITERAL(34, 341, 11), // "TextBlockID"
-QT_MOC_LITERAL(35, 353, 3), // "bId"
-QT_MOC_LITERAL(36, 357, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(37, 374, 6), // "blkFmt"
-QT_MOC_LITERAL(38, 381, 10), // "bulkDelete"
-QT_MOC_LITERAL(39, 392, 15), // "QList<Position>"
-QT_MOC_LITERAL(40, 408, 4), // "poss"
-QT_MOC_LITERAL(41, 413, 9), // "blockEdit"
-QT_MOC_LITERAL(42, 423, 2), // "id"
-QT_MOC_LITERAL(43, 426, 8), // "listEdit"
-QT_MOC_LITERAL(44, 435, 7), // "blockId"
-QT_MOC_LITERAL(45, 443, 10), // "TextListID"
-QT_MOC_LITERAL(46, 454, 6), // "listId"
-QT_MOC_LITERAL(47, 461, 15), // "QTextListFormat"
-QT_MOC_LITERAL(48, 477, 15), // "messageDispatch"
-QT_MOC_LITERAL(49, 493, 7), // "message"
-QT_MOC_LITERAL(50, 501, 6), // "sender"
-QT_MOC_LITERAL(51, 508, 13), // "documentClose"
-QT_MOC_LITERAL(52, 522, 6), // "forced"
-QT_MOC_LITERAL(53, 529, 10) // "userLogout"
+QT_MOC_LITERAL(32, 322, 15), // "QVector<Symbol>"
+QT_MOC_LITERAL(33, 338, 4), // "syms"
+QT_MOC_LITERAL(34, 343, 11), // "TextBlockID"
+QT_MOC_LITERAL(35, 355, 3), // "bId"
+QT_MOC_LITERAL(36, 359, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(37, 376, 6), // "blkFmt"
+QT_MOC_LITERAL(38, 383, 10), // "bulkDelete"
+QT_MOC_LITERAL(39, 394, 17), // "QVector<Position>"
+QT_MOC_LITERAL(40, 412, 4), // "poss"
+QT_MOC_LITERAL(41, 417, 9), // "blockEdit"
+QT_MOC_LITERAL(42, 427, 2), // "id"
+QT_MOC_LITERAL(43, 430, 8), // "listEdit"
+QT_MOC_LITERAL(44, 439, 7), // "blockId"
+QT_MOC_LITERAL(45, 447, 10), // "TextListID"
+QT_MOC_LITERAL(46, 458, 6), // "listId"
+QT_MOC_LITERAL(47, 465, 15), // "QTextListFormat"
+QT_MOC_LITERAL(48, 481, 15), // "messageDispatch"
+QT_MOC_LITERAL(49, 497, 7), // "message"
+QT_MOC_LITERAL(50, 505, 6), // "sender"
+QT_MOC_LITERAL(51, 512, 13), // "documentClose"
+QT_MOC_LITERAL(52, 526, 6), // "forced"
+QT_MOC_LITERAL(53, 533, 10) // "userLogout"
 
     },
     "MessageHandler\0loginRequest\0MessageCapsule\0"
@@ -98,9 +98,9 @@ QT_MOC_LITERAL(53, 529, 10) // "userLogout"
     "documentRemove\0charInsert\0Symbol\0s\0"
     "charDelete\0Position\0pos\0charFormat\0"
     "QTextCharFormat\0fmt\0bulkInsert\0"
-    "QList<Symbol>\0syms\0TextBlockID\0bId\0"
+    "QVector<Symbol>\0syms\0TextBlockID\0bId\0"
     "QTextBlockFormat\0blkFmt\0bulkDelete\0"
-    "QList<Position>\0poss\0blockEdit\0id\0"
+    "QVector<Position>\0poss\0blockEdit\0id\0"
     "listEdit\0blockId\0TextListID\0listId\0"
     "QTextListFormat\0messageDispatch\0message\0"
     "sender\0documentClose\0forced\0userLogout"
@@ -190,8 +190,8 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 8: _t->charInsert((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
         case 9: _t->charDelete((*reinterpret_cast< Position(*)>(_a[1]))); break;
         case 10: _t->charFormat((*reinterpret_cast< Position(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
-        case 11: _t->bulkInsert((*reinterpret_cast< QList<Symbol>(*)>(_a[1])),(*reinterpret_cast< TextBlockID(*)>(_a[2])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[3]))); break;
-        case 12: _t->bulkDelete((*reinterpret_cast< QList<Position>(*)>(_a[1]))); break;
+        case 11: _t->bulkInsert((*reinterpret_cast< QVector<Symbol>(*)>(_a[1])),(*reinterpret_cast< TextBlockID(*)>(_a[2])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[3]))); break;
+        case 12: _t->bulkDelete((*reinterpret_cast< QVector<Position>(*)>(_a[1]))); break;
         case 13: _t->blockEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
         case 14: _t->listEdit((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< TextListID(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
         case 15: _t->messageDispatch((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
@@ -290,7 +290,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QList<Symbol> >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<Symbol> >(); break;
             case 1:
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< TextBlockID >(); break;
             }
@@ -299,7 +299,7 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QList<Position> >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<Position> >(); break;
             }
             break;
         case 13:
@@ -420,14 +420,14 @@ void MessageHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
             }
         }
         {
-            using _t = void (MessageHandler::*)(QList<Symbol> , TextBlockID , QTextBlockFormat );
+            using _t = void (MessageHandler::*)(QVector<Symbol> , TextBlockID , QTextBlockFormat );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::bulkInsert)) {
                 *result = 11;
                 return;
             }
         }
         {
-            using _t = void (MessageHandler::*)(QList<Position> );
+            using _t = void (MessageHandler::*)(QVector<Position> );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&MessageHandler::bulkDelete)) {
                 *result = 12;
                 return;
@@ -596,14 +596,14 @@ void MessageHandler::charFormat(Position _t1, QTextCharFormat _t2)
 }
 
 // SIGNAL 11
-void MessageHandler::bulkInsert(QList<Symbol> _t1, TextBlockID _t2, QTextBlockFormat _t3)
+void MessageHandler::bulkInsert(QVector<Symbol> _t1, TextBlockID _t2, QTextBlockFormat _t3)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))) };
     QMetaObject::activate(this, &staticMetaObject, 11, _a);
 }
 
 // SIGNAL 12
-void MessageHandler::bulkDelete(QList<Position> _t1)
+void MessageHandler::bulkDelete(QVector<Position> _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 12, _a);

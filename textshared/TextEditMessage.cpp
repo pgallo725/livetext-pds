@@ -102,7 +102,7 @@ BulkInsertMessage::BulkInsertMessage()
 {
 }
 
-BulkInsertMessage::BulkInsertMessage(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+BulkInsertMessage::BulkInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 	: Message(BulkInsert), m_symbols(symbols), m_blockId(bId), m_blockFmt(blkFmt), m_flag(isLast)
 {
 }
@@ -117,7 +117,7 @@ void BulkInsertMessage::readFrom(QDataStream& stream)
 	stream >> m_symbols >> m_blockId >> m_blockFmt >> m_flag;
 }
 
-QList<Symbol> BulkInsertMessage::getSymbols() const
+QVector<Symbol> BulkInsertMessage::getSymbols() const
 {
 	return m_symbols;
 }
@@ -145,7 +145,7 @@ BulkDeleteMessage::BulkDeleteMessage()
 {
 }
 
-BulkDeleteMessage::BulkDeleteMessage(QList<Position> positions)
+BulkDeleteMessage::BulkDeleteMessage(QVector<Position> positions)
 	: Message(BulkDelete), m_fPositions(positions)
 {
 }
@@ -160,7 +160,7 @@ void BulkDeleteMessage::readFrom(QDataStream& stream)
 	stream >> m_fPositions;
 }
 
-QList<Position> BulkDeleteMessage::getPositions() const
+QVector<Position> BulkDeleteMessage::getPositions() const
 {
 	return m_fPositions;
 }

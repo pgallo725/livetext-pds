@@ -89,9 +89,9 @@ void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 }
 
 
-void DocumentEditor::bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
-	QList<Symbol>::iterator s = symbols.begin();
+	QVector<Symbol>::iterator s = symbols.begin();
 
 	for (; s < symbols.end() - 1; s++)
 	{
@@ -117,7 +117,7 @@ void DocumentEditor::bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID 
 	_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
-void DocumentEditor::bulkDelete(QList<Position> positions)
+void DocumentEditor::bulkDelete(QVector<Position> positions)
 {
 	for each (Position pos in positions)
 	{
@@ -129,11 +129,12 @@ void DocumentEditor::bulkDelete(QList<Position> positions)
 	_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
 }
 
-void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt)
+void DocumentEditor::addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts,
+	int pos, bool isLast, QTextBlockFormat blkFmt)
 {
-	QList<Symbol> symbols;
-	QList<QChar>::iterator i = chars.begin();
-	QList<QTextCharFormat>::iterator j = fmts.begin();
+	QVector<Symbol> symbols;
+	QVector<QChar>::iterator i = chars.begin();
+	QVector<QTextCharFormat>::iterator j = fmts.begin();
 
 	// Add all the provided chars to the document as symbols and to the list
 	// of symbols that will have to be inserted by other clients
@@ -153,7 +154,7 @@ void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharForm
 
 void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
 {
-	QList<Position> fPositions;
+	QVector<Position> fPositions;
 
 	for (int i = 0; i < charCount && position < _document.length(); i++)
 	{

@@ -200,7 +200,7 @@ void WorkSpace::documentDeleteSymbol(Position position)
 	doc->remove(position);
 }
 
-void WorkSpace::documentBulkInsert(QList<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
+void WorkSpace::documentBulkInsert(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
 {
 	for each (Symbol symbol in symbols)
 	{
@@ -210,7 +210,7 @@ void WorkSpace::documentBulkInsert(QList<Symbol> symbols, TextBlockID blockId, Q
 	doc->formatBlock(blockId, blockFmt);
 }
 
-void WorkSpace::documentBulkDelete(QList<Position> positions)
+void WorkSpace::documentBulkDelete(QVector<Position> positions)
 {
 	for each (Position position in positions)
 	{

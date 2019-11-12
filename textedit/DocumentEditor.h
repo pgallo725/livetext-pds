@@ -29,9 +29,9 @@ public slots:
 	void removeSymbol(Position position);
 	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
 	void deleteCharAtIndex(int position);
-	void bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void bulkDelete(QList<Position> positions);
-	void addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
+	void bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void bulkDelete(QVector<Position> positions);
+	void addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
 	void deleteCharGroupAtIndex(int position, int charCount);
 	void changeSymbolFormat(int position, QTextCharFormat fmt);
 	void applySymbolFormat(Position position, QTextCharFormat fmt);
@@ -56,8 +56,8 @@ signals:
 
 	void charAdded(Symbol s, bool isLast);
 	void charDeleted(Position fPos);
-	void charGroupInserted(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void charGroupDeleted(QList<Position> positions);
+	void charGroupInserted(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void charGroupDeleted(QVector<Position> positions);
 	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt);
 	void symbolFormatChanged(Position position, QTextCharFormat fmt);
 	void blockListChanged(TextBlockID blockId, TextListID listId, QTextListFormat fmt);

@@ -647,7 +647,7 @@ void Client::sendCharRemove(Position position)
 	}
 }
 
-void Client::sendBulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+void Client::sendBulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
 	try
 	{
@@ -658,7 +658,7 @@ void Client::sendBulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID bId,
 	}
 }
 
-void Client::sendBulkDelete(QList<Position> positions)
+void Client::sendBulkDelete(QVector<Position> positions)
 {
 	try
 	{
