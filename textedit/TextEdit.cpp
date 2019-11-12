@@ -1022,6 +1022,10 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	//Sets block format in current block
 	_extraCursor->mergeBlockFormat(format);
 
+	//Reset previous cursor position so it is sent as soon as possible, to avoid issues
+	//where the cursor is not properly positioned in the text after changing the alignment
+	_currentCursorPosition = -1;
+
 	//Call alignment changed for update GUI
 	alignmentChanged(fmt.alignment());
 
@@ -1659,6 +1663,9 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	//Insert character at position
 	_extraCursor->insertText(ch);
 
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
+
 	//GUI update
 	updateEditorSelectedActions();
 
@@ -1674,6 +1681,9 @@ void TextEdit::removeChar(int position)
 
 	//Delete character
 	_extraCursor->deleteChar();
+
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
 
 	//GUI update
 	updateEditorSelectedActions();
