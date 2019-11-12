@@ -5,7 +5,6 @@
 #include <QMap>
 #include <QTimer>
 
-
 #include <User.h>
 
 #include "Presence.h"
@@ -15,6 +14,7 @@
 #define CURSOR_SEND_INTERVAL 200
 #define STATUSBAR_MSG_DURATION 5000
 #define BULK_EDIT_SIZE 256
+
 
 //Method encapsulation
 class QAction;
@@ -149,7 +149,7 @@ private:
 	ShareUriWindow* _shareUri;
 
 	//About dialog
-	AboutWindow* _aboutwindow;
+	AboutWindow* _aboutWindow;
 
 	//Text highlighting
 	QList<QTextEdit::ExtraSelection> _usersText;

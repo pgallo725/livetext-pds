@@ -61,7 +61,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 {
 
 	//About widget
-	_aboutwindow = new AboutWindow();
+	_aboutWindow = new AboutWindow();
 
 
 	/**************************** GUI SETUP ****************************/
@@ -585,7 +585,7 @@ void TextEdit::setupEditorActions()
 	menu = menuBar()->addMenu(tr("?"));
 	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
 	menu->addSeparator();
-	menu->addAction(tr("About LiveText..."), _aboutwindow, &AboutWindow::exec);
+	menu->addAction(tr("About LiveText..."), _aboutWindow, &AboutWindow::exec);
 }
 
 
@@ -695,7 +695,9 @@ void TextEdit::resizeEditor(const QSizeF& newSize)
 
 void TextEdit::askBeforeCloseDocument()
 {
-	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(), tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(),
+		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+
 	if (reply == QMessageBox::Yes) {
 		_cursorTimer.stop();
 		emit closeDocument(_user.getUserId());
