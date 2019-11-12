@@ -105,6 +105,7 @@ BulkInsertMessage::BulkInsertMessage()
 BulkInsertMessage::BulkInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 	: Message(BulkInsert), m_symbols(symbols), m_blockId(bId), m_blockFmt(blkFmt), m_flag(isLast)
 {
+	m_symbols.squeeze();	// Avoid any unrequired memory usage to reduce message size
 }
 
 void BulkInsertMessage::writeTo(QDataStream& stream) const
@@ -148,6 +149,7 @@ BulkDeleteMessage::BulkDeleteMessage()
 BulkDeleteMessage::BulkDeleteMessage(QVector<Position> positions)
 	: Message(BulkDelete), m_fPositions(positions)
 {
+	m_fPositions.squeeze();		// Avoid any extra memory usage to reduce message size
 }
 
 void BulkDeleteMessage::writeTo(QDataStream& stream) const
