@@ -33,7 +33,7 @@ quint32 SocketBuffer::getDataSize() const
 quint32 SocketBuffer::getReadDataSize() const
 { 
 	return (quint32)buffer.size(); 
-};
+}
 
 void SocketBuffer::append(QByteArray array) 
 { 
@@ -48,6 +48,11 @@ void SocketBuffer::clear()
 bool SocketBuffer::bufferReadyRead() 
 { 
 	return mSize == getReadDataSize(); 
+};
+
+QByteArray* SocketBuffer::bufferPtr()
+{
+	return &buffer;
 };
 
 QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer)

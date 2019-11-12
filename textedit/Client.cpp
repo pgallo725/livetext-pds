@@ -38,7 +38,7 @@ void Client::readBuffer()
 	{
 		try 
 		{
-			QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+			QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
 			MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 			message->read(dataStream);
 
@@ -82,7 +82,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 
 	try 
 	{	// Read all the available message data from the socket
-		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
 		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 		message->read(dataStream);
 

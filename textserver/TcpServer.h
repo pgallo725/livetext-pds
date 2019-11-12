@@ -19,8 +19,6 @@ class TcpServer : public QTcpServer
 {
 	Q_OBJECT
 
-	friend class MessageHandler;
-
 private:
 
 	ServerDatabase db;

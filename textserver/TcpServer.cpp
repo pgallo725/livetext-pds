@@ -669,7 +669,7 @@ void TcpServer::readMessage()
 
 	if (socketBuffer.bufferReadyRead()) {
 		
-		QDataStream dataStream(&(socketBuffer.buffer), QIODevice::ReadWrite);
+		QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
 		quint16 mType = socketBuffer.getType();
 		
 		try {

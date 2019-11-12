@@ -18,8 +18,6 @@ class WorkSpace : public QObject
 {
 	Q_OBJECT
 
-	friend class MessageHandler;
-
 private:
 
 	QSharedPointer<Document> doc;

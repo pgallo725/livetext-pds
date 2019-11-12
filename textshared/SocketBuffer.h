@@ -5,10 +5,6 @@
 
 class SocketBuffer
 {
-	friend class TcpServer;
-	friend class WorkSpace;
-	friend class Client;
-
 	/* Operators for QDataStream deserialization */
 	friend QDataStream& operator>>(QDataStream& in, SocketBuffer& socketBuffer);		// Input
 
@@ -24,6 +20,7 @@ public:
 	void append(QByteArray array);
 	void clear();
 	bool bufferReadyRead();
+	QByteArray* bufferPtr();
 
 	/* setter */
 	void setType(quint16 t);
