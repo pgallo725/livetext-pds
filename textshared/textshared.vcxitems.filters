@@ -2,108 +2,108 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)AccountMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)DocumentMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)FailureMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)LoginMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)LogoutMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Message.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)MessageFactory.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)PresenceMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Symbol.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)TextEditMessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)User.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Messages</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Document.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Document</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)SocketBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Symbol.h">
+      <Filter>Header Files\Document</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)TextBlock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)TextUtils.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Document</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)TextList.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Document</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextUtils.h">
+      <Filter>Header Files\Document</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)SocketBuffer.h">
+      <Filter>Header Files\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)User.h">
+      <Filter>Header Files\Other</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
+      <Filter>Source Files\Messages</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)DocumentMessage.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)FailureMessage.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)LoginMessage.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)LogoutMessage.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Message.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)MessageFactory.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)PresenceMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Symbol.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)TextEditMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)User.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Messages</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Document.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Document</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Symbol.cpp">
+      <Filter>Source Files\Document</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)TextList.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Document</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)TextUtils.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Document</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
+      <Filter>Source Files\Document</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)User.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp">
+      <Filter>Source Files\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp">
+      <Filter>Source Files\Other</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +112,24 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{b4606425-48bc-434e-b0aa-07f6bf3e5352}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Messages">
+      <UniqueIdentifier>{5be6d7eb-f116-45ac-9dbb-929a3061375a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Document">
+      <UniqueIdentifier>{9ad13f8d-d7d3-42bf-8896-25c04c7958b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Messages">
+      <UniqueIdentifier>{693c57d3-c1a5-4429-a943-c7cbc9817aec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Document">
+      <UniqueIdentifier>{074f7396-2aed-44e4-b95d-436323853ab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Other">
+      <UniqueIdentifier>{48967870-d6b5-47bc-b300-44d2f9c181f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Other">
+      <UniqueIdentifier>{98956cee-1d9d-4351-8e73-32d1a4c52d23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
