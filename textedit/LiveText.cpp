@@ -97,20 +97,23 @@ void LiveText::forceLogout()
 	if (_editProfile->isVisible())
 		_editProfile->close();
 
-	//Shows landing page again
-	_landingPage->pushButtonBackClicked();
-	_landingPage->incorrectOperation(tr("Server not responding"));
-	_landingPage->show();
-
 	if (editorOpen) {
 		//Show an error on editor
 		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+
+		//Shows landing page again
+		_landingPage->pushButtonBackClicked();
+		_landingPage->incorrectOperation(tr("Server not responding"));
+		_landingPage->show();
+
 		//Close editor
 		closeEditor();
 	}
-	else
+	else {
 		//Show error on landing page
-		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(), tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
+		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(),
+			tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
+	}
 }
 
 /************************ DOCUMENT OPERATIONS ************************/
