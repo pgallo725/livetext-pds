@@ -48,10 +48,10 @@ signals:
 	MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
 	void charInsert(Symbol s);
-	void charDelete(QVector<qint32> pos);
-	void charFormat(QVector<qint32> pos, QTextCharFormat fmt);
+	void charDelete(Position pos);
+	void charFormat(Position pos, QTextCharFormat fmt);
 	void bulkInsert(QList<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
-	void bulkDelete(QList<QVector<qint32>> poss);
+	void bulkDelete(QList<Position> poss);
 	void blockEdit(TextBlockID id, QTextBlockFormat fmt);
 	void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 	void messageDispatch(MessageCapsule message, QSslSocket* sender);

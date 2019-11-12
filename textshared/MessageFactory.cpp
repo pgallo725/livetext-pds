@@ -147,12 +147,12 @@ MessageCapsule MessageFactory::CharInsert(Symbol symbol, bool isLast)
 	return new CharInsertMessage(symbol, isLast);
 }
 
-MessageCapsule MessageFactory::CharDelete(QVector<qint32> position)
+MessageCapsule MessageFactory::CharDelete(Position position)
 {
 	return new CharDeleteMessage(position);
 }
 
-MessageCapsule MessageFactory::CharFormat(QVector<qint32> position, QTextCharFormat fmt)
+MessageCapsule MessageFactory::CharFormat(Position position, QTextCharFormat fmt)
 {
 	return new CharFormatMessage(position, fmt);
 }
@@ -162,7 +162,7 @@ MessageCapsule MessageFactory::BulkInsert(QList<Symbol> symbols, bool isLast, Te
 	return new BulkInsertMessage(symbols, isLast, bId, blkFmt);
 }
 
-MessageCapsule MessageFactory::BulkDelete(QList<QVector<qint32>> positions)
+MessageCapsule MessageFactory::BulkDelete(QList<Position> positions)
 {
 	return new BulkDeleteMessage(positions);
 }

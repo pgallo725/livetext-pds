@@ -12,9 +12,9 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
-	qRegisterMetaType<QVector<qint32>>("QVector<qint32>");
-	qRegisterMetaType<QVector<qint32>>("QList<Symbol>");
-	qRegisterMetaType<QVector<qint32>>("QList<QVector<qint32>>");
+	qRegisterMetaType<Position>("Position");
+	qRegisterMetaType<QList<Symbol>>("QList<Symbol>");
+	qRegisterMetaType<QList<Position>>("QList<Position>");
 }
 
 
@@ -61,7 +61,7 @@ void DocumentEditor::addSymbol(Symbol s, bool isLast)	// REMOTE
 	}
 }
 
-void DocumentEditor::removeSymbol(QVector<qint32> position)		// REMOTE
+void DocumentEditor::removeSymbol(Position position)	// REMOTE
 {
 	int pos = _document.remove(position);
 	if (pos >= 0) {
@@ -73,7 +73,7 @@ void DocumentEditor::removeSymbol(QVector<qint32> position)		// REMOTE
 
 void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)	// LOCAL
 {
-	Symbol s(ch, fmt, _user.getUserId(), _document.newFractionalPos(position));
+	Symbol s(ch, fmt, _document.newFractionalPos(position, _user.getUserId()));
 
 	_document.insert(s);
 	emit charAdded(s, isLast);
@@ -84,7 +84,7 @@ void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 	if (position < 0 || position >= _document.length())		// Skip if out-of-range (needed ?)
 		return;
 
-	QVector<qint32> fractionalPosition = _document.removeAtIndex(position);
+	Position fractionalPosition = _document.removeAtIndex(position);
 	emit charDeleted(fractionalPosition);
 }
 
@@ -117,9 +117,9 @@ void DocumentEditor::bulkInsert(QList<Symbol> symbols, bool isLast, TextBlockID 
 	_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
-void DocumentEditor::bulkDelete(QList<QVector<qint32>> positions)
+void DocumentEditor::bulkDelete(QList<Position> positions)
 {
-	for each (QVector<qint32> pos in positions)
+	for each (Position pos in positions)
 	{
 		int index = _document.remove(pos);
 		if (index >= 0)
@@ -139,7 +139,7 @@ void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharForm
 	// of symbols that will have to be inserted by other clients
 	for (int n = 0; i < chars.end() && j < fmts.end(); i++, j++, n++)
 	{
-		Symbol s(*i, *j, _user.getUserId(), _document.newFractionalPos(pos + n));
+		Symbol s(*i, *j, _document.newFractionalPos(pos + n, _user.getUserId()));
 		symbols.append(s);
 
 		_document.insert(s);
@@ -153,7 +153,7 @@ void DocumentEditor::addCharGroupAtIndex(QList<QChar> chars, QList<QTextCharForm
 
 void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
 {
-	QList<QVector<qint32>> fPositions;
+	QList<Position> fPositions;
 
 	for (int i = 0; i < charCount && position < _document.length(); i++)
 	{
@@ -174,7 +174,7 @@ void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)		// L
 	emit symbolFormatChanged(s.getPosition(), fmt);
 }
 
-void DocumentEditor::applySymbolFormat(QVector<qint32> position, QTextCharFormat fmt)	 // REMOTE
+void DocumentEditor::applySymbolFormat(Position position, QTextCharFormat fmt)	 // REMOTE
 {
 	// Early out if the local state is already aligned with the server's
 	if (_document[position].getFormat() == fmt)

@@ -43,7 +43,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)TextElement.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextBlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -90,7 +96,13 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)AccountMessage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextElement.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

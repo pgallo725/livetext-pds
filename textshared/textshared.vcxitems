@@ -26,8 +26,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)SharedException.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)SocketBuffer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Symbol.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextBlock.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)TextEditMessage.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)TextElement.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextList.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)TextUtils.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)User.h" />
   </ItemGroup>
   <ItemGroup>
@@ -43,8 +45,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)SharedException.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)SocketBuffer.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Symbol.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextBlock.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)TextEditMessage.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextElement.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextList.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)TextUtils.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)User.cpp" />
   </ItemGroup>
 </Project>

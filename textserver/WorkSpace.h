@@ -48,10 +48,10 @@ public slots:
 	
 	void documentSave();
 	void documentInsertSymbol(Symbol symbol);
-	void documentDeleteSymbol(QVector<qint32> position);
+	void documentDeleteSymbol(Position position);
 	void documentBulkInsert(QList<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt);
-	void documentBulkDelete(QList<QVector<qint32>> positions);
-	void documentEditSymbol(QVector<qint32> position, QTextCharFormat format);
+	void documentBulkDelete(QList<Position> positions);
+	void documentEditSymbol(Position position, QTextCharFormat format);
 	void documentEditBlock(TextBlockID blockId, QTextBlockFormat format);
 	void documentEditList(TextBlockID blockId, TextListID listId, QTextListFormat format);
 

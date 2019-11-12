@@ -2,7 +2,8 @@
 
 #include "Message.h"
 #include "Symbol.h"
-#include "TextElement.h"
+#include "TextBlock.h"
+#include "TextList.h"
 
 
 class CharInsertMessage : public Message
@@ -39,14 +40,14 @@ class CharDeleteMessage : public Message
 
 private:
 
-	QVector<qint32> m_fPos;
+	Position m_fPos;
 
 protected:
 
 	CharDeleteMessage();	// empty constructor
 
 	// Constructor for CharDelete messages, with the fractional position of the symbol to delete
-	CharDeleteMessage(QVector<qint32> position);
+	CharDeleteMessage(Position position);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -55,7 +56,7 @@ public:
 
 	~CharDeleteMessage() {};
 
-	QVector<qint32> getPosition() const;
+	Position getPosition() const;
 };
 
 
@@ -65,7 +66,7 @@ class CharFormatMessage : public Message
 
 private:
 
-	QVector<qint32> m_fPos;
+	Position m_fPos;
 	QTextCharFormat m_charFmt;
 
 protected:
@@ -73,7 +74,7 @@ protected:
 	CharFormatMessage();	// empty constructor
 
 	// Constructor for CharFormat messages, with the fractional position and the new format of the symbol
-	CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt);
+	CharFormatMessage(Position position, QTextCharFormat fmt);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -82,7 +83,7 @@ public:
 
 	~CharFormatMessage() {};
 
-	QVector<qint32> getPosition() const;
+	Position getPosition() const;
 	QTextCharFormat getCharFormat() const;
 };
 
@@ -125,14 +126,14 @@ class BulkDeleteMessage : public Message
 
 private:
 
-	QList<QVector<qint32>> m_fPositions;
+	QList<Position> m_fPositions;
 
 protected:
 
 	BulkDeleteMessage();	// empty constructor
 
 	// Constructor for BulkDelete messages, with the fractional positions to delete
-	BulkDeleteMessage(QList<QVector<qint32>> positions);
+	BulkDeleteMessage(QList<Position> positions);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
@@ -141,7 +142,7 @@ public:
 
 	~BulkDeleteMessage() {};
 
-	QList<QVector<qint32>> getPositions() const;
+	QList<Position> getPositions() const;
 };
 
 

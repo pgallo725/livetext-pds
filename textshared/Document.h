@@ -3,7 +3,8 @@
 #include <QString>
 
 #include "Symbol.h"
-#include "TextElement.h"
+#include "TextBlock.h"
+#include "TextList.h"
 
 
 class URI
@@ -40,7 +41,6 @@ Q_DECLARE_METATYPE(URI);
 class Document
 {
 	friend class DocumentEditor;
-	friend class DocumentReadyMessage;
 
 	/* Operators for QDataStream serialization and deserialization */
 	friend QDataStream& operator>>(QDataStream& in, Document& user);			// Input
@@ -58,11 +58,9 @@ private:
 	qint32 _listCounter;
 	QMap<TextListID, TextList> _lists;
 
-protected:
-
-	Document();		// Only use this to construct an empty Document object for deserialization purposes
-
 public:
+
+	Document();		// Only use to construct an empty Document object for deserialization purposes
 
 	Document(URI uri, qint32 authorId = -1);
 	~Document();
@@ -75,11 +73,11 @@ public:
 
 	/* Editing methods */
 	int insert(Symbol& s);
-	int remove(QVector<qint32> fPos);
-	QVector<qint32> removeAtIndex(int index);
+	int remove(const Position& fPos);
+	Position removeAtIndex(int index);
 
 	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);
-	int formatSymbol(QVector<qint32> fPos, QTextCharFormat fmt);
+	int formatSymbol(const Position& fPos, QTextCharFormat fmt);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 	int formatList(TextListID id, QTextListFormat fmt);
 	
@@ -89,13 +87,13 @@ public:
 	QString getName() const;
 	QString getAuthor() const;
 
-	int length();
-	QVector<Symbol> getContent();
-	QString toString();				// returns a printable representation of the document's contents
+	int length() const;
+	QVector<Symbol> getContent() const;
+	QString toString() const;				// returns a printable representation of the document's contents
 
 	// The [] array operator works with both indexes and fractional positions, and it
 	// returns the corresponding symbols in the document
-	Symbol& operator[](QVector<qint32> fPos);
+	Symbol& operator[](const Position& fPos);
 	Symbol& operator[](int pos);
 
 	/* Block accessor methods */
@@ -114,11 +112,11 @@ public:
 private:
 
 	/* Binary search methods to translate from a fractional position to an integer index */
-	int positionIndex(QVector<qint32> position);
-	int insertionIndex(QVector<qint32> position);
+	int positionIndex(const Position& pos);
+	int insertionIndex(const Position& pos);
 
 	/* Fractional position algorithm */
-	QVector<qint32> newFractionalPos(int index);
+	Position newFractionalPos(int index, qint32 _userId);
 
 	// Internal handling of chars and blocks relationships
 	void addCharToBlock(Symbol& s, TextBlock& b);

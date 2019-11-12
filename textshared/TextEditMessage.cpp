@@ -41,7 +41,7 @@ CharDeleteMessage::CharDeleteMessage()
 {
 }
 
-CharDeleteMessage::CharDeleteMessage(QVector<qint32> position)
+CharDeleteMessage::CharDeleteMessage(Position position)
 	: Message(CharDelete), m_fPos(position)
 {
 }
@@ -56,7 +56,7 @@ void CharDeleteMessage::readFrom(QDataStream& stream)
 	stream >> m_fPos;
 }
 
-QVector<qint32> CharDeleteMessage::getPosition() const
+Position CharDeleteMessage::getPosition() const
 {
 	return m_fPos;
 }
@@ -69,7 +69,7 @@ CharFormatMessage::CharFormatMessage()
 {
 }
 
-CharFormatMessage::CharFormatMessage(QVector<qint32> position, QTextCharFormat fmt)
+CharFormatMessage::CharFormatMessage(Position position, QTextCharFormat fmt)
 	: Message(CharFormat), m_fPos(position), m_charFmt(fmt)
 {
 }
@@ -84,7 +84,7 @@ void CharFormatMessage::readFrom(QDataStream& stream)
 	stream >> m_fPos >> m_charFmt;
 }
 
-QVector<qint32> CharFormatMessage::getPosition() const
+Position CharFormatMessage::getPosition() const
 {
 	return m_fPos;
 }
@@ -145,7 +145,7 @@ BulkDeleteMessage::BulkDeleteMessage()
 {
 }
 
-BulkDeleteMessage::BulkDeleteMessage(QList<QVector<qint32>> positions)
+BulkDeleteMessage::BulkDeleteMessage(QList<Position> positions)
 	: Message(BulkDelete), m_fPositions(positions)
 {
 }
@@ -160,7 +160,7 @@ void BulkDeleteMessage::readFrom(QDataStream& stream)
 	stream >> m_fPositions;
 }
 
-QList<QVector<qint32>> BulkDeleteMessage::getPositions() const
+QList<Position> BulkDeleteMessage::getPositions() const
 {
 	return m_fPositions;
 }

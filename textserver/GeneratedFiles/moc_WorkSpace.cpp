@@ -12,7 +12,6 @@
 #include <QtCore/qmetatype.h>
 #include <QtCore/QSharedPointer>
 #include <QtCore/QList>
-#include <QtCore/QVector>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'WorkSpace.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
@@ -26,7 +25,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_WorkSpace_t {
     QByteArrayData data[56];
-    char stringdata0[723];
+    char stringdata0[708];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -68,29 +67,29 @@ QT_MOC_LITERAL(29, 347, 20), // "documentInsertSymbol"
 QT_MOC_LITERAL(30, 368, 6), // "Symbol"
 QT_MOC_LITERAL(31, 375, 6), // "symbol"
 QT_MOC_LITERAL(32, 382, 20), // "documentDeleteSymbol"
-QT_MOC_LITERAL(33, 403, 15), // "QVector<qint32>"
-QT_MOC_LITERAL(34, 419, 8), // "position"
-QT_MOC_LITERAL(35, 428, 18), // "documentBulkInsert"
-QT_MOC_LITERAL(36, 447, 13), // "QList<Symbol>"
-QT_MOC_LITERAL(37, 461, 7), // "symbols"
-QT_MOC_LITERAL(38, 469, 11), // "TextBlockID"
-QT_MOC_LITERAL(39, 481, 7), // "blockId"
-QT_MOC_LITERAL(40, 489, 16), // "QTextBlockFormat"
-QT_MOC_LITERAL(41, 506, 8), // "blockFmt"
-QT_MOC_LITERAL(42, 515, 18), // "documentBulkDelete"
-QT_MOC_LITERAL(43, 534, 23), // "QList<QVector<qint32> >"
-QT_MOC_LITERAL(44, 558, 9), // "positions"
-QT_MOC_LITERAL(45, 568, 18), // "documentEditSymbol"
-QT_MOC_LITERAL(46, 587, 15), // "QTextCharFormat"
-QT_MOC_LITERAL(47, 603, 6), // "format"
-QT_MOC_LITERAL(48, 610, 17), // "documentEditBlock"
-QT_MOC_LITERAL(49, 628, 16), // "documentEditList"
-QT_MOC_LITERAL(50, 645, 10), // "TextListID"
-QT_MOC_LITERAL(51, 656, 6), // "listId"
-QT_MOC_LITERAL(52, 663, 15), // "QTextListFormat"
-QT_MOC_LITERAL(53, 679, 19), // "handleAccountUpdate"
-QT_MOC_LITERAL(54, 699, 19), // "answerAccountUpdate"
-QT_MOC_LITERAL(55, 719, 3) // "msg"
+QT_MOC_LITERAL(33, 403, 8), // "Position"
+QT_MOC_LITERAL(34, 412, 8), // "position"
+QT_MOC_LITERAL(35, 421, 18), // "documentBulkInsert"
+QT_MOC_LITERAL(36, 440, 13), // "QList<Symbol>"
+QT_MOC_LITERAL(37, 454, 7), // "symbols"
+QT_MOC_LITERAL(38, 462, 11), // "TextBlockID"
+QT_MOC_LITERAL(39, 474, 7), // "blockId"
+QT_MOC_LITERAL(40, 482, 16), // "QTextBlockFormat"
+QT_MOC_LITERAL(41, 499, 8), // "blockFmt"
+QT_MOC_LITERAL(42, 508, 18), // "documentBulkDelete"
+QT_MOC_LITERAL(43, 527, 15), // "QList<Position>"
+QT_MOC_LITERAL(44, 543, 9), // "positions"
+QT_MOC_LITERAL(45, 553, 18), // "documentEditSymbol"
+QT_MOC_LITERAL(46, 572, 15), // "QTextCharFormat"
+QT_MOC_LITERAL(47, 588, 6), // "format"
+QT_MOC_LITERAL(48, 595, 17), // "documentEditBlock"
+QT_MOC_LITERAL(49, 613, 16), // "documentEditList"
+QT_MOC_LITERAL(50, 630, 10), // "TextListID"
+QT_MOC_LITERAL(51, 641, 6), // "listId"
+QT_MOC_LITERAL(52, 648, 15), // "QTextListFormat"
+QT_MOC_LITERAL(53, 664, 19), // "handleAccountUpdate"
+QT_MOC_LITERAL(54, 684, 19), // "answerAccountUpdate"
+QT_MOC_LITERAL(55, 704, 3) // "msg"
 
     },
     "WorkSpace\0requestAccountUpdate\0\0"
@@ -104,10 +103,10 @@ QT_MOC_LITERAL(55, 719, 3) // "msg"
     "MessageCapsule\0message\0sender\0"
     "documentSave\0documentInsertSymbol\0"
     "Symbol\0symbol\0documentDeleteSymbol\0"
-    "QVector<qint32>\0position\0documentBulkInsert\0"
+    "Position\0position\0documentBulkInsert\0"
     "QList<Symbol>\0symbols\0TextBlockID\0"
     "blockId\0QTextBlockFormat\0blockFmt\0"
-    "documentBulkDelete\0QList<QVector<qint32> >\0"
+    "documentBulkDelete\0QList<Position>\0"
     "positions\0documentEditSymbol\0"
     "QTextCharFormat\0format\0documentEditBlock\0"
     "documentEditList\0TextListID\0listId\0"
@@ -198,10 +197,10 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 9: _t->dispatchMessage((*reinterpret_cast< MessageCapsule(*)>(_a[1])),(*reinterpret_cast< QSslSocket*(*)>(_a[2]))); break;
         case 10: _t->documentSave(); break;
         case 11: _t->documentInsertSymbol((*reinterpret_cast< Symbol(*)>(_a[1]))); break;
-        case 12: _t->documentDeleteSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1]))); break;
+        case 12: _t->documentDeleteSymbol((*reinterpret_cast< Position(*)>(_a[1]))); break;
         case 13: _t->documentBulkInsert((*reinterpret_cast< QList<Symbol>(*)>(_a[1])),(*reinterpret_cast< TextBlockID(*)>(_a[2])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[3]))); break;
-        case 14: _t->documentBulkDelete((*reinterpret_cast< QList<QVector<qint32> >(*)>(_a[1]))); break;
-        case 15: _t->documentEditSymbol((*reinterpret_cast< QVector<qint32>(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
+        case 14: _t->documentBulkDelete((*reinterpret_cast< QList<Position>(*)>(_a[1]))); break;
+        case 15: _t->documentEditSymbol((*reinterpret_cast< Position(*)>(_a[1])),(*reinterpret_cast< QTextCharFormat(*)>(_a[2]))); break;
         case 16: _t->documentEditBlock((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< QTextBlockFormat(*)>(_a[2]))); break;
         case 17: _t->documentEditList((*reinterpret_cast< TextBlockID(*)>(_a[1])),(*reinterpret_cast< TextListID(*)>(_a[2])),(*reinterpret_cast< QTextListFormat(*)>(_a[3]))); break;
         case 18: _t->handleAccountUpdate((*reinterpret_cast< QSslSocket*(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2])),(*reinterpret_cast< QImage(*)>(_a[3])),(*reinterpret_cast< QString(*)>(_a[4]))); break;
@@ -250,7 +249,7 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<qint32> >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< Position >(); break;
             }
             break;
         case 13:
@@ -266,14 +265,14 @@ void WorkSpace::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QList<QVector<qint32> > >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QList<Position> >(); break;
             }
             break;
         case 15:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
-                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QVector<qint32> >(); break;
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< Position >(); break;
             }
             break;
         case 16:
