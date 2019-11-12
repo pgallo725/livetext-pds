@@ -4,6 +4,7 @@
 DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObject* parent)
 	: QObject(parent), _document(doc), _textedit(editor), _user(user)
 {
+	qRegisterMetaType<Position>("Position");
 	qRegisterMetaType<TextBlockID>("TextBlockID");
 	qRegisterMetaType<TextBlock>("TextBlock");
 	qRegisterMetaType<TextListID>("TextListID");
@@ -12,9 +13,8 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
-	qRegisterMetaType<Position>("Position");
-	qRegisterMetaType<QList<Symbol>>("QList<Symbol>");
-	qRegisterMetaType<QList<Position>>("QList<Position>");
+	qRegisterMetaType<QVector<Symbol>>("QVector<Symbol>");
+	qRegisterMetaType<QVector<Position>>("QVector<Position>");
 }
 
 
