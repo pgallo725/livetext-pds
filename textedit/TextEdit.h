@@ -12,7 +12,7 @@
 #include "ShareUriWindow.h"
 #include "AboutWindow.h"
 
-#define CURSOR_SEND_INTERVAL 250
+#define CURSOR_SEND_INTERVAL 200
 #define STATUSBAR_MSG_DURATION 5000
 #define BULK_EDIT_SIZE 256
 
