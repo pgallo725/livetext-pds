@@ -219,7 +219,7 @@ void DocumentEditor::bulkDelete(QVector<Position> positions)
 			}
 			else
 			{
-				//naksndadnaondsoas
+				_textedit->deleteManyChars(firstPosition, lastPosition);
 				firstPosition = index;
 				lastPosition = index;
 			}
@@ -228,7 +228,7 @@ void DocumentEditor::bulkDelete(QVector<Position> positions)
 
 	if (firstPosition >= 0 && lastPosition >= 0)
 	{
-		//dskfnskfnks
+		_textedit->deleteManyChars(firstPosition, lastPosition);
 	}
 
 	//_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
