@@ -75,7 +75,6 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//GUI update in case of format change or cursor position changed
 	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
 
-
 	//Online users cursor redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
@@ -288,11 +287,14 @@ void TextEdit::setupEditorActions()
 	clipboardDataChanged();
 #endif
 
-	//Select all
 	menu->addSeparator();
+	//Delete
+	actionDelete = menu->addAction(tr("Delete"), this, [this]() { _textEdit->textCursor().removeSelectedText(); });
+	actionDelete->setPriority(QAction::LowPriority);
+	actionDelete->setShortcut(QKeySequence::Delete);
+	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
-
-
+	
 
 	/********** FORMAT MENU **********/
 
@@ -1272,7 +1274,6 @@ void TextEdit::setLineHeight(QAction* a)
 
 void TextEdit::cursorPositionChanged()
 {
-
 	//Update scrollbar position according to cursor position wiith offsets
 	int cursorPosition = _textEdit->cursorRect().y();
 	int areaBottom = area->contentsRect().bottom();
@@ -1301,6 +1302,9 @@ void TextEdit::updateEditorSelectedActions()
 
 	//Users cursors
 	redrawAllCursors();
+
+	//Selection
+	actionDelete->setEnabled(cursor.hasSelection());
 
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();

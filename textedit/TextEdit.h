@@ -135,6 +135,7 @@ private:
 	QAction* actionCopy;
 	QAction* actionPaste;
 #endif
+	QAction* actionDelete;
 
 	//Text editor
 	QTextEditWrapper* _textEdit;
