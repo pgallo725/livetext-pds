@@ -140,6 +140,8 @@ LandingPage::LandingPage(QWidget* parent)
 	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(
 		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
+	//Validator for username
+	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
 
 
 	//Loads user login infos
