@@ -22,7 +22,9 @@
 
 const QString rsrcPath = ":/images";
 
-LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) {
+LandingPage::LandingPage(QWidget* parent) 
+	: QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) 
+{
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
 
@@ -78,8 +80,9 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	*	Line edit (return key pressed)
 	*	File list
 	*	Update user profile picture preview during registration
-	*	tabWidget tab changed
+	*	TabWidget tab changed
 	*/
+
 	connect(ui->pushButton_confirmOperation, &QPushButton::clicked, this, &LandingPage::pushButtonConfirmOperationClicked);
 	connect(ui->pushButton_new, &QPushButton::clicked, this, &LandingPage::pushButtonNewClicked);
 	connect(ui->pushButton_register, &QPushButton::clicked, this, &LandingPage::pushButtonRegisterClicked);
@@ -123,10 +126,8 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	ui->label_logos->setPixmap(logos.scaled(ui->label_logos->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 
-
 	//Index to 0 for stackedWidget (Home page)
 	ui->stackedWidget->setCurrentIndex(0);
-
 
 	//Index to 0 for tabWidget (Login)
 	ui->tabWidget->setCurrentIndex(0);
@@ -136,7 +137,9 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Validator for server port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 65535, this));
 	//Validator for server IP
-	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"), this));
+	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(
+		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
+		this));
 
 
 	//Loads user login infos
@@ -158,8 +161,6 @@ LandingPage::LandingPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Land
 	//Setup loading message Label
 	loading = new QLabel(this);
 	mngr.setupLoadingInfo(loading);
-
-
 }
 
 LandingPage::~LandingPage()
@@ -196,7 +197,9 @@ void LandingPage::pushButtonConfirmOperationClicked()
 		}
 	}
 	else {
-		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty() || ui->lineEdit_regPswConf->text().isEmpty()) {
+		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty() 
+			|| ui->lineEdit_regPswConf->text().isEmpty()) 
+		{
 			incorrectOperation(tr("Please fill all the required fields"));
 			return;
 		}
@@ -325,7 +328,6 @@ void LandingPage::updateUserInfo()
 		username = _user->getUsername() + "#" + QString::number(_user->getUserId()).rightJustified(4, '0');
 		ui->label_userUsername->setText(username);
 	}
-
 
 
 	//Set user profile picture
@@ -483,7 +485,6 @@ void LandingPage::currentTabChanged(int index)
 		ui->pushButton_confirmOperation->setText(tr("Register"));
 		break;
 	}
-
 }
 
 
