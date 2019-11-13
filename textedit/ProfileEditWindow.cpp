@@ -176,14 +176,13 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 		else
 		{
 			qint64 fileSize = file.size();
-			ui->label_imageSize->setText("Image size: " + QString::number(fileSize / 1024) + " KB");
-
 			if (fileSize > 1048576) {
 				//Shows error
 				ui->label_incorrect_edit->setText(tr("Selected image is too big, please choose another one (Maximum size: 1MB)"));
 				return;
 			}
 			else {
+				ui->label_imageSize->setText("Image size: " + QString::number(fileSize / 1024) + " KB");
 				ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 				ui->label_incorrect_edit->setText("");
 				return;
