@@ -1453,7 +1453,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 {
 	/*************** CHARACTER DELETION ***************/
 
-	/*if (charsRemoved == 1)
+	if (charsRemoved == 1)
 	{
 		emit charDeleted(position);
 	}
@@ -1463,11 +1463,11 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		{
 			emit charGroupDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 		}
-	}*/
+	}
 
 	/*************** CHARACTER INSERTION ***************/
 
-	/*if (charsAdded == 1)
+	if (charsAdded == 1)
 	{
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(position + 1);
@@ -1569,9 +1569,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 			}
 		}
 
-	}*/
+	}
 
-	for (int i = 0; i < charsRemoved; ++i) {
+	/*for (int i = 0; i < charsRemoved; ++i) {
 		emit charDeleted(position);
 	}
 
@@ -1642,7 +1642,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	//If in my insertion there's not a 8233 (\n), i apply the correct block format
 	if (charsAdded > 1) {
 		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
-	}
+	}*/
 
 
 	//Update GUI after some insertion/deletion
