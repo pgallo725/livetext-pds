@@ -1714,6 +1714,28 @@ void TextEdit::removeChar(int position)
 	updateUsersSelections();
 }
 
+void TextEdit::deleteManyChars(int start, int end)
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	//Select the text to be removed
+	_extraCursor->setPosition(start);
+	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
+
+	//Delete characters
+	_extraCursor->removeSelectedText();
+
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
+
+	//GUI update
+	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
+}
+
+
 /**************************** EXTRA CURSORS ****************************/
 /*
 *	Functions to handle extra cursors position updates.

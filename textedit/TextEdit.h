@@ -204,6 +204,7 @@ public:
 	void newChar(QChar ch, QTextCharFormat format, int position);
 	void manyChars(QString chars, QTextCharFormat fmt, int position);
 	void removeChar(int position);
+	void deleteManyChars(int start, int end);
 
 	//REMOTE: Apply text block format
 	void applyBlockFormat(int position, QTextBlockFormat fmt);

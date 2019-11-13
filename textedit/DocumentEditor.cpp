@@ -21,10 +21,38 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 void DocumentEditor::openDocument()
 {
 	// Insert all symbols in the document
-	for (int i = 0; i < _document.length() - 1; i++) {
+	/*for (int i = 0; i < _document.length() - 1; i++) {
 		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
+	}*/
+
+	QString buffer;
+	QVector<Symbol> text = _document.getContent();
+	QVector<Symbol>::iterator s = text.begin();
+	int position = 0;
+	QTextCharFormat oldFmt;
+
+	for (; s < text.end(); s++)
+	{
+		if (oldFmt == s->getFormat())
+		{
+			buffer.append(s->getChar());
+		}
+		else
+		{
+			_textedit->manyChars(buffer, oldFmt, position);
+			position += buffer.length();
+			buffer.clear();
+			buffer.append(s->getChar());
+			oldFmt = s->getFormat();
+		}
 	}
-	   
+
+	if (!buffer.isEmpty())
+	{
+		_textedit->manyChars(buffer, oldFmt, position);
+	}
+
+
 	// Create lists
 	foreach(TextList list, _document._lists.values()) 
 	{
@@ -138,7 +166,9 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 		{
 			_textedit->manyChars(buffer, oldFmt, firstPosition);
 			buffer.clear();
-			oldPosition = -1;
+			buffer.append(s->getChar());
+			oldFmt = s->getFormat();
+			oldPosition = position;
 		}
 	}
 
@@ -169,14 +199,39 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 
 void DocumentEditor::bulkDelete(QVector<Position> positions)
 {
+	int firstPosition = -1;
+	int lastPosition = -1;
+
 	for each (Position pos in positions)
 	{
 		int index = _document.remove(pos);
-		if (index >= 0)
-			_textedit->removeChar(index);
+
+		if (index >= 0)	  // Skip non-extisting characters
+		{
+			if (firstPosition == -1)
+			{
+				firstPosition = index;
+				lastPosition = index;
+			}
+			else if (index == lastPosition + 1)
+			{
+				lastPosition = index;
+			}
+			else
+			{
+				//naksndadnaondsoas
+				firstPosition = index;
+				lastPosition = index;
+			}
+		}
 	}
 
-	_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
+	if (firstPosition >= 0 && lastPosition >= 0)
+	{
+		//dskfnskfnks
+	}
+
+	//_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
 }
 
 void DocumentEditor::addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts,
