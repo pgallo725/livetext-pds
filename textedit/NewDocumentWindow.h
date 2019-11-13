@@ -3,15 +3,18 @@
 
 #include <QDialog>
 
-namespace Ui {
-	class NewDocumentWindow;
-}
+namespace Ui { class NewDocumentWindow; }
 
 class NewDocumentWindow : public QDialog
 {
 	Q_OBJECT
 
+private:
+	// Application buffer which holds the name of the document to be opened
+	QString& _filename;
+
 public:
+
 	Ui::NewDocumentWindow* ui;
 	NewDocumentWindow(QString& filename, QWidget* parent = nullptr);
 	~NewDocumentWindow();
@@ -26,12 +29,7 @@ private slots:
 	//Buttons slots
 	void acceptClicked();
 	void rejectClicked();
-
-private:
-	QString& _filename;
 };
-
-
 
 
 #endif // NEWFILEWINDOW_H

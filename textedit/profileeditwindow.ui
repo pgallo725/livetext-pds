@@ -51,7 +51,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Update the form to edit your profile informations</string>
+           <string>Edit the form to update your profile</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -236,6 +236,9 @@ password</string>
             </item>
             <item row="3" column="1">
              <widget class="QLineEdit" name="lineEdit_editPswConf">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>16777215</width>

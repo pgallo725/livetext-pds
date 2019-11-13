@@ -1,15 +1,14 @@
 #include "NewDocumentWindow.h"
 #include "ui_newdocumentwindow.h"
 
-#include <QWidget>
-#include <QStyle>
-#include <QApplication>
-#include <QDesktopWidget>
 #include <QRegExpValidator>
 
 #include "WidgetsManager.h"
 
-NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewDocumentWindow), _filename(filename) {
+
+NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewDocumentWindow), _filename(filename)
+{
 	//Window name
 	setWindowTitle(tr("New document"));
 

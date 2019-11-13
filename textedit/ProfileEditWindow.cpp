@@ -5,16 +5,16 @@
 
 #include <QMessageBox>
 #include <QPixmap>
-#include <QWidget>
 #include <QFileDialog>
-#include <QStandardPaths>
-#include <QStyle>
-#include <QApplication>
 #include <QDesktopWidget>
 
 const QString rsrcPath = ":/images";
 
-ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow), _user(user), mngr(WidgetsManager(this)) {
+
+ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow),
+	_user(user), mngr(WidgetsManager(this)) 
+{
 	//UI setup
 	ui->setupUi(this);
 
@@ -32,7 +32,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) : QDialog(pare
 
 	connect(ui->lineEdit_editNick, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
-	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
+	connect(ui->lineEdit_editPsw, &QLineEdit::textChanged, this, &ProfileEditWindow::passwordEdited);
 	connect(ui->lineEdit_editPswConf, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 
 	//Radio button
@@ -110,7 +110,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	//Check if all password are the same (if setted)
 	if (!newPassword.isEmpty() || !newPasswordConf.isEmpty()) {
 		if (newPassword != newPasswordConf) {
-			ui->label_incorrect_edit->setText(tr("Passwords does not match"));
+			ui->label_incorrect_edit->setText(tr("Passwords don't match"));
 			return;
 		}
 	}
@@ -128,6 +128,18 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	emit accountUpdate(nick, userIcon, newPassword, _fromEditor);
 }
 
+void ProfileEditWindow::passwordEdited()
+{
+	if (ui->lineEdit_editPsw->text().isEmpty())
+	{
+		ui->lineEdit_editPswConf->clear();
+		ui->lineEdit_editPswConf->setEnabled(false);
+	}
+	else
+	{
+		ui->lineEdit_editPswConf->setEnabled(true);
+	}
+}
 
 void ProfileEditWindow::radioButtonPressed()
 {
@@ -168,7 +180,7 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 
 			if (fileSize > 1048576) {
 				//Shows error
-				ui->label_incorrect_edit->setText(tr("Choosen image is too big, please select another one (Maximum size: 1MB)"));
+				ui->label_incorrect_edit->setText(tr("Selected image is too big, please choose another one (Maximum size: 1MB)"));
 				return;
 			}
 			else {

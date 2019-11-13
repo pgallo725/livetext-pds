@@ -1,14 +1,12 @@
 #include "OpenUriWindow.h"
 #include "ui_openuriwindow.h"
 
-#include <QWidget>
-#include <QStyle>
-#include <QApplication>
-#include <QDesktopWidget>
-
 #include "WidgetsManager.h"
 
-OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow), _uri(uri) {
+
+OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow), _uri(uri) 
+{
 	//Window name and logo
 	setWindowTitle(tr("Open from URI"));
 

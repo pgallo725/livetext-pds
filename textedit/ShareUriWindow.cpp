@@ -1,17 +1,16 @@
 #include "ShareUriWindow.h"
 #include "ui_shareuriwindow.h"
 
-#include <QWidget>
-#include <QStyle>
-#include <QApplication>
-#include <QDesktopWidget>
 #include <QClipboard>
 
 #include "WidgetsManager.h"
 
 const QString rsrcPath = ":/images";
 
-ShareUriWindow::ShareUriWindow(QString uri, QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow), _uri(uri) {
+
+ShareUriWindow::ShareUriWindow(QString uri, QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ShareUriWindow) 
+{
 	//Setup UI window and resize
 	ui->setupUi(this);
 
@@ -37,9 +36,9 @@ ShareUriWindow::~ShareUriWindow()
 
 void ShareUriWindow::copyAndClose()
 {
-	//Copy uri to clip board
+	//Copy uri to clipboard
 	QClipboard* clipboard = QApplication::clipboard();
-	clipboard->setText(_uri);
+	clipboard->setText(ui->lineEdit_uri->text());
 
 	//Close window
 	this->done(QDialog::Accepted);

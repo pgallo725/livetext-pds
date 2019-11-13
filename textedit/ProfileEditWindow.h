@@ -2,15 +2,12 @@
 #define PROFILEEDITWINDOW_H
 
 #include <QDialog>
-#include <User.h>
-
 #include <QLabel>
+#include <User.h>
 
 #include "WidgetsManager.h"
 
-namespace Ui {
-	class ProfileEditWindow;
-}
+namespace Ui { class ProfileEditWindow; }
 
 class ProfileEditWindow : public QDialog
 {
@@ -54,6 +51,9 @@ private slots:
 	void pushButtonUpdateClicked();
 	void pushButtonBrowseClicked();
 	void pushButtonCancelClicked();
+
+	//Password editing
+	void passwordEdited();
 
 	//Radio button
 	void radioButtonPressed();

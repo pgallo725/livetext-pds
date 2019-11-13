@@ -3,17 +3,19 @@
 
 #include <QDialog>
 
-namespace Ui {
-	class OpenUriWindow;
-}
+namespace Ui { class OpenUriWindow; }
 
 class OpenUriWindow : public QDialog
 {
 	Q_OBJECT
 
+private:
+	// Application buffer holding the URI of the document to be opened
+	QString& _uri;
+
 public:
+
 	Ui::OpenUriWindow* ui;
-	
 	OpenUriWindow(QString& uri, QWidget* parent = nullptr);
 	~OpenUriWindow();
 		
@@ -27,12 +29,7 @@ private slots:
 	//Buttons slots
 	void acceptClicked();
 	void rejectClicked();
-
-private:
-	QString& _uri;
 };
-
-
 
 
 #endif // OPENURIWINDOW_H

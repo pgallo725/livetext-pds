@@ -1,14 +1,14 @@
 #include "AboutWindow.h"
 #include "ui_aboutwindow.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 #include "WidgetsManager.h"
 
 const QString rsrcPath = ":/images";
 
-AboutWindow::AboutWindow(QWidget* parent) : QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::AboutWindow){
+
+AboutWindow::AboutWindow(QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::AboutWindow)
+{
 	//Window name
 	setWindowTitle(tr("About"));
 

@@ -45,6 +45,12 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Header Files\UI Windows">
+      <UniqueIdentifier>{03001d1b-8e53-48ab-9877-ca19c39ee89d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI Windows">
+      <UniqueIdentifier>{fa8d80a4-1853-4659-a109-100ff4f3a8e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp">
@@ -59,16 +65,7 @@
     <ClCompile Include="LiveText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenUriWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Presence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ProfileEditWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ShareUriWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -80,11 +77,20 @@
     <ClCompile Include="WidgetsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NewDocumentWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AboutWindow.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\UI Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="NewDocumentWindow.cpp">
+      <Filter>Source Files\UI Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenUriWindow.cpp">
+      <Filter>Source Files\UI Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ShareUriWindow.cpp">
+      <Filter>Source Files\UI Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="ProfileEditWindow.cpp">
+      <Filter>Source Files\UI Windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,31 +100,31 @@
     <QtMoc Include="DocumentEditor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="LandingPage.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClInclude Include="LiveText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="OpenUriWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClInclude Include="Presence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="ProfileEditWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="ShareUriWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="TextEdit.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="NewDocumentWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="AboutWindow.h">
+      <Filter>Header Files\UI Windows</Filter>
+    </QtMoc>
+    <QtMoc Include="NewDocumentWindow.h">
+      <Filter>Header Files\UI Windows</Filter>
+    </QtMoc>
+    <QtMoc Include="OpenUriWindow.h">
+      <Filter>Header Files\UI Windows</Filter>
+    </QtMoc>
+    <QtMoc Include="ProfileEditWindow.h">
+      <Filter>Header Files\UI Windows</Filter>
+    </QtMoc>
+    <QtMoc Include="ShareUriWindow.h">
+      <Filter>Header Files\UI Windows</Filter>
+    </QtMoc>
+    <QtMoc Include="LandingPage.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
