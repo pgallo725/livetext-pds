@@ -91,7 +91,7 @@ void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
 
 void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
-	QVector<Symbol>::iterator s = symbols.begin();
+	/*QVector<Symbol>::iterator s = symbols.begin();
 
 	for (; s < symbols.end() - 1; s++)
 	{
@@ -112,9 +112,59 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 	int blockPos = _document.formatBlock(bId, blkFmt);		// Format the block according to the received QTextBlockFormat
 	if (blockPos >= 0) {
 		_textedit->applyBlockFormat(blockPos, blkFmt);
+	}*/
+
+	QString buffer;
+	QVector<Symbol>::iterator s = symbols.begin();
+	int firstPosition = 0;
+	int oldPosition = -1;
+	QTextCharFormat oldFmt;
+
+	for (; s < symbols.end() - 1; s++)
+	{
+		int position = _document.insert(*s);
+		if (position == oldPosition + 1 && oldFmt == s->getFormat())
+		{
+			buffer.append(s->getChar());
+			oldPosition = position;
+		}
+		else if (oldPosition == -1)
+		{
+			buffer = QString(s->getChar());
+			oldFmt = s->getFormat();
+			firstPosition = oldPosition = position;
+		}
+		else
+		{
+			_textedit->manyChars(buffer, oldFmt, firstPosition);
+			buffer.clear();
+			oldPosition = -1;
+		}
 	}
 
-	_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
+	if (s < symbols.end())	// Handle the last symbol separately (to avoid checking isLast at every iteration)
+	{
+		int position = _document.insert(*s);
+		if (!isLast)
+		{
+			// skip inserting the terminating char in the Qt document
+			if (position == oldPosition + 1 && s->getFormat() == oldFmt)
+			{
+				buffer.append(s->getChar());
+				_textedit->manyChars(buffer, oldFmt, firstPosition);
+			}
+			else
+			{
+				_textedit->newChar(s->getChar(), s->getFormat(), position);
+			}
+		}
+		else if (!buffer.isEmpty())
+		{
+			_textedit->manyChars(buffer, oldFmt, firstPosition);
+		}
+	}
+
+	//_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
 void DocumentEditor::bulkDelete(QVector<Position> positions)

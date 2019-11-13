@@ -1675,6 +1675,26 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	updateUsersSelections();
 }
 
+void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	_extraCursor->setPosition(position);
+
+	//Insert character at position
+	_extraCursor->insertText(chars, fmt);
+
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
+
+	//GUI update
+	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
+}
+
+
 void TextEdit::removeChar(int position)
 {
 	const QSignalBlocker blocker(_textEdit->document());

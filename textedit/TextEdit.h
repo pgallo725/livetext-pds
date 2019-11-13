@@ -202,6 +202,7 @@ public:
 
 	//REMOTE: character insertion/deletion
 	void newChar(QChar ch, QTextCharFormat format, int position);
+	void manyChars(QString chars, QTextCharFormat fmt, int position);
 	void removeChar(int position);
 
 	//REMOTE: Apply text block format
