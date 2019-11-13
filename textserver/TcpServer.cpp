@@ -198,9 +198,6 @@ void TcpServer::newClientConnection()
 
 	Logger() << "New connection from a client";
 
-	// Avoid buffers
-	//socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
-
 	// Create a new client object 
 	QSharedPointer<Client> client(new Client(socket));
 	clients.insert(socket, client);
@@ -324,6 +321,10 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	/* check if username or password are nulls */
 	if (!username.compare("") || !password.compare(""))
 		return MessageFactory::AccountError("Username and/or password fields cannot be empty");
+
+	/* check if the username contains the character '_', this may lead to got issues in create/open documents */
+	if(username.contains('_'))
+		return MessageFactory::AccountError("Username not valid, must not contain '_'");
 
 	/* check if this username is already used */
 	if (users.contains(username))
@@ -466,6 +467,9 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
+
+	if(docName.contains('_'))
+		return MessageFactory::DocumentError("Document name not valid, must not contain '_'");
 
 	URI docURI = generateURI(client->getUsername(), docName);
 
