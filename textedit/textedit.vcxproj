@@ -260,21 +260,6 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </AdditionalInputs>
     </CustomBuild>
-    <ClInclude Include="ui_landingpage.h" />
-    <ClInclude Include="ui_openuriwindow.h" />
-    <ClInclude Include="ui_profileeditwindow.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="aboutwindow.ui" />
-    <QtUic Include="landingpage.ui">
-    </QtUic>
-    <QtUic Include="newdocumentwindow.ui" />
-    <QtUic Include="openuriwindow.ui">
-    </QtUic>
-    <QtUic Include="profileeditwindow.ui">
-    </QtUic>
-    <QtUic Include="shareuriwindow.ui">
-    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\win\alpha.png" />
@@ -323,6 +308,14 @@
     <None Include="images\win\user.png" />
     <None Include="images\win\zoomin.png" />
     <None Include="images\win\zoomout.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="forms\aboutwindow.ui" />
+    <QtUic Include="forms\landingpage.ui" />
+    <QtUic Include="forms\newdocumentwindow.ui" />
+    <QtUic Include="forms\openuriwindow.ui" />
+    <QtUic Include="forms\profileeditwindow.ui" />
+    <QtUic Include="forms\shareuriwindow.ui" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

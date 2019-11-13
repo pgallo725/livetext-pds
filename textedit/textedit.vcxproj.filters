@@ -135,35 +135,6 @@
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    <ClInclude Include="ui_landingpage.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_openuriwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_profileeditwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <QtUic Include="landingpage.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="openuriwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="profileeditwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="shareuriwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="newdocumentwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="aboutwindow.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <None Include="images\win\alpha.png">
@@ -306,5 +277,25 @@
     <ClInclude Include="WidgetsManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="forms\aboutwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\landingpage.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\newdocumentwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\openuriwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\profileeditwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="forms\shareuriwindow.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
 </Project>
