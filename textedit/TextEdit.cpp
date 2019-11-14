@@ -75,7 +75,6 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//GUI update in case of format change or cursor position changed
 	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
 
-
 	//Online users cursor redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
@@ -288,11 +287,14 @@ void TextEdit::setupEditorActions()
 	clipboardDataChanged();
 #endif
 
-	//Select all
 	menu->addSeparator();
+	//Delete
+	actionDelete = menu->addAction(tr("Delete"), this, [this]() { _textEdit->textCursor().removeSelectedText(); });
+	actionDelete->setPriority(QAction::LowPriority);
+	actionDelete->setShortcut(QKeySequence::Delete);
+	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
-
-
+	
 
 	/********** FORMAT MENU **********/
 
@@ -516,24 +518,29 @@ void TextEdit::setupEditorActions()
 	formatMenu->addSeparator();
 
 	/********** ACCOUNT MENU **********/
+
 	addToolBarBreak(Qt::TopToolBarArea);
 
 	tb = addToolBar(tr("&Account"));
 	menu = menuBar()->addMenu(tr("&Account"));
 
+	//Close document
+	tb->addAction(closeDocoumentAction);
+
 	//Highlight user text
 	const QIcon HighlightUsersIcon(rsrcPath + "/editor/highlightusers.png");
 	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
-	tb->addAction(actionHighlightUsers);
-	actionHighlightUsers->setCheckable(true);
+
+	menu->addSeparator();
 
 	//Edit profile
 	const QIcon userIcon(rsrcPath + "/editor/user.png");
 	a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
 	tb->addAction(a);
 
-	//Close document
-	tb->addAction(closeDocoumentAction);
+	tb->addAction(actionHighlightUsers);
+	actionHighlightUsers->setCheckable(true);
+	
 
 	//Online users toolbar
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
@@ -581,11 +588,12 @@ void TextEdit::setupEditorActions()
 
 	tb->addAction(a);
 
-	/********** FONT AND SIZE **********/
+	/********** HELP AND INFORMATIONS **********/
+
 	menu = menuBar()->addMenu(tr("?"));
 	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
 	menu->addSeparator();
-	menu->addAction(tr("About LiveText..."), _aboutWindow, &AboutWindow::exec);
+	menu->addAction(tr("About LiveText   "), _aboutWindow, &AboutWindow::exec);
 }
 
 
@@ -1272,7 +1280,6 @@ void TextEdit::setLineHeight(QAction* a)
 
 void TextEdit::cursorPositionChanged()
 {
-
 	//Update scrollbar position according to cursor position wiith offsets
 	int cursorPosition = _textEdit->cursorRect().y();
 	int areaBottom = area->contentsRect().bottom();
@@ -1301,6 +1308,9 @@ void TextEdit::updateEditorSelectedActions()
 
 	//Users cursors
 	redrawAllCursors();
+
+	//Selection
+	actionDelete->setEnabled(cursor.hasSelection());
 
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();
@@ -1675,6 +1685,26 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	updateUsersSelections();
 }
 
+void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	_extraCursor->setPosition(position);
+
+	//Insert character at position
+	_extraCursor->insertText(chars, fmt);
+
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
+
+	//GUI update
+	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
+}
+
+
 void TextEdit::removeChar(int position)
 {
 	const QSignalBlocker blocker(_textEdit->document());
@@ -1693,6 +1723,28 @@ void TextEdit::removeChar(int position)
 	//User text higlighting
 	updateUsersSelections();
 }
+
+void TextEdit::deleteManyChars(int start, int end)
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	//Select the text to be removed
+	_extraCursor->setPosition(start);
+	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
+
+	//Delete characters
+	_extraCursor->removeSelectedText();
+
+	//Reset previous cursor position so it is sent as soon as possible
+	_currentCursorPosition = -1;
+
+	//GUI update
+	updateEditorSelectedActions();
+
+	//User text higlighting
+	updateUsersSelections();
+}
+
 
 /**************************** EXTRA CURSORS ****************************/
 /*

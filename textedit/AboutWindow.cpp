@@ -26,4 +26,5 @@ AboutWindow::AboutWindow(QWidget* parent)
 
 AboutWindow::~AboutWindow()
 {
+	delete ui;
 }
