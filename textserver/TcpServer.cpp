@@ -22,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 0.9.5)" << endl
+	Logger(Info) << "LiveText Server (version 0.9.6)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -322,6 +322,10 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	if (!username.compare("") || !password.compare(""))
 		return MessageFactory::AccountError("Username and/or password fields cannot be empty");
 
+	/* check username/nickname length */
+	if (username.length() > MAX_NAME_LENGTH || nickname.length() > MAX_NAME_LENGTH)
+		return MessageFactory::AccountError("Username and/or nickname too long (Max 50 characters)");
+
 	/* check if the username contains the URI field separator (prohibited) */
 	if(username.contains(URI_FIELD_SEPARATOR))
 		return MessageFactory::AccountError("Invalid username, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
@@ -365,6 +369,9 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You need to login before performing any operation");
 
+	if (nickname.length() > MAX_NAME_LENGTH)
+		return MessageFactory::AccountError("Nickname string too long (Max 50 characters)");
+
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
 		return MessageFactory::AccountError("Image file too big (Maximum size: 1MB)");
 
@@ -394,6 +401,9 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 
 	if (!client->isLogged())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You need to login before performing any operation"));
+
+	if (nickname.length() > MAX_NAME_LENGTH)
+		emit sendAccountUpdate(client, MessageFactory::AccountError("Nickname string too long (Max 50 characters)"));
 
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Image file too big (Maximum size: 1MB)"));

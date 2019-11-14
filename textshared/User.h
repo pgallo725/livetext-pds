@@ -5,7 +5,8 @@
 #include <QByteArray>
 #include "Document.h"
 
-#define MAX_IMAGE_SIZE 1*1024*1024		// 1 MB
+#define MAX_NAME_LENGTH	  50			  // 50 characters
+#define MAX_IMAGE_SIZE	  1*1024*1024	  // 1 MB
 
 
 class User
