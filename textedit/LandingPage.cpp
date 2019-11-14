@@ -141,7 +141,8 @@ LandingPage::LandingPage(QWidget* parent)
 		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
 	//Validator for username
-	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
+	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
+		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR + "]+$")), this));
 
 
 	//Loads user login infos
@@ -570,7 +571,7 @@ void LandingPage::updateUserAvatarPreview(QString path)
 		else
 		{
 			qint64 fileSize = file.size();
-			if (fileSize > 1048576) {
+			if (fileSize > MAX_IMAGE_SIZE) {
 				//Shows error
 				incorrectOperation(tr("Selected image is too big, please choose another one (Maximum size: 1MB)"));
 				return;

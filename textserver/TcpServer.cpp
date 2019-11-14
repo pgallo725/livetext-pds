@@ -322,13 +322,17 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	if (!username.compare("") || !password.compare(""))
 		return MessageFactory::AccountError("Username and/or password fields cannot be empty");
 
-	/* check if the username contains the character '_', this may lead to got issues in create/open documents */
-	if(username.contains('_'))
-		return MessageFactory::AccountError("Username not valid, must not contain '_'");
+	/* check if the username contains the URI field separator (prohibited) */
+	if(username.contains(URI_FIELD_SEPARATOR))
+		return MessageFactory::AccountError("Invalid username, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
 
 	/* check if this username is already used */
 	if (users.contains(username))
 		return MessageFactory::AccountError("The requested username is already taken");
+
+	/* check if image size is acceptable */
+	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
+		return MessageFactory::AccountError("Image file too big (Maximum size: 1MB)");
 
 	Logger() << "Creating new user account " << username;
 	
@@ -361,6 +365,9 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (!client->isLogged())
 		return MessageFactory::AccountError("You need to login before performing any operation");
 
+	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
+		return MessageFactory::AccountError("Image file too big (Maximum size: 1MB)");
+
 	Logger() << "Updating account information of user " << client->getUsername();
 
 	User* user = client->getUser();
@@ -387,6 +394,9 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 
 	if (!client->isLogged())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("You need to login before performing any operation"));
+
+	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
+		emit sendAccountUpdate(client, MessageFactory::AccountError("Image file too big (Maximum size: 1MB)"));
 
 	Logger() << "Updating account information of user " << client->getUsername() << " (inside Workspace)";
 
@@ -468,8 +478,8 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
 
-	if(docName.contains('_'))
-		return MessageFactory::DocumentError("Document name not valid, must not contain '_'");
+	if(docName.contains(URI_FIELD_SEPARATOR))
+		return MessageFactory::DocumentError("Invalid document name, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
 
 	URI docURI = generateURI(client->getUsername(), docName);
 

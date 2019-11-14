@@ -5,6 +5,9 @@
 #include <QByteArray>
 #include "Document.h"
 
+#define MAX_IMAGE_SIZE 1*1024*1024		// 1 MB
+
+
 class User
 {
 	/* Operators for QDataStream serialization and deserialization */

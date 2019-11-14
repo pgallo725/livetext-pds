@@ -4,6 +4,7 @@
 #include <QRegExpValidator>
 
 #include "WidgetsManager.h"
+#include "Document.h"
 
 
 NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent) 
@@ -24,7 +25,8 @@ NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent)
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewDocumentWindow::rejectClicked);
 
 	//Validator to prevent insertion of '_' character in filename
-	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
+	ui->lineEdit_fileName->setValidator(new QRegExpValidator(
+		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR + "]+$")), this));
 
 	//Set keyboard focus
 	ui->lineEdit_fileName->setFocus();

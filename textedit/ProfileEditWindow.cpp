@@ -176,7 +176,7 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 		else
 		{
 			qint64 fileSize = file.size();
-			if (fileSize > 1048576) {
+			if (fileSize > MAX_IMAGE_SIZE) {
 				//Shows error
 				ui->label_incorrect_edit->setText(tr("Selected image is too big, please choose another one (Maximum size: 1MB)"));
 				return;

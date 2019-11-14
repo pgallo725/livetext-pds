@@ -10,7 +10,6 @@
 
 #define FPOS_GAP_SIZE 4						// Value used in the fractional position algorithm
 #define DOCUMENTS_DIRNAME "./Documents/"	// Path on which the document files are stored (on the server)
-#define URI_FIELD_SEPARATOR	'_'
 
 
 URI::URI()
