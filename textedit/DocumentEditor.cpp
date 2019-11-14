@@ -199,8 +199,8 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 
 void DocumentEditor::bulkDelete(QVector<Position> positions)
 {
-	int firstPosition = -1;
-	int lastPosition = -1;
+	int position = -1;
+	int count = 0;
 
 	for each (Position pos in positions)
 	{
@@ -208,27 +208,27 @@ void DocumentEditor::bulkDelete(QVector<Position> positions)
 
 		if (index >= 0)	  // Skip non-extisting characters
 		{
-			if (firstPosition == -1)
+			if (position == -1)
 			{
-				firstPosition = index;
-				lastPosition = index;
+				position = index;
+				count = 1;
 			}
-			else if (index == lastPosition + 1)
+			else if (index == position)
 			{
-				lastPosition = index;
+				count++;
 			}
 			else
 			{
-				_textedit->deleteManyChars(firstPosition, lastPosition);
-				firstPosition = index;
-				lastPosition = index;
+				_textedit->deleteManyChars(position, position + count);
+				position = index;
+				count = 1;
 			}
 		}
 	}
 
-	if (firstPosition >= 0 && lastPosition >= 0)
+	if (position >= 0 && count > 0)
 	{
-		_textedit->deleteManyChars(firstPosition, lastPosition);
+		_textedit->deleteManyChars(position, position + count);
 	}
 
 	//_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
