@@ -1,6 +1,7 @@
 #include "WorkSpace.h"
 
 #include <QCoreApplication>
+#include <QElapsedTimer>
 
 #include "ServerLogger.h"
 #include <MessageFactory.h>
@@ -202,20 +203,32 @@ void WorkSpace::documentDeleteSymbol(Position position)
 
 void WorkSpace::documentBulkInsert(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	for each (Symbol symbol in symbols)
 	{
 		doc->insert(symbol);
 	}
 
 	doc->formatBlock(blockId, blockFmt);
+
+	Logger() << "BulkInsert message: " << symbols.size() << 
+		" symbols, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentBulkDelete(QVector<Position> positions)
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	for each (Position position in positions)
 	{
 		doc->remove(position);
 	}
+
+	Logger() << "BulkDelete message: " << positions.size() <<
+		" elements, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentEditSymbol(Position position, QTextCharFormat format)
