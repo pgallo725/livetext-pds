@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <Document.h>
+#include <QPoint>
 
 #include <User.h>
 
@@ -98,6 +99,9 @@ private slots:
 	void pushButtonRemoveClicked();
 	void pushButtonOpenUriClicked();
 	void pushButtonConfirmOperationClicked();
+
+	//Document custom menu
+	void showDocumentActionsMenu(const QPoint& position);
 
 	//Radio button
 	void radioButtonPressed();

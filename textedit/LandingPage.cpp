@@ -15,6 +15,7 @@
 #include <QPainterPath>
 #include <QFrame>
 #include <QTableWidget>
+#include <QMenu>
 
 
 #define DEFAULT_IP "127.0.0.1"
@@ -106,6 +107,7 @@ LandingPage::LandingPage(QWidget* parent)
 	//Document list
 	connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
 	connect(ui->tableWidget, &QTableWidget::itemActivated, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, this, &LandingPage::showDocumentActionsMenu);
 
 
 	//tabWidget
@@ -221,23 +223,6 @@ void LandingPage::pushButtonConfirmOperationClicked()
 	emit(connectToServer(serverIP, serverPort.toShort()));
 }
 
-void LandingPage::radioButtonPressed()
-{
-	if (ui->radioButton_customAvatar->isChecked()) {
-		ui->pushButton_browse->setEnabled(true);
-	}
-	else
-	{
-		ui->pushButton_browse->setEnabled(false);
-		ui->label_incorrect_operation->setText("");
-		ui->label_imageSize->setText("");
-
-		//Load default profile picture
-		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	}
-}
-
 
 void LandingPage::connectionEstabilished()
 {
@@ -281,6 +266,24 @@ void LandingPage::Register()
 
 	//Emit register signal to server
 	emit serverRegister(username, password, nickname, userIcon);
+}
+
+
+void LandingPage::radioButtonPressed()
+{
+	if (ui->radioButton_customAvatar->isChecked()) {
+		ui->pushButton_browse->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_browse->setEnabled(false);
+		ui->label_incorrect_operation->setText("");
+		ui->label_imageSize->setText("");
+
+		//Load default profile picture
+		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	}
 }
 
 
@@ -424,6 +427,22 @@ void LandingPage::setupFileList()
 *	Close all windows
 *	User profile picture preview
 */
+
+
+void LandingPage::showDocumentActionsMenu(const QPoint& position)
+{
+	if (ui->tableWidget->itemAt(ui->tableWidget->mapFromGlobal(QCursor::pos()))) {
+		QMenu* menu = new QMenu;
+		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/editcopy.png"), tr("Open Document..."));
+
+		connect(a, &QAction::triggered, this, &LandingPage::pushButtonOpenClicked);
+
+		menu->exec(QCursor::pos());
+		menu->clear();
+	}
+}
+
+
 
 void LandingPage::setupUserProfilePicture(QPixmap userPix)
 {
