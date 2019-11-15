@@ -114,6 +114,9 @@ private slots:
 
 	//User profile picture preview
 	void updateUserAvatarPreview(QString path);
+
+	//Copy document URI
+	void copyDocumentURI();
 };
 
 #endif // LANDINGPAGE_H
