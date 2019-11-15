@@ -224,7 +224,6 @@ public:
 	void resetCursorPosition();
 
 	//User text highlighting
-	void updateUsersSelections();
 	void setExtraSelections(qint32 userId, QPair<int, int> selection);
 
 	/* ----------------------- SIGNALS ----------------------- */

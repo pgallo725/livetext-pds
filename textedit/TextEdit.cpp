@@ -81,7 +81,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
-	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
 
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
 	connect(_textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
@@ -294,7 +294,7 @@ void TextEdit::setupEditorActions()
 	actionDelete->setShortcut(QKeySequence::Delete);
 	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
-	
+
 
 	/********** FORMAT MENU **********/
 
@@ -646,7 +646,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	_currentCursorPosition = -1;
 
 	//Recompute text highlighting
-	updateUsersSelections();
+	emit generateExtraSelection();
 }
 
 //Remove presence in the document
@@ -1035,6 +1035,9 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 	//GUI update
 	updateEditorSelectedActions();
+
+	//User text higlighting
+	handleMultipleSelections();
 }
 
 
@@ -1653,7 +1656,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	cursorPositionChanged();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 
@@ -1676,7 +1679,7 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
@@ -1695,7 +1698,7 @@ void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 
@@ -1715,7 +1718,7 @@ void TextEdit::removeChar(int position)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 void TextEdit::deleteManyChars(int start, int end)
@@ -1736,7 +1739,7 @@ void TextEdit::deleteManyChars(int start, int end)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 
@@ -1813,26 +1816,10 @@ void TextEdit::highlightUsersText()
 		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
 
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
-void TextEdit::updateUsersSelections()
-{
-	if (areUserIconActive()) {
-		_usersText.clear();
 
-		//Generate extraSelections according to users text
-		emit generateExtraSelection();
-
-		//Shows user text highlight
-		handleMultipleSelections();
-	}
-	else {
-		//Clear all extra selections
-		_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
-
-	}
-}
 
 //Sets and save all extra selections in the document
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
@@ -1866,24 +1853,29 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 void TextEdit::handleMultipleSelections()
 {
 	//Clear all extra selections
-	_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
+	_usersText.clear();
+
+	if (areUserIconActive()) {
+
+		emit generateExtraSelection();
 
 
-	int actionsChecked = 0;
-	foreach(Presence * p, onlineUsers.values()) {
-		if (p->actionHighlightText()->isChecked())
-			actionsChecked++;
+		int actionsChecked = 0;
+		foreach(Presence * p, onlineUsers.values()) {
+			if (p->actionHighlightText()->isChecked())
+				actionsChecked++;
+		}
+
+		//Check/Uncheck of actionHighlightUsers based on single highlight checked
+		if (actionsChecked == 0) {
+			actionHighlightUsers->setChecked(false);
+		}
+
+		if (actionsChecked == onlineUsers.size()) {
+			actionHighlightUsers->setChecked(true);
+		}
+
 	}
-
-	//Check/Uncheck of actionHighlightUsers based on single highlight checked
-	if (actionsChecked == 0) {
-		actionHighlightUsers->setChecked(false);
-	}
-
-	if (actionsChecked == onlineUsers.size()) {
-		actionHighlightUsers->setChecked(true);
-	}
-
 	//Sets the formatted selections in the editor
 	_textEdit->setExtraSelections(_usersText);
 }

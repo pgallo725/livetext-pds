@@ -85,7 +85,6 @@ void DocumentEditor::addSymbol(Symbol s, bool isLast)	// REMOTE
 	if (!isLast) 
 	{	// skip inserting the terminating char in the Qt document, because it has one already
 		_textedit->newChar(s.getChar(), s.getFormat(), position);
-		_textedit->updateUsersSelections();
 	}
 }
 
@@ -94,7 +93,6 @@ void DocumentEditor::removeSymbol(Position position)	// REMOTE
 	int pos = _document.remove(position);
 	if (pos >= 0) {
 		_textedit->removeChar(pos);
-		_textedit->updateUsersSelections();
 	}
 }
 
@@ -306,7 +304,7 @@ void DocumentEditor::generateExtraSelection()
 		selectionDelimiters.second = 0;
 
 		//Increment selection upper limit until we reach end of document or a char inserted by another user
-		for (int i = 0; i < _document.length() - 1; i++) {
+		for (int i = 0; i < _document.length(); i++) {
 			if (_document[i].getAuthorId() != userId) {
 				_textedit->setExtraSelections(userId, selectionDelimiters);
 
