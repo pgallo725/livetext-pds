@@ -354,12 +354,12 @@ int Document::insert(Symbol& s, int hint)
 		if (_text[hint - 1].getPosition() < s.getPosition()	&& s.getPosition() < _text[hint].getPosition())
 			insertPos = hint;
 	}
-	else if (hint == 0)
+	else if (hint == 0 && !_text.isEmpty())
 	{
 		if (s.getPosition() < _text.first().getPosition())
 			insertPos = hint;
 	}
-	else if (hint == _text.size())
+	else if (hint == _text.size() && !_text.isEmpty())
 	{
 		if (s.getPosition() > _text.last().getPosition())
 			insertPos = hint;

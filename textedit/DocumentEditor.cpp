@@ -142,7 +142,7 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 
 	QString buffer;
 	QVector<Symbol>::iterator s = symbols.begin();
-	int firstPosition = 0;
+	int firstPosition = -1;
 	int oldPosition = -1;
 	QTextCharFormat oldFmt;
 
