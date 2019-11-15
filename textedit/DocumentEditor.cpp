@@ -31,7 +31,7 @@ void DocumentEditor::openDocument()
 	int position = 0;
 	QTextCharFormat oldFmt;
 
-	for (; s < text.end(); s++)
+	for (; s < text.end() - 1; s++)
 	{
 		if (oldFmt == s->getFormat())
 		{
@@ -190,6 +190,11 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 		{
 			_textedit->manyChars(buffer, oldFmt, firstPosition);
 		}
+	}
+
+	int blockPos = _document.formatBlock(bId, blkFmt);		// Format the block according to the received QTextBlockFormat
+	if (blockPos >= 0) {
+		_textedit->applyBlockFormat(blockPos, blkFmt);
 	}
 
 	//_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
