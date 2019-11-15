@@ -95,7 +95,11 @@ Document::Document(URI docURI, qint32 authorId) :
 	eof.setBlock(defaultBlock.getId());
 
 	_blocks.insert(defaultBlock.getId(), defaultBlock);
+#if USE_DOCUMENT_TREE_STRUCTURE
+	_text.insert(eof.getPosition(), eof);
+#else
 	_text.insert(_text.begin(), eof);
+#endif
 }
 
 Document::~Document()
@@ -124,22 +128,31 @@ QString Document::getAuthor() const
 
 QVector<Symbol> Document::getContent() const
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	return _text.values().toVector();
+#else
 	return _text;
+#endif
 }
 
 int Document::length() const
 {
-	return _text.length();
+	return _text.size();
 }
 
 QString Document::toString() const
 {
 	QString text;
 
-	for (const Symbol* i = _text.cbegin(); i != _text.cend(); i++)
+#if USE_DOCUMENT_TREE_STRUCTURE
+	for (QMap<Position, Symbol>::const_iterator i = _text.begin(); i != _text.end(); i++)
 	{
 		text.append(i->getChar());
 	}
+#else
+	for (QVector<Symbol>::const_iterator i = _text.begin(); i != _text.end(); i++)
+		text.append(i->getChar());
+#endif	
 
 	return text;
 }
@@ -147,17 +160,33 @@ QString Document::toString() const
 
 Symbol& Document::operator[](const Position& fPos)
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	QMap<Position, Symbol>::iterator s = _text.find(fPos);
+	if (s != _text.end())
+		return *s;
+	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
+#else
 	int pos = positionIndex(fPos);
-	if (pos >= 0 && pos < _text.length())
+	if (pos >= 0 && pos < _text.size())
 		return _text[pos];
 	else throw std::out_of_range("The document doesn't contain any symbol with that fractional position");
+#endif
 }
 
 Symbol& Document::operator[](int pos)
 {
-	if (pos >= 0 && pos < _text.length())
+#if USE_DOCUMENT_TREE_STRUCTURE
+	if (pos >= 0 && pos < _text.size())
+	{
+		QMap<Position, Symbol>::iterator s = _text.begin();
+		return *(s + pos);
+	}
+	else throw std::out_of_range("The document doesn't contain any symbol with that index");
+#else
+	if (pos >= 0 && pos < _text.size())
 		return _text[pos];
 	else throw std::out_of_range("The document doesn't contain any symbol with that index");
+#endif
 }
 
 
@@ -192,7 +221,9 @@ void Document::unload()
 	// Unload the Document object contents from memory
 	_blocks.clear();
 	_text.clear();
+#if !USE_DOCUMENT_TREE_STRUCTURE
 	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
+#endif
 }
 
 void Document::save()
@@ -234,12 +265,16 @@ void Document::erase()
 
 int Document::insert(Symbol& s)
 {
-	int insertPos = insertionIndex(s.getPosition());	// Search for the insertion position
-	assert(insertPos >= 0);
+#if USE_DOCUMENT_TREE_STRUCTURE
+	int insertPos;
+	QMap<Position, Symbol>::iterator i;
+	for (insertPos = 0, i = _text.begin();
+		i != _text.end() && s.getPosition() < i.key();
+		insertPos++, i++);
 
 	// Check if the inserted symbol implies the creation of a new block
-	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertPos < _text.length())
-		|| (insertPos == _text.length() && _text[insertPos-1].getChar() == QChar::ParagraphSeparator
+	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertPos < _text.size())
+		|| (insertPos == _text.size() && (i-1)->getChar() == QChar::ParagraphSeparator
 			&& s.getChar() != QChar::Null))
 	{
 		QMap<TextBlockID, TextBlock>::iterator block;
@@ -261,7 +296,84 @@ int Document::insert(Symbol& s)
 		}
 
 		// Check if it's needed to split blocks
-		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertPos != _text.length())
+		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertPos != _text.size())
+		{
+			TextBlock& prevBlock = _blocks[getBlockAt(insertPos)];
+
+			// The paragraph delimiter belongs to the previous block
+			s.setBlock(nullptr);
+			addCharToBlock(s, prevBlock);
+			QMap<Position, Symbol>::iterator pos = _text.insert(s.getPosition(), s);
+
+			// The new paragraph inherits the format attributes from the previous one
+			block->setFormat(prevBlock.getFormat());
+
+			// Migrate the list belonging from the previous to the new block
+			if (prevBlock.getListId())
+			{
+				TextList& list = _lists[prevBlock.getListId()];
+				addBlockToList(*block, list);
+				removeBlockFromList(prevBlock, list);
+			}
+
+			// All the following symbols of that paragraph are assigned to the new block
+			int x = positionIndex(prevBlock.end());
+			for (QMap<Position, Symbol>::iterator i = _text.begin() + x; i != pos; i--) {
+				addCharToBlock(*i, *block);
+			}
+
+			// We guarantee that this copy of the symbol contains the ID of the block that was created
+			// because of its insertion (even though in _text it belongs to another block)
+			s.setBlock(block->getId());
+		}
+		else
+		{
+			// Insert the symbol in the document
+			addCharToBlock(s, *block);
+			_text.insert(s.getPosition(), s);
+		}
+	}
+	else	// Inserting a regular symbol in the document
+	{
+		// Assign the character to the block on which it is inserted
+		TextBlockID blockId = (insertPos == _text.size() ?
+			getBlockAt(insertPos - 1) : getBlockAt(insertPos));		// the last char belongs to the previous block
+		addCharToBlock(s, _blocks[blockId]);
+		_text.insert(s.getPosition(), s);
+	}
+
+	return insertPos;
+
+#else	// VECTOR STRUCTURE
+
+	int insertPos = insertionIndex(s.getPosition());	// Search for the insertion position
+	assert(insertPos >= 0);
+
+	// Check if the inserted symbol implies the creation of a new block
+	if (_text.empty() || (s.getChar() == QChar::ParagraphSeparator && insertPos < _text.size())
+		|| (insertPos == _text.size() && _text[insertPos-1].getChar() == QChar::ParagraphSeparator
+			&& s.getChar() != QChar::Null))
+	{
+		QMap<TextBlockID, TextBlock>::iterator block;
+
+		if (!s.getBlockId())	// (symbol received from Qt editor)
+		{
+			// Create a new TextBlock with locally-generated ID
+			TextBlockID blockId(_blockCounter++, s.getAuthorId());
+			block = _blocks.insert(blockId, TextBlock(blockId, QTextBlockFormat()));
+
+			s.setBlock(blockId);
+		}
+		else	// (symbol received from remote)
+		{
+			// Create a TextBlock with the ID carried by the symbol itself (received from another client)
+			block = _blocks.insert(s.getBlockId(), TextBlock(s.getBlockId(), QTextBlockFormat()));
+
+			_blockCounter++;	// (keep the block counter aligned between clients)
+		}
+
+		// Check if it's needed to split blocks
+		if (s.getChar() == QChar::ParagraphSeparator && !_text.empty() && insertPos != _text.size())
 		{
 			TextBlock& prevBlock = _blocks[getBlockAt(insertPos)];
 
@@ -286,8 +398,8 @@ int Document::insert(Symbol& s)
 				addCharToBlock(_text[i], *block);
 			}
 
-			/* We guarantee that this copy of the symbol contains the ID of the block that was created
-			because of its insertion (even though in _text it belongs to another block) */
+			// We guarantee that this copy of the symbol contains the ID of the block that was created
+			// because of its insertion (even though in _text it belongs to another block)
 			s.setBlock(block->getId());
 		}
 		else
@@ -300,18 +412,48 @@ int Document::insert(Symbol& s)
 	else	// Inserting a regular symbol in the document
 	{
 		// Assign the character to the block on which it is inserted
-		TextBlockID blockId = (insertPos == _text.length() ?
+		TextBlockID blockId = (insertPos == _text.size() ?
 			getBlockAt(insertPos - 1) :	getBlockAt(insertPos));		// the last char belongs to the previous block
 		addCharToBlock(s, _blocks[blockId]);
 		_text.insert(_text.begin() + insertPos, s);
 	}
 
 	return insertPos;
+#endif
 }
 
 
 int Document::remove(const Position& fPos)
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	QMap<Position, Symbol>::iterator s = _text.find(fPos);
+	if (s == _text.end())
+		return -1;
+
+	int index = std::distance(_text.begin(), s);
+	TextBlock& block = _blocks[s->getBlockId()];
+
+	// Check if the symbol removal implies the merging of two blocks
+	if (s->getChar() == QChar::ParagraphSeparator && index < _text.size() - 1 &&
+		!(block.begin() == block.end()))
+	{
+		// All symbols belonging to the next block will be assigned to the current block
+		for (QMap<Position, Symbol>::iterator i = s + 1; i != _text.end(); i++)
+		{
+			addCharToBlock(*i, block);
+			if (i->getChar() == QChar::ParagraphSeparator)
+				break;
+		}
+	}
+
+	// Remove the symbol from the document
+	removeCharFromBlock(*s, block);
+	_text.remove(fPos);
+
+	return index;
+
+#else	// VECTOR STRUCTURE
+
 	int pos = positionIndex(fPos);	// looks for the symbol with that fractional position
 	if (pos < 0)
 		return -1;					// Early out if the symbol has already been deleted
@@ -320,11 +462,11 @@ int Document::remove(const Position& fPos)
 	TextBlock& block = _blocks[s.getBlockId()];
 
 	// Check if the symbol removal implies the merging of two blocks
-	if (s.getChar() == QChar::ParagraphSeparator && pos < _text.length() - 1 &&
+	if (s.getChar() == QChar::ParagraphSeparator && pos < _text.size() - 1 &&
 		!(block.begin() == block.end()))
 	{
 		// All symbols belonging to the next block will be assigned to the current block
-		for (int i = pos + 1; i < _text.length(); i++)
+		for (int i = pos + 1; i < _text.size(); i++)
 		{
 			addCharToBlock(_text[i], block);
 			if (_text[i].getChar() == QChar::ParagraphSeparator)
@@ -337,14 +479,19 @@ int Document::remove(const Position& fPos)
 	_text.removeAt(pos);
 
 	return pos;
+#endif
 }
 
 Position Document::removeAtIndex(int index)
 {
-	if (index < 0 || index >= _text.length())
+	if (index < 0 || index >= _text.size())
 		throw std::out_of_range("The specified index is not a valid position for the document");
 
+#if USE_DOCUMENT_TREE_STRUCTURE
+	Position fPosition = (_text.begin() + index)->getPosition();
+#else
 	Position fPosition = _text[index].getPosition();
+#endif
 	
 	remove(fPosition);
 	return fPosition;
@@ -388,12 +535,20 @@ int Document::editBlockList(TextBlockID blockId, TextListID listId, QTextListFor
 
 int Document::formatSymbol(const Position& fPos, QTextCharFormat fmt)
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	QMap<Position, Symbol>::iterator s = _text.find(fPos);
+	if (s != _text.end())
+		s->setFormat(fmt);
+
+	return std::distance(_text.begin(), s);
+#else
 	int pos = positionIndex(fPos);		// looks for the symbol with that fractional position
 
 	if (pos >= 0)						// if the symbol exists in the document
 		_text[pos].setFormat(fmt);		// change its format with the new one
 
 	return pos;
+#endif
 }
 
 int Document::formatBlock(TextBlockID id, QTextBlockFormat fmt)
@@ -433,10 +588,14 @@ int Document::getBlockPosition(TextBlockID blockId)
 
 TextBlockID Document::getBlockAt(int index)
 {
-	if (index < 0 || index >= _text.length())
+	if (index < 0 || index >= _text.size())
 		throw std::out_of_range("The specified index is not a valid position for the document");
 
+#if USE_DOCUMENT_TREE_STRUCTURE
+	return this->operator[](index).getBlockId();
+#else
 	return _text[index].getBlockId();
+#endif
 }
 
 QList<TextBlockID> Document::getBlocksBetween(int start, int end)
@@ -444,11 +603,11 @@ QList<TextBlockID> Document::getBlocksBetween(int start, int end)
 	QList<TextBlockID> result;
 
 	// Clamping begin and end indexes to avoid out-of-range
-	start = std::clamp<int>(start, 0, _text.length());
-	end = std::clamp<int>(end, 0, _text.length());
+	start = std::clamp<int>(start, 0, _text.size());
+	end = std::clamp<int>(end, 0, _text.size());
 
 	int n = start;
-	while (n < _text.length())
+	while (n < _text.size())
 	{
 		TextBlockID blockId = getBlockAt(n);
 		TextBlock& block = _blocks[blockId];	// Get the block and add it to the list of results
@@ -500,17 +659,31 @@ void Document::removeCharFromBlock(Symbol& s, TextBlock& b)
 	}
 	else if (s.getPosition() == b.begin())
 	{
+#if USE_DOCUMENT_TREE_STRUCTURE
+		QMap<Position, Symbol>::iterator s = _text.find(b.begin());
+		assert(s != _text.end());
+
+		b.setBegin((s+1)->getPosition());
+#else
 		int beginIndex = positionIndex(b.begin());
 		assert(beginIndex >= 0);
 
 		b.setBegin(_text[beginIndex + 1].getPosition());
+#endif
 	}
 	else if (s.getPosition() == b.end())
 	{
+#if USE_DOCUMENT_TREE_STRUCTURE
+		QMap<Position, Symbol>::iterator s = _text.find(b.end());
+		assert(s != _text.end());
+
+		b.setBegin((s - 1)->getPosition());
+#else
 		int endIndex = positionIndex(b.end());
 		assert(endIndex >= 0);
 
 		b.setEnd(_text[endIndex - 1].getPosition());
+#endif
 	}
 }
 
@@ -535,7 +708,7 @@ int Document::getListPosition(TextListID listId)
 
 TextListID Document::getListAt(int index)
 {
-	if (index < 0 || index >= _text.length())
+	if (index < 0 || index >= _text.size())
 		throw std::out_of_range("The specified index is not a valid position for the document");
 
 	return _blocks[getBlockAt(index)].getListId();
@@ -594,6 +767,13 @@ void Document::removeBlockFromList(TextBlock& b, TextList& l)
 // otherwise returns -1 (if no symbol has that position) 
 int Document::positionIndex(const Position& pos)
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	QMap<Position, Symbol>::iterator s = _text.find(pos);
+	if (s != _text.end())
+	{
+		return std::distance(_text.begin(), s);		// distance between iterators, O(n)
+	}
+#else
 	int lower = 0;
 	int higher = _text.size() - 1;
 	int m = 0;
@@ -608,6 +788,7 @@ int Document::positionIndex(const Position& pos)
 			m = lower = m + 1;
 		else higher = m - 1;
 	}
+#endif
 
 	return -1;		// no match found
 }
@@ -616,6 +797,9 @@ int Document::positionIndex(const Position& pos)
 // otherwise returns -1 (if a symbol with that fractional position already exists) 
 int Document::insertionIndex(const Position& pos)
 {
+#if USE_DOCUMENT_TREE_STRUCTURE
+	return -1;
+#else
 	int lower = 0;
 	int higher = _text.size() - 1;
 	int m = 0;
@@ -633,6 +817,7 @@ int Document::insertionIndex(const Position& pos)
 	}
 
 	return m;		// the final index represents the insertion position
+#endif
 }
 
 
@@ -646,7 +831,7 @@ Position Document::newFractionalPos(int index, qint32 authorId)
 {
 	QVector<qint32> result;
 
-	if (index < 0 || index > _text.length())
+	if (index < 0 || index > _text.size())
 		throw std::out_of_range("The specified index is not a valid position for the document");
 
 	if (_text.empty())		// First character in the document
@@ -656,19 +841,19 @@ Position Document::newFractionalPos(int index, qint32 authorId)
 	else if (index == 0)		// Beginning of the document
 	{
 		// The fractional position will precede the first symbol's fPos[0] by FPOS_GAP_SIZE 
-		const Position& begin = _text.front().getPosition();
+		const Position& begin = _text.first().getPosition();
 		result.push_back(begin[0] - FPOS_GAP_SIZE);
 	}
-	else if (index == _text.length())	  // End of the document
+	else if (index == _text.size())	  // End of the document
 	{
 		// The fractional position will follow the last symbol's fPos[0] by FPOS_GAP_SIZE 
-		const Position& end = _text.back().getPosition();
+		const Position& end = _text.last().getPosition();
 		result.push_back(end[0] + FPOS_GAP_SIZE);
 	}
 	else
 	{
-		const Position& prev = _text[index - 1].getPosition();		// The symbols which 'sandwich' the inserion position
-		const Position& next = _text[index].getPosition();
+		const Position& prev = this->operator[](index - 1).getPosition();		// The symbols which 'sandwich' the inserion position
+		const Position& next = this->operator[](index).getPosition();
 		int maxlen = std::max<int>(prev.size(), next.size());
 
 		for (int i = 0; i < maxlen; i++)

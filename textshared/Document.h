@@ -6,6 +6,7 @@
 #include "TextBlock.h"
 #include "TextList.h"
 
+#define USE_DOCUMENT_TREE_STRUCTURE 0
 
 class URI
 {
@@ -50,7 +51,12 @@ private:
 
 	URI uri;
 
+#if USE_DOCUMENT_TREE_STRUCTURE
+	QMap<Position, Symbol> _text;
+#else
 	QVector<Symbol> _text;
+#endif
+	
 
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
