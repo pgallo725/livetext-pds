@@ -13,6 +13,7 @@
 #include "WidgetsManager.h"
 
 
+
 namespace Ui {
 	class LandingPage;
 }
@@ -107,6 +108,9 @@ private slots:
 
 	//tabWidget slot to switch tabs
 	void currentTabChanged(int index);
+
+	//Table widget
+	void showDocumentActionsMenu(const QPoint& position);
 
 	//User profile picture preview
 	void updateUserAvatarPreview(QString path);
