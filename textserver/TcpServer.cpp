@@ -22,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 0.9.6)" << endl
+	Logger(Info) << "LiveText Server (version 0.9.7)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -328,7 +328,7 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	/* check if the username contains the URI field separator (prohibited) */
 	if(username.contains(URI_FIELD_SEPARATOR))
-		return MessageFactory::AccountError("Invalid username, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
+		return MessageFactory::AccountError("Invalid username, must not contain '_'");
 
 	/* check if this username is already used */
 	if (users.contains(username))
@@ -488,8 +488,11 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
 
-	if(docName.contains(URI_FIELD_SEPARATOR))
-		return MessageFactory::DocumentError("Invalid document name, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
+	if (docName.length() > MAX_DOCNAME_LENGTH)
+		return MessageFactory::DocumentError("Document name too long (Max 100 characters)");
+
+	if (docName.contains(URI_FIELD_SEPARATOR))
+		return MessageFactory::DocumentError("Invalid document name, must not contain '_'");
 
 	URI docURI = generateURI(client->getUsername(), docName);
 
