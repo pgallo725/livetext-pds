@@ -194,6 +194,11 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 		}
 	}
 
+	int blockPos = _document.formatBlock(bId, blkFmt);		// Format the block according to the received QTextBlockFormat
+	if (blockPos >= 0) {
+		_textedit->applyBlockFormat(blockPos, blkFmt);
+	}
+
 	//_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
