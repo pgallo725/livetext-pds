@@ -285,7 +285,9 @@ void LiveText::accountUpdated(User user)
 	if (editorOpen) {
 		_textEdit->newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
 	}
-	if (_landingPage->isVisible()) {
+	if (_landingPage->isVisible()) 
+	{
+		_landingPage->resetFields();
 		_landingPage->updateUserInfo();
 	}
 
