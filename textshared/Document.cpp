@@ -263,7 +263,7 @@ void Document::erase()
 /************ EDITING OPERATIONS ***********/
 
 
-int Document::insert(Symbol& s)
+int Document::insert(Symbol& s, int hint)
 {
 #if USE_DOCUMENT_TREE_STRUCTURE
 	int insertPos;
@@ -346,7 +346,28 @@ int Document::insert(Symbol& s)
 
 #else	// VECTOR STRUCTURE
 
-	int insertPos = insertionIndex(s.getPosition());	// Search for the insertion position
+	int insertPos = -1;
+
+	//Check if the hint is correct
+	if (hint > 0 && hint < _text.size() - 1)
+	{
+		if (_text[hint - 1].getPosition() < s.getPosition()	&& s.getPosition() < _text[hint].getPosition())
+			insertPos = hint;
+	}
+	else if (hint == 0)
+	{
+		if (s.getPosition() < _text.first().getPosition())
+			insertPos = hint;
+	}
+	else if (hint == _text.size())
+	{
+		if (s.getPosition() > _text.last().getPosition())
+			insertPos = hint;
+	}
+
+	if (insertPos < 0)
+		insertPos = insertionIndex(s.getPosition());	// Search for the insertion position
+
 	assert(insertPos >= 0);
 
 	// Check if the inserted symbol implies the creation of a new block
@@ -423,7 +444,7 @@ int Document::insert(Symbol& s)
 }
 
 
-int Document::remove(const Position& fPos)
+int Document::remove(const Position& fPos, int hint)
 {
 #if USE_DOCUMENT_TREE_STRUCTURE
 	QMap<Position, Symbol>::iterator s = _text.find(fPos);
@@ -454,7 +475,18 @@ int Document::remove(const Position& fPos)
 
 #else	// VECTOR STRUCTURE
 
-	int pos = positionIndex(fPos);	// looks for the symbol with that fractional position
+	int pos = -1;
+
+	//Check if the hint is correct
+	if (hint >= 0 && hint < _text.size() - 1 && _text[hint].getPosition() == fPos)
+	{
+		pos = hint;
+	}
+	else
+	{
+		pos = positionIndex(fPos);		// looks for the symbol with that fractional position
+	}
+
 	if (pos < 0)
 		return -1;					// Early out if the symbol has already been deleted
 
@@ -493,7 +525,7 @@ Position Document::removeAtIndex(int index)
 	Position fPosition = _text[index].getPosition();
 #endif
 	
-	remove(fPosition);
+	remove(fPosition, index);
 	return fPosition;
 }
 

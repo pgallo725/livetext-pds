@@ -78,8 +78,8 @@ public:
 	void erase();
 
 	/* Editing methods */
-	int insert(Symbol& s);
-	int remove(const Position& fPos);
+	int insert(Symbol& s, int positionHint = -1);
+	int remove(const Position& fPos, int positionHint = -1);
 	Position removeAtIndex(int index);
 
 	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);

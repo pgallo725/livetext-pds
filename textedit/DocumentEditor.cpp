@@ -148,7 +148,7 @@ void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockI
 
 	for (; s < symbols.end() - 1; s++)
 	{
-		int position = _document.insert(*s);
+		int position = _document.insert(*s, oldPosition + 1);
 		if (position == oldPosition + 1 && oldFmt == s->getFormat())
 		{
 			buffer.append(s->getChar());
@@ -205,9 +205,9 @@ void DocumentEditor::bulkDelete(QVector<Position> positions)
 	int position = -1;
 	int count = 0;
 
-	for each (Position pos in positions)
+	for each (Position fPos in positions)
 	{
-		int index = _document.remove(pos);
+		int index = _document.remove(fPos, position);
 
 		if (index >= 0)	  // Skip non-extisting characters
 		{
@@ -243,6 +243,7 @@ void DocumentEditor::addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextChar
 	QVector<Symbol> symbols;
 	QVector<QChar>::iterator i = chars.begin();
 	QVector<QTextCharFormat>::iterator j = fmts.begin();
+	int positionHint = -1;
 
 	// Add all the provided chars to the document as symbols and to the list
 	// of symbols that will have to be inserted by other clients
@@ -251,7 +252,7 @@ void DocumentEditor::addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextChar
 		Symbol s(*i, *j, _document.newFractionalPos(pos + n, _user.getUserId()));
 		symbols.append(s);
 
-		_document.insert(s);
+		positionHint = _document.insert(s, positionHint);
 	}
 
 	TextBlockID blkId = _document.getBlockAt(pos);		// Format the block with the provided QTextBlockFormat
