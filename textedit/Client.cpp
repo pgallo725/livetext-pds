@@ -380,6 +380,9 @@ void Client::openDocument(URI URI)
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	// Clear the socket from any unexpected message
+	socket->readAll();
+
 	try 
 	{	// Request the document to the server
 		MessageFactory::DocumentOpen(URI.toString())->send(socket);
@@ -438,6 +441,9 @@ void Client::createDocument(QString name)
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	// Clear the socket from any unexpected message
+	socket->readAll();
+
 	try 
 	{	// Send the document creation request to the server
 		MessageFactory::DocumentCreate(name)->send(socket);
@@ -494,6 +500,9 @@ void Client::deleteDocument(URI URI)
 {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	// Clear the socket from any unexpected message
+	socket->readAll();
 
 	try 
 	{	// Send the document delete request to the server
@@ -783,6 +792,11 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password,
 		// Disconnect the regular function that reads asynchronous TextEdit or Presence messages
 		disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
 	}
+	else
+	{
+		// Clear the socket from any unexpected message
+		socket->readAll();
+	}
 	
 	try 
 	{	// Start the sequence of AccountUpdate messages
@@ -831,17 +845,16 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password,
 			{
 				FailureMessage* failure = dynamic_cast<FailureMessage*>(message.get());
 				emit accountUpdateFailed(failure->getDescription());
+				return;
 			}
 		}
 		default:
 		{
+			// Inside the editor, handle all packets received while waiting for the response
+			// When called from the LandingPage discard all unexpected messages
 			if (inEditor) {
 				messageHandler(message);
 				break;
-			}
-			else {
-				throw MessageTypeException(message->getType());
-				return;
 			}
 		}
 		}
