@@ -206,9 +206,11 @@ void WorkSpace::documentBulkInsert(QVector<Symbol> symbols, TextBlockID blockId,
 	QElapsedTimer timer;
 	timer.start();
 
+	int hint = -1;
+
 	for each (Symbol symbol in symbols)
 	{
-		doc->insert(symbol);
+		hint = doc->insert(symbol, hint) + 1;
 	}
 
 	doc->formatBlock(blockId, blockFmt);
@@ -222,9 +224,11 @@ void WorkSpace::documentBulkDelete(QVector<Position> positions)
 	QElapsedTimer timer;
 	timer.start();
 
+	int hint = -1;
+
 	for each (Position position in positions)
 	{
-		doc->remove(position);
+		hint = doc->remove(position, hint);
 	}
 
 	Logger() << "BulkDelete message: " << positions.size() <<
