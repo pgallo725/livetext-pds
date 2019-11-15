@@ -309,7 +309,7 @@ void DocumentEditor::generateExtraSelection()
 		selectionDelimiters.second = 0;
 
 		//Increment selection upper limit until we reach end of document or a char inserted by another user
-		for (int i = 0; i < _document.length(); i++) {
+		for (int i = 0; i < _document.length() -1; i++) {
 			if (_document[i].getAuthorId() != userId) {
 				_textedit->setExtraSelections(userId, selectionDelimiters);
 

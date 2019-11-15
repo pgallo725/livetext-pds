@@ -15,15 +15,18 @@
 #include <QPainterPath>
 #include <QFrame>
 #include <QTableWidget>
+#include <QMenu>
 
 
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PORT "1500"
+#define URI_FIELD_SEPARATOR "_"
+#define MAX_IMAGE_SIZE 1048576 //1MB
 
 const QString rsrcPath = ":/images";
 
-LandingPage::LandingPage(QWidget* parent) 
-	: QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) 
+LandingPage::LandingPage(QWidget* parent)
+	: QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this))
 {
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
@@ -106,6 +109,7 @@ LandingPage::LandingPage(QWidget* parent)
 	//Document list
 	connect(ui->tableWidget, &QTableWidget::itemSelectionChanged, this, &LandingPage::enablePushButtonOpen);
 	connect(ui->tableWidget, &QTableWidget::itemActivated, this, &LandingPage::pushButtonOpenClicked);
+	connect(ui->tableWidget, &QTableWidget::customContextMenuRequested, this, &LandingPage::showDocumentActionsMenu);
 
 
 	//tabWidget
@@ -141,7 +145,8 @@ LandingPage::LandingPage(QWidget* parent)
 		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
 	//Validator for username
-	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(QRegExp("^[^_]+$"), this));
+	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
+		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
 
 
 	//Loads user login infos
@@ -199,8 +204,8 @@ void LandingPage::pushButtonConfirmOperationClicked()
 		}
 	}
 	else {
-		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty() 
-			|| ui->lineEdit_regPswConf->text().isEmpty()) 
+		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty()
+			|| ui->lineEdit_regPswConf->text().isEmpty())
 		{
 			incorrectOperation(tr("Please fill all the required fields"));
 			return;
@@ -218,23 +223,6 @@ void LandingPage::pushButtonConfirmOperationClicked()
 
 	//Emit connection signal to server
 	emit(connectToServer(serverIP, serverPort.toShort()));
-}
-
-void LandingPage::radioButtonPressed()
-{
-	if (ui->radioButton_customAvatar->isChecked()) {
-		ui->pushButton_browse->setEnabled(true);
-	}
-	else
-	{
-		ui->pushButton_browse->setEnabled(false);
-		ui->label_incorrect_operation->setText("");
-		ui->label_imageSize->setText("");
-
-		//Load default profile picture
-		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-	}
 }
 
 
@@ -280,6 +268,24 @@ void LandingPage::Register()
 
 	//Emit register signal to server
 	emit serverRegister(username, password, nickname, userIcon);
+}
+
+
+void LandingPage::radioButtonPressed()
+{
+	if (ui->radioButton_customAvatar->isChecked()) {
+		ui->pushButton_browse->setEnabled(true);
+	}
+	else
+	{
+		ui->pushButton_browse->setEnabled(false);
+		ui->label_incorrect_operation->setText("");
+		ui->label_imageSize->setText("");
+
+		//Load default profile picture
+		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
+		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	}
 }
 
 
@@ -423,6 +429,22 @@ void LandingPage::setupFileList()
 *	Close all windows
 *	User profile picture preview
 */
+
+
+void LandingPage::showDocumentActionsMenu(const QPoint& position)
+{
+	if (ui->tableWidget->itemAt(ui->tableWidget->mapFromGlobal(QCursor::pos()))) {
+		QMenu* menu = new QMenu;
+		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/editcopy.png"), tr("Open Document..."));
+
+		connect(a, &QAction::triggered, this, &LandingPage::pushButtonOpenClicked);
+
+		menu->exec(QCursor::pos());
+		menu->clear();
+	}
+}
+
+
 
 void LandingPage::setupUserProfilePicture(QPixmap userPix)
 {
@@ -570,7 +592,7 @@ void LandingPage::updateUserAvatarPreview(QString path)
 		else
 		{
 			qint64 fileSize = file.size();
-			if (fileSize > 1048576) {
+			if (fileSize > MAX_IMAGE_SIZE) {
 				//Shows error
 				incorrectOperation(tr("Selected image is too big, please choose another one (Maximum size: 1MB)"));
 				return;
