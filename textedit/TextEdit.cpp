@@ -288,10 +288,6 @@ void TextEdit::setupEditorActions()
 #endif
 
 	menu->addSeparator();
-	//Delete
-	actionDelete = menu->addAction(tr("Delete"), this, [this]() { _textEdit->textCursor().removeSelectedText(); });
-	actionDelete->setPriority(QAction::LowPriority);
-	actionDelete->setShortcut(QKeySequence::Delete);
 	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 	
@@ -1309,9 +1305,6 @@ void TextEdit::updateEditorSelectedActions()
 	//Users cursors
 	redrawAllCursors();
 
-	//Selection
-	actionDelete->setEnabled(cursor.hasSelection());
-
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
@@ -1685,26 +1678,6 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	updateUsersSelections();
 }
 
-void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
-{
-	const QSignalBlocker blocker(_textEdit->document());
-
-	_extraCursor->setPosition(position);
-
-	//Insert character at position
-	_extraCursor->insertText(chars, fmt);
-
-	//Reset previous cursor position so it is sent as soon as possible
-	_currentCursorPosition = -1;
-
-	//GUI update
-	updateEditorSelectedActions();
-
-	//User text higlighting
-	updateUsersSelections();
-}
-
-
 void TextEdit::removeChar(int position)
 {
 	const QSignalBlocker blocker(_textEdit->document());
@@ -1713,27 +1686,6 @@ void TextEdit::removeChar(int position)
 
 	//Delete character
 	_extraCursor->deleteChar();
-
-	//Reset previous cursor position so it is sent as soon as possible
-	_currentCursorPosition = -1;
-
-	//GUI update
-	updateEditorSelectedActions();
-
-	//User text higlighting
-	updateUsersSelections();
-}
-
-void TextEdit::deleteManyChars(int start, int end)
-{
-	const QSignalBlocker blocker(_textEdit->document());
-
-	//Select the text to be removed
-	_extraCursor->setPosition(start);
-	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
-
-	//Delete characters
-	_extraCursor->removeSelectedText();
 
 	//Reset previous cursor position so it is sent as soon as possible
 	_currentCursorPosition = -1;
