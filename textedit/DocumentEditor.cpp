@@ -31,7 +31,7 @@ void DocumentEditor::openDocument()
 	int position = 0;
 	QTextCharFormat oldFmt;
 
-	for (; s < text.end(); s++)
+	for (; s < text.end() - 1; s++)
 	{
 		if (oldFmt == s->getFormat())
 		{
