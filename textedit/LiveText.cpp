@@ -113,6 +113,10 @@ void LiveText::forceLogout()
 		//Show error on landing page
 		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(),
 			tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
+
+		//Return to login page
+		_landingPage->pushButtonBackClicked();
+		_landingPage->incorrectOperation(tr("Server not responding"));
 	}
 }
 
