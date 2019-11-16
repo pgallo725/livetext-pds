@@ -1460,7 +1460,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	{
 		emit charDeleted(position);
 	}
-	else // if (charsRemoved > 1)
+	else if (charsRemoved > 1)
 	{
 		for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
 		{
@@ -1496,7 +1496,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 			emit blockFormatChanged(position, position, blockFmt);
 		}
 	}
-	else // if (charsAdded > 1)
+	else if (charsAdded > 1)
 	{
 		QVector<QChar> bulkChars;
 		QVector<QTextCharFormat> bulkFormats;
@@ -1649,7 +1649,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 
 
 	//Update GUI after some insertion/deletion
-	cursorPositionChanged();
+	updateEditorSelectedActions();
 
 	//User text higlighting
 	updateUsersSelections();
