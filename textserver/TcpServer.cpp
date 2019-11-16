@@ -22,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 0.9.6)" << endl
+	Logger(Info) << "LiveText Server (version 0.9.7)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -488,6 +488,8 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 	if (!client->isLogged())
 		return MessageFactory::DocumentError("You need to login before performing any operation");
 
+	if (docName.length() > MAX_DOCNAME_LENGTH)
+		return MessageFactory::DocumentError("Document name too long (Max 100 characters)");
 	if(docName.contains(URI_FIELD_SEPARATOR))
 		return MessageFactory::DocumentError(QString("Invalid document name, must not contain '") + URI_FIELD_SEPARATOR + "'");
 

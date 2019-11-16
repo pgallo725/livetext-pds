@@ -8,7 +8,8 @@
 
 /* Symbol reserved to concatenate (and then split) different information in the URI
    NOTE: used in regular expressions, prepend a \ if an escape is needed */
-#define URI_FIELD_SEPARATOR	"_"		
+#define URI_FIELD_SEPARATOR	"_"	
+#define MAX_DOCNAME_LENGTH 100		// characters
 
 
 class URI
