@@ -328,7 +328,7 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 
 	/* check if the username contains the URI field separator (prohibited) */
 	if(username.contains(URI_FIELD_SEPARATOR))
-		return MessageFactory::AccountError("Invalid username, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
+		return MessageFactory::AccountError(QString("Invalid username, must not contain '") + URI_FIELD_SEPARATOR + "'");
 
 	/* check if this username is already used */
 	if (users.contains(username))
@@ -489,7 +489,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		return MessageFactory::DocumentError("You need to login before performing any operation");
 
 	if(docName.contains(URI_FIELD_SEPARATOR))
-		return MessageFactory::DocumentError("Invalid document name, must not contain '" + QString(URI_FIELD_SEPARATOR + "'"));
+		return MessageFactory::DocumentError(QString("Invalid document name, must not contain '") + URI_FIELD_SEPARATOR + "'");
 
 	URI docURI = generateURI(client->getUsername(), docName);
 

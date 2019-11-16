@@ -26,7 +26,7 @@ NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent)
 
 	//Validator to prevent insertion of '_' character in filename
 	ui->lineEdit_fileName->setValidator(new QRegExpValidator(
-		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR + "]+$")), this));
+		QRegExp(QString("^[^") + URI_FIELD_SEPARATOR + "]+$"), this));
 
 	//Set keyboard focus
 	ui->lineEdit_fileName->setFocus();

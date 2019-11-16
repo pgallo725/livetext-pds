@@ -144,7 +144,7 @@ LandingPage::LandingPage(QWidget* parent)
 		this));
 	//Validator for username
 	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
-		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR + "]+$")), this));
+		QRegExp(QString("^[^") + URI_FIELD_SEPARATOR + "]+$"), this));
 
 
 	//Loads user login infos
