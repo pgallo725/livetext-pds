@@ -3,14 +3,24 @@
 #include <SharedException.h>
 
 
-Client::Client(QObject* parent) 
-	: QObject(parent), socket(nullptr)
+Client::Client(QSharedPointer<QWaitCondition> wc, QObject* parent) 
+	: QObject(parent), socket(nullptr), sync(false), wc(wc)
 {
+	qRegisterMetaType<User>("User");
+	qRegisterMetaType<Document>("Document");
+	qRegisterMetaType<URI>("URI");
+
+	// Instantiate the Workspace thread and start it
+	workThread = QSharedPointer<QThread>(new QThread(parent));
+	connect(workThread.get(), &QThread::finished, workThread.get(), &QThread::deleteLater);
+	this->moveToThread(workThread.get());
+	workThread->start();
 }
 
 Client::~Client()
 {
-	// NOTHING TO DO
+	workThread->quit();		// Quit the thread
+	workThread->wait();		// Waiting for ending the thread
 }
 
 
@@ -142,6 +152,11 @@ void Client::messageHandler(MessageCapsule message)
 		throw MessageTypeException(message->getType());
 		break;
 	}
+}
+
+void Client::setSync()
+{
+	sync = true;
 }
 
 
@@ -413,7 +428,17 @@ void Client::openDocument(URI URI)
 		while (socket->encryptedBytesAvailable() > 0)
 			readBuffer();								// Check if some bytes are already available on the socket
 
+		//Set sync = false for the syncronization
+		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
+
+		//Sync between this thread and GUI thread
+		QMutexLocker ml(&m);
+		if (!sync) {
+			wc->wait(&m, READYREAD_TIMEOUT);
+			sync = true;
+		}
+
 		return;
 	}
 	case DocumentError: 
@@ -473,7 +498,17 @@ void Client::createDocument(QString name)
 		while (socket->encryptedBytesAvailable() > 0)
 			readBuffer();								// Check if some bytes are already available on the socket
 
+		//Set sync = false for the syncronization
+		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
+
+		//Sync between this thread and GUI thread
+		QMutexLocker ml(&m);
+		if (!sync) {
+			wc->wait(&m, READYREAD_TIMEOUT);
+			sync = true;
+		}
+
 		return;
 	}
 	case DocumentError:
