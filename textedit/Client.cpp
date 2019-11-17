@@ -417,11 +417,6 @@ void Client::openDocument(URI URI)
 		// Server successfully answered with the document
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
-		// Connect the function which will read messages from the socket inside the editor
-		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
-
 		//Set sync = false for the syncronization
 		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
@@ -432,6 +427,11 @@ void Client::openDocument(URI URI)
 			wc->wait(&m, READYREAD_TIMEOUT);
 			sync = true;
 		}
+
+		// Connect the function which will read messages from the socket inside the editor
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->encryptedBytesAvailable() > 0)
+			readBuffer();								// Check if some bytes are already available on the socket
 
 		return;
 	}
@@ -488,10 +488,6 @@ void Client::createDocument(QString name)
 		//Document successfully created (and opened)
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
-		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
-
 		//Set sync = false for the syncronization
 		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
@@ -502,6 +498,10 @@ void Client::createDocument(QString name)
 			wc->wait(&m, READYREAD_TIMEOUT);
 			sync = true;
 		}
+
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->encryptedBytesAvailable() > 0)
+			readBuffer();								// Check if some bytes are already available on the socket
 
 		return;
 	}
