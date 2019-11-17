@@ -2,6 +2,11 @@
 
 #include <QObject>
 #include <QtNetwork>
+#include <QThread>
+#include <QSharedPointer>
+#include <QWaitCondition>
+#include <QMutex>
+#include <QMutexLocker>
 
 //Include headers to handle server Messages
 #include <Message.h>
@@ -31,16 +36,21 @@ private:
 
 	QSslSocket* socket;
 	SocketBuffer socketBuffer;
+	QSharedPointer<QThread> workThread;
+	
+	QMutex m;
+	QSharedPointer<QWaitCondition> wc;
+	bool sync;
 
 public:
 
-	Client(QObject* parent = 0);
+	Client(QSharedPointer<QWaitCondition> wc, QObject* parent = 0);
 	~Client();
 
 	// Generic message reader and handler
 	MessageCapsule readMessage(QDataStream& stream);
 	void messageHandler(MessageCapsule message);
-
+	void setSync();
 
 public slots:
 

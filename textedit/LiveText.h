@@ -10,9 +10,13 @@
 #include <User.h>
 
 #include <QObject>
+#include <QWaitCondition>
+#include <QSharedPointer>
 
 class LiveText : public QObject
 {
+	Q_OBJECT
+
 private:
 	//Landing page
 	LandingPage* _landingPage;
@@ -33,6 +37,8 @@ private:
 	//Current user
 	User _user;
 
+	//Sync variable
+	QSharedPointer<QWaitCondition> wc;
 
 public:
 	LiveText(QObject* parent = nullptr);
@@ -62,6 +68,9 @@ private slots:
 
 	//GUI
 	void operationFailed(QString errorType);
+
+signals:
+	void disconnect();
 };
 
 #endif //LIVETEXT_H

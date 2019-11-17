@@ -100,9 +100,6 @@
     <QtMoc Include="DocumentEditor.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="LiveText.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Presence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -125,6 +122,9 @@
       <Filter>Header Files\UI Windows</Filter>
     </QtMoc>
     <QtMoc Include="LandingPage.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="LiveText.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

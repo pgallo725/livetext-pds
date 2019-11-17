@@ -9,9 +9,11 @@
 
 LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 {
+	wc = QSharedPointer<QWaitCondition>(new QWaitCondition());
+
 	//Initialize landing page and client
 	_landingPage = new LandingPage();
-	_client = new Client();
+	_client = new Client(wc);
 
 
 	/************************ CONNECTS ************************/
@@ -20,30 +22,33 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
 
 	//LANDINGPAGE - CLIENT
-	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect);		// Connect
-	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login);				// Login
-	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register);		// Register
-	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout);			// Logout
-	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument);		// Create document
-	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument);	// Remove document
-	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument);		// Open document
+	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect, Qt::QueuedConnection);		// Connect
+	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login, Qt::QueuedConnection);				// Login
+	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register, Qt::QueuedConnection);		// Register
+	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout, Qt::QueuedConnection);			// Logout
+	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument, Qt::QueuedConnection);		// Create document
+	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument, Qt::QueuedConnection);	// Remove document
+	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument, Qt::QueuedConnection);		// Open document
 
 	//CLIENT - LANDING PAGE
-	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished);	// Connection estabilished
-	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::incorrectOperation);		// Impossibile to conncet
-	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation);
+	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished, Qt::QueuedConnection);	// Connection estabilished
+	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::incorrectOperation, Qt::QueuedConnection);		// Impossibile to conncet
+	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation, Qt::QueuedConnection);
 
 
 	//CLIENT - LIVETEXT
-	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed);
-	connect(_client, &Client::registrationFailed, this, &LiveText::operationFailed);
-	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess);
-	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess);
-	connect(_client, &Client::accountUpdateComplete, this, &LiveText::accountUpdated);
-	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted);
-	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted);
-	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted);
-	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
+	connect(_client, &Client::loginFailed, this, &LiveText::operationFailed, Qt::QueuedConnection);
+	connect(_client, &Client::registrationFailed, this, &LiveText::operationFailed, Qt::QueuedConnection);
+	connect(_client, &Client::loginSuccess, this, &LiveText::loginSuccess, Qt::QueuedConnection);
+	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess, Qt::QueuedConnection);
+	connect(_client, &Client::accountUpdateComplete, this, &LiveText::accountUpdated, Qt::QueuedConnection);
+	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted, Qt::QueuedConnection);
+	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted, Qt::QueuedConnection);
+	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted, Qt::QueuedConnection);
+	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
+	
+	//LIVETEXT - CLIENT
+	connect(this, &LiveText::disconnect, _client, &Client::Disconnect, Qt::QueuedConnection);
 }
 
 LiveText::~LiveText()
@@ -75,7 +80,7 @@ void LiveText::loginSuccess(User user)
 	_editProfile = new ProfileEditWindow(_user);
 
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
-	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed);
+	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed, Qt::QueuedConnection);
 
 	//Open logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
@@ -88,7 +93,7 @@ void LiveText::operationFailed(QString errorType)
 	_landingPage->incorrectOperation(errorType);
 
 	//Disconnect from server
-	_client->Disconnect();
+	emit disconnect();
 }
 
 void LiveText::forceLogout()
@@ -154,23 +159,23 @@ void LiveText::openDocumentCompleted(Document doc)
 
 
 	//CLIENT - TEXTEDIT
-	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged);	//REMOTE: Cursor position received
-	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence);				// Add/Edit Presence
-	connect(_client, &Client::updateUserPresence, _textEdit, &TextEdit::newPresence);
-	connect(_client, &Client::removeUserPresence, _textEdit, &TextEdit::removePresence);		// Remove presence
-	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError);	// Problem during close document
+	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged, Qt::QueuedConnection);	//REMOTE: Cursor position received
+	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence, Qt::QueuedConnection);				// Add/Edit Presence
+	connect(_client, &Client::updateUserPresence, _textEdit, &TextEdit::newPresence, Qt::QueuedConnection);
+	connect(_client, &Client::removeUserPresence, _textEdit, &TextEdit::removePresence, Qt::QueuedConnection);		// Remove presence
+	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError, Qt::QueuedConnection);	// Problem during close document
 
 	//TEXTEDIT - CLIENT
-	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor);
+	connect(_textEdit, &TextEdit::newCursorPosition, _client, &Client::sendCursor, Qt::QueuedConnection);
 	connect(_textEdit, &TextEdit::closeDocument, _client, &Client::closeDocument, Qt::QueuedConnection);
 
 
 	//DOCUMENTEDITOR - CLIENT
-	connect(_docEditor, &DocumentEditor::charsAdded, _client, &Client::sendCharsInsert);
-	connect(_docEditor, &DocumentEditor::charsDeleted, _client, &Client::sendCharsDelete);
-	connect(_docEditor, &DocumentEditor::charsFormatChanged, _client, &Client::sendCharsFormat);
-	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::sendBlockFormat);
-	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::sendListEdit);
+	connect(_docEditor, &DocumentEditor::charsAdded, _client, &Client::sendCharsInsert, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::charsDeleted, _client, &Client::sendCharsDelete, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::charsFormatChanged, _client, &Client::sendCharsFormat, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::sendBlockFormat, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::sendListEdit, Qt::QueuedConnection);
 
 	//CLIENT - DOCUMENTEDITOR
 	connect(_client, &Client::insertSymbols, _docEditor, &DocumentEditor::charsInsert, Qt::QueuedConnection);
@@ -189,6 +194,9 @@ void LiveText::openDocumentCompleted(Document doc)
 
 	//Opens text editor
 	openEditor();
+
+	_client->setSync();
+	wc->wakeAll();
 }
 
 
