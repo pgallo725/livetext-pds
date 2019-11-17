@@ -657,7 +657,7 @@ void LandingPage::pushButtonBrowseClicked()
 {
 	//Open file browser dialog to choose profile picture
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
 
 	if (!filename.isEmpty()) {
 		//Set choosen filename
