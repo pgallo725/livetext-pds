@@ -130,6 +130,8 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	actionPaste->setEnabled(false);
 #endif
 
+	_textEdit->setContextMenuPolicy(Qt::DefaultContextMenu);
+
 	//Setup cursor position
 	_currentCursorPosition = -1;
 
@@ -290,7 +292,7 @@ void TextEdit::setupEditorActions()
 	menu->addSeparator();
 	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
-	
+
 
 	/********** FORMAT MENU **********/
 
@@ -362,9 +364,9 @@ void TextEdit::setupEditorActions()
 	actionTextColor = formatMenu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
 
+
 	formatMenu->addSeparator();
 	tb->addSeparator();
-
 
 	//Align Left
 	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
@@ -536,7 +538,7 @@ void TextEdit::setupEditorActions()
 
 	tb->addAction(actionHighlightUsers);
 	actionHighlightUsers->setCheckable(true);
-	
+
 
 	//Online users toolbar
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
@@ -1381,10 +1383,19 @@ void TextEdit::fontChanged(const QFont& f)
 void TextEdit::colorChanged(const QColor& c)
 {
 	//Change color of textColor button according to text
-	QPixmap pix(rsrcPath + "/editor/textcolor.png");
+	QPixmap pix(rsrcPath + "/editor/textcolor_bottom.png");
 	QBitmap mask = pix.createMaskFromColor(Qt::transparent, Qt::MaskInColor);
 	pix.fill(c);
 	pix.setMask(mask);
+
+	QPainter painter(&pix);
+	painter.setRenderHint(QPainter::Antialiasing);
+	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+	painter.drawPixmap(0, 0, QPixmap(rsrcPath + "/editor/textcolor_top.png"));
+	painter.end();
+
 	actionTextColor->setIcon(pix);
 }
 

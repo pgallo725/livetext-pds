@@ -21,7 +21,8 @@
 	<file>images/editor/square.png</file>
 	<file>images/editor/textbold.png</file>
 	<file>images/editor/textcenter.png</file>
-	<file>images/editor/textcolor.png</file>
+	<file>images/editor/textcolor_top.png</file>
+	<file>images/editor/textcolor_bottom.png</file>
 	<file>images/editor/textitalic.png</file>
 	<file>images/editor/textjustify.png</file>
 	<file>images/editor/textleft.png</file>
