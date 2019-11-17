@@ -1925,16 +1925,15 @@ void TextEdit::handleMultipleSelections()
 				actionsChecked++;
 		}
 
-		if (actionsChecked == onlineUsers.size()) {
+		if (actionsChecked == onlineUsers.size())
 			actionHighlightUsers->setChecked(true);
-		}
+		else
+			actionHighlightUsers->setChecked(false);
 
 	}
 	else {
-
-		//Check/Uncheck of actionHighlightUsers based on single highlight checked
+		//Uncheck of actionHighlightUsers based on single highlight checked
 		actionHighlightUsers->setChecked(false);
-
 	}
 	//Sets the formatted selections in the editor
 	_textEdit->setExtraSelections(_usersText);
