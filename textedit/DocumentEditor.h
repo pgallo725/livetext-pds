@@ -25,16 +25,12 @@ public:
 public slots:
 
 	// Char operations
-	void addSymbol(Symbol s, bool isLast);
-	void removeSymbol(Position position);
-	void addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast);
-	void deleteCharAtIndex(int position);
-	void bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void bulkDelete(QVector<Position> positions);
-	void addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
-	void deleteCharGroupAtIndex(int position, int charCount);
-	void changeSymbolFormat(int position, QTextCharFormat fmt);
-	void applySymbolFormat(Position position, QTextCharFormat fmt);
+	void charsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void charsDelete(QVector<Position> positions);
+	void addCharsAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
+	void deleteCharsAtIndex(int position, int charCount);
+	void changeSymbolFormat(int position, int count, QVector<QTextCharFormat> fmts);
+	void applySymbolFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts);
 
 	void generateExtraSelection();		// Text highlighting update
 
@@ -54,12 +50,10 @@ public slots:
 
 signals:
 
-	void charAdded(Symbol s, bool isLast);
-	void charDeleted(Position fPos);
-	void charGroupInserted(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void charGroupDeleted(QVector<Position> positions);
+	void charsAdded(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void charsDeleted(QVector<Position> positions);
+	void charsFormatChanged(QVector<Position> positions, QVector<QTextCharFormat> fmts);
 	void blockFormatChanged(TextBlockID blockId, QTextBlockFormat fmt);
-	void symbolFormatChanged(Position position, QTextCharFormat fmt);
 	void blockListChanged(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 };
 

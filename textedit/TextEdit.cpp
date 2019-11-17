@@ -1218,25 +1218,46 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 	//Getting document cursor
 	QTextCursor cursor = _textEdit->textCursor();
 
-	//Apply format to the document, if the cursor (_textEdit->textCursor()) has a selection, apply format to the selection
+	//Apply format to the document, if the textCursor has a selection, apply format to the selection
 	_textEdit->mergeCurrentCharFormat(format);
 
-	//Sends new char format to server (in case of selection it sends the updated format of every character because they can be different
-	for (int i = cursor.selectionStart(); i < cursor.selectionEnd(); ++i) {
-		_extraCursor->setPosition(i + 1);
-		emit symbolFormatChanged(i, _extraCursor->charFormat());
+	QVector<QTextCharFormat> formats;
+	int i = cursor.selectionStart();
+	int position = i;
+
+	//Sends new char formats to server (array to handle selections with different formats)
+	while (true) 
+	{
+		if (i == cursor.selectionEnd())
+		{
+			if (formats.size() > 0)
+				emit charsFormatChanged(position, formats.size(), formats);
+			break;
+		}
+
+		// Add the next symbol's format to the array
+		_extraCursor->setPosition(++i);
+		formats.append(_extraCursor->charFormat());
+
+		if (formats.size() == BULK_EDIT_SIZE)
+		{
+			emit charsFormatChanged(position, BULK_EDIT_SIZE, formats);
+			formats.clear();
+			position = i;
+		}
 	}
 }
 
 
-void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
+void TextEdit::applyCharFormat(int start, int end, QTextCharFormat fmt)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
-	_extraCursor->setPosition(position);
-	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
+	//Create a selection on the chars that have to be formatted
+	_extraCursor->setPosition(start);
+	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
 
-	//Apply char format to text
+	//Apply char format to selected text
 	_extraCursor->setCharFormat(fmt);
 
 	//Update GUI buttons according to new format
@@ -1460,7 +1481,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 {
 	/*************** CHARACTER DELETION ***************/
 
-	if (charsRemoved == 1)
+	/*if (charsRemoved == 1)
 	{
 		emit charDeleted(position);
 	}
@@ -1468,13 +1489,92 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	{
 		for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
 		{
-			emit charGroupDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
+			emit charsDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 		}
+	}*/
+
+	for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
+	{
+		emit TextEdit::charsDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 	}
 
 	/*************** CHARACTER INSERTION ***************/
 
-	if (charsAdded == 1)
+	QVector<QChar> bulkChars;
+	QVector<QTextCharFormat> bulkFormats;
+
+	for (int i = position, pos = position; i < position + charsAdded; ++i)
+	{
+		//Cursor position is set to i + 1 to get correct character format
+		_extraCursor->setPosition(i + 1);
+
+		//Getting QTextCharFormat from cursor
+		QTextCharFormat fmt = _extraCursor->charFormat();
+
+		//Reset position to i to get blockformat
+		_extraCursor->setPosition(i);
+
+		//Getting inserted character
+		QChar ch = _textEdit->document()->characterAt(i);
+
+		//Skip null characters '\0'
+		if (ch != QChar::Null)
+		{
+			bulkChars.append(ch);
+			bulkFormats.append(fmt);
+
+			// Send a group of characters either if the end of the block or the buffer size value is reached
+			if (ch == QChar::ParagraphSeparator || bulkChars.length() == BULK_EDIT_SIZE || i == position + charsAdded - 1)
+			{
+				//Getting QTextBlockFormat from cursor
+				QTextBlockFormat blockFmt = _extraCursor->blockFormat();
+				blockFmt.lineHeight();
+
+				//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
+				bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
+				emit TextEdit::charsAdded(bulkChars, bulkFormats, pos, isLast, blockFmt);
+
+				pos += bulkChars.length();
+				bulkChars.clear();			 // Clear buffers before the next iteration (block to be inserted)
+				bulkFormats.clear();
+			}
+
+			//If it is a paragraph separator ('8233')
+			if (ch == QChar::ParagraphSeparator)
+			{
+				//Getting current block and list (if present)
+				QTextBlock currentBlock = _extraCursor->block();
+				QTextList* textList = _extraCursor->currentList();
+
+				if (textList)
+				{
+					//Getting first block of the list
+					QTextBlock firstListBlock = textList->item(0);
+
+					//If the current block is the beginning of a new list emit the signal to create a new one
+					if (currentBlock == firstListBlock)
+					{
+						// It's not actually a new list in this case, but the re-insertion of a block
+						if (textList->count() > 1 && i == position + charsAdded - 1)
+						{
+							QTextBlock otherListBlock = textList->item(1);
+							emit assignBlockToList(currentBlock.position(), otherListBlock.position());
+						}
+						else
+							emit createNewList(currentBlock.position(), textList->format());
+					}
+
+					//Else assign current block to his proper list
+					else
+						emit assignBlockToList(currentBlock.position(), firstListBlock.position());
+				}
+				else
+					emit setBlockNoList(currentBlock.position());
+			}
+		}
+	}
+
+	/*if (charsAdded == 1)
 	{
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(position + 1);
@@ -1534,7 +1634,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 
 					//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
 					bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
-					emit charGroupInserted(bulkChars, bulkFormats, pos, isLast, blockFmt);
+					emit charsAdded(bulkChars, bulkFormats, pos, isLast, blockFmt);
 
 					pos += bulkChars.length();
 					bulkChars.clear();			 // Clear buffers before the next iteration (block to be inserted)
@@ -1576,7 +1676,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 			}
 		}
 
-	}
+	}*/
 
 	/*for (int i = 0; i < charsRemoved; ++i) {
 		emit charDeleted(position);
@@ -1660,29 +1760,7 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 }
 
 
-void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
-{
-	const QSignalBlocker blocker(_textEdit->document());
-
-	_extraCursor->setPosition(position);
-
-	//Set new char format
-	_extraCursor->setCharFormat(format);
-
-	//Insert character at position
-	_extraCursor->insertText(ch);
-
-	//Reset previous cursor position so it is sent as soon as possible
-	_currentCursorPosition = -1;
-
-	//GUI update
-	updateEditorSelectedActions();
-
-	//User text higlighting
-	handleMultipleSelections();
-}
-
-void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
+void TextEdit::newChars(QString chars, QTextCharFormat fmt, int position)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
@@ -1702,26 +1780,7 @@ void TextEdit::manyChars(QString chars, QTextCharFormat fmt, int position)
 }
 
 
-void TextEdit::removeChar(int position)
-{
-	const QSignalBlocker blocker(_textEdit->document());
-
-	_extraCursor->setPosition(position);
-
-	//Delete character
-	_extraCursor->deleteChar();
-
-	//Reset previous cursor position so it is sent as soon as possible
-	_currentCursorPosition = -1;
-
-	//GUI update
-	updateEditorSelectedActions();
-
-	//User text higlighting
-	handleMultipleSelections();
-}
-
-void TextEdit::deleteManyChars(int start, int end)
+void TextEdit::removeChars(int start, int end)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 

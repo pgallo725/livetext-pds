@@ -6,89 +6,7 @@
 #include "TextList.h"
 
 
-class CharInsertMessage : public Message
-{
-	friend MessageFactory;
-
-private:
-
-	Symbol m_symbol;
-	bool m_flag;
-
-protected:
-
-	CharInsertMessage();	// empty constructor
-
-	// Constructor for CharInsert messages, carrying the symbol object
-	CharInsertMessage(Symbol symbol, bool isLast);
-
-	void writeTo(QDataStream& stream) const override;
-	void readFrom(QDataStream& stream) override;
-
-public:
-
-	~CharInsertMessage() {};
-
-	Symbol getSymbol() const;
-	bool getIsLast() const;
-};
-
-
-class CharDeleteMessage : public Message
-{
-	friend MessageFactory;
-
-private:
-
-	Position m_fPos;
-
-protected:
-
-	CharDeleteMessage();	// empty constructor
-
-	// Constructor for CharDelete messages, with the fractional position of the symbol to delete
-	CharDeleteMessage(Position position);
-
-	void writeTo(QDataStream& stream) const override;
-	void readFrom(QDataStream& stream) override;
-
-public:
-
-	~CharDeleteMessage() {};
-
-	Position getPosition() const;
-};
-
-
-class CharFormatMessage : public Message
-{
-	friend MessageFactory;
-
-private:
-
-	Position m_fPos;
-	QTextCharFormat m_charFmt;
-
-protected:
-
-	CharFormatMessage();	// empty constructor
-
-	// Constructor for CharFormat messages, with the fractional position and the new format of the symbol
-	CharFormatMessage(Position position, QTextCharFormat fmt);
-
-	void writeTo(QDataStream& stream) const override;
-	void readFrom(QDataStream& stream) override;
-
-public:
-
-	~CharFormatMessage() {};
-
-	Position getPosition() const;
-	QTextCharFormat getCharFormat() const;
-};
-
-
-class BulkInsertMessage : public Message
+class CharsInsertMessage : public Message
 {
 	friend MessageFactory;
 
@@ -98,29 +16,29 @@ private:
 	TextBlockID m_blockId;
 	QTextBlockFormat m_blockFmt;
 	bool m_flag;
-	
+
 protected:
 
-	BulkInsertMessage();	// empty constructor
+	CharsInsertMessage();	// empty constructor
 
-	// Constructor for BulkInsert messages, carrying the list of symbols in a block and its format
-	BulkInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	// Constructor for CharsInsert messages, carrying the list of symbols in a block and its format
+	CharsInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
 
 public:
 
-	~BulkInsertMessage() {};
+	~CharsInsertMessage() {};
 
 	QVector<Symbol> getSymbols() const;
 	TextBlockID getBlockId() const;
 	QTextBlockFormat getBlockFormat() const;
 	bool getIsLast() const;
-};
+}; 
 
 
-class BulkDeleteMessage : public Message
+class CharsDeleteMessage : public Message
 {
 	friend MessageFactory;
 
@@ -130,19 +48,47 @@ private:
 
 protected:
 
-	BulkDeleteMessage();	// empty constructor
+	CharsDeleteMessage();	// empty constructor
 
-	// Constructor for BulkDelete messages, with the fractional positions to delete
-	BulkDeleteMessage(QVector<Position> positions);
+	// Constructor for CharsDelete messages, with the fractional positions to delete
+	CharsDeleteMessage(QVector<Position> positions);
 
 	void writeTo(QDataStream& stream) const override;
 	void readFrom(QDataStream& stream) override;
 
 public:
 
-	~BulkDeleteMessage() {};
+	~CharsDeleteMessage() {};
 
 	QVector<Position> getPositions() const;
+};
+
+
+class CharsFormatMessage : public Message
+{
+	friend MessageFactory;
+
+private:
+
+	QVector<Position> m_fPos;
+	QVector<QTextCharFormat> m_charFmt;
+
+protected:
+
+	CharsFormatMessage();	// empty constructor
+
+	// Constructor for CharsFormat messages, with the fractional positions and the new symbol formats
+	CharsFormatMessage(QVector<Position> positions, QVector<QTextCharFormat> fmts);
+
+	void writeTo(QDataStream& stream) const override;
+	void readFrom(QDataStream& stream) override;
+
+public:
+
+	~CharsFormatMessage() {};
+
+	QVector<Position> getPositions() const;
+	QVector<QTextCharFormat> getCharFormats() const;
 };
 
 

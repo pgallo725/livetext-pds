@@ -8,6 +8,7 @@
 
 #define USE_DOCUMENT_TREE_STRUCTURE 0
 
+
 class URI
 {
 	/* Operators for QDataStream serialization and deserialization */
@@ -56,7 +57,6 @@ private:
 #else
 	QVector<Symbol> _text;
 #endif
-	
 
 	qint32 _blockCounter;
 	QMap<TextBlockID, TextBlock> _blocks;
@@ -83,7 +83,7 @@ public:
 	Position removeAtIndex(int index);
 
 	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);
-	int formatSymbol(const Position& fPos, QTextCharFormat fmt);
+	int formatSymbol(const Position& fPos, QTextCharFormat fmt, int positionHint = -1);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 	int formatList(TextListID id, QTextListFormat fmt);
 	
@@ -117,8 +117,8 @@ public:
 
 private:
 
-	/* Binary search methods to translate from a fractional position to an integer index */
-	int positionIndex(const Position& pos);
+	/* Binary search method to translate: fractional position <-> integer index */
+	int findPosition(const Position& pos);
 	int insertionIndex(const Position& pos);
 
 	/* Fractional position algorithm */
