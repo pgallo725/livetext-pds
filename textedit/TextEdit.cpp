@@ -1872,7 +1872,7 @@ void TextEdit::highlightUsersText()
 {
 	//For every user it's check/uncheck his selection to be displayed
 	foreach(Presence * p, onlineUsers.values())
-		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
+			p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
 
 	handleMultipleSelections();
@@ -1918,18 +1918,7 @@ void TextEdit::handleMultipleSelections()
 
 		emit generateExtraSelection();
 
-
-		int actionsChecked = 0;
-		foreach(Presence * p, onlineUsers.values()) {
-			if (p->actionHighlightText()->isChecked())
-				actionsChecked++;
-		}
-
-		if (actionsChecked == onlineUsers.size())
-			actionHighlightUsers->setChecked(true);
-		else
-			actionHighlightUsers->setChecked(false);
-
+		actionHighlightUsers->setChecked(true);
 	}
 	else {
 		//Uncheck of actionHighlightUsers based on single highlight checked
