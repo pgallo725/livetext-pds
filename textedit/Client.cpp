@@ -430,8 +430,8 @@ void Client::openDocument(URI URI)
 
 		// Connect the function which will read messages from the socket inside the editor
 		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
 
 		return;
 	}
@@ -500,8 +500,8 @@ void Client::createDocument(QString name)
 		}
 
 		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
 
 		return;
 	}
