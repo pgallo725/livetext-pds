@@ -10,28 +10,24 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<TextListID>("TextListID");
 	qRegisterMetaType<TextList>("TextList");
 	qRegisterMetaType<Symbol>("Symbol");
-	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
+	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
-	qRegisterMetaType<QVector<Symbol>>("QVector<Symbol>");
 	qRegisterMetaType<QVector<Position>>("QVector<Position>");
+	qRegisterMetaType<QVector<Symbol>>("QVector<Symbol>");
+	qRegisterMetaType<QVector<QTextCharFormat>>("QVector<QTextCharFormat>");
 }
 
 
 void DocumentEditor::openDocument()
 {
 	// Insert all symbols in the document
-	/*for (int i = 0; i < _document.length() - 1; i++) {
-		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
-	}*/
-
+	QVector<Symbol>::iterator s = _document._text.begin();
 	QString buffer;
-	QVector<Symbol> text = _document.getContent();
-	QVector<Symbol>::iterator s = text.begin();
 	int position = 0;
 	QTextCharFormat oldFmt;
 
-	for (; s < text.end() - 1; s++)
+	for (; s < _document._text.end() - 1; s++)
 	{
 		if (oldFmt == s->getFormat())
 		{
@@ -48,7 +44,7 @@ void DocumentEditor::openDocument()
 	}
 
 	if (!buffer.isEmpty())
-	{
+	{	// Insert the last chunk of characters
 		_textedit->newChars(buffer, oldFmt, position);
 	}
 
