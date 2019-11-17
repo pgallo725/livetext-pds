@@ -317,6 +317,9 @@ private slots:
 	//Widget resize
 	void resizeEditor(const QSizeF& newSize);
 
+	//Document custom menu
+	void showCustomContextMenu(const QPoint& position);
+
 	//About
 	void linkPressed();
 };

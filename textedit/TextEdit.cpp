@@ -83,6 +83,9 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
 
+	//Custom context menu
+	connect(_textEdit, &QTextEdit::customContextMenuRequested, this, &TextEdit::showCustomContextMenu);
+
 	//Mandatory to intercept character insertion, the document emit this signal every time a character inside document is added/removed
 	connect(_textEdit->document(), &QTextDocument::contentsChange, this, &TextEdit::contentsChange);
 
@@ -111,6 +114,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	textFont.setPointSize(12);
 	_textEdit->setFont(textFont);
 	_textEdit->document()->setDefaultFont(textFont);
+	_textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	//Disable undo/redo
 	_textEdit->setUndoRedoEnabled(false);
@@ -130,7 +134,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	actionPaste->setEnabled(false);
 #endif
 
-	_textEdit->setContextMenuPolicy(Qt::DefaultContextMenu);
+	_textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
 
 	//Setup cursor position
 	_currentCursorPosition = -1;
@@ -591,7 +595,7 @@ void TextEdit::setupEditorActions()
 	menu = menuBar()->addMenu(tr("?"));
 	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
 	menu->addSeparator();
-	menu->addAction(tr("About LiveText   "), _aboutWindow, &AboutWindow::exec);
+	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("About LiveText   "), _aboutWindow, &AboutWindow::exec);
 }
 
 
@@ -1868,6 +1872,38 @@ bool TextEdit::areUserIconActive()
 }
 
 
+/**************************** CUSTOM CONTEXT MENU ****************************/
+/*
+*	Show editor custom context menu
+*/
+void TextEdit::showCustomContextMenu(const QPoint& position)
+{
+	QMenu* menu = new QMenu(this);
+#ifndef QT_NO_CLIPBOARD
+	menu->addAction(actionCopy);
+	menu->addAction(actionCut);
+	menu->addAction(actionPaste);
+#endif
+	
+	menu->addSeparator();
+	menu->addAction(actionHighlightUsers);
+
+	menu->addSeparator();
+	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
+
+	menu->addSeparator();
+
+	QMenu* alignmentMenu = new QMenu(tr("Paragraph"), this);
+	alignmentMenu->addAction(actionAlignLeft);
+	alignmentMenu->addAction(actionAlignCenter);
+	alignmentMenu->addAction(actionAlignRight);
+	alignmentMenu->addAction(actionAlignJustify);
+
+	menu->addMenu(alignmentMenu);
+
+	menu->exec(QCursor::pos());
+	menu->clear();
+}
 
 
 /**************************** ABOUT ****************************/
