@@ -14,6 +14,7 @@
 #define CURSOR_SEND_INTERVAL 200
 #define STATUSBAR_MSG_DURATION 5000
 #define BULK_EDIT_SIZE 256
+#define LIST_STYLES 9
 
 
 //Method encapsulation
@@ -57,7 +58,7 @@ private:
 
 	//Button and actions of list menu
 	QToolButton* listButton;
-	QAction* listActions[9];
+	QAction* listActions[LIST_STYLES];
 
 	//GUI update and list style easy application
 	enum listType
@@ -73,7 +74,7 @@ private:
 		romanupper
 	};
 
-	QString listIconPath[9] =
+	QString listIconPath[LIST_STYLES] =
 	{
 		"/editor/list.png",
 		"/editor/disc.png",
@@ -86,7 +87,7 @@ private:
 		"/editor/romanupper.png"
 	};
 
-	QTextListFormat::Style listStyles[9] =
+	QTextListFormat::Style listStyles[LIST_STYLES] =
 	{
 		QTextListFormat::ListStyleUndefined,
 		QTextListFormat::ListDisc,

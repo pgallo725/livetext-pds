@@ -1328,7 +1328,7 @@ void TextEdit::updateEditorSelectedActions()
 
 	//Checks list format (if in list) and updates GUI according to format
 	if (list) {
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < LIST_STYLES; i++) {
 			if (list->format().style() == listStyles[i]) {
 				//Find list format to update GUI correctly
 				toggleCheckList(i);
@@ -1348,7 +1348,7 @@ void TextEdit::toggleCheckList(int listType)
 {
 
 	//All other entries are unchecked
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < LIST_STYLES; ++i) {
 		listActions[i]->setChecked(i == listType);
 	}
 
@@ -1879,20 +1879,21 @@ bool TextEdit::areUserIconActive()
 void TextEdit::showCustomContextMenu(const QPoint& position)
 {
 	QMenu* menu = new QMenu(this);
+
+	//Cut/Copy/Paste
 #ifndef QT_NO_CLIPBOARD
 	menu->addAction(actionCopy);
 	menu->addAction(actionCut);
 	menu->addAction(actionPaste);
 #endif
-	
-	menu->addSeparator();
-	menu->addAction(actionHighlightUsers);
 
+	//Select All/Delete
 	menu->addSeparator();
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 
 	menu->addSeparator();
 
+	//Alignment
 	QMenu* alignmentMenu = new QMenu(tr("Paragraph"), this);
 	alignmentMenu->addAction(actionAlignLeft);
 	alignmentMenu->addAction(actionAlignCenter);
@@ -1900,6 +1901,18 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 	alignmentMenu->addAction(actionAlignJustify);
 
 	menu->addMenu(alignmentMenu);
+
+	//List style
+	QMenu* listMenu = new QMenu(tr("Lists"), this);
+	for (int i = 0; i < LIST_STYLES; ++i) {
+		listMenu->addAction(listActions[i]);
+	}
+
+	menu->addMenu(listMenu);
+
+	//Highlight user text
+	menu->addSeparator();
+	menu->addAction(actionHighlightUsers);
 
 	menu->exec(QCursor::pos());
 	menu->clear();
