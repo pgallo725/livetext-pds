@@ -9,11 +9,11 @@
 
 LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 {
-	wc = QSharedPointer<QWaitCondition>(new QWaitCondition());
+	_wc = QSharedPointer<QWaitCondition>(new QWaitCondition());
 
 	//Initialize landing page and client
 	_landingPage = new LandingPage();
-	_client = new Client(wc);
+	_client = new Client(_wc);
 
 
 	/************************ CONNECTS ************************/
@@ -206,7 +206,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	openEditor();
 
 	_client->setSync();
-	wc->wakeAll();
+	_wc->wakeAll();
 }
 
 

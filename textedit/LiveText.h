@@ -38,7 +38,7 @@ private:
 	User _user;
 
 	//Sync variable
-	QSharedPointer<QWaitCondition> wc;
+	QSharedPointer<QWaitCondition> _wc;
 
 public:
 	LiveText(QObject* parent = nullptr);

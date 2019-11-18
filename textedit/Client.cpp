@@ -3,7 +3,7 @@
 #include <SharedException.h>
 
 
-Client::Client(QSharedPointer<QWaitCondition> wc, QObject* parent) 
+Client::Client(QSharedPointer<QWaitCondition> wc, QObject* parent)
 	: QObject(parent), socket(nullptr), sync(false), wc(wc)
 {
 	qRegisterMetaType<User>("User");
@@ -156,7 +156,17 @@ void Client::messageHandler(MessageCapsule message)
 
 void Client::setSync()
 {
+	QMutexLocker ml(&m);
 	sync = true;
+}
+
+void Client::getSync()
+{
+	QMutexLocker ml(&m);
+	if (!sync) {
+		wc->wait(&m, SYNC_TIMEOUT);
+		sync = true;
+	}
 }
 
 
@@ -433,11 +443,7 @@ void Client::openDocument(URI URI)
 		emit openFileCompleted(documentReady->getDocument());
 
 		//Sync between this thread and GUI thread
-		QMutexLocker ml(&m);
-		if (!sync) {
-			wc->wait(&m, READYREAD_TIMEOUT);
-			sync = true;
-		}
+		getSync();
 
 		return;
 	}
@@ -503,11 +509,7 @@ void Client::createDocument(QString name)
 		emit openFileCompleted(documentReady->getDocument());
 
 		//Sync between this thread and GUI thread
-		QMutexLocker ml(&m);
-		if (!sync) {
-			wc->wait(&m, READYREAD_TIMEOUT);
-			sync = true;
-		}
+		getSync();
 
 		return;
 	}

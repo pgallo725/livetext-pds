@@ -26,7 +26,7 @@
 #include <Document.h>
 
 #define READYREAD_TIMEOUT 5000
-
+#define SYNC_TIMEOUT 5000
 
 class Client : public QObject
 {
@@ -38,9 +38,11 @@ private:
 	SocketBuffer socketBuffer;
 	QSharedPointer<QThread> workThread;
 	
-	QMutex m;
 	QSharedPointer<QWaitCondition> wc;
+	QMutex m;
 	bool sync;
+
+	void getSync();
 
 public:
 
