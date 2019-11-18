@@ -47,11 +47,9 @@ signals:
 	MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
 	MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
 
-	void charInsert(Symbol s);
-	void charDelete(Position pos);
-	void charFormat(Position pos, QTextCharFormat fmt);
-	void bulkInsert(QVector<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
-	void bulkDelete(QVector<Position> poss);
+	void charsInsert(QVector<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
+	void charsDelete(QVector<Position> poss);
+	void charsFormat(QVector<Position> pos, QVector<QTextCharFormat> fmts);
 	void blockEdit(TextBlockID id, QTextBlockFormat fmt);
 	void listEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 	void messageDispatch(MessageCapsule message, QSslSocket* sender);

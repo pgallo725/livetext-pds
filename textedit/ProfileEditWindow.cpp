@@ -84,7 +84,7 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 {
 	//Open file dialog, to choose profile picture
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
 
 	//Sets in path box correct path
 	if (!filename.isEmpty()) {

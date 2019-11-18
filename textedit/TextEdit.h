@@ -202,16 +202,14 @@ public:
 	void setCurrentFileName(QString fileName, QString uri);
 
 	//REMOTE: character insertion/deletion
-	void newChar(QChar ch, QTextCharFormat format, int position);
-	void manyChars(QString chars, QTextCharFormat fmt, int position);
-	void removeChar(int position);
-	void deleteManyChars(int start, int end);
+	void newChars(QString chars, QTextCharFormat fmt, int position);
+	void removeChars(int start, int end);
+
+	//REMOTE: Apply Symbol format
+	void applyCharFormat(int position, int end, QTextCharFormat fmt);
 
 	//REMOTE: Apply text block format
 	void applyBlockFormat(int position, QTextBlockFormat fmt);
-
-	//REMOTE: Apply Symbol format
-	void applyCharFormat(int position, QTextCharFormat fmt);
 
 	//List management
 	void createList(int position, QTextListFormat fmt);
@@ -237,19 +235,15 @@ signals:
 	//Ask to open edit profile window
 	void openEditProfile();
 
-	//LOCAL: character insertion/deletion
-	void charInserted(QChar ch, QTextCharFormat format, int position, bool isLast);
-	void charDeleted(int position);
-	void charGroupInserted(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
-	void charGroupDeleted(int position, int count);
+	//LOCAL: character insertion/deletion/format change
+	void charsAdded(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);
+	void charsDeleted(int position, int count);
+	void charsFormatChanged(int position, int count, QVector<QTextCharFormat> fmts);
 
 	//LOCAL: text block format changed
 	void blockFormatChanged(int start, int end, Qt::Alignment alignment);
 	void blockFormatChanged(int start, int end, qreal height, int heightType);
 	void blockFormatChanged(int start, int end, QTextBlockFormat fmt);
-
-	//LOCAL: character format changed
-	void symbolFormatChanged(int position, QTextCharFormat fmt);
 
 	//Users text highlighting
 	void generateExtraSelection();

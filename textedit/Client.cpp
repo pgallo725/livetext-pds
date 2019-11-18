@@ -123,20 +123,14 @@ void Client::messageHandler(MessageCapsule message)
 	case PresenceUpdate:
 		handleUpdatePresence(message);
 		break;
-	case CharInsert:
-		handleCharInsert(message);
+	case CharsInsert:
+		handleCharsInsert(message);
 		break;
-	case CharDelete:
-		handleCharRemove(message);
+	case CharsDelete:
+		handleCharsDelete(message);
 		break;
-	case CharFormat:
-		handleCharFormat(message);
-		break;
-	case BulkInsert:
-		handleBulkInsert(message);
-		break;
-	case BulkDelete:
-		handleBulkDelete(message);
+	case CharsFormat:
+		handleCharsFormat(message);
 		break;
 	case BlockEdit:
 		handleBlockFormat(message);
@@ -433,17 +427,17 @@ void Client::openDocument(URI URI)
 		// Server successfully answered with the document
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
-		// Connect the function which will read messages from the socket inside the editor
-		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
-
 		//Set sync = false for the syncronization
 		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
 
 		//Sync between this thread and GUI thread
 		getSync();
+
+		// Connect the function which will read messages from the socket inside the editor
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
 
 		return;
 	}
@@ -500,16 +494,16 @@ void Client::createDocument(QString name)
 		//Document successfully created (and opened)
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
-		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
-
 		//Set sync = false for the syncronization
 		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
 
 		//Sync between this thread and GUI thread
 		getSync();
+
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
 
 		return;
 	}
@@ -671,55 +665,33 @@ void Client::handleCursor(MessageCapsule message)
 
 /* Send messages to server */
 
-void Client::sendCharInsert(Symbol character, bool isLast) {
-
-	try 
-	{
-		MessageFactory::CharInsert(character, isLast)->send(socket);
-	}
-	catch (MessageException& me) {
-		qDebug() << me.what();
-	}
-}
-
-void Client::sendCharRemove(Position position)
-{
-	try 
-	{
-		MessageFactory::CharDelete(position)->send(socket);
-	}
-	catch (MessageException& me) {
-		qDebug() << me.what();
-	}
-}
-
-void Client::sendBulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+void Client::sendCharsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
 	try
 	{
-		MessageFactory::BulkInsert(symbols, isLast, bId, blkFmt)->send(socket);
+		MessageFactory::CharsInsert(symbols, isLast, bId, blkFmt)->send(socket);
 	}
 	catch (MessageException & me) {
 		qDebug() << me.what();
 	}
 }
 
-void Client::sendBulkDelete(QVector<Position> positions)
+void Client::sendCharsDelete(QVector<Position> positions)
 {
 	try
 	{
-		MessageFactory::BulkDelete(positions)->send(socket);
+		MessageFactory::CharsDelete(positions)->send(socket);
 	}
 	catch (MessageException & me) {
 		qDebug() << me.what();
 	}
 }
 
-void Client::sendCharFormat(Position position, QTextCharFormat fmt)
+void Client::sendCharsFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts)
 {
 	try 
 	{
-		MessageFactory::CharFormat(position, fmt)->send(socket);
+		MessageFactory::CharsFormat(positions, fmts)->send(socket);
 	}
 	catch (MessageException& me) {
 		qDebug() << me.what();
@@ -751,35 +723,23 @@ void Client::sendListEdit(TextBlockID blockId, TextListID listId, QTextListForma
 
 /* Handle messages received from server */
 
-void Client::handleCharInsert(MessageCapsule message) 
+void Client::handleCharsInsert(MessageCapsule message)
 {
-	CharInsertMessage* insertCharMsg = dynamic_cast<CharInsertMessage*>(message.get());
-	emit insertSymbol(insertCharMsg->getSymbol(), insertCharMsg->getIsLast());
-}
-
-void Client::handleCharRemove(MessageCapsule message) 
-{
-	CharDeleteMessage* deleteCharMsg = dynamic_cast<CharDeleteMessage*>(message.get());
-	emit removeSymbol(deleteCharMsg->getPosition());
-}
-
-void Client::handleBulkInsert(MessageCapsule message)
-{
-	BulkInsertMessage* bulkInsertMsg = dynamic_cast<BulkInsertMessage*>(message.get());
-	emit insertBulk(bulkInsertMsg->getSymbols(), bulkInsertMsg->getIsLast(),
+	CharsInsertMessage* bulkInsertMsg = dynamic_cast<CharsInsertMessage*>(message.get());
+	emit insertSymbols(bulkInsertMsg->getSymbols(), bulkInsertMsg->getIsLast(),
 		bulkInsertMsg->getBlockId(), bulkInsertMsg->getBlockFormat());
 }
 
-void Client::handleBulkDelete(MessageCapsule message)
+void Client::handleCharsDelete(MessageCapsule message)
 {
-	BulkDeleteMessage* bulkDeleteMsg = dynamic_cast<BulkDeleteMessage*>(message.get());
-	emit removeBulk(bulkDeleteMsg->getPositions());
+	CharsDeleteMessage* bulkDeleteMsg = dynamic_cast<CharsDeleteMessage*>(message.get());
+	emit removeSymbols(bulkDeleteMsg->getPositions());
 }
 
-void Client::handleCharFormat(MessageCapsule message) 
+void Client::handleCharsFormat(MessageCapsule message) 
 {
-	CharFormatMessage* charFormatMsg = dynamic_cast<CharFormatMessage*>(message.get());
-	emit formatSymbol(charFormatMsg->getPosition(), charFormatMsg->getCharFormat());
+	CharsFormatMessage* charFormatMsg = dynamic_cast<CharsFormatMessage*>(message.get());
+	emit formatSymbols(charFormatMsg->getPositions(), charFormatMsg->getCharFormats());
 }
 
 void Client::handleBlockFormat(MessageCapsule message) 

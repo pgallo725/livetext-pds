@@ -142,19 +142,13 @@ void LiveText::openDocumentCompleted(Document doc)
 	/********************** CONNECTS **********************/
 
 	//TEXTEDIT - DOCUMENTEDITOR
-	connect(_textEdit, &TextEdit::charDeleted, _docEditor, &DocumentEditor::deleteCharAtIndex);
-	connect(_textEdit, &TextEdit::charInserted, _docEditor, &DocumentEditor::addCharAtIndex);
-	connect(_textEdit, &TextEdit::charGroupDeleted, _docEditor, &DocumentEditor::deleteCharGroupAtIndex);
-	connect(_textEdit, &TextEdit::charGroupInserted, _docEditor, &DocumentEditor::addCharGroupAtIndex);
+	connect(_textEdit, &TextEdit::charsAdded, _docEditor, &DocumentEditor::addCharsAtIndex);
+	connect(_textEdit, &TextEdit::charsDeleted, _docEditor, &DocumentEditor::deleteCharsAtIndex);
+	connect(_textEdit, &TextEdit::charsFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
 	connect(_textEdit, &TextEdit::generateExtraSelection, _docEditor, &DocumentEditor::generateExtraSelection, Qt::DirectConnection);
-	connect(_textEdit, qOverload<int, int, Qt::Alignment>(&TextEdit::blockFormatChanged),
-		_docEditor, &DocumentEditor::changeBlockAlignment);
-	connect(_textEdit, qOverload<int, int, qreal, int>(&TextEdit::blockFormatChanged),
-		_docEditor, &DocumentEditor::changeBlockLineHeight);
-	connect(_textEdit, qOverload<int, int, QTextBlockFormat>(&TextEdit::blockFormatChanged),
-		_docEditor, &DocumentEditor::changeBlockFormat);
-
-	connect(_textEdit, &TextEdit::symbolFormatChanged, _docEditor, &DocumentEditor::changeSymbolFormat);
+	connect(_textEdit, qOverload<int, int, Qt::Alignment>(&TextEdit::blockFormatChanged), _docEditor, &DocumentEditor::changeBlockAlignment);
+	connect(_textEdit, qOverload<int, int, qreal, int>(&TextEdit::blockFormatChanged), _docEditor, &DocumentEditor::changeBlockLineHeight);
+	connect(_textEdit, qOverload<int, int, QTextBlockFormat>(&TextEdit::blockFormatChanged), _docEditor, &DocumentEditor::changeBlockFormat);
 	connect(_textEdit, &TextEdit::toggleList, _docEditor, &DocumentEditor::toggleList);
 	connect(_textEdit, &TextEdit::createNewList, _docEditor, &DocumentEditor::createList);
 	connect(_textEdit, &TextEdit::assignBlockToList, _docEditor, &DocumentEditor::assignBlockToList);
@@ -177,21 +171,17 @@ void LiveText::openDocumentCompleted(Document doc)
 
 
 	//DOCUMENTEDITOR - CLIENT
-	connect(_docEditor, &DocumentEditor::charDeleted, _client, &Client::sendCharRemove, Qt::QueuedConnection);
-	connect(_docEditor, &DocumentEditor::charAdded, _client, &Client::sendCharInsert, Qt::QueuedConnection);
-	connect(_docEditor, &DocumentEditor::charGroupDeleted, _client, &Client::sendBulkDelete, Qt::QueuedConnection);
-	connect(_docEditor, &DocumentEditor::charGroupInserted, _client, &Client::sendBulkInsert, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::charsAdded, _client, &Client::sendCharsInsert, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::charsDeleted, _client, &Client::sendCharsDelete, Qt::QueuedConnection);
+	connect(_docEditor, &DocumentEditor::charsFormatChanged, _client, &Client::sendCharsFormat, Qt::QueuedConnection);
 	connect(_docEditor, &DocumentEditor::blockFormatChanged, _client, &Client::sendBlockFormat, Qt::QueuedConnection);
-	connect(_docEditor, &DocumentEditor::symbolFormatChanged, _client, &Client::sendCharFormat, Qt::QueuedConnection);
 	connect(_docEditor, &DocumentEditor::blockListChanged, _client, &Client::sendListEdit, Qt::QueuedConnection);
 
 	//CLIENT - DOCUMENTEDITOR
-	connect(_client, &Client::insertSymbol, _docEditor, &DocumentEditor::addSymbol, Qt::QueuedConnection);
-	connect(_client, &Client::removeSymbol, _docEditor, &DocumentEditor::removeSymbol, Qt::QueuedConnection);
-	connect(_client, &Client::insertBulk, _docEditor, &DocumentEditor::bulkInsert, Qt::QueuedConnection);
-	connect(_client, &Client::removeBulk, _docEditor, &DocumentEditor::bulkDelete, Qt::QueuedConnection);
+	connect(_client, &Client::insertSymbols, _docEditor, &DocumentEditor::charsInsert, Qt::QueuedConnection);
+	connect(_client, &Client::removeSymbols, _docEditor, &DocumentEditor::charsDelete, Qt::QueuedConnection);
 	connect(_client, &Client::formatBlock, _docEditor, &DocumentEditor::applyBlockFormat, Qt::QueuedConnection);
-	connect(_client, &Client::formatSymbol, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
+	connect(_client, &Client::formatSymbols, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
 	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
 
 	//If opening document is not present in user data, it updates data

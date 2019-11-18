@@ -1,171 +1,111 @@
 #include "TextEditMessage.h"
 
 
-/*************** CHAR INSERT MESSAGE ***************/
+/*************** CHARS INSERT MESSAGE ***************/
 
-CharInsertMessage::CharInsertMessage()
-	: Message(CharInsert), m_flag(false)
+CharsInsertMessage::CharsInsertMessage()
+	: Message(CharsInsert), m_flag(false)
 {
 }
 
-CharInsertMessage::CharInsertMessage(Symbol symbol, bool isLast)
-	: Message(CharInsert), m_symbol(symbol), m_flag(isLast)
+CharsInsertMessage::CharsInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+	: Message(CharsInsert), m_symbols(symbols), m_blockId(bId), m_blockFmt(blkFmt), m_flag(isLast)
 {
+	m_symbols.squeeze();	// Avoid any unrequired memory usage to reduce message size
 }
 
-void CharInsertMessage::writeTo(QDataStream& stream) const
+void CharsInsertMessage::writeTo(QDataStream& stream) const
 {
-	stream << m_symbol << m_flag;
+	stream << m_symbols << m_blockId << m_blockFmt << m_flag;
 }
 
-void CharInsertMessage::readFrom(QDataStream& stream)
+void CharsInsertMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_symbol >> m_flag;
+	stream >> m_symbols >> m_blockId >> m_blockFmt >> m_flag;
 }
 
-Symbol CharInsertMessage::getSymbol() const
+QVector<Symbol> CharsInsertMessage::getSymbols() const
 {
-	return m_symbol;
+	return m_symbols;
 }
 
-bool CharInsertMessage::getIsLast() const
+TextBlockID CharsInsertMessage::getBlockId() const
+{
+	return m_blockId;
+}
+
+QTextBlockFormat CharsInsertMessage::getBlockFormat() const
+{
+	return m_blockFmt;
+}
+
+bool CharsInsertMessage::getIsLast() const
 {
 	return m_flag;
 }
 
 
-/*************** CHAR DELETE MESSAGE ***************/
+/*************** CHARS DELETE MESSAGE ***************/
 
-CharDeleteMessage::CharDeleteMessage()
-	: Message(CharDelete)
+CharsDeleteMessage::CharsDeleteMessage()
+	: Message(CharsDelete)
 {
 }
 
-CharDeleteMessage::CharDeleteMessage(Position position)
-	: Message(CharDelete), m_fPos(position)
+CharsDeleteMessage::CharsDeleteMessage(QVector<Position> positions)
+	: Message(CharsDelete), m_fPositions(positions)
 {
+	m_fPositions.squeeze();		// Avoid any extra memory usage to reduce message size
 }
 
-void CharDeleteMessage::writeTo(QDataStream& stream) const
+void CharsDeleteMessage::writeTo(QDataStream& stream) const
 {
-	stream << m_fPos;
+	stream << m_fPositions;
 }
 
-void CharDeleteMessage::readFrom(QDataStream& stream)
+void CharsDeleteMessage::readFrom(QDataStream& stream)
 {
-	stream >> m_fPos;
+	stream >> m_fPositions;
 }
 
-Position CharDeleteMessage::getPosition() const
+QVector<Position> CharsDeleteMessage::getPositions() const
 {
-	return m_fPos;
+	return m_fPositions;
 }
 
 
 /*************** CHAR FORMAT MESSAGE ***************/
 
-CharFormatMessage::CharFormatMessage()
-	: Message(CharFormat)
+CharsFormatMessage::CharsFormatMessage()
+	: Message(CharsFormat)
 {
 }
 
-CharFormatMessage::CharFormatMessage(Position position, QTextCharFormat fmt)
-	: Message(CharFormat), m_fPos(position), m_charFmt(fmt)
+CharsFormatMessage::CharsFormatMessage(QVector<Position> positions, QVector<QTextCharFormat> fmts)
+	: Message(CharsFormat), m_fPos(positions), m_charFmt(fmts)
 {
 }
 
-void CharFormatMessage::writeTo(QDataStream& stream) const
+void CharsFormatMessage::writeTo(QDataStream& stream) const
 {
 	stream << m_fPos << m_charFmt;
 }
 
-void CharFormatMessage::readFrom(QDataStream& stream)
+void CharsFormatMessage::readFrom(QDataStream& stream)
 {
 	stream >> m_fPos >> m_charFmt;
 }
 
-Position CharFormatMessage::getPosition() const
+QVector<Position> CharsFormatMessage::getPositions() const
 {
 	return m_fPos;
 }
 
-QTextCharFormat CharFormatMessage::getCharFormat() const
+QVector<QTextCharFormat> CharsFormatMessage::getCharFormats() const
 {
 	return m_charFmt;
 }
 
-
-/*************** BULK INSERT MESSAGE ***************/
-
-BulkInsertMessage::BulkInsertMessage()
-	: Message(BulkInsert), m_flag(false)
-{
-}
-
-BulkInsertMessage::BulkInsertMessage(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
-	: Message(BulkInsert), m_symbols(symbols), m_blockId(bId), m_blockFmt(blkFmt), m_flag(isLast)
-{
-	m_symbols.squeeze();	// Avoid any unrequired memory usage to reduce message size
-}
-
-void BulkInsertMessage::writeTo(QDataStream& stream) const
-{
-	stream << m_symbols << m_blockId << m_blockFmt << m_flag;
-}
-
-void BulkInsertMessage::readFrom(QDataStream& stream)
-{
-	stream >> m_symbols >> m_blockId >> m_blockFmt >> m_flag;
-}
-
-QVector<Symbol> BulkInsertMessage::getSymbols() const
-{
-	return m_symbols;
-}
-
-TextBlockID BulkInsertMessage::getBlockId() const
-{
-	return m_blockId;
-}
-
-QTextBlockFormat BulkInsertMessage::getBlockFormat() const
-{
-	return m_blockFmt;
-}
-
-bool BulkInsertMessage::getIsLast() const
-{
-	return m_flag;
-}
-
-
-/*************** BULK DELETE MESSAGE ***************/
-
-BulkDeleteMessage::BulkDeleteMessage()
-	: Message(BulkDelete)
-{
-}
-
-BulkDeleteMessage::BulkDeleteMessage(QVector<Position> positions)
-	: Message(BulkDelete), m_fPositions(positions)
-{
-	m_fPositions.squeeze();		// Avoid any extra memory usage to reduce message size
-}
-
-void BulkDeleteMessage::writeTo(QDataStream& stream) const
-{
-	stream << m_fPositions;
-}
-
-void BulkDeleteMessage::readFrom(QDataStream& stream)
-{
-	stream >> m_fPositions;
-}
-
-QVector<Position> BulkDeleteMessage::getPositions() const
-{
-	return m_fPositions;
-}
 
 
 /*************** BLOCK FORMAT EDIT MESSAGE ***************/

@@ -444,14 +444,18 @@ void LandingPage::showDocumentActionsMenu(const QPoint& position)
 		QMenu* menu = new QMenu;
 
 		//Open document
-		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/editcopy.png"), tr("Open Document..."));
+		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/share.png"), tr("Copy URI"));
+		connect(a, &QAction::triggered, this, &LandingPage::copyDocumentURI);
+
+
+		a = menu->addAction(QIcon(rsrcPath + "/landingPage/filenew.png"), tr("Open Document"));
 		connect(a, &QAction::triggered, this, &LandingPage::pushButtonOpenClicked);
 
-		a = menu->addAction(QIcon(rsrcPath + "/landingPage/remove.png"), tr("Remove Document..."));
+		menu->addSeparator();
+		a = menu->addAction(QIcon(rsrcPath + "/landingPage/remove.png"), tr("Remove Document"));
 		connect(a, &QAction::triggered, this, &LandingPage::pushButtonRemoveClicked);
 
-		a = menu->addAction(QIcon(rsrcPath + "/editor/share.png"), tr("Copy Document URI..."));
-		connect(a, &QAction::triggered, this, &LandingPage::copyDocumentURI);
+		
 
 
 		menu->exec(QCursor::pos());
@@ -653,7 +657,7 @@ void LandingPage::pushButtonBrowseClicked()
 {
 	//Open file browser dialog to choose profile picture
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
 
 	if (!filename.isEmpty()) {
 		//Set choosen filename
