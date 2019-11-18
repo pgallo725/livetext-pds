@@ -38,11 +38,10 @@ private:
 	SocketBuffer socketBuffer;
 	QSharedPointer<QThread> workThread;
 	
+	// Thread sync variables
 	QSharedPointer<QWaitCondition> wc;
 	QMutex m;
 	bool sync;
-
-	void getSync();
 
 public:
 
@@ -52,7 +51,13 @@ public:
 	// Generic message reader and handler
 	MessageCapsule readMessage(QDataStream& stream);
 	void messageHandler(MessageCapsule message);
+
+	// Thread synchronization methods
 	void setSync();
+
+private:
+
+	void getSync();
 
 public slots:
 

@@ -1,17 +1,17 @@
 #ifndef LIVETEXT_H
 #define LIVETEXT_H
 
-#include "textedit.h"
+#include <QObject>
+#include <QWaitCondition>
+#include <QSharedPointer>
+
+#include <User.h>
+#include "TextEdit.h"
 #include "LandingPage.h"
 #include "Client.h"
 #include "DocumentEditor.h"
 #include "ProfileEditWindow.h"
 
-#include <User.h>
-
-#include <QObject>
-#include <QWaitCondition>
-#include <QSharedPointer>
 
 class LiveText : public QObject
 {
@@ -47,7 +47,6 @@ public:
 	//Launch the main window
 	void launch();
 
-
 private slots:
 	//Text editor operations
 	void openEditor();
@@ -70,6 +69,7 @@ private slots:
 	void operationFailed(QString errorType);
 
 signals:
+
 	void disconnect();
 };
 

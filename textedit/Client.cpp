@@ -400,7 +400,8 @@ void Client::openDocument(URI URI)
 	MessageCapsule incomingMessage;
 
 	// Clear the socket from any unexpected message
-	socket->readAll();
+	if (socket->bytesAvailable())
+		socket->readAll();
 
 	try 
 	{	// Request the document to the server
@@ -467,7 +468,8 @@ void Client::createDocument(QString name)
 	MessageCapsule incomingMessage;
 
 	// Clear the socket from any unexpected message
-	socket->readAll();
+	if (socket->bytesAvailable())
+		socket->readAll();
 
 	try 
 	{	// Send the document creation request to the server
@@ -533,7 +535,8 @@ void Client::deleteDocument(URI URI)
 	MessageCapsule incomingMessage;
 
 	// Clear the socket from any unexpected message
-	socket->readAll();
+	if (socket->bytesAvailable())
+		socket->readAll();
 
 	try 
 	{	// Send the document delete request to the server
@@ -792,7 +795,8 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password,
 	else
 	{
 		// Clear the socket from any unexpected message
-		socket->readAll();
+		if (socket->bytesAvailable())
+			socket->readAll();
 	}
 	
 	try 

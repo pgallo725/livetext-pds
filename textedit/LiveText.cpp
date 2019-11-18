@@ -195,6 +195,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	//Opens text editor
 	openEditor();
 
+	// Synchronize with the client thread
 	_client->setSync();
 	_wc->wakeAll();
 }
