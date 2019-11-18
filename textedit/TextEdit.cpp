@@ -1894,7 +1894,9 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 	menu->addSeparator();
 
 	//Alignment
+	const QIcon alignmentIcon = QIcon(rsrcPath + "/editor/paragraph.png");
 	QMenu* alignmentMenu = new QMenu(tr("Paragraph"), this);
+	alignmentMenu->setIcon(alignmentIcon);
 	alignmentMenu->addAction(actionAlignLeft);
 	alignmentMenu->addAction(actionAlignCenter);
 	alignmentMenu->addAction(actionAlignRight);
@@ -1903,7 +1905,9 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 	menu->addMenu(alignmentMenu);
 
 	//List style
+	const QIcon listIcon = QIcon(rsrcPath + "/editor/list.png");
 	QMenu* listMenu = new QMenu(tr("Lists"), this);
+	listMenu->setIcon(listIcon);
 	for (int i = 0; i < LIST_STYLES; ++i) {
 		listMenu->addAction(listActions[i]);
 	}
