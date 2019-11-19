@@ -930,7 +930,7 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 		removeBlockFromList(position);
 
 	//Setting list indentation to 1 step
-	fmt.setIndent(1);
+	//fmt.setIndent(1);
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
@@ -961,7 +961,7 @@ void TextEdit::removeBlockFromList(int blockPosition)
 
 	//Makes the index of the blockFormat object -1 --> Reset block format to default
 	blkFormat.setObjectIndex(-1);
-	blkFormat.setIndent(0);
+	//blkFormat.setIndent(0);
 
 	//Apply new format (is applied anyway)
 	_extraCursor->setBlockFormat(blkFormat);
