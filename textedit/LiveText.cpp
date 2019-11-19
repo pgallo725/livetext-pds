@@ -22,15 +22,15 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
 
 	//LANDINGPAGE - CLIENT
-	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect, Qt::QueuedConnection);		// Connect
+	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect, Qt::QueuedConnection);			// Connect
 	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login, Qt::QueuedConnection);				// Login
-	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register, Qt::QueuedConnection);		// Register
-	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout, Qt::QueuedConnection);			// Logout
+	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register, Qt::QueuedConnection);			// Register
+	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout, Qt::QueuedConnection);				// Logout
 	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument, Qt::QueuedConnection);		// Create document
 	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument, Qt::QueuedConnection);	// Remove document
 	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument, Qt::QueuedConnection);		// Open document
 
-	//CLIENT - LANDING PAGE
+	//CLIENT - LANDINGPAGE
 	connect(_client, &Client::connectionEstablished, _landingPage, &LandingPage::connectionEstabilished, Qt::QueuedConnection);	// Connection estabilished
 	connect(_client, &Client::impossibleToConnect, _landingPage, &LandingPage::incorrectOperation, Qt::QueuedConnection);		// Impossibile to conncet
 	connect(_client, &Client::fileOperationFailed, _landingPage, &LandingPage::incorrectFileOperation, Qt::QueuedConnection);
@@ -160,7 +160,7 @@ void LiveText::openDocumentCompleted(Document doc)
 
 	//CLIENT - TEXTEDIT
 	connect(_client, &Client::cursorMoved, _textEdit, &TextEdit::userCursorPositionChanged, Qt::QueuedConnection);	//REMOTE: Cursor position received
-	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence, Qt::QueuedConnection);				// Add/Edit Presence
+	connect(_client, &Client::newUserPresence, _textEdit, &TextEdit::newPresence, Qt::QueuedConnection);			// Add/Edit Presence
 	connect(_client, &Client::updateUserPresence, _textEdit, &TextEdit::newPresence, Qt::QueuedConnection);
 	connect(_client, &Client::removeUserPresence, _textEdit, &TextEdit::removePresence, Qt::QueuedConnection);		// Remove presence
 	connect(_client, &Client::documentExitFailed, _textEdit, &TextEdit::closeDocumentError, Qt::QueuedConnection);	// Problem during close document

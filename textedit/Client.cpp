@@ -594,7 +594,7 @@ void Client::closeDocument()
 	}
 	catch (MessageException& me) {
 		qDebug() << me.what();
-		emit documentExitFailed(tr("MessageException raised"));
+		emit documentExitFailed(tr("Server communication error"));
 		return;
 	}
 
@@ -607,10 +607,7 @@ void Client::closeDocument()
 		incomingMessage = readMessage(in);
 		if (!incomingMessage)				 // returns an empty MessageCapsule if any error occurs
 		{
-			emit documentExitFailed(tr("Server communication error"));
-			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-			while (socket->encryptedBytesAvailable() > 0)
-				readBuffer();								// Handle any byte received on the socket in the meantime
+			socket->abort();
 			return;
 		}
 
@@ -621,15 +618,10 @@ void Client::closeDocument()
 			emit documentExitComplete();
 			return;
 		}
-		case DocumentError:
+		case Failure:
 		{
-			// Server denied permission to leave the editor
-			DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-			emit documentExitFailed(documentError->getErrorMessage());
-
-			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-			while (socket->encryptedBytesAvailable() > 0)
-				readBuffer();								// Handle any byte received on the socket in the meantime
+			// NOTE: Failure message is handled by messageHandler but then the loop should terminate
+			messageHandler(incomingMessage);
 			return;
 		}
 		default:
@@ -638,7 +630,6 @@ void Client::closeDocument()
 			messageHandler(incomingMessage);
 			break;
 		}
-		// NOTE: Failure message is not caught explicitly here because it is already handled by messageHandler
 	}
 }
 
