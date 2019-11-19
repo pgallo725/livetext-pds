@@ -1365,7 +1365,6 @@ void TextEdit::updateEditorSelectedActions()
 //Checks only listType menu entry in list menu
 void TextEdit::toggleCheckList(int listType)
 {
-
 	//All other entries are unchecked
 	for (int i = 0; i < 9; ++i) {
 		listActions[i]->setChecked(i == listType);
@@ -1437,7 +1436,6 @@ void TextEdit::lineHeightChanged(qreal height)
 		actionLineHeight200->setChecked(true);
 	else //Default line height
 		actionLineHeight100->setChecked(true);
-
 }
 
 /**************************** PASTE EVENT ****************************/
@@ -1786,7 +1784,8 @@ void TextEdit::removeChars(int start, int end)
 
 	//Select the text to be removed
 	_extraCursor->setPosition(start);
-	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
+	_extraCursor->setPosition(std::min<int>(end, _textEdit->document()->characterCount()-1),
+		QTextCursor::KeepAnchor);
 
 	//Delete characters
 	_extraCursor->removeSelectedText();
@@ -1883,7 +1882,6 @@ void TextEdit::highlightUsersText()
 //Sets and save all extra selections in the document
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
-
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
 

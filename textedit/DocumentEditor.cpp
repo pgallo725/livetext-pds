@@ -184,9 +184,10 @@ void DocumentEditor::addCharsAtIndex(QVector<QChar> chars, QVector<QTextCharForm
 	for (int n = 0; i < chars.end() && j < fmts.end(); i++, j++, n++)
 	{
 		Symbol s(*i, *j, _document.newFractionalPos(pos + n, _user.getUserId()));
-		symbols.append(s);
 
+		// Insert the symbol in the document (locally)
 		positionHint = _document.insert(s, positionHint);
+		symbols.append(s);
 	}
 
 	TextBlockID blkId = _document.getBlockAt(pos);		// Format the block with the provided QTextBlockFormat
