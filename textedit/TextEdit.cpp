@@ -898,7 +898,6 @@ void TextEdit::listStyle(int styleIndex)
 	//Getting document cursor
 	QTextCursor cursor = _textEdit->textCursor();
 
-
 	//Create standard style (undefined)
 	QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
 
@@ -1015,9 +1014,15 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	//Sets alignment and indent in a new format (due to compatibility problems)
 	QTextBlockFormat format;
 	format.setAlignment(fmt.alignment());
+	format.setIndent(fmt.indent());
+
+	// Set margins
+	format.setBottomMargin(fmt.bottomMargin());
+	format.setTopMargin(fmt.topMargin());
+	format.setLeftMargin(fmt.leftMargin());
+	format.setRightMargin(fmt.rightMargin());
 
 	//Set format lineheight, if not present sets default one
-	format.setIndent(fmt.indent());
 	if (fmt.lineHeight() == 0)
 		format.setLineHeight(100, QTextBlockFormat::ProportionalHeight);
 	else
@@ -1358,7 +1363,6 @@ void TextEdit::updateEditorSelectedActions()
 	else {
 		toggleCheckList(standard);
 	}
-
 }
 
 
