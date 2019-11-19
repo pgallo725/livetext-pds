@@ -34,7 +34,7 @@ LandingPage::LandingPage(QWidget* parent)
 
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
-		mngr.centerAndResize(0.7, 0.8);
+		mngr.centerAndResize(0.68, 0.8);
 	else
 		mngr.centerAndResize(0.55, 0.65);
 
