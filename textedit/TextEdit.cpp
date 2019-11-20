@@ -678,10 +678,6 @@ void TextEdit::removePresence(qint32 userId)
 *	Status bar messages
 *	Error messages
 *	Start timer
-*	Setting document filename, URI
-*	File print, Print Preview
-*	Save as PDF
-*	Share document URI
 */
 
 void TextEdit::resizeEditor(const QSizeF& newSize)
@@ -697,8 +693,13 @@ void TextEdit::resizeEditor(const QSizeF& newSize)
 
 void TextEdit::askBeforeCloseDocument()
 {
-	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(),
-		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	/*QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(),
+		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);*/
+
+	QMessageBox* confirm = new QMessageBox(QMessageBox::Icon::Warning, QCoreApplication::applicationName(),
+		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No, this);
+
+	QMessageBox::StandardButton reply = (QMessageBox::StandardButton)confirm->exec();
 
 	if (reply == QMessageBox::Yes) {
 		_cursorTimer.stop();
@@ -748,12 +749,6 @@ void TextEdit::closeEditor()
 }
 
 
-void TextEdit::criticalError(QString error)
-{
-	QMessageBox::StandardButton(QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok));
-}
-
-
 void TextEdit::resetCursorPosition()
 {
 	//Set new cursor
@@ -778,6 +773,14 @@ void TextEdit::cursorTimerEvent()
 	}
 }
 
+
+/**************************** EDITOR FILE OPERATIONS ****************************/
+/*
+*	Setting document filename, URI
+*	File print, Print Preview
+*	Save as PDF
+*	Share document URI
+*/
 
 void TextEdit::setCurrentFileName(QString fileName, QString uri)
 {

@@ -216,9 +216,8 @@ public:
 	void removeBlockFromList(int blockPosition);
 	void addBlockToList(int blockPosition, int listPosition);
 
-	//Editor operations (close/error)
+	//Editor operations
 	void closeEditor();
-	void criticalError(QString error);
 	void resetCursorPosition();
 
 	//User text highlighting

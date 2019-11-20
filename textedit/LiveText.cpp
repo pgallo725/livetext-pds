@@ -103,8 +103,13 @@ void LiveText::forceLogout()
 		_editProfile->close();
 
 	if (editorOpen) {
-		//Show an error on editor
-		_textEdit->criticalError(tr("Server not responding, you will be disconnected"));
+		//Show an error popup in the editor
+		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
+			tr("Server not responding, you will be disconnected"), QMessageBox::Ok, _textEdit);
+		err->exec();
+
+		if (!editorOpen)	// Avoid crashes when multiple popups appear at once
+			return;
 
 		//Shows landing page again
 		_landingPage->pushButtonBackClicked();
@@ -184,31 +189,41 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_client, &Client::formatSymbols, _docEditor, &DocumentEditor::applySymbolFormat, Qt::QueuedConnection);
 	connect(_client, &Client::listEditBlock, _docEditor, &DocumentEditor::listEditBlock, Qt::QueuedConnection);
 
+
 	//If opening document is not present in user data, it updates data
-	if (!_user.getDocuments().contains(doc.getURI())) {
+	if (!_user.hasDocument(doc.getURI()))
 		_user.addDocument(doc.getURI());
-	}
 
 	//Load document in editor
 	_docEditor->openDocument();
 
-	//Opens text editor
-	openEditor();
-
 	// Synchronize with the client thread
 	_client->setSync();
 	_wc->wakeAll();
+
+	//Opens text editor
+	openEditor();
 }
 
 
 void LiveText::closeDocumentCompleted(bool isForced)
 {
-	if (isForced) {
-		//If it is forced print an error message in editor
-		_textEdit->criticalError(tr("Server encountered an error, the document will be closed"));
+	if (isForced) 
+	{
+		//Close edit profile (if opened)
+		if (_editProfile->isVisible())
+			_editProfile->close();
+
+		//If it is forced, show an error popup to the user inside the editor
+		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
+			tr("Server encountered an error, the document will be closed"), QMessageBox::Ok, _textEdit);
+		err->exec();
 	}
 
-	//Reopen logged page in landing page
+	if (!editorOpen)	// Avoid crashes when multiple popups appear at once
+		return;
+
+	//Keep the user logged in and return to landing page (document selection)
 	_landingPage->LoginSuccessful(&_user);
 	_landingPage->show();
 
