@@ -13,7 +13,7 @@ const QString rsrcPath = ":/images";
 
 ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) 
 	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow),
-	_user(user), mngr(WidgetsManager(this)) 
+	_user(user), _iconChanged(false), mngr(WidgetsManager(this)) 
 {
 	//UI setup
 	ui->setupUi(this);
@@ -89,6 +89,7 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 	//Sets in path box correct path
 	if (!filename.isEmpty()) {
 		updateUserAvatarPreview(filename);
+		_iconChanged = true;
 	}
 }
 
@@ -104,7 +105,8 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString nick = ui->lineEdit_editNick->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
-	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
+	QImage userIcon = _iconChanged ? 
+		ui->label_UsrIcon->pixmap()->toImage() : QImage();		//If the image was not changed, an empty one is sent
 
 
 	//Check if all password are the same (if setted)
@@ -118,14 +120,10 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	//Shows loading splash screen 
 	mngr.showLoadingScreen(loading, tr("Updating profile..."));
 
-
-	//Check if some fields are unchanged it emits empty ones
-	if (userIcon == _user.getIcon())
-		userIcon = QImage();
-
-
 	//Sends new info to server
 	emit accountUpdate(nick, userIcon, newPassword, _fromEditor);
+
+	_iconChanged = false;	 // Reset the image flag
 }
 
 void ProfileEditWindow::passwordEdited()
@@ -155,6 +153,7 @@ void ProfileEditWindow::radioButtonPressed()
 		//Load default profile picture
 		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+		_iconChanged = true;
 	}
 }
 
@@ -190,7 +189,6 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 		}
 	}
 
-
 	//Load default profile picture
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -223,7 +221,6 @@ void ProfileEditWindow::updateInfo()
 
 	ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
-	
 	//Set username
 	ui->label_username->setText(_user.getUsername());
 	ui->lineEdit_editNick->setText(_user.getNickname());

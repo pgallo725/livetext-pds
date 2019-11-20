@@ -14,6 +14,7 @@ class ProfileEditWindow : public QDialog
 	Q_OBJECT
 
 private:
+
 	//Loading splash screen
 	QLabel* loading;
 
@@ -28,11 +29,14 @@ private:
 	//Checks if window is open from editor (true) or from LandingPage (false)
 	bool _fromEditor;
 
+	//Flag used to determine whether the image was changed or not
+	bool _iconChanged;
+
 	//Methods
 	void resetFields();
 	
-
 public:
+
 	ProfileEditWindow(User& user, QWidget* parent = nullptr);
 	~ProfileEditWindow();
 

@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QStyle>
 
+
 WidgetsManager::WidgetsManager(QWidget* widget) : _widget(widget)
 {
 	//Sets widget icon
