@@ -21,7 +21,7 @@ AboutWindow::AboutWindow(QWidget* parent)
 	WidgetsManager mngr(this);
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
-		mngr.centerAndResize(0.45, 0.475);
+		mngr.centerAndResize(0.4, 0.4);
 	else
 		mngr.centerAndResize(0.36, 0.38);
 	
