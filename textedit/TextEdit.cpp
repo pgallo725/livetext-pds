@@ -991,10 +991,12 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 	_extraCursor->setPosition(listPosition);
 	QTextList* currentList = _extraCursor->currentList();
 
-
-	//Add block to list
-	currentList->add(blk);
-
+	if (currentList)
+	{
+		//Add block to list
+		currentList->add(blk);
+	}
+	
 	//GUI update
 	updateEditorSelectedActions();
 }
@@ -1753,6 +1755,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
 	}*/
 
+
+	//Reset old cursor position
+	_currentCursorPosition = -1;
 
 	//Update GUI after some insertion/deletion
 	cursorPositionChanged();
