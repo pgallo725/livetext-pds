@@ -1380,6 +1380,19 @@ a.a 2018/2019</string>
               </property>
              </widget>
             </item>
+            <item>
+             <spacer name="verticalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
           </item>
          </layout>
@@ -1488,7 +1501,7 @@ a.a 2018/2019</string>
                     <bool>false</bool>
                    </attribute>
                    <attribute name="horizontalHeaderMinimumSectionSize">
-                    <number>35</number>
+                    <number>45</number>
                    </attribute>
                    <attribute name="horizontalHeaderDefaultSectionSize">
                     <number>70</number>
