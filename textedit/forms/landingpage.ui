@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>776</width>
+    <width>832</width>
     <height>659</height>
    </rect>
   </property>
@@ -1254,6 +1254,9 @@ a.a 2018/2019</string>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Preferred</enum>
+              </property>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>0</width>
@@ -1380,19 +1383,6 @@ a.a 2018/2019</string>
               </property>
              </widget>
             </item>
-            <item>
-             <spacer name="verticalSpacer_12">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
            </layout>
           </item>
          </layout>
@@ -1449,12 +1439,6 @@ a.a 2018/2019</string>
                 <layout class="QVBoxLayout" name="verticalLayout_11">
                  <item>
                   <widget class="QTableWidget" name="tableWidget">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
                    <property name="minimumSize">
                     <size>
                      <width>0</width>
@@ -1504,7 +1488,7 @@ a.a 2018/2019</string>
                     <number>45</number>
                    </attribute>
                    <attribute name="horizontalHeaderDefaultSectionSize">
-                    <number>70</number>
+                    <number>100</number>
                    </attribute>
                    <attribute name="horizontalHeaderHighlightSections">
                     <bool>false</bool>
@@ -1519,7 +1503,7 @@ a.a 2018/2019</string>
                     <number>20</number>
                    </attribute>
                    <attribute name="verticalHeaderDefaultSectionSize">
-                    <number>25</number>
+                    <number>35</number>
                    </attribute>
                    <attribute name="verticalHeaderHighlightSections">
                     <bool>false</bool>
@@ -1565,7 +1549,7 @@ a.a 2018/2019</string>
                       <bool>false</bool>
                      </property>
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -1573,7 +1557,7 @@ a.a 2018/2019</string>
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>32</height>
+                       <height>35</height>
                       </size>
                      </property>
                      <property name="font">
@@ -1596,7 +1580,7 @@ a.a 2018/2019</string>
                       <bool>false</bool>
                      </property>
                      <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                        <horstretch>0</horstretch>
                        <verstretch>0</verstretch>
                       </sizepolicy>
@@ -1633,7 +1617,7 @@ a.a 2018/2019</string>
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::MinimumExpanding</enum>
+               <enum>QSizePolicy::Preferred</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -1657,7 +1641,7 @@ a.a 2018/2019</string>
               <item>
                <widget class="QPushButton" name="pushButton_back">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
@@ -1687,7 +1671,7 @@ a.a 2018/2019</string>
                <enum>Qt::Vertical</enum>
               </property>
               <property name="sizeType">
-               <enum>QSizePolicy::MinimumExpanding</enum>
+               <enum>QSizePolicy::Preferred</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
