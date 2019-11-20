@@ -600,23 +600,6 @@ void TextEdit::setupEditorActions()
 *	Remove presence from editor
 */
 
-void TextEdit::setupOnlineUsersActions()
-{
-	//Clear online users toolbar
-	onlineUsersToolbar->clear();
-
-	//Generate user toolbar for every user logged
-	foreach(Presence * p, onlineUsers.values()) {
-
-		QAction* onlineAction = new QAction(QIcon(p->profilePicture()), p->name().toStdString().c_str(), this);
-		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
-
-		onlineAction->setCheckable(true);
-		onlineUsersToolbar->addAction(onlineAction);
-
-		p->setAction(onlineAction);
-	}
-}
 
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
@@ -636,17 +619,25 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 		removePresence(userId);
 	}
 
-	//Insert presence in editor
-	onlineUsers.insert(userId, new Presence(userId, username, color, userPic, _textEdit));
+	Presence* p = new Presence(userId, username, color, userPic, _textEdit);
 
-	//Redraw of the onlineUsers toolbar
-	setupOnlineUsersActions();
+	//Add user icon on user toolbar
+	QAction* onlineAction = new QAction(QIcon(p->profilePicture()), username, this);
+	connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
+
+	onlineAction->setCheckable(true);
+	onlineUsersToolbar->addAction(onlineAction);
+
+	p->setAction(onlineAction);
+
+	//Insert presence in editor
+	onlineUsers.insert(userId, p);
 
 	//Reset cursor postion to send to the new user current cursor position
 	_currentCursorPosition = -1;
 
-	//Recompute text highlighting
-	emit generateExtraSelection();
+	//Recompute user text highlighting
+	handleMultipleSelections();
 }
 
 //Remove presence in the document
@@ -661,8 +652,11 @@ void TextEdit::removePresence(qint32 userId)
 		//Remove frome editor
 		onlineUsers.remove(userId);
 
-		//Redraw of the onlineUsers toolbar
-		setupOnlineUsersActions();
+		//Remove user icon from users toolbar
+		onlineUsersToolbar->removeAction(p->actionHighlightText());
+
+		//Recompute user text highlighting
+		handleMultipleSelections();
 
 		//Clean pointers
 		delete p;
@@ -999,7 +993,7 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 		//Add block to list
 		currentList->add(blk);
 	}
-	
+
 	//GUI update
 	updateEditorSelectedActions();
 }
@@ -1236,7 +1230,7 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 	int position = i;
 
 	//Sends new char formats to server (array to handle selections with different formats)
-	while (true) 
+	while (true)
 	{
 		if (i == cursor.selectionEnd())
 		{
@@ -1796,7 +1790,7 @@ void TextEdit::removeChars(int start, int end)
 
 	//Select the text to be removed
 	_extraCursor->setPosition(start);
-	_extraCursor->setPosition(std::min<int>(end, _textEdit->document()->characterCount()-1),
+	_extraCursor->setPosition(std::min<int>(end, _textEdit->document()->characterCount() - 1),
 		QTextCursor::KeepAnchor);
 
 	//Delete characters
@@ -1883,7 +1877,7 @@ void TextEdit::highlightUsersText()
 {
 	//For every user it's check/uncheck his selection to be displayed
 	foreach(Presence * p, onlineUsers.values())
-			p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
+		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
 
 	handleMultipleSelections();
@@ -1915,6 +1909,25 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 			//Add extra selection to Presence
 			_usersText.append(userText);
 		}
+	}
+	else
+	{
+		QTextCursor cursor(_textEdit->document());
+
+		//Text selection
+		cursor.setPosition(selection.first);
+		cursor.setPosition(selection.second, QTextCursor::KeepAnchor);
+
+		QTextEdit::ExtraSelection userText;
+
+		//Sets format of extra selection
+		QColor color = Qt::gray;
+		color.setAlpha(70);
+		userText.format.setBackground(color);
+		userText.cursor = cursor;
+
+		//Add extra selection to Presence
+		_usersText.append(userText);
 	}
 }
 

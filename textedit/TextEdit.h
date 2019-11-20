@@ -160,7 +160,6 @@ private:
 	//GUI Setup
 	void setupMainWindow();
 	void setupEditorActions();
-	void setupOnlineUsersActions();
 
 	//Warning message before closing document
 	void askBeforeCloseDocument();
