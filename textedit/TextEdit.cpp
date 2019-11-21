@@ -1332,6 +1332,9 @@ void TextEdit::updateEditorSelectedActions()
 {
 	QTextCursor cursor = _textEdit->textCursor();
 
+	//Selection
+	actionDelete->setEnabled(cursor.hasSelection());
+
 	//If there's a selection and the selection is from right to left
 	//It take the format of the first character of the selection
 	if (cursor.hasSelection() && (cursor.selectionStart() == cursor.position()))
@@ -1339,9 +1342,6 @@ void TextEdit::updateEditorSelectedActions()
 
 	//Users cursors
 	redrawAllCursors();
-
-	//Selection
-	actionDelete->setEnabled(cursor.hasSelection());
 
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();
