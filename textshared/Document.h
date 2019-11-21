@@ -77,12 +77,12 @@ public:
 	void erase();
 
 	/* Editing methods */
-	int insert(Symbol& s);
-	int remove(const Position& fPos);
+	int insert(Symbol& s, int positionHint = -1);
+	int remove(const Position& fPos, int positionHint = -1);
 	Position removeAtIndex(int index);
 
 	int editBlockList(TextBlockID bId, TextListID lId, QTextListFormat fmt);
-	int formatSymbol(const Position& fPos, QTextCharFormat fmt);
+	int formatSymbol(const Position& fPos, QTextCharFormat fmt, int positionHint = -1);
 	int formatBlock(TextBlockID id, QTextBlockFormat fmt);
 	int formatList(TextListID id, QTextListFormat fmt);
 	
@@ -116,8 +116,8 @@ public:
 
 private:
 
-	/* Binary search methods to translate from a fractional position to an integer index */
-	int positionIndex(const Position& pos);
+	/* Binary search method to translate: fractional position <-> integer index */
+	int findPosition(const Position& pos);
 	int insertionIndex(const Position& pos);
 
 	/* Fractional position algorithm */

@@ -3,6 +3,8 @@
 
 #include "WidgetsManager.h"
 
+#include <QDesktopWidget>
+
 const QString rsrcPath = ":/images";
 
 
@@ -17,11 +19,18 @@ AboutWindow::AboutWindow(QWidget* parent)
 
 	//Center and resize window
 	WidgetsManager mngr(this);
-	mngr.centerAndResize(0.4, 0.35);
+	//Center and resize
+	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+		mngr.centerAndResize(0.4, 0.4);
+	else
+		mngr.centerAndResize(0.36, 0.38);
+	
 
 	//Setup label logo
 	QPixmap logoPix(rsrcPath + "/misc/logo.png");
 	ui->label_logo->setPixmap(logoPix.scaled(ui->label_logo->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
+	connect(ui->pushButton, &QPushButton::clicked, this, &AboutWindow::close);
 }
 
 AboutWindow::~AboutWindow()

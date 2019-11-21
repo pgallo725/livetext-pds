@@ -33,11 +33,9 @@ enum MessageType : quint16
 	DocumentError,
 
 	// Text-editing messages
-	CharInsert,
-	CharDelete,
-	CharFormat,
-	BulkInsert,
-	BulkDelete,
+	CharsInsert,
+	CharsDelete,
+	CharsFormat,
 	BlockEdit,
 	ListEdit,
 

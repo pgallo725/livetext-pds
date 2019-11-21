@@ -2,6 +2,11 @@
 
 #include <QObject>
 #include <QtNetwork>
+#include <QThread>
+#include <QSharedPointer>
+#include <QWaitCondition>
+#include <QMutex>
+#include <QMutexLocker>
 
 //Include headers to handle server Messages
 #include <Message.h>
@@ -21,7 +26,7 @@
 #include <Document.h>
 
 #define READYREAD_TIMEOUT 5000
-
+#define SYNC_TIMEOUT 5000
 
 class Client : public QObject
 {
@@ -31,16 +36,28 @@ private:
 
 	QSslSocket* socket;
 	SocketBuffer socketBuffer;
+	QSharedPointer<QThread> workThread;
+	
+	// Thread sync variables
+	QSharedPointer<QWaitCondition> wc;
+	QMutex m;
+	bool sync;
 
 public:
 
-	Client(QObject* parent = 0);
+	Client(QSharedPointer<QWaitCondition> wc, QObject* parent = 0);
 	~Client();
 
 	// Generic message reader and handler
 	MessageCapsule readMessage(QDataStream& stream);
 	void messageHandler(MessageCapsule message);
 
+	// Thread synchronization methods
+	void setSync();
+
+private:
+
+	void getSync();
 
 public slots:
 
@@ -64,21 +81,17 @@ public slots:
 
 	// TextEditor message handlers
 	void handleCursor(MessageCapsule message);
-	void handleCharInsert(MessageCapsule message);
-	void handleCharRemove(MessageCapsule message);
-	void handleBulkInsert(MessageCapsule message);
-	void handleBulkDelete(MessageCapsule message);
-	void handleCharFormat(MessageCapsule message);
+	void handleCharsInsert(MessageCapsule message);
+	void handleCharsDelete(MessageCapsule message);
+	void handleCharsFormat(MessageCapsule message);
 	void handleBlockFormat(MessageCapsule message);
 	void handleListEdit(MessageCapsule message);
 
 	// Send TextEditor messages to server
 	void sendCursor(qint32 userId, qint32 position);
-	void sendCharInsert(Symbol character, bool isLast);
-	void sendCharRemove(Position position);
-	void sendBulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void sendBulkDelete(QVector<Position> positions);
-	void sendCharFormat(Position position, QTextCharFormat fmt);
+	void sendCharsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void sendCharsDelete(QVector<Position> positions);
+	void sendCharsFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts);
 	void sendBlockFormat(TextBlockID blockId, QTextBlockFormat fmt);
 	void sendListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
@@ -111,11 +124,9 @@ signals:
 	void documentExitFailed(QString errorType);
 	
 	// TextEdit Signals
-	void insertSymbol(Symbol character, bool isLast);
-	void removeSymbol(Position position);
-	void insertBulk(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	void removeBulk(QVector<Position> positions);
-	void formatSymbol(Position position, QTextCharFormat fmt);
+	void insertSymbols(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	void removeSymbols(QVector<Position> positions);
+	void formatSymbols(QVector<Position> positions, QVector<QTextCharFormat> fmts);
 	void formatBlock(TextBlockID blockId, QTextBlockFormat fmt);
 	void listEditBlock(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 
