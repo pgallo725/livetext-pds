@@ -1808,6 +1808,7 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 
 	//Select All/Delete
 	menu->addSeparator();
+	menu->addAction(actionDelete);
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 
 	menu->addSeparator();
