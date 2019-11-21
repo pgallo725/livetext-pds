@@ -1,6 +1,7 @@
 #include "WorkSpace.h"
 
 #include <QCoreApplication>
+#include <QElapsedTimer>
 
 #include "ServerLogger.h"
 #include <MessageFactory.h>
@@ -106,7 +107,7 @@ void WorkSpace::readMessage()
 			message->read(dataStream);
 			socketBuffer.clear();
 
-			if (mType == AccountUpdate || (mType >= CharInsert && mType <= PresenceRemove) || mType == DocumentClose)
+			if (mType == AccountUpdate || (mType >= CharsInsert && mType <= PresenceRemove) || mType == DocumentClose)
 			{
 				messageHandler.process(message, socket);
 			}
@@ -190,37 +191,55 @@ void WorkSpace::documentSave()
 	}
 }
 
-void WorkSpace::documentInsertSymbol(Symbol symbol)
+void WorkSpace::documentInsertSymbols(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
 {
-	doc->insert(symbol);
-}
+	QElapsedTimer timer;
+	timer.start();
 
-void WorkSpace::documentDeleteSymbol(Position position)
-{
-	doc->remove(position);
-}
+	int hint = -1;
 
-void WorkSpace::documentBulkInsert(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
-{
 	for each (Symbol symbol in symbols)
 	{
-		doc->insert(symbol);
+		hint = doc->insert(symbol, hint) + 1;
 	}
 
-	doc->formatBlock(blockId, blockFmt);
+	if (blockId)
+		doc->formatBlock(blockId, blockFmt);
+
+	Logger() << "CharsInsert message: " << symbols.size() <<
+		" symbols, processed in " << timer.elapsed() << " ms";
 }
 
-void WorkSpace::documentBulkDelete(QVector<Position> positions)
+void WorkSpace::documentDeleteSymbols(QVector<Position> positions)
 {
+	QElapsedTimer timer;
+	timer.start();
+
+	int hint = -1;
+
 	for each (Position position in positions)
 	{
-		doc->remove(position);
+		hint = doc->remove(position, hint);
 	}
+
+	Logger() << "CharsDelete message: " << positions.size() <<
+		" elements, processed in " << timer.elapsed() << " ms";
 }
 
-void WorkSpace::documentEditSymbol(Position position, QTextCharFormat format)
+void WorkSpace::documentEditSymbols(QVector<Position> positions, QVector<QTextCharFormat> formats)
 {
-	doc->formatSymbol(position, format);
+	QElapsedTimer timer;
+	timer.start();
+
+	int hint = -1;
+
+	for (int i = 0; i < positions.length(); i++)
+	{
+		hint = doc->formatSymbol(positions[i], formats[i], hint);
+	}
+	
+	Logger() << "CharsFormat message: " << positions.size() <<
+		" elements, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)

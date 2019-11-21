@@ -81,7 +81,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
-	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::updateUsersSelections);
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
 
 	//Custom context menu
 	connect(_textEdit, &QTextEdit::customContextMenuRequested, this, &TextEdit::showCustomContextMenu);
@@ -294,6 +294,10 @@ void TextEdit::setupEditorActions()
 #endif
 
 	menu->addSeparator();
+	//Delete
+	actionDelete = menu->addAction(tr("Delete"), this, [this]() { _textEdit->textCursor().removeSelectedText(); });
+	actionDelete->setPriority(QAction::LowPriority);
+	actionDelete->setShortcut(QKeySequence::Delete);
 	//Select all
 	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 
@@ -608,23 +612,6 @@ void TextEdit::setupEditorActions()
 *	Remove presence from editor
 */
 
-void TextEdit::setupOnlineUsersActions()
-{
-	//Clear online users toolbar
-	onlineUsersToolbar->clear();
-
-	//Generate user toolbar for every user logged
-	foreach(Presence * p, onlineUsers.values()) {
-
-		QAction* onlineAction = new QAction(QIcon(p->profilePicture()), p->name().toStdString().c_str(), this);
-		connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
-
-		onlineAction->setCheckable(true);
-		onlineUsersToolbar->addAction(onlineAction);
-
-		p->setAction(onlineAction);
-	}
-}
 
 //Slot to add a Presence in the editor
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
@@ -644,17 +631,25 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 		removePresence(userId);
 	}
 
-	//Insert presence in editor
-	onlineUsers.insert(userId, new Presence(userId, username, color, userPic, _textEdit));
+	Presence* p = new Presence(userId, username, color, userPic, _textEdit);
 
-	//Redraw of the onlineUsers toolbar
-	setupOnlineUsersActions();
+	//Add user icon on user toolbar
+	QAction* onlineAction = new QAction(QIcon(p->profilePicture()), username, this);
+	connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
+
+	onlineAction->setCheckable(true);
+	onlineUsersToolbar->addAction(onlineAction);
+
+	p->setAction(onlineAction);
+
+	//Insert presence in editor
+	onlineUsers.insert(userId, p);
 
 	//Reset cursor postion to send to the new user current cursor position
 	_currentCursorPosition = -1;
 
-	//Recompute text highlighting
-	updateUsersSelections();
+	//Recompute user text highlighting
+	handleMultipleSelections();
 }
 
 //Remove presence in the document
@@ -669,8 +664,11 @@ void TextEdit::removePresence(qint32 userId)
 		//Remove frome editor
 		onlineUsers.remove(userId);
 
-		//Redraw of the onlineUsers toolbar
-		setupOnlineUsersActions();
+		//Remove user icon from users toolbar
+		onlineUsersToolbar->removeAction(p->actionHighlightText());
+
+		//Recompute user text highlighting
+		handleMultipleSelections();
 
 		//Clean pointers
 		delete p;
@@ -686,10 +684,6 @@ void TextEdit::removePresence(qint32 userId)
 *	Status bar messages
 *	Error messages
 *	Start timer
-*	Setting document filename, URI
-*	File print, Print Preview
-*	Save as PDF
-*	Share document URI
 */
 
 void TextEdit::resizeEditor(const QSizeF& newSize)
@@ -705,8 +699,10 @@ void TextEdit::resizeEditor(const QSizeF& newSize)
 
 void TextEdit::askBeforeCloseDocument()
 {
-	QMessageBox::StandardButton reply = QMessageBox::warning(this, QCoreApplication::applicationName(),
-		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No);
+	QMessageBox* confirm = new QMessageBox(QMessageBox::Icon::Warning, QCoreApplication::applicationName(),
+		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No, this);
+
+	QMessageBox::StandardButton reply = (QMessageBox::StandardButton)confirm->exec();
 
 	if (reply == QMessageBox::Yes) {
 		_cursorTimer.stop();
@@ -756,12 +752,6 @@ void TextEdit::closeEditor()
 }
 
 
-void TextEdit::criticalError(QString error)
-{
-	QMessageBox::StandardButton(QMessageBox::critical(this, QCoreApplication::applicationName(), error, QMessageBox::Ok));
-}
-
-
 void TextEdit::resetCursorPosition()
 {
 	//Set new cursor
@@ -786,6 +776,14 @@ void TextEdit::cursorTimerEvent()
 	}
 }
 
+
+/**************************** EDITOR FILE OPERATIONS ****************************/
+/*
+*	Setting document filename, URI
+*	File print, Print Preview
+*	Save as PDF
+*	Share document URI
+*/
 
 void TextEdit::setCurrentFileName(QString fileName, QString uri)
 {
@@ -906,7 +904,6 @@ void TextEdit::listStyle(int styleIndex)
 	//Getting document cursor
 	QTextCursor cursor = _textEdit->textCursor();
 
-
 	//Create standard style (undefined)
 	QTextListFormat::Style style = QTextListFormat::ListStyleUndefined;
 
@@ -939,7 +936,7 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 		removeBlockFromList(position);
 
 	//Setting list indentation to 1 step
-	fmt.setIndent(1);
+	//fmt.setIndent(1);
 
 	//Creating list with given format
 	_extraCursor->createList(fmt);
@@ -970,7 +967,7 @@ void TextEdit::removeBlockFromList(int blockPosition)
 
 	//Makes the index of the blockFormat object -1 --> Reset block format to default
 	blkFormat.setObjectIndex(-1);
-	blkFormat.setIndent(0);
+	//blkFormat.setIndent(0);
 
 	//Apply new format (is applied anyway)
 	_extraCursor->setBlockFormat(blkFormat);
@@ -1000,9 +997,11 @@ void TextEdit::addBlockToList(int blockPosition, int listPosition)
 	_extraCursor->setPosition(listPosition);
 	QTextList* currentList = _extraCursor->currentList();
 
-
-	//Add block to list
-	currentList->add(blk);
+	if (currentList)
+	{
+		//Add block to list
+		currentList->add(blk);
+	}
 
 	//GUI update
 	updateEditorSelectedActions();
@@ -1023,9 +1022,15 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	//Sets alignment and indent in a new format (due to compatibility problems)
 	QTextBlockFormat format;
 	format.setAlignment(fmt.alignment());
+	format.setIndent(fmt.indent());
+
+	// Set margins
+	format.setBottomMargin(fmt.bottomMargin());
+	format.setTopMargin(fmt.topMargin());
+	format.setLeftMargin(fmt.leftMargin());
+	format.setRightMargin(fmt.rightMargin());
 
 	//Set format lineheight, if not present sets default one
-	format.setIndent(fmt.indent());
 	if (fmt.lineHeight() == 0)
 		format.setLineHeight(100, QTextBlockFormat::ProportionalHeight);
 	else
@@ -1043,6 +1048,9 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 	//GUI update
 	updateEditorSelectedActions();
+
+	//User text higlighting
+	handleMultipleSelections();
 }
 
 
@@ -1223,25 +1231,46 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 	//Getting document cursor
 	QTextCursor cursor = _textEdit->textCursor();
 
-	//Apply format to the document, if the cursor (_textEdit->textCursor()) has a selection, apply format to the selection
+	//Apply format to the document, if the textCursor has a selection, apply format to the selection
 	_textEdit->mergeCurrentCharFormat(format);
 
-	//Sends new char format to server (in case of selection it sends the updated format of every character because they can be different
-	for (int i = cursor.selectionStart(); i < cursor.selectionEnd(); ++i) {
-		_extraCursor->setPosition(i + 1);
-		emit symbolFormatChanged(i, _extraCursor->charFormat());
+	QVector<QTextCharFormat> formats;
+	int i = cursor.selectionStart();
+	int position = i;
+
+	//Sends new char formats to server (array to handle selections with different formats)
+	while (true)
+	{
+		if (i == cursor.selectionEnd())
+		{
+			if (formats.size() > 0)
+				emit charsFormatChanged(position, formats.size(), formats);
+			break;
+		}
+
+		// Add the next symbol's format to the array
+		_extraCursor->setPosition(++i);
+		formats.append(_extraCursor->charFormat());
+
+		if (formats.size() == BULK_EDIT_SIZE)
+		{
+			emit charsFormatChanged(position, BULK_EDIT_SIZE, formats);
+			formats.clear();
+			position = i;
+		}
 	}
 }
 
 
-void TextEdit::applyCharFormat(int position, QTextCharFormat fmt)
+void TextEdit::applyCharFormat(int start, int end, QTextCharFormat fmt)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
-	_extraCursor->setPosition(position);
-	_extraCursor->setPosition(position + 1, QTextCursor::KeepAnchor);
+	//Create a selection on the chars that have to be formatted
+	_extraCursor->setPosition(start);
+	_extraCursor->setPosition(end, QTextCursor::KeepAnchor);
 
-	//Apply char format to text
+	//Apply char format to selected text
 	_extraCursor->setCharFormat(fmt);
 
 	//Update GUI buttons according to new format
@@ -1311,6 +1340,9 @@ void TextEdit::updateEditorSelectedActions()
 	//Users cursors
 	redrawAllCursors();
 
+	//Selection
+	actionDelete->setEnabled(cursor.hasSelection());
+
 	//Block format
 	QTextBlockFormat blockFmt = cursor.blockFormat();
 
@@ -1339,14 +1371,12 @@ void TextEdit::updateEditorSelectedActions()
 	else {
 		toggleCheckList(standard);
 	}
-
 }
 
 
 //Checks only listType menu entry in list menu
 void TextEdit::toggleCheckList(int listType)
 {
-
 	//All other entries are unchecked
 	for (int i = 0; i < LIST_STYLES; ++i) {
 		listActions[i]->setChecked(i == listType);
@@ -1427,7 +1457,6 @@ void TextEdit::lineHeightChanged(qreal height)
 		actionLineHeight200->setChecked(true);
 	else //Default line height
 		actionLineHeight100->setChecked(true);
-
 }
 
 /**************************** PASTE EVENT ****************************/
@@ -1471,132 +1500,18 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 {
 	/*************** CHARACTER DELETION ***************/
 
-	if (charsRemoved == 1)
+	for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
 	{
-		emit charDeleted(position);
-	}
-	else if (charsRemoved > 1)
-	{
-		for (int i = 0; i < charsRemoved; i += BULK_EDIT_SIZE)
-		{
-			emit charGroupDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
-		}
+		emit TextEdit::charsDeleted(position, std::min<int>(BULK_EDIT_SIZE, charsRemoved - i));
 	}
 
 	/*************** CHARACTER INSERTION ***************/
 
-	if (charsAdded == 1)
+	QVector<QChar> bulkChars;
+	QVector<QTextCharFormat> bulkFormats;
+
+	for (int i = position, pos = position; i < position + charsAdded; ++i)
 	{
-		//Cursor position is set to i + 1 to get correct character format
-		_extraCursor->setPosition(position + 1);
-
-		//Getting QTextCharFormat from cursor
-		QTextCharFormat fmt = _extraCursor->charFormat();
-
-		//Reset position to i to get blockformat
-		_extraCursor->setPosition(position);
-
-		//Getting QTextBlockFormat from cursor
-		QTextBlockFormat blockFmt = _extraCursor->blockFormat();
-
-		//Getting inserted character
-		QChar ch = _textEdit->document()->characterAt(position);
-
-		emit charInserted(ch, fmt, position, false);
-
-		//If it is a paragraph separator ('8233')
-		if (ch == QChar::ParagraphSeparator)
-		{
-			//Update block format to server
-			emit blockFormatChanged(position, position, blockFmt);
-		}
-	}
-	else if (charsAdded > 1)
-	{
-		QVector<QChar> bulkChars;
-		QVector<QTextCharFormat> bulkFormats;
-
-		for (int i = position, pos = position; i < position + charsAdded; ++i)
-		{
-			//Cursor position is set to i + 1 to get correct character format
-			_extraCursor->setPosition(i + 1);
-
-			//Getting QTextCharFormat from cursor
-			QTextCharFormat fmt = _extraCursor->charFormat();
-
-			//Reset position to i to get blockformat
-			_extraCursor->setPosition(i);
-
-			//Getting inserted character
-			QChar ch = _textEdit->document()->characterAt(i);
-
-			//Skip null characters '\0'
-			if (ch != QChar::Null)
-			{
-				bulkChars.append(ch);
-				bulkFormats.append(fmt);
-
-				// Send a group of characters either if the end of the block or the buffer size value is reached
-				if (ch == QChar::ParagraphSeparator || bulkChars.length() == BULK_EDIT_SIZE || i == position + charsAdded - 1)
-				{
-					//Getting QTextBlockFormat from cursor
-					QTextBlockFormat blockFmt = _extraCursor->blockFormat();
-					blockFmt.lineHeight();
-
-					//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
-					bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
-					emit charGroupInserted(bulkChars, bulkFormats, pos, isLast, blockFmt);
-
-					pos += bulkChars.length();
-					bulkChars.clear();			 // Clear buffers before the next iteration (block to be inserted)
-					bulkFormats.clear();
-				}
-
-				//If it is a paragraph separator ('8233')
-				if (ch == QChar::ParagraphSeparator)
-				{
-					//Getting current block and list (if present)
-					QTextBlock currentBlock = _extraCursor->block();
-					QTextList* textList = _extraCursor->currentList();
-
-					if (textList)
-					{
-						//Getting first block of the list
-						QTextBlock firstListBlock = textList->item(0);
-
-						//If the current block is the beginning of a new list emit the signal to create a new one
-						if (currentBlock == firstListBlock)
-						{
-							// It's not actually a new list in this case, but the re-insertion of a block
-							if (textList->count() > 1 && i == position + charsAdded - 1)
-							{
-								QTextBlock otherListBlock = textList->item(1);
-								emit assignBlockToList(currentBlock.position(), otherListBlock.position());
-							}
-							else
-								emit createNewList(currentBlock.position(), textList->format());
-						}
-
-						//Else assign current block to his proper list
-						else
-							emit assignBlockToList(currentBlock.position(), firstListBlock.position());
-					}
-					else
-						emit setBlockNoList(currentBlock.position());
-				}
-			}
-		}
-
-	}
-
-	/*for (int i = 0; i < charsRemoved; ++i) {
-		emit charDeleted(position);
-	}
-
-	QTextBlockFormat blockFmt;
-
-
-	for (int i = position; i < position + charsAdded; ++i) {
 		//Cursor position is set to i + 1 to get correct character format
 		_extraCursor->setPosition(i + 1);
 
@@ -1606,82 +1521,86 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		//Reset position to i to get blockformat
 		_extraCursor->setPosition(i);
 
-		//Getting QTextBlockFormat from cursor
-		blockFmt = _extraCursor->blockFormat();
-
 		//Getting inserted character
 		QChar ch = _textEdit->document()->characterAt(i);
 
-		//Emit signal to DocumentEditor to insert a character if is not a null character '\0'
-		if (ch != QChar::Null) {
-			//Boolean flag to check id it's last '8233' of the document (eof)
-			bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
-			emit charInserted(ch, fmt, i, isLast);
-		}
+		//Skip null characters '\0'
+		if (ch != QChar::Null)
+		{
+			bulkChars.append(ch);
+			bulkFormats.append(fmt);
 
-		//If it is a paragraph separator ('8233')
-		if (ch == QChar::ParagraphSeparator) {
-
-			//Update block format to server
-			emit blockFormatChanged(i, i, blockFmt);
-
-
-			//Getting current block and list (if present)
-			QTextBlock currentBlock = _extraCursor->block();
-			QTextList* textList = _extraCursor->currentList();
-
-			if (textList)
+			// Send a group of characters either if the end of the block or the buffer size value is reached
+			if (ch == QChar::ParagraphSeparator || bulkChars.length() == BULK_EDIT_SIZE || i == position + charsAdded - 1)
 			{
-				//Getting first block of the list
-				QTextBlock firstListBlock = textList->item(0);
+				//Getting QTextBlockFormat from cursor
+				QTextBlockFormat blockFmt = _extraCursor->blockFormat();
+				blockFmt.lineHeight();
 
-				//If the current block is the beginning of a new list emit the signal to create a new one
-				if (currentBlock == firstListBlock)
-				{
-					// It's not actually a new list in this case, but the re-insertion of a block
-					if (textList->count() > 1 && i == position + charsAdded - 1)
-					{
-						QTextBlock otherListBlock = textList->item(1);
-						emit assignBlockToList(currentBlock.position(), otherListBlock.position());
-					}
-					else
-						emit createNewList(currentBlock.position(), textList->format());
-				}
+				//Boolean flag to check if the bulk contains the last '8233' of the document (eof)
+				bool isLast = (ch == QChar::ParagraphSeparator) && (i == _textEdit->document()->characterCount() - 1);
+				emit TextEdit::charsAdded(bulkChars, bulkFormats, pos, isLast, blockFmt);
 
-				//Else assign current block to his proper list
-				else
-					emit assignBlockToList(currentBlock.position(), firstListBlock.position());
+				pos += bulkChars.length();
+				bulkChars.clear();			 // Clear buffers before the next iteration (block to be inserted)
+				bulkFormats.clear();
 			}
-			else
-				emit setBlockNoList(currentBlock.position());
+
+			//If it is a paragraph separator ('8233')
+			if (ch == QChar::ParagraphSeparator)
+			{
+				//Getting current block and list (if present)
+				QTextBlock currentBlock = _extraCursor->block();
+				QTextList* textList = _extraCursor->currentList();
+
+				if (textList)
+				{
+					//Getting first block of the list
+					QTextBlock firstListBlock = textList->item(0);
+
+					//If the current block is the beginning of a new list emit the signal to create a new one
+					if (currentBlock == firstListBlock)
+					{
+						// It's not actually a new list in this case, but the re-insertion of a block
+						if (textList->count() > 1 && i == position + charsAdded - 1)
+						{
+							QTextBlock otherListBlock = textList->item(1);
+							emit assignBlockToList(currentBlock.position(), otherListBlock.position());
+						}
+						else
+							emit createNewList(currentBlock.position(), textList->format());
+					}
+
+					//Else assign current block to his proper list
+					else
+						emit assignBlockToList(currentBlock.position(), firstListBlock.position());
+				}
+				else
+					emit setBlockNoList(currentBlock.position());
+			}
 		}
 	}
 
-	//If in my insertion there's not a 8233 (\n), i apply the correct block format
-	if (charsAdded > 1) {
-		emit blockFormatChanged(position + charsAdded - 1, position + charsAdded - 1, blockFmt);
-	}*/
 
+	//Reset old cursor position
+	_currentCursorPosition = -1;
 
 	//Update GUI after some insertion/deletion
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 
-void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
+void TextEdit::newChars(QString chars, QTextCharFormat fmt, int position)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
 	_extraCursor->setPosition(position);
-
-	//Set new char format
-	_extraCursor->setCharFormat(format);
 
 	//Insert character at position
-	_extraCursor->insertText(ch);
+	_extraCursor->insertText(chars, fmt);
 
 	//Reset previous cursor position so it is sent as soon as possible
 	_currentCursorPosition = -1;
@@ -1690,17 +1609,21 @@ void TextEdit::newChar(QChar ch, QTextCharFormat format, int position)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
-void TextEdit::removeChar(int position)
+
+void TextEdit::removeChars(int start, int end)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
-	_extraCursor->setPosition(position);
+	//Select the text to be removed
+	_extraCursor->setPosition(start);
+	_extraCursor->setPosition(std::min<int>(end, _textEdit->document()->characterCount() - 1),
+		QTextCursor::KeepAnchor);
 
-	//Delete character
-	_extraCursor->deleteChar();
+	//Delete characters
+	_extraCursor->removeSelectedText();
 
 	//Reset previous cursor position so it is sent as soon as possible
 	_currentCursorPosition = -1;
@@ -1709,7 +1632,7 @@ void TextEdit::removeChar(int position)
 	updateEditorSelectedActions();
 
 	//User text higlighting
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
 
@@ -1772,6 +1695,7 @@ void TextEdit::drawGraphicCursor(Presence* p)
 	userCursorLabel->show();
 }
 
+
 /**************************** HIGHLIGHT ONLINE USERS TEXT ****************************/
 /*
 *	Handle button behavior to check/uncheck all selections
@@ -1786,31 +1710,13 @@ void TextEdit::highlightUsersText()
 		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
 
-	updateUsersSelections();
+	handleMultipleSelections();
 }
 
-void TextEdit::updateUsersSelections()
-{
-	if (areUserIconActive()) {
-		_usersText.clear();
-
-		//Generate extraSelections according to users text
-		emit generateExtraSelection();
-
-		//Shows user text highlight
-		handleMultipleSelections();
-	}
-	else {
-		//Clear all extra selections
-		_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
-
-	}
-}
 
 //Sets and save all extra selections in the document
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
-
 	if (onlineUsers.contains(userId)) {
 		Presence* p = onlineUsers.find(userId).value();
 
@@ -1833,30 +1739,43 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 			_usersText.append(userText);
 		}
 	}
+	else
+	{
+		QTextCursor cursor(_textEdit->document());
+
+		//Text selection
+		cursor.setPosition(selection.first);
+		cursor.setPosition(selection.second, QTextCursor::KeepAnchor);
+
+		QTextEdit::ExtraSelection userText;
+
+		//Sets format of extra selection
+		QColor color = Qt::gray;
+		color.setAlpha(70);
+		userText.format.setBackground(color);
+		userText.cursor = cursor;
+
+		//Add extra selection to Presence
+		_usersText.append(userText);
+	}
 }
 
 //Sets extra selection in the editor based on what user is checked
 void TextEdit::handleMultipleSelections()
 {
 	//Clear all extra selections
-	_textEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
+	_usersText.clear();
 
+	if (areUserIconActive()) {
 
-	int actionsChecked = 0;
-	foreach(Presence * p, onlineUsers.values()) {
-		if (p->actionHighlightText()->isChecked())
-			actionsChecked++;
-	}
+		emit generateExtraSelection();
 
-	//Check/Uncheck of actionHighlightUsers based on single highlight checked
-	if (actionsChecked == 0) {
-		actionHighlightUsers->setChecked(false);
-	}
-
-	if (actionsChecked == onlineUsers.size()) {
 		actionHighlightUsers->setChecked(true);
 	}
-
+	else {
+		//Uncheck of actionHighlightUsers based on single highlight checked
+		actionHighlightUsers->setChecked(false);
+	}
 	//Sets the formatted selections in the editor
 	_textEdit->setExtraSelections(_usersText);
 }
@@ -1925,7 +1844,6 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 
 /**************************** ABOUT ****************************/
 /*
-*	Open about dialog
 *	Open repository main page
 */
 

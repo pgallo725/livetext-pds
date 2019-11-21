@@ -10,21 +10,45 @@ DocumentEditor::DocumentEditor(Document doc, TextEdit* editor, User& user, QObje
 	qRegisterMetaType<TextListID>("TextListID");
 	qRegisterMetaType<TextList>("TextList");
 	qRegisterMetaType<Symbol>("Symbol");
-	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextCharFormat>("QTextCharFormat");
+	qRegisterMetaType<QTextBlockFormat>("QTextBlockFormat");
 	qRegisterMetaType<QTextListFormat>("QTextListFormat");
-	qRegisterMetaType<QVector<Symbol>>("QVector<Symbol>");
 	qRegisterMetaType<QVector<Position>>("QVector<Position>");
+	qRegisterMetaType<QVector<Symbol>>("QVector<Symbol>");
+	qRegisterMetaType<QVector<QTextCharFormat>>("QVector<QTextCharFormat>");
 }
 
 
 void DocumentEditor::openDocument()
 {
 	// Insert all symbols in the document
-	for (int i = 0; i < _document.length() - 1; i++) {
-		_textedit->newChar(_document[i].getChar(), _document[i].getFormat(), i);
+	QVector<Symbol>::iterator s = _document._text.begin();
+	QString buffer;
+	int position = 0;
+	QTextCharFormat oldFmt;
+
+	for (; s < _document._text.end() - 1; s++)
+	{
+		if (oldFmt == s->getFormat())
+		{
+			buffer.append(s->getChar());
+		}
+		else
+		{
+			_textedit->newChars(buffer, oldFmt, position);
+			position += buffer.length();
+			buffer.clear();
+			buffer.append(s->getChar());
+			oldFmt = s->getFormat();
+		}
 	}
-	   
+
+	if (!buffer.isEmpty())
+	{	// Insert the last chunk of characters
+		_textedit->newChars(buffer, oldFmt, position);
+	}
+
+
 	// Create lists
 	foreach(TextList list, _document._lists.values()) 
 	{
@@ -51,108 +75,128 @@ void DocumentEditor::openDocument()
 
 /************ CHAR OPERATIONS ************/
 
-void DocumentEditor::addSymbol(Symbol s, bool isLast)	// REMOTE
+void DocumentEditor::charsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
-	int position = _document.insert(s);
-	if (!isLast) 
-	{	// skip inserting the terminating char in the Qt document, because it has one already
-		_textedit->newChar(s.getChar(), s.getFormat(), position);
-		_textedit->updateUsersSelections();
-	}
-}
-
-void DocumentEditor::removeSymbol(Position position)	// REMOTE
-{
-	int pos = _document.remove(position);
-	if (pos >= 0) {
-		_textedit->removeChar(pos);
-		_textedit->updateUsersSelections();
-	}
-}
-
-
-void DocumentEditor::addCharAtIndex(QChar ch, QTextCharFormat fmt, int position, bool isLast)	// LOCAL
-{
-	Symbol s(ch, fmt, _document.newFractionalPos(position, _user.getUserId()));
-
-	_document.insert(s);
-	emit charAdded(s, isLast);
-}
-
-void DocumentEditor::deleteCharAtIndex(int position)	// LOCAL
-{
-	if (position < 0 || position >= _document.length())		// Skip if out-of-range (needed ?)
-		return;
-
-	Position fractionalPosition = _document.removeAtIndex(position);
-	emit charDeleted(fractionalPosition);
-}
-
-
-void DocumentEditor::bulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
-{
+	QString buffer;
 	QVector<Symbol>::iterator s = symbols.begin();
+	int start = -1;
+	int position = -2;
+	QTextCharFormat curFmt;
 
 	for (; s < symbols.end() - 1; s++)
 	{
-		int position = _document.insert(*s);
-		_textedit->newChar(s->getChar(), s->getFormat(), position);
+		int index = _document.insert(*s, position + 1);
+		if (index == position + 1 && curFmt == s->getFormat())
+		{
+			// Extend the current chunk of symbols to be inserted at once
+			buffer.append(s->getChar());
+			position = index;
+		}
+		else
+		{
+			// Insert the accumulated chars all at once
+			if (start >= 0)
+				_textedit->newChars(buffer, curFmt, start);
+
+			// Begin a new batch of symbols to insert
+			buffer.clear();
+			buffer.append(s->getChar());
+			curFmt = s->getFormat();
+			start = position = index;
+		}
 	}
 
 	if (s < symbols.end())	// Handle the last symbol separately (to avoid checking isLast at every iteration)
 	{
 		int position = _document.insert(*s);
 		if (!isLast)
+		{	// skip inserting the terminating char in the Qt document
+			if (position == position + 1 && s->getFormat() == curFmt)
+			{
+				buffer.append(s->getChar());
+				_textedit->newChars(buffer, curFmt, start);
+			}
+			else
+			{
+				if (!buffer.isEmpty())
+					_textedit->newChars(buffer, curFmt, start);
+
+				_textedit->newChars(s->getChar(), s->getFormat(), position);
+			}
+		}
+		else if (!buffer.isEmpty())
 		{
-			// skip inserting the terminating char in the Qt document
-			_textedit->newChar(s->getChar(), s->getFormat(), position);
+			_textedit->newChars(buffer, curFmt, start);
 		}
 	}
 
-	int blockPos = _document.formatBlock(bId, blkFmt);		// Format the block according to the received QTextBlockFormat
+	// Apply the block format received with the CharsInsert message
+	int blockPos = _document.formatBlock(bId, blkFmt);
 	if (blockPos >= 0) {
 		_textedit->applyBlockFormat(blockPos, blkFmt);
 	}
-
-	_textedit->updateUsersSelections();		// Only once after applying the bulk of changes
 }
 
-void DocumentEditor::bulkDelete(QVector<Position> positions)
+void DocumentEditor::charsDelete(QVector<Position> positions)
 {
-	for each (Position pos in positions)
+	int position = -1;
+	int count = 0;
+
+	for each (Position fPos in positions)
 	{
-		int index = _document.remove(pos);
-		if (index >= 0)
-			_textedit->removeChar(index);
+		int index = _document.remove(fPos, position);
+
+		if (index >= 0)	  // Skip non-extisting characters
+		{
+			if (index == position)
+			{	// Keep extending the chunk of symbols to format at once
+				count++;
+			}
+			else
+			{
+				// Delete all chars in the current range
+				if (position >= 0 && count > 0)
+					_textedit->removeChars(position, position + count);
+
+				// Begin a new batch of symbols to delete
+				position = index;
+				count = 1;
+			}
+		}
 	}
 
-	_textedit->updateUsersSelections();		// This can be done only once after removing all the specified symbols
+	if (position >= 0 && count > 0)
+	{	// Delete the last chunk of characters
+		_textedit->removeChars(position, position + count);
+	}
 }
 
-void DocumentEditor::addCharGroupAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts,
+void DocumentEditor::addCharsAtIndex(QVector<QChar> chars, QVector<QTextCharFormat> fmts,
 	int pos, bool isLast, QTextBlockFormat blkFmt)
 {
 	QVector<Symbol> symbols;
 	QVector<QChar>::iterator i = chars.begin();
 	QVector<QTextCharFormat>::iterator j = fmts.begin();
+	int positionHint = -1;
 
 	// Add all the provided chars to the document as symbols and to the list
 	// of symbols that will have to be inserted by other clients
 	for (int n = 0; i < chars.end() && j < fmts.end(); i++, j++, n++)
 	{
 		Symbol s(*i, *j, _document.newFractionalPos(pos + n, _user.getUserId()));
-		symbols.append(s);
 
-		_document.insert(s);
+		// Insert the symbol in the document (locally)
+		positionHint = _document.insert(s, positionHint);
+		symbols.append(s);
 	}
 
 	TextBlockID blkId = _document.getBlockAt(pos);		// Format the block with the provided QTextBlockFormat
 	_document.formatBlock(blkId, blkFmt);
 	
-	emit charGroupInserted(symbols, isLast, blkId, blkFmt);
+	emit charsAdded(symbols, isLast, blkId, blkFmt);
 }
 
-void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
+void DocumentEditor::deleteCharsAtIndex(int position, int charCount)
 {
 	QVector<Position> fPositions;
 
@@ -163,27 +207,59 @@ void DocumentEditor::deleteCharGroupAtIndex(int position, int charCount)
 		fPositions.append(_document.removeAtIndex(position));
 	}
 
-	emit charGroupDeleted(fPositions);
+	emit charsDeleted(fPositions);
 }
 
 
-void DocumentEditor::changeSymbolFormat(int position, QTextCharFormat fmt)		// LOCAL
+void DocumentEditor::changeSymbolFormat(int position, int count, QVector<QTextCharFormat> fmts)		// LOCAL
 {
-	Symbol& s = _document[position];
+	QVector<Position> positions;
+	QVector<Symbol>::iterator s = _document._text.begin() + position;
 
-	_document.formatSymbol(s.getPosition(), fmt);
-	emit symbolFormatChanged(s.getPosition(), fmt);
+	// Apply the format change locally and build the array to be sent to the server
+	for (int i = 0; i < count && s != _document._text.end(); i++, s++)
+	{
+		s->setFormat(fmts[i]);
+		positions.append(s->getPosition());
+	}
+
+	emit charsFormatChanged(positions, fmts);
 }
 
-void DocumentEditor::applySymbolFormat(Position position, QTextCharFormat fmt)	 // REMOTE
+void DocumentEditor::applySymbolFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts)		// REMOTE
 {
-	// Early out if the local state is already aligned with the server's
-	if (_document[position].getFormat() == fmt)
-		return;
+	QTextCharFormat curFmt;
+	int start = -1;
+	int index = -2;
+	int count = 0;
+	
+	for (int i = 0; i < positions.length(); i++)
+	{
+		index = _document.formatSymbol(positions[i], fmts[i], index + 1);
 
-	int pos = _document.formatSymbol(position, fmt);
-	if (pos >= 0) {
-		_textedit->applyCharFormat(pos, fmt);
+		if (index >= 0)	  // Skip non-extisting characters
+		{
+			if (index == start + count && fmts[i] == curFmt)	
+			{	// Keep extending the chunk of symbols to format at once
+				count++;
+			}
+			else
+			{
+				// Apply the current format to all chars in the range
+				if (start >= 0 && count > 0)
+					_textedit->applyCharFormat(start, start + count, curFmt);
+
+				// Begin a new batch of symbols to format
+				start = index;
+				count = 1;
+				curFmt = fmts[i];
+			}
+		}
+	}
+
+	if (start >= 0 && count > 0)
+	{	// Apply the last chunk of charFormats
+		_textedit->applyCharFormat(start, start + count, curFmt);
 	}
 }
 
@@ -201,7 +277,7 @@ void DocumentEditor::generateExtraSelection()
 		selectionDelimiters.second = 0;
 
 		//Increment selection upper limit until we reach end of document or a char inserted by another user
-		for (int i = 0; i < _document.length() - 1; i++) {
+		for (int i = 0; i < _document.length() -1; i++) {
 			if (_document[i].getAuthorId() != userId) {
 				_textedit->setExtraSelections(userId, selectionDelimiters);
 

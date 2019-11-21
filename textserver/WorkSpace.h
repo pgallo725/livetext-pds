@@ -47,11 +47,9 @@ public slots:
 	void dispatchMessage(MessageCapsule message, QSslSocket* sender);
 	
 	void documentSave();
-	void documentInsertSymbol(Symbol symbol);
-	void documentDeleteSymbol(Position position);
-	void documentBulkInsert(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt);
-	void documentBulkDelete(QVector<Position> positions);
-	void documentEditSymbol(Position position, QTextCharFormat format);
+	void documentInsertSymbols(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt);
+	void documentDeleteSymbols(QVector<Position> positions);
+	void documentEditSymbols(QVector<Position> positions, QVector<QTextCharFormat> formats);
 	void documentEditBlock(TextBlockID blockId, QTextBlockFormat format);
 	void documentEditList(TextBlockID blockId, TextListID listId, QTextListFormat format);
 

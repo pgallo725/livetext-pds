@@ -218,7 +218,7 @@
     </QtMoc>
     <QtMoc Include="LandingPage.h">
     </QtMoc>
-    <ClInclude Include="LiveText.h" />
+    <QtMoc Include="LiveText.h" />
     <QtMoc Include="NewDocumentWindow.h">
     </QtMoc>
     <QtMoc Include="OpenUriWindow.h">

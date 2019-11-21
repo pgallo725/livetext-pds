@@ -32,11 +32,9 @@ MessageCapsule MessageFactory::Empty(MessageType type)
 	case MessageType::DocumentClose:		return new DocumentCloseMessage();
 	case MessageType::DocumentExit:			return new DocumentExitMessage();
 	case MessageType::DocumentError:		return new DocumentErrorMessage();
-	case MessageType::CharInsert:			return new CharInsertMessage();
-	case MessageType::CharDelete:			return new CharDeleteMessage();
-	case MessageType::CharFormat:			return new CharFormatMessage();
-	case MessageType::BulkInsert:			return new BulkInsertMessage();
-	case MessageType::BulkDelete:			return new BulkDeleteMessage();
+	case MessageType::CharsInsert:			return new CharsInsertMessage();
+	case MessageType::CharsDelete:			return new CharsDeleteMessage();
+	case MessageType::CharsFormat:			return new CharsFormatMessage();
 	case MessageType::BlockEdit:			return new BlockEditMessage();
 	case MessageType::ListEdit:				return new ListEditMessage();
 	case MessageType::CursorMove:			return new CursorMoveMessage();
@@ -142,29 +140,19 @@ MessageCapsule MessageFactory::DocumentError(QString error)
 	return new DocumentErrorMessage(error);
 }
 
-MessageCapsule MessageFactory::CharInsert(Symbol symbol, bool isLast)
+MessageCapsule MessageFactory::CharsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
-	return new CharInsertMessage(symbol, isLast);
+	return new CharsInsertMessage(symbols, isLast, bId, blkFmt);
 }
 
-MessageCapsule MessageFactory::CharDelete(Position position)
+MessageCapsule MessageFactory::CharsDelete(QVector<Position> positions)
 {
-	return new CharDeleteMessage(position);
+	return new CharsDeleteMessage(positions);
 }
 
-MessageCapsule MessageFactory::CharFormat(Position position, QTextCharFormat fmt)
+MessageCapsule MessageFactory::CharsFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts)
 {
-	return new CharFormatMessage(position, fmt);
-}
-
-MessageCapsule MessageFactory::BulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
-{
-	return new BulkInsertMessage(symbols, isLast, bId, blkFmt);
-}
-
-MessageCapsule MessageFactory::BulkDelete(QVector<Position> positions)
-{
-	return new BulkDeleteMessage(positions);
+	return new CharsFormatMessage(positions, fmts);
 }
 
 MessageCapsule MessageFactory::BlockEdit(TextBlockID blockId, QTextBlockFormat fmt)

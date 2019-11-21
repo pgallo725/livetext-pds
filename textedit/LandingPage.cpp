@@ -16,15 +16,17 @@
 #include <QFrame>
 #include <QTableWidget>
 #include <QMenu>
-
+#include <QTimer>
+#include <QClipboard>
 
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PORT "1500"
 
+
 const QString rsrcPath = ":/images";
 
-LandingPage::LandingPage(QWidget* parent) 
-	: QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this)) 
+LandingPage::LandingPage(QWidget* parent)
+	: QMainWindow(parent), ui(new Ui::LandingPage), mngr(WidgetsManager(this))
 {
 	//Window title
 	setWindowTitle(QCoreApplication::applicationName());
@@ -144,7 +146,7 @@ LandingPage::LandingPage(QWidget* parent)
 		this));
 	//Validator for username
 	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
-		QRegExp(QString("^[^") + URI_FIELD_SEPARATOR + "]+$"), this));
+		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
 
 
 	//Loads user login infos
@@ -202,8 +204,8 @@ void LandingPage::pushButtonConfirmOperationClicked()
 		}
 	}
 	else {
-		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty() 
-			|| ui->lineEdit_regPswConf->text().isEmpty()) 
+		if (ui->lineEdit_regUsr->text().isEmpty() || ui->lineEdit_regPsw->text().isEmpty()
+			|| ui->lineEdit_regPswConf->text().isEmpty())
 		{
 			incorrectOperation(tr("Please fill all the required fields"));
 			return;
@@ -420,6 +422,7 @@ void LandingPage::setupFileList()
 
 /******************* GUI *******************/
 /*
+*	Contextual menu on document list
 *	Reset fields
 *	Switch between login/register pushbutton text
 *	Error messages
@@ -431,17 +434,31 @@ void LandingPage::setupFileList()
 
 void LandingPage::showDocumentActionsMenu(const QPoint& position)
 {
-	if (ui->tableWidget->itemAt(ui->tableWidget->mapFromGlobal(QCursor::pos()))) {
+	QTableWidgetItem* selectedItem = ui->tableWidget->itemAt(position);
+	
+	if (selectedItem && selectedItem->text() != "<No documents found>") {
+		//Creates menu when right mouse button is pressed on Document table
 		QMenu* menu = new QMenu;
-		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/editcopy.png"), tr("Open Document..."));
 
+		//Open document
+		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/share.png"), tr("Copy URI"));
+		connect(a, &QAction::triggered, this, &LandingPage::copyDocumentURI);
+
+
+		a = menu->addAction(QIcon(rsrcPath + "/landingPage/filenew.png"), tr("Open Document"));
 		connect(a, &QAction::triggered, this, &LandingPage::pushButtonOpenClicked);
+
+		menu->addSeparator();
+		a = menu->addAction(QIcon(rsrcPath + "/landingPage/remove.png"), tr("Remove Document"));
+		connect(a, &QAction::triggered, this, &LandingPage::pushButtonRemoveClicked);
+
+		
+
 
 		menu->exec(QCursor::pos());
 		menu->clear();
 	}
 }
-
 
 
 void LandingPage::setupUserProfilePicture(QPixmap userPix)
@@ -515,8 +532,6 @@ void LandingPage::incorrectFileOperation(QString error)
 	mngr.hideLoadingScreen(loading);
 
 	//Print errors
-	//openURIWindow->incorrectOperation(error);
-	//newFileWindow->incorrectOperation(error);
 	ui->label_incorrect_file_operation->setText(error);
 
 	//Recompute file list
@@ -557,7 +572,6 @@ void LandingPage::enablePushButtonOpen()
 		ui->pushButton_open->setEnabled(false);
 		ui->pushButton_remove->setEnabled(false);
 	}
-
 }
 
 
@@ -611,6 +625,7 @@ void LandingPage::updateUserAvatarPreview(QString path)
 }
 
 
+
 /******************* PUSH BUTTONS *******************/
 /*
 *	Register
@@ -619,6 +634,7 @@ void LandingPage::updateUserAvatarPreview(QString path)
 *	Open from URI
 *	New File
 *	Logout
+*	Copy document URI
 */
 
 
@@ -633,7 +649,7 @@ void LandingPage::pushButtonBrowseClicked()
 {
 	//Open file browser dialog to choose profile picture
 	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp)");
+		QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
 
 	if (!filename.isEmpty()) {
 		//Set choosen filename
@@ -673,7 +689,6 @@ void LandingPage::pushButtonOpenUriClicked()
 	//Show and lanch dialog
 	if (openURIWindow->exec() == QDialog::Accepted) {
 		mngr.showLoadingScreen(loading, tr("Open document from URI..."));
-
 		//Adds document recived from open uri
 		emit openDocument(URI(_buffer));
 	};
@@ -713,6 +728,27 @@ void LandingPage::pushButtonBackClicked()
 
 	//Set focus to correct field
 	ui->lineEdit_psw->setFocus();
+}
+
+
+void LandingPage::copyDocumentURI()
+{
+	//Open only if is not "<No documents found>" element
+	QString URI = ui->tableWidget->item(ui->tableWidget->currentRow(), 2)->text();
+
+	//Copy uri to clipboard
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(URI);
+
+
+	//Show status bar
+	statusBar()->show();
+
+	//Shows message for 5"
+	statusBar()->showMessage(tr("URI copied into clipboard"), STATUSBAR_MSG_DURATION);
+
+	//Hides status bar after 5"
+	QTimer::singleShot(STATUSBAR_MSG_DURATION, [this] {statusBar()->hide(); });
 }
 
 

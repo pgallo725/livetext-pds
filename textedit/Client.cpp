@@ -3,14 +3,24 @@
 #include <SharedException.h>
 
 
-Client::Client(QObject* parent) 
-	: QObject(parent), socket(nullptr)
+Client::Client(QSharedPointer<QWaitCondition> wc, QObject* parent)
+	: QObject(parent), socket(nullptr), sync(false), wc(wc)
 {
+	qRegisterMetaType<User>("User");
+	qRegisterMetaType<Document>("Document");
+	qRegisterMetaType<URI>("URI");
+
+	// Instantiate the Workspace thread and start it
+	workThread = QSharedPointer<QThread>(new QThread(parent));
+	connect(workThread.get(), &QThread::finished, workThread.get(), &QThread::deleteLater);
+	this->moveToThread(workThread.get());
+	workThread->start();
 }
 
 Client::~Client()
 {
-	// NOTHING TO DO
+	workThread->quit();		// Quit the thread
+	workThread->wait();		// Waiting for ending the thread
 }
 
 
@@ -113,20 +123,14 @@ void Client::messageHandler(MessageCapsule message)
 	case PresenceUpdate:
 		handleUpdatePresence(message);
 		break;
-	case CharInsert:
-		handleCharInsert(message);
+	case CharsInsert:
+		handleCharsInsert(message);
 		break;
-	case CharDelete:
-		handleCharRemove(message);
+	case CharsDelete:
+		handleCharsDelete(message);
 		break;
-	case CharFormat:
-		handleCharFormat(message);
-		break;
-	case BulkInsert:
-		handleBulkInsert(message);
-		break;
-	case BulkDelete:
-		handleBulkDelete(message);
+	case CharsFormat:
+		handleCharsFormat(message);
 		break;
 	case BlockEdit:
 		handleBlockFormat(message);
@@ -141,6 +145,21 @@ void Client::messageHandler(MessageCapsule message)
 	default:
 		throw MessageTypeException(message->getType());
 		break;
+	}
+}
+
+void Client::setSync()
+{
+	QMutexLocker ml(&m);
+	sync = true;
+}
+
+void Client::getSync()
+{
+	QMutexLocker ml(&m);
+	if (!sync) {
+		wc->wait(&m, SYNC_TIMEOUT);
+		sync = true;
 	}
 }
 
@@ -380,6 +399,10 @@ void Client::openDocument(URI URI)
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	// Clear the socket from any unexpected message
+	if (socket->bytesAvailable())
+		socket->readAll();
+
 	try 
 	{	// Request the document to the server
 		MessageFactory::DocumentOpen(URI.toString())->send(socket);
@@ -405,12 +428,18 @@ void Client::openDocument(URI URI)
 		// Server successfully answered with the document
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
+		//Set sync = false for the syncronization
+		sync = false;
+		emit openFileCompleted(documentReady->getDocument());
+
+		//Sync between this thread and GUI thread
+		getSync();
+
 		// Connect the function which will read messages from the socket inside the editor
 		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
 
-		emit openFileCompleted(documentReady->getDocument());
 		return;
 	}
 	case DocumentError: 
@@ -438,6 +467,10 @@ void Client::createDocument(QString name)
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
 
+	// Clear the socket from any unexpected message
+	if (socket->bytesAvailable())
+		socket->readAll();
+
 	try 
 	{	// Send the document creation request to the server
 		MessageFactory::DocumentCreate(name)->send(socket);
@@ -463,11 +496,17 @@ void Client::createDocument(QString name)
 		//Document successfully created (and opened)
 		DocumentReadyMessage* documentReady = dynamic_cast<DocumentReadyMessage*>(incomingMessage.get());
 
-		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		while (socket->encryptedBytesAvailable() > 0)
-			readBuffer();								// Check if some bytes are already available on the socket
-
+		//Set sync = false for the syncronization
+		sync = false;
 		emit openFileCompleted(documentReady->getDocument());
+
+		//Sync between this thread and GUI thread
+		getSync();
+
+		connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
+		while (socket->bytesAvailable())
+			readBuffer();					// Check if some bytes are already available on the socket
+
 		return;
 	}
 	case DocumentError:
@@ -494,6 +533,10 @@ void Client::deleteDocument(URI URI)
 {
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	// Clear the socket from any unexpected message
+	if (socket->bytesAvailable())
+		socket->readAll();
 
 	try 
 	{	// Send the document delete request to the server
@@ -551,7 +594,7 @@ void Client::closeDocument()
 	}
 	catch (MessageException& me) {
 		qDebug() << me.what();
-		emit documentExitFailed(tr("MessageException raised"));
+		emit documentExitFailed(tr("Server communication error"));
 		return;
 	}
 
@@ -564,10 +607,7 @@ void Client::closeDocument()
 		incomingMessage = readMessage(in);
 		if (!incomingMessage)				 // returns an empty MessageCapsule if any error occurs
 		{
-			emit documentExitFailed(tr("Server communication error"));
-			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-			while (socket->encryptedBytesAvailable() > 0)
-				readBuffer();								// Handle any byte received on the socket in the meantime
+			socket->abort();
 			return;
 		}
 
@@ -578,15 +618,10 @@ void Client::closeDocument()
 			emit documentExitComplete();
 			return;
 		}
-		case DocumentError:
+		case Failure:
 		{
-			// Server denied permission to leave the editor
-			DocumentErrorMessage* documentError = dynamic_cast<DocumentErrorMessage*>(incomingMessage.get());
-			emit documentExitFailed(documentError->getErrorMessage());
-
-			connect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-			while (socket->encryptedBytesAvailable() > 0)
-				readBuffer();								// Handle any byte received on the socket in the meantime
+			// NOTE: Failure message is handled by messageHandler but then the loop should terminate
+			messageHandler(incomingMessage);
 			return;
 		}
 		default:
@@ -595,7 +630,6 @@ void Client::closeDocument()
 			messageHandler(incomingMessage);
 			break;
 		}
-		// NOTE: Failure message is not caught explicitly here because it is already handled by messageHandler
 	}
 }
 
@@ -625,55 +659,33 @@ void Client::handleCursor(MessageCapsule message)
 
 /* Send messages to server */
 
-void Client::sendCharInsert(Symbol character, bool isLast) {
-
-	try 
-	{
-		MessageFactory::CharInsert(character, isLast)->send(socket);
-	}
-	catch (MessageException& me) {
-		qDebug() << me.what();
-	}
-}
-
-void Client::sendCharRemove(Position position)
-{
-	try 
-	{
-		MessageFactory::CharDelete(position)->send(socket);
-	}
-	catch (MessageException& me) {
-		qDebug() << me.what();
-	}
-}
-
-void Client::sendBulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
+void Client::sendCharsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt)
 {
 	try
 	{
-		MessageFactory::BulkInsert(symbols, isLast, bId, blkFmt)->send(socket);
+		MessageFactory::CharsInsert(symbols, isLast, bId, blkFmt)->send(socket);
 	}
 	catch (MessageException & me) {
 		qDebug() << me.what();
 	}
 }
 
-void Client::sendBulkDelete(QVector<Position> positions)
+void Client::sendCharsDelete(QVector<Position> positions)
 {
 	try
 	{
-		MessageFactory::BulkDelete(positions)->send(socket);
+		MessageFactory::CharsDelete(positions)->send(socket);
 	}
 	catch (MessageException & me) {
 		qDebug() << me.what();
 	}
 }
 
-void Client::sendCharFormat(Position position, QTextCharFormat fmt)
+void Client::sendCharsFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts)
 {
 	try 
 	{
-		MessageFactory::CharFormat(position, fmt)->send(socket);
+		MessageFactory::CharsFormat(positions, fmts)->send(socket);
 	}
 	catch (MessageException& me) {
 		qDebug() << me.what();
@@ -705,35 +717,23 @@ void Client::sendListEdit(TextBlockID blockId, TextListID listId, QTextListForma
 
 /* Handle messages received from server */
 
-void Client::handleCharInsert(MessageCapsule message) 
+void Client::handleCharsInsert(MessageCapsule message)
 {
-	CharInsertMessage* insertCharMsg = dynamic_cast<CharInsertMessage*>(message.get());
-	emit insertSymbol(insertCharMsg->getSymbol(), insertCharMsg->getIsLast());
-}
-
-void Client::handleCharRemove(MessageCapsule message) 
-{
-	CharDeleteMessage* deleteCharMsg = dynamic_cast<CharDeleteMessage*>(message.get());
-	emit removeSymbol(deleteCharMsg->getPosition());
-}
-
-void Client::handleBulkInsert(MessageCapsule message)
-{
-	BulkInsertMessage* bulkInsertMsg = dynamic_cast<BulkInsertMessage*>(message.get());
-	emit insertBulk(bulkInsertMsg->getSymbols(), bulkInsertMsg->getIsLast(),
+	CharsInsertMessage* bulkInsertMsg = dynamic_cast<CharsInsertMessage*>(message.get());
+	emit insertSymbols(bulkInsertMsg->getSymbols(), bulkInsertMsg->getIsLast(),
 		bulkInsertMsg->getBlockId(), bulkInsertMsg->getBlockFormat());
 }
 
-void Client::handleBulkDelete(MessageCapsule message)
+void Client::handleCharsDelete(MessageCapsule message)
 {
-	BulkDeleteMessage* bulkDeleteMsg = dynamic_cast<BulkDeleteMessage*>(message.get());
-	emit removeBulk(bulkDeleteMsg->getPositions());
+	CharsDeleteMessage* bulkDeleteMsg = dynamic_cast<CharsDeleteMessage*>(message.get());
+	emit removeSymbols(bulkDeleteMsg->getPositions());
 }
 
-void Client::handleCharFormat(MessageCapsule message) 
+void Client::handleCharsFormat(MessageCapsule message) 
 {
-	CharFormatMessage* charFormatMsg = dynamic_cast<CharFormatMessage*>(message.get());
-	emit formatSymbol(charFormatMsg->getPosition(), charFormatMsg->getCharFormat());
+	CharsFormatMessage* charFormatMsg = dynamic_cast<CharsFormatMessage*>(message.get());
+	emit formatSymbols(charFormatMsg->getPositions(), charFormatMsg->getCharFormats());
 }
 
 void Client::handleBlockFormat(MessageCapsule message) 
@@ -783,6 +783,12 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password,
 		// Disconnect the regular function that reads asynchronous TextEdit or Presence messages
 		disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
 	}
+	else
+	{
+		// Clear the socket from any unexpected message
+		if (socket->bytesAvailable())
+			socket->readAll();
+	}
 	
 	try 
 	{	// Start the sequence of AccountUpdate messages
@@ -831,17 +837,16 @@ void Client::sendAccountUpdate(QString nickname, QImage image, QString password,
 			{
 				FailureMessage* failure = dynamic_cast<FailureMessage*>(message.get());
 				emit accountUpdateFailed(failure->getDescription());
+				return;
 			}
 		}
 		default:
 		{
+			// Inside the editor, handle all packets received while waiting for the response
+			// When called from the LandingPage discard all unexpected messages
 			if (inEditor) {
 				messageHandler(message);
 				break;
-			}
-			else {
-				throw MessageTypeException(message->getType());
-				return;
 			}
 		}
 		}

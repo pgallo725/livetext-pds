@@ -34,11 +34,9 @@ public:
 	static MessageCapsule DocumentExit();
 	static MessageCapsule DocumentError(QString error);
 
-	static MessageCapsule CharInsert(Symbol symbol, bool isLast);
-	static MessageCapsule CharDelete(Position position);
-	static MessageCapsule CharFormat(Position position, QTextCharFormat fmt);
-	static MessageCapsule BulkInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
-	static MessageCapsule BulkDelete(QVector<Position> positions);
+	static MessageCapsule CharsInsert(QVector<Symbol> symbols, bool isLast, TextBlockID bId, QTextBlockFormat blkFmt);
+	static MessageCapsule CharsDelete(QVector<Position> positions);
+	static MessageCapsule CharsFormat(QVector<Position> positions, QVector<QTextCharFormat> fmts);
 	static MessageCapsule BlockEdit(TextBlockID blockId, QTextBlockFormat fmt);
 	static MessageCapsule ListEdit(TextBlockID blockId, TextListID listId, QTextListFormat fmt);
 

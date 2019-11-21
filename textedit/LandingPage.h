@@ -13,6 +13,8 @@
 #include "NewDocumentWindow.h"
 #include "WidgetsManager.h"
 
+#define STATUSBAR_MSG_DURATION 5000		// ms
+
 
 namespace Ui {
 	class LandingPage;
@@ -114,6 +116,9 @@ private slots:
 
 	//User profile picture preview
 	void updateUserAvatarPreview(QString path);
+
+	//Copy document URI
+	void copyDocumentURI();
 };
 
 #endif // LANDINGPAGE_H
