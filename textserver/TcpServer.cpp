@@ -22,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 0.9.8)" << endl
+	Logger(Info) << "LiveText Server (version 1.0.0)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
