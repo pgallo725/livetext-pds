@@ -182,13 +182,13 @@ void WorkSpace::documentSave()
 	}
 	catch (DocumentException& de)
 	{
+		nFails++;
 		Logger(Error) << de.what() << ", fail count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Send Failure message to all clients in the workspace
 			for each (QSslSocket * client in editors.keys())
 				clientQuit(client, true);
 		}
-		nFails++;
 	}
 }
 
