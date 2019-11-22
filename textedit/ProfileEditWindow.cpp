@@ -7,6 +7,7 @@
 #include <QPixmap>
 #include <QFileDialog>
 #include <QDesktopWidget>
+#include <QRegExpValidator>
 
 const QString rsrcPath = ":/images";
 
@@ -38,6 +39,11 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 	//Radio button
 	connect(ui->radioButton_customAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
 	connect(ui->radioButton_defaultAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
+
+	//Validator for nickname (no spaces)
+	ui->lineEdit_editNick->setValidator(new QRegExpValidator(
+		QRegExp("^[^ ]+$"), this));
+
 
 	//Update GUI according to user info
 	updateInfo();
