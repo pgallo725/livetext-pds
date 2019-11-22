@@ -94,6 +94,9 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//Adapt textEditor layout according to document
 	connect(_textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
 
+	//Enable buttons when text is selected2wa
+	connect(_textEdit, &QTextEdit::selectionChanged, this, &TextEdit::updateEditorSelectedActions);
+
 
 	//If i can use clipboard setup connects from QTextEdit of cut/copy and clipboard management
 #ifndef QT_NO_CLIPBOARD
@@ -864,6 +867,9 @@ void TextEdit::filePrintPdf()
 
 	//Append pdf suffix to file
 	fileDialog.setDefaultSuffix("pdf");
+
+	//Set file name
+	fileDialog.selectFile(this->fileName);
 
 	//If answer is not Accept it closes
 	if (fileDialog.exec() != QDialog::Accepted)
