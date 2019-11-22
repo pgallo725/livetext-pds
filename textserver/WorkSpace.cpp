@@ -10,7 +10,7 @@
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
 {
-	Logger() << "Loading document" << doc->getURI().toString();
+	Logger() << "Loading document " << doc->getURI().toString();
 
 	// Load the document contents
 	doc->load();
@@ -182,7 +182,7 @@ void WorkSpace::documentSave()
 	}
 	catch (DocumentException& de)
 	{
-		Logger(Error) << de.what() << ", fails count = " << nFails;
+		Logger(Error) << de.what() << ", fail count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Send Failure message to all clients in the workspace
 			for each (QSslSocket * client in editors.keys())

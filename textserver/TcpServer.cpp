@@ -123,7 +123,7 @@ void TcpServer::initialize()
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 		else {
 			db.removeDoc(docURI);
-			Logger(Warning) << "Invalid document URI" << docURI << "skipped and removed";
+			Logger(Warning) << "Invalid document URI " << docURI << " skipped and removed";
 		}
 	}
 	Logger() << "(COMPLETED)";
