@@ -144,9 +144,13 @@ LandingPage::LandingPage(QWidget* parent)
 	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(
 		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
-	//Validator for username
+	//Validator for username (no spaces and '_')
 	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
-		QRegExp("^[^" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
+		QRegExp("^[^ " + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
+	
+	//Validator for nickname (no spaces)
+	ui->lineEdit_regNick->setValidator(new QRegExpValidator(
+		QRegExp("^[^ ]+$"), this));
 
 
 	//Loads user login infos
