@@ -1,7 +1,6 @@
 #include "WorkSpace.h"
 
 #include <QCoreApplication>
-#include <QElapsedTimer>
 
 #include "ServerLogger.h"
 #include <MessageFactory.h>
@@ -193,9 +192,6 @@ void WorkSpace::documentSave()
 
 void WorkSpace::documentInsertSymbols(QVector<Symbol> symbols, TextBlockID blockId, QTextBlockFormat blockFmt)
 {
-	QElapsedTimer timer;
-	timer.start();
-
 	int hint = -1;
 
 	for each (Symbol symbol in symbols)
@@ -205,41 +201,26 @@ void WorkSpace::documentInsertSymbols(QVector<Symbol> symbols, TextBlockID block
 
 	if (blockId)
 		doc->formatBlock(blockId, blockFmt);
-
-	Logger() << "CharsInsert message: " << symbols.size() <<
-		" symbols, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentDeleteSymbols(QVector<Position> positions)
 {
-	QElapsedTimer timer;
-	timer.start();
-
 	int hint = -1;
 
 	for each (Position position in positions)
 	{
 		hint = doc->remove(position, hint);
 	}
-
-	Logger() << "CharsDelete message: " << positions.size() <<
-		" elements, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentEditSymbols(QVector<Position> positions, QVector<QTextCharFormat> formats)
 {
-	QElapsedTimer timer;
-	timer.start();
-
 	int hint = -1;
 
 	for (int i = 0; i < positions.length(); i++)
 	{
 		hint = doc->formatSymbol(positions[i], formats[i], hint);
 	}
-	
-	Logger() << "CharsFormat message: " << positions.size() <<
-		" elements, processed in " << timer.elapsed() << " ms";
 }
 
 void WorkSpace::documentEditBlock(TextBlockID blockId, QTextBlockFormat format)
