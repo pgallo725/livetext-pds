@@ -119,11 +119,11 @@ void TcpServer::initialize()
 	Logger() << "Loading documents index";
 	foreach(QString docURI, db.readDocumentURIs())
 	{
-		if (validateURI(docURI) && QFileInfo(QFile(DOCUMENTS_DIRNAME + docURI)).exists())
+		if (validateURI(docURI) && QFile(DOCUMENTS_DIRNAME + docURI).exists())
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 		else {
 			db.removeDoc(docURI);
-			Logger(Warning) << "Invalid document URI " << docURI << " skipped and removed";
+			Logger(Warning) << "Invalid document URI " << docURI << " removed";
 		}
 	}
 	Logger() << "(COMPLETED)";

@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QFileInfo>
 #include <QSaveFile>
+#include <QDir>
 
 #define FPOS_GAP_SIZE 4						// Value used in the fractional position algorithm
 
@@ -195,7 +196,7 @@ void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
 	QSaveFile file(DOCUMENTS_DIRNAME + uri.toString());
-	if (file.open(QIODevice::WriteOnly))
+	if (QDir().mkdir(DOCUMENTS_DIRNAME) && file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
 
