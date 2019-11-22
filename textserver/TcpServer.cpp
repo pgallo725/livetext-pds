@@ -6,7 +6,6 @@
 #include <QDateTime>
 #include <QRandomGenerator>
 #include <QRegularExpression>
-#include <QFileInfo>
 #include <QDir>
 
 #include "ServerLogger.h"
@@ -94,10 +93,10 @@ void TcpServer::initialize()
 	Logger() << "Checking SSL resources availability";
 
 	// Check existence of the required SSL certificate files
-	if (!QFileInfo(QFile("server.key")).exists()) {
+	if (!QFile("server.key").exists()) {
 		throw StartupException("Cannot find private key file: 'server.key'");
 	}
-	if (!QFileInfo(QFile("server.pem")).exists()) {
+	if (!QFile("server.pem").exists()) {
 		throw StartupException("Cannot find local certificate file: 'server.pem'");
 	}
 

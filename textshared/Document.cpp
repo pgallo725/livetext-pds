@@ -5,9 +5,9 @@
 
 #include <QDataStream>
 #include <QMap>
-#include <QFileInfo>
-#include <QSaveFile>
 #include <QDir>
+#include <QSaveFile>
+
 
 #define FPOS_GAP_SIZE 4						// Value used in the fractional position algorithm
 
