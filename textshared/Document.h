@@ -10,6 +10,7 @@
    NOTE: used in regular expressions, prepend a \ if an escape is needed */
 #define URI_FIELD_SEPARATOR	"_"	
 #define MAX_DOCNAME_LENGTH 100		// characters
+#define DOCUMENTS_DIRNAME "./Documents/"	// Path on which the document files are stored (on the server)
 
 
 class URI

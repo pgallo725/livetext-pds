@@ -9,7 +9,6 @@
 #include <QSaveFile>
 
 #define FPOS_GAP_SIZE 4						// Value used in the fractional position algorithm
-#define DOCUMENTS_DIRNAME "./Documents/"	// Path on which the document files are stored (on the server)
 
 
 URI::URI()

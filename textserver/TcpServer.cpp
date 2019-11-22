@@ -22,7 +22,7 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 0.9.7)" << endl
+	Logger(Info) << "LiveText Server (version 0.9.8)" << endl
 		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
 
 	/* initialize random number generator with timestamp */
@@ -106,16 +106,24 @@ void TcpServer::initialize()
 	db.open("livetext.db3");
 	Logger() << "(COMPLETED)";
 
+	// Check existence of (or create) the Documents folder
+	if (!QDir("Documents").exists())
+	{
+		Logger() << "Creating the server Documents folder";
+		if (!QDir().mkdir("Documents")) {
+			throw StartupException("Cannot create folder '.\\Documents'");
+		}
+	}
 
 	// Loading the documents index in the server memory
 	Logger() << "Loading documents index";
 	foreach(QString docURI, db.readDocumentURIs())
 	{
-		if (validateURI(docURI))
+		if (validateURI(docURI) && QFileInfo(QFile(DOCUMENTS_DIRNAME + docURI)).exists())
 			documents.insert(docURI, QSharedPointer<Document>(new Document(docURI)));
 		else {
 			db.removeDoc(docURI);
-			Logger(Warning) << "Invalid URI" << docURI << "skipped and removed";
+			Logger(Warning) << "Invalid document URI" << docURI << "skipped and removed";
 		}
 	}
 	Logger() << "(COMPLETED)";
@@ -134,15 +142,6 @@ void TcpServer::initialize()
 
 	// Initialize the counter to assign user IDs
 	_userIdCounter = db.getMaxUserID();
-
-	// Check existence of (or create) the Documents folder
-	if (!QDir("Documents").exists()) 
-	{
-		Logger() << "Creating the server Documents folder";
-		if (!QDir().mkdir("Documents")) {
-			throw StartupException("Cannot create folder '.\\Documents'");
-		}
-	}
 
 	Logger() << "(INITIALIZATION COMPLETE)" << endl;
 }
