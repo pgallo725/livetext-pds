@@ -62,12 +62,14 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 	for (auto i = editors.begin(); i != editors.end(); ++i)
 	{
 		User* editor = i.value()->getUser();
-		MessageFactory::PresenceAdd(editor->getUserId(), editor->getNickname(),
-			editor->getIcon())->send(socket);
+		QString name = editor->getNickname().isEmpty() ? editor->getUsername() : editor->getNickname();
+		MessageFactory::PresenceAdd(editor->getUserId(), name, editor->getIcon())->send(socket);
 	}
 
-	dispatchMessage(MessageFactory::PresenceAdd(client->getUserId(),				// Send to other clients this new presence
-		client->getUser()->getNickname(), client->getUser()->getIcon()), socket);
+	// Send to other clients this new presence
+	User* clientUser = client->getUser();
+	QString clientName = clientUser->getNickname().isEmpty() ? clientUser->getUsername() : clientUser->getNickname();
+	dispatchMessage(MessageFactory::PresenceAdd(clientUser->getUserId(), clientName, clientUser->getIcon()), socket);
 
 	editors.insert(socket, client);
 
