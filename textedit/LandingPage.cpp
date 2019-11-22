@@ -150,7 +150,7 @@ LandingPage::LandingPage(QWidget* parent)
 	
 	//Validator for nickname (no spaces)
 	ui->lineEdit_regNick->setValidator(new QRegExpValidator(
-		QRegExp("^[^\\S]+$"), this));
+		QRegExp("^[^\\s]+$"), this));
 
 
 	//Loads user login infos

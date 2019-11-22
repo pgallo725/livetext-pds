@@ -145,7 +145,10 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	_currentCursorPosition = -1;
 
 	//Generate new presence for current user
-	newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
+	if(!_user.getNickname().isEmpty())
+		newPresence(_user.getUserId(), _user.getNickname(), _user.getIcon());
+	else
+		newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
 }
 
 /**************************** GUI SETUP ****************************/
