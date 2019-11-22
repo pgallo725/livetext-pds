@@ -180,7 +180,7 @@ private:
 
 	//User text highlighting
 	void handleMultipleSelections();
-	bool areUserIconActive();
+	int areUserIconActive();
 
 	//Graphic cursors
 	void redrawAllCursors();

@@ -11,9 +11,9 @@
 const QString rsrcPath = ":/images";
 
 
-ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent) 
+ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow),
-	_user(user), _iconChanged(false), mngr(WidgetsManager(this)) 
+	_user(user), _iconChanged(false), mngr(WidgetsManager(this))
 {
 	//UI setup
 	ui->setupUi(this);
@@ -105,7 +105,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString nick = ui->lineEdit_editNick->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
-	QImage userIcon = _iconChanged ? 
+	QImage userIcon = _iconChanged ?
 		ui->label_UsrIcon->pixmap()->toImage() : QImage();		//If the image was not changed, an empty one is sent
 
 
@@ -224,6 +224,7 @@ void ProfileEditWindow::updateInfo()
 	//Set username
 	ui->label_username->setText(_user.getUsername());
 	ui->lineEdit_editNick->setText(_user.getNickname());
+	ui->label_userId->setText(QString::number(_user.getUserId()).rightJustified(4, '0'));
 }
 
 void ProfileEditWindow::setFromEditor(bool fromEditor)

@@ -79,6 +79,8 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
+	connect(this, &TextEdit::resizeEvent, this, [this] {redrawAllCursors(); });
+
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
@@ -91,7 +93,6 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 
 	//Adapt textEditor layout according to document
 	connect(_textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
-
 
 
 	//If i can use clipboard setup connects from QTextEdit of cut/copy and clipboard management
@@ -134,8 +135,9 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	actionPaste->setEnabled(false);
 #endif
 
+	//Custom context menu
 	_textEdit->setContextMenuPolicy(Qt::CustomContextMenu);
-
+	
 	//Setup cursor position
 	_currentCursorPosition = -1;
 
@@ -641,6 +643,9 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	onlineUsersToolbar->addAction(onlineAction);
 
 	p->setAction(onlineAction);
+
+	if (areUserIconActive() && areUserIconActive() == onlineUsers.size())
+		onlineAction->setChecked(true);
 
 	//Insert presence in editor
 	onlineUsers.insert(userId, p);
@@ -1780,14 +1785,15 @@ void TextEdit::handleMultipleSelections()
 	_textEdit->setExtraSelections(_usersText);
 }
 
-bool TextEdit::areUserIconActive()
+int TextEdit::areUserIconActive()
 {
+	int checkedActions = 0;
 	foreach(Presence * p, onlineUsers.values()) {
 		if (p->actionHighlightText()->isChecked())
-			return true;
+			checkedActions++;
 	}
 
-	return false;
+	return checkedActions;
 }
 
 
