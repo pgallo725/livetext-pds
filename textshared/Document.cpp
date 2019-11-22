@@ -196,7 +196,7 @@ void Document::save()
 {
 	// Create or overwrite the document file on disk, and write data to it
 	QSaveFile file(DOCUMENTS_DIRNAME + uri.toString());
-	if (QDir().mkdir(DOCUMENTS_DIRNAME) && file.open(QIODevice::WriteOnly))
+	if (QDir().mkpath(DOCUMENTS_DIRNAME) && file.open(QIODevice::WriteOnly))
 	{
 		QDataStream docFileStream(&file);
 
