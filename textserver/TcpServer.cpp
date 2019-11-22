@@ -334,6 +334,10 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 	if (users.contains(username))
 		return MessageFactory::AccountError("The requested username is already taken");
 
+	/* check if the username or nickname are made up only of whitespaces */
+	if (QRegExp("^[^\\s]+$").exactMatch(username) || (!nickname.isEmpty() && QRegExp("^[^\\s]+$").exactMatch(nickname)))
+		return MessageFactory::AccountError("Invalid username and/or nickname, must not be only whitespaces");
+
 	/* check if image size is acceptable */
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
 		return MessageFactory::AccountError("Image file too big (Maximum size: 1MB)");
@@ -372,6 +376,9 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (nickname.length() > MAX_NAME_LENGTH)
 		return MessageFactory::AccountError("Nickname string too long (Max 50 characters)");
 
+	if (!nickname.isEmpty() && QRegExp("^[^\\s]+$").exactMatch(nickname))
+		return MessageFactory::AccountError("Nickname string cannot be only whitespaces");
+
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
 		return MessageFactory::AccountError("Image file too big (Maximum size: 1MB)");
 
@@ -404,6 +411,9 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 
 	if (nickname.length() > MAX_NAME_LENGTH)
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Nickname string too long (Max 50 characters)"));
+
+	if (!nickname.isEmpty() && QRegExp("^[^\\s]+$").exactMatch(nickname))
+		emit sendAccountUpdate(client, MessageFactory::AccountError("Nickname string cannot be only whitespaces"));
 
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Image file too big (Maximum size: 1MB)"));
