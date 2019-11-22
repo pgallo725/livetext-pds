@@ -146,11 +146,11 @@ LandingPage::LandingPage(QWidget* parent)
 		this));
 	//Validator for username (no spaces and '_')
 	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
-		QRegExp("^[^ " + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
+		QRegExp("^[^\\s" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
 	
 	//Validator for nickname (no spaces)
 	ui->lineEdit_regNick->setValidator(new QRegExpValidator(
-		QRegExp("^[^ ]+$"), this));
+		QRegExp("^[^\\S]+$"), this));
 
 
 	//Loads user login infos

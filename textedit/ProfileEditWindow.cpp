@@ -42,7 +42,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 
 	//Validator for nickname (no spaces)
 	ui->lineEdit_editNick->setValidator(new QRegExpValidator(
-		QRegExp("^[^ ]+$"), this));
+		QRegExp("^[^\\s]+$"), this));
 
 
 	//Update GUI according to user info
