@@ -692,7 +692,7 @@ void LandingPage::pushButtonOpenUriClicked()
 {
 	//Show and lanch dialog
 	if (openURIWindow->exec() == QDialog::Accepted) {
-		mngr.showLoadingScreen(loading, tr("Open document from URI..."));
+		mngr.showLoadingScreen(loading, tr("Opening URI..."));
 		//Adds document recived from open uri
 		emit openDocument(URI(_buffer));
 	};
@@ -705,7 +705,7 @@ void LandingPage::pushButtonNewClicked()
 {
 	//Show and launch dialog
 	if (newFileWindow->exec() == QDialog::Accepted) {
-		mngr.showLoadingScreen(loading, tr("Creating new document..."));
+		mngr.showLoadingScreen(loading, tr("Creating document..."));
 
 		//Adds document recived from open uri
 		emit newDocument(_buffer);
