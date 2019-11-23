@@ -14,6 +14,9 @@
    <string>Edit profile</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="topMargin">
+    <number>18</number>
+   </property>
    <item>
     <spacer name="verticalSpacer_15">
      <property name="orientation">
@@ -76,6 +79,9 @@
      <property name="rightMargin">
       <number>40</number>
      </property>
+     <property name="bottomMargin">
+      <number>20</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
@@ -89,7 +95,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>50</height>
+           <height>40</height>
           </size>
          </property>
         </spacer>
@@ -100,16 +106,21 @@
           <set>Qt::AlignCenter</set>
          </property>
          <property name="horizontalSpacing">
-          <number>14</number>
+          <number>18</number>
          </property>
          <property name="verticalSpacing">
-          <number>30</number>
+          <number>35</number>
          </property>
          <property name="bottomMargin">
           <number>0</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Username</string>
            </property>
@@ -117,6 +128,11 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_5">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Nickname</string>
            </property>
@@ -136,6 +152,11 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="maxLength">
             <number>50</number>
            </property>
@@ -143,6 +164,11 @@
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="label_11">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>New
 password</string>
@@ -163,6 +189,11 @@ password</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="maxLength">
             <number>100</number>
            </property>
@@ -173,6 +204,11 @@ password</string>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Confirm
 password</string>
@@ -190,6 +226,11 @@ password</string>
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="maxLength">
             <number>100</number>
            </property>
@@ -203,8 +244,13 @@ password</string>
            <property name="enabled">
             <bool>true</bool>
            </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
            <property name="text">
-            <string>Id</string>
+            <string>User ID</string>
            </property>
           </widget>
          </item>
@@ -212,6 +258,11 @@ password</string>
           <widget class="QLabel" name="label_userId">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
            </property>
            <property name="text">
             <string/>
@@ -222,6 +273,11 @@ password</string>
           <widget class="QLabel" name="label_username">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>9</pointsize>
+            </font>
            </property>
            <property name="text">
             <string/>
@@ -274,13 +330,18 @@ password</string>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>50</height>
+           <height>35</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
          <property name="title">
           <string>Avatar</string>
          </property>
@@ -295,7 +356,10 @@ password</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <property name="topMargin">
-           <number>0</number>
+           <number>15</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
           </property>
           <item alignment="Qt::AlignHCenter">
            <widget class="QLabel" name="label_UsrIcon">
@@ -307,14 +371,14 @@ password</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>130</width>
-              <height>130</height>
+              <width>128</width>
+              <height>128</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>130</width>
-              <height>130</height>
+              <width>128</width>
+              <height>128</height>
              </size>
             </property>
             <property name="baseSize">
@@ -348,7 +412,7 @@ password</string>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>20</height>
+              <height>30</height>
              </size>
             </property>
            </spacer>
@@ -356,10 +420,24 @@ password</string>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <property name="leftMargin">
-             <number>0</number>
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
             </property>
             <item>
              <widget class="QRadioButton" name="radioButton_defaultAvatar">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Use default avatar</string>
               </property>
@@ -376,10 +454,28 @@ password</string>
               <property name="spacing">
                <number>6</number>
               </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetDefaultConstraint</enum>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
               <item>
                <widget class="QRadioButton" name="radioButton_customAvatar">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <kerning>true</kerning>
+                 </font>
+                </property>
                 <property name="text">
-                 <string>Upload custom avatar</string>
+                 <string>Upload custom avatar </string>
                 </property>
                 <property name="checked">
                  <bool>true</bool>
@@ -399,7 +495,7 @@ password</string>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>10</pointsize>
+                  <pointsize>9</pointsize>
                  </font>
                 </property>
                 <property name="text">
@@ -422,6 +518,11 @@ password</string>
                 <width>0</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>9</pointsize>
+               </font>
               </property>
               <property name="text">
                <string/>
@@ -500,6 +601,11 @@ password</string>
            </disabled>
           </palette>
          </property>
+         <property name="font">
+          <font>
+           <pointsize>9</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -529,6 +635,11 @@ password</string>
              <width>0</width>
              <height>30</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
            </property>
            <property name="text">
             <string>Cancel</string>
@@ -563,6 +674,22 @@ password</string>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </item>

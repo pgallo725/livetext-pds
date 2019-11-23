@@ -21,7 +21,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 
 	//Center and resize
 	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
-		mngr.centerAndResize(0.55, 0.7);
+		mngr.centerAndResize(0.55, 0.62);
 	else
 		mngr.centerAndResize(0.5, 0.55);
 

@@ -124,7 +124,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	_textEdit->setUndoRedoEnabled(false);
 
 	//Set document margin
-	_textEdit->document()->setDocumentMargin(64);
+	_textEdit->document()->setDocumentMargin(70);
 
 	//Initialize GUI, activating buttons according to current conditions
 	fontChanged(_textEdit->font());
