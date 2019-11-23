@@ -187,6 +187,7 @@ void Document::load()
 void Document::unload()
 {
 	// Unload the Document object contents from memory
+	_lists.clear();
 	_blocks.clear();
 	_text.clear();
 	_text.squeeze();		// release allocated but unused memory until the document gets reloaded
