@@ -36,10 +36,18 @@ WorkSpace::~WorkSpace()
 
 	Logger() << "Saving and unloading document " << doc->getURI().toString();
 
-	doc->save();			// Saving changes to the document before closing the workspace
-	doc->unload();			// Unload the document contents from memory until it gets re-opened
+	try
+	{
+		doc->save();			// Saving changes to the document before closing the workspace
+		doc->unload();			// Unload the document contents from memory until it gets re-opened
 
-	Logger() << "(COMPLETED)" << endl;
+		Logger() << "(COMPLETED)";
+	}
+	catch (DocumentException & de)
+	{
+		doc->unload();
+		Logger(Error) << de.what();
+	}
 }
 
 
@@ -171,6 +179,9 @@ void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 /* Save document, if something goes wrong throw exception after MAX_FAILS */
 void WorkSpace::documentSave()
 {
+	if (editors.size() == 0)	// Skip saving if all clients have already quit
+		return;					// (Workspace will save the document before closing anyways)
+
 	try
 	{
 		// Save the document's contents to file

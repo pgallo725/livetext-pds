@@ -669,16 +669,10 @@ MessageCapsule TcpServer::removeDocument(QSslSocket* clientSocket, URI docUri)
 /* Release all resources owned by workspace and delete it */
 void TcpServer::deleteWorkspace(URI document)
 {
-	try /* delete workspace and remove it from the map */
-	{
-		workspaces.remove(document);
+	/* remove workspace from the map (calls the destructor automatically) */
+	workspaces.remove(document);
 
-		Logger() << "Workspace (" << document.toString() << ") successfully closed";
-	}
-	catch (DocumentException& de)
-	{
-		Logger(Error) << de.what();
-	}
+	Logger() << "Workspace (" << document.toString() << ") closed";
 }
 
 
