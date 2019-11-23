@@ -3,6 +3,7 @@
 University assignment project for System and Device Programming at PoliTO
 
 LiveText is a client-server, "real-time" collaborative text editor built in C++ using the Qt framework.
+
 We began our project by studying other collaborative text editors such as [Conclave](https://conclave-team.github.io/conclave-site/) and Google Docs and then we developed our own version in the form of a desktop application.
 
 Here you can download the latest server and client packages for your own use:
@@ -70,7 +71,7 @@ We reimplemented the basic structure of the document by adding to each character
 From [Wikipedia](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 >In distributed computing, a conflict-free replicated data type (CRDT) is a data structure which can be replicated across multiple computers in a network, where the replicas can be updated independently and concurrently without coordination between the replicas, and where it is always mathematically possible to resolve inconsistencies which might result.
 
-CRDT is a different way to approach the problem: each character is not identified by its index (or position) in the document, but instead CRDT provides a structure containing a list of numerical values (*"fractional position"*) that identifies the symbol's position in an absolute way.
+CRDT is a different way to approach the problem: each character is not identified by its index (or position) in the document, but instead CRDT provides a structure containing a list of numerical values (***"fractional position"***) that identifies the symbol's position in an absolute way.
 
 ### Globally Ordered Characters
 Fractional indices allow us to generate new positions without having to logically shift the index of all following characters.
@@ -92,13 +93,15 @@ The information exchange between clients and the server follows a custom bytestr
 
 ## Server
 The server application is a multi-threaded process.
+
 The main thread is in charge of serving all user requests such as the creation of a new account, login and profile information updates, while also handling the creation, deletion and opening of documents and updating the database accordingly.
 
-All editors working on the same shared document connect to a "Workspace", which is run on a separate thread of the server process and handles all editing operations received by clients, automatically saves the document on the server file system and dispatches messages to all connected clients (no synchronization needed due to clear roles separation between threads). 
+All editors working on the same shared document connect to a *Workspace*, which is run on a separate thread of the server process and handles all editing operations received by clients, automatically saves the document on the server file system and dispatches messages to all connected clients (no synchronization needed due to clear roles separation between threads). 
 All documents that are not being currently edited are stored on disk and unloaded from memory.
 
 ## Client
 The LiveText client is a QtGUI-based desktop application.
+
 It provides a landing page with basic account operations such login, registration, profile editing and grants access and control over the user's documents, a document is opened inside the TextEditor.
 
 The editor is based on Qt's feature-rich **QTextEdit** component, which supports *RichText* but works in the "traditional" way (that is, identifying characters by their absolute position) and so we had to add a completely custom intermediate layer which translates all editing operations between the traditional text editor and our CRDT representation (in both directions).
@@ -120,7 +123,8 @@ The password is only sent to the server once during the Registration phase, and 
 
 # Performance considerations
 
-Our internal document representation stores the text in a a single ordered array of symbol objects (while other formatting properties, such as paragraphs and lists, make use of additional data structures) which makes it really easy to retrieve specific characters knowing their index and to translate fractional positions with "traditional" position values (required for QTextEdit interoperability) but suffers from a complexity of O(N) for the insertion or deletion of a character in the middle of the document. 
-While inserting or deleting single characters at a time (*e.g.* user typing on a keyboard) does not cause any performance issue, operations that involve a large number of symbols (*e.g.* copy-pasting or selecting and deleting thousands of characters) come with a big performance cost that may even freeze the editor for a few seconds.
+Our internal document representation stores the text in a **single ordered array** of symbol objects (while paragraphs and lists make use of additional data structures) which grants us random access to any character and simplifies the translation between fractional positions and "traditional" indexes (required for QTextEdit interoperability) but suffers from a complexity of O(N) for the insertion or deletion of a character in the middle of the document.
+
+While inserting or deleting single characters at a time (*e.g.* user typing on a keyboard) does not cause any perceivable delay, operations that involve a large number of symbols (*e.g.* copy-pasting or selecting and deleting thousands of characters) come with a big performance cost that may even freeze the editor for a few seconds.
 
 An ordered tree structure could have avoided the cost of shifting all the elements at every editing operation, but it would've still presented a linear complexity (but lower overall cost due to no memory copy) for the translation between fractional positions and array indexes.
