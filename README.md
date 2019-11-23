@@ -1,109 +1,130 @@
 # LiveText
+
 University assignment project for System and Device Programming at PoliTO
 
-LiveText is a client-server, "real-time" text editor built in C++ using the Qt library.
-We started studying other collaborative text editors such as Google Docs and Conclave and then we built up our own version.
+LiveText is a client-server, "real-time" collaborative text editor built in C++ using the Qt framework.
 
-Click below to download server and client exe:
+We began our project by studying other collaborative text editors such as [Conclave](https://conclave-team.github.io/conclave-site/) and Google Docs and then we developed our own version in the form of a desktop application.
+
+Here you can download the latest server and client packages for your own use:
 - server (link al .exe)
 - client (link al .exe)
 
 # Index
 1. [What is a real-time text editor?](#What-is-a-real-time-text-editor)
-2. [What are the new problems?](#What-are-the-new-problems)
+2. [Which are the new problems?](#Which-are-the-new-problems)
    - [Commutativity](#Commutativity)
    - [Idempotency](#Idempotency)
 3. [How we solved the new issues](#How-we-solved-new-issues)
    - [Conflict-Free Replicated Data Type (CRDT)](#Conflict-Free-Replicated-Data-Type-CRDT)
    - [Globally Ordered Characters](#Globally-Ordered-Characters)
+   - [Globally Ordered Formatting Operations](#Globally-Ordered-Formatting-Operations)
 4. [Architecture](#Architecture)
    - [Server](#Server)
    - [Client](#Client)
 5. [Security](#Security)
-6. [Main functions code](#Main-functions-code)
+6. [Performance considerations](#Performance-considerations)
 
 # What is a real-time text editor?
-In a simple text editor there is one user who edits the document, but what if we want more users editing the same document at the same time?
-Is it possible?
 
-First of all we must deliver a local copy of the document to all the on-line clients and then allow them to edit the document.
-The challenge here is that we want a real-time editor, so users edit the document like in a simple local text editor, their changes must be applied immediately.
-This leads to new problems to be handled.
+In a simple (or "classical") text editor there is only one user who edits the document, but what if we want to allow multiple users to edit the same document at the same time? Is it possible?
 
-We need to find a way to make users communicate to inform others clients about changes in the document.
-We provide a server to solve this task, that acts as a relay for client's messages.
+First of all we must deliver a local copy of the document to all the on-line clients and then allow them to edit it.
+The challenge here is that we want a real-time editor, therefore any change by each user editing the document should be applied immediately to the local copy and sent to other clients as soon as possible.
+This leads to new problems that need to be handled.
 
-# What are the new problems?
+**Note:** An example of a non-real-time collaborative editor is a version control system like *Git*.
 
-LiveText is a distributed system, so we have new problems due to how networks work.
-	
-The main issue at first was making the documents converge on the same final state.
-Users can use two operations, insertion and deletion, and both changes are applied immediately to the local side, but there is some delay between the users.
-Sometimes operations could invert their order and the documents might not converge at all, this due to the un-commutativity of these two operations.
+In order to coordinate the editing of a shared document and allow the users to communicate with each other, we provide a central server that acts as a relay for clients' messages.
+
+# Which are the new problems?
+
+LiveText is a distributed system, and the presence of network communication creates a bunch of new problems for a text editor:	
+the main issue that we had to face was making sure that all copies of the document as seen by different users were coherent, or atleast always guarantee the convergence to the same final state.
+
+Any text editor provides 2 basic operations, insertion and deletion, which are both applied immediately and without issues to the local copy of the document. However, sending these operations to other users through the network means that a non-negligible delay is introduced, causing some operations to be applied in a different order which can then lead the documents to not converge to the same state, due to the un-commutativity of these two operations.
 
 ### Commutativity
 From [Wikipedia](https://en.wikipedia.org/wiki/Commutative_property)
 >In mathematics, a binary operation is commutative if changing the order of the operands does not change the result.
 
-This means that the final state is not the same if operations are not applied in the same order, but the network cannot ensure that this could not happen.
+For us, commutativity is a requirement because (due to network delay) we cannot ensure that operations are applied in the same order on every client editing the same document.
 
-The second problem we met was that the document could merge to the same final state, but something else went wrong:
-if more than one user did a "delete" operation at the same time for the same character, this change was applied multiple times instead of once, this due to the un-idempotency of the delete operation.
+The second problem was that, even when documents may converge to the same final state, something else could go wrong:
+if multiple users "delete" the same character at the same time, this change would be applied multiple times instead of once resulting in more than one character being deleted, due to the un-idempotency of the operation.
 
 ### Idempotency
 From [Wikipedia](https://en.wikipedia.org/wiki/Idempotence)
 >Idempotence (UK: /ˌɪdɛmˈpoʊtəns/,[1] US: /ˌaɪdəm-/)[2] is the property of certain operations in mathematics and computer science whereby they can be applied multiple times without changing the result beyond the initial application.
 
-This means that the delete operation must be applied only one time, even though there are multiples deletions.
+In our case, this means that the delete operation must be applied only once (if it refers to the same character), even when there are multiples deletions sent from different clients.
 
-The insert operation is not a problem here, because if a character is duplicated it's easy for the users to detect it and delete one of the two copies.
-The same principle is not applicable for the delete operation, because the additional character that is deleted could not be easy to see to be replaced by the users.
+The insert operation does not present this issue because even if a character is duplicated it's easy for the user to detect it and delete the extra copies that were created, while deleted characters are much harder to notice and be recovered by the users.
 
 # How we solved the new issues
 
-Traditional text editors use an absolute value for the position of each character, and this cannot provide as the two main features that we want.
-We reimplemented the basic structure of the text editor in which each character has additional informations that can provide what we needed.
+The real cause of the aforementioned issues is that traditional text editors identify each character with an absolute position index inside the document, and this does not fit well in a scenario where (due to network delay) the clients' views of the document may not be coherent for a short period of time.
 
-This different approach is called "fractional position" or "CRDT".
+We reimplemented the basic structure of the document by adding to each character some information providing a global ordering and unique identification of symbols, in order to achieve the properties that we need.
 
 ### Conflict-Free Replicated Data Type (CRDT)
 From [Wikipedia](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)
 >In distributed computing, a conflict-free replicated data type (CRDT) is a data structure which can be replicated across multiple computers in a network, where the replicas can be updated independently and concurrently without coordination between the replicas, and where it is always mathematically possible to resolve inconsistencies which might result.
 
-CRDT is a different way to approach the problem, each character doesn't have just one value for the position, but CRDT provides a list of numerical values that identify the position of the character in an absolute way.
-This new structure adds other properties that allowed characters to be "globally ordered".
+CRDT is a different way to approach the problem: each character is not identified by its index (or position) in the document, but instead CRDT provides a structure containing a list of numerical values (***"fractional position"***) that identifies the symbol's position in an absolute way.
 
 ### Globally Ordered Characters
-We needed all the characters to be ordered and be consistent in all the documents and this means that when some user inserts a new character, its location must be unique and placed in the same position on every opened document.
-Fractional indices allow to not shift all the positions of the other characters when a new character is being placed.
+Fractional indices allow us to generate new positions without having to logically shift the index of all following characters.
+Every fractional position serves as a unique symbol identifier (to avoid conflicts when 2 users insert a character in the same spot at the same time) and is also an ordered type, therefore it provides information on where the symbol has to be inserted in the document.
 
-We could image this as a tree: the new characters are added to the existing ones, but their position doesn't change.
+This technique resembles a binary tree: when a new character is added to the document, it gets assigned a new fractional position generated by selecting a middle value between the previous and the next symbols' fractional indices and increasing the depth of the list in case there is not enough room to do so (no floating point math is used).
+
+### Globally Ordered Formatting Operations
+The solution presented above completely solves the issues related to "insert" and "delete" operations, but what about other operations that only change some *attributes* of existing symbols such as text formatting ?
+
+The same ordering issues due to network delays apply here, but solving this problem was much easier: the formatting change is sent to the central server and then dispatched not only to all other clients in the same document, it is also sent back to the source allowing the server to enforce a "global ordering" of such operations (convergence to the same final state is guaranteed).
 
 # Architecture
 
 We chose the simplest distributed system: [client-server architecture](https://it.wikipedia.org/wiki/Sistema_client/server).
-This might not be the best choice perfomance-wise, but we avoided a lot of new other problems that would have showed up due to peer-to-peer communication.
+This might not be the best choice perfomance-wise (especially when thinking about scaling to a large number of users), but  avoids many other problems that would've showed up in a peer-to-peer communication model.
+
+The information exchange between clients and the server follows a custom bytestream application-level protocol based on Qt's serialization primitives.
 
 ## Server
-The server is a multiple-threads process.
-The main thread is in charge of all the critical operations such as creation of a new account, login, update and all that concerns users. It also handles the creation and opening of documents.
-Secondary threads are created when a document is opened, which handle all editing messages from and to clients, making sure that all changes are consistent.
+The server application is a multi-threaded process.
+
+The main thread is in charge of serving all user requests such as the creation of a new account, login and profile information updates, while also handling the creation, deletion and opening of documents and updating the database accordingly.
+
+All editors working on the same shared document connect to a *Workspace*, which is run on a separate thread of the server process and handles all editing operations received by clients, automatically saves the document on the server file system and dispatches messages to all connected clients (no synchronization needed due to clear roles separation between threads). 
+All documents that are not being currently edited are stored on disk and unloaded from memory.
 
 ## Client
-//TODO
+The LiveText client is a QtGUI-based desktop application.
+
+It provides a landing page with basic account operations such login, registration, profile editing and grants access and control over the user's documents, a document is opened inside the TextEditor.
+
+The editor is based on Qt's feature-rich **QTextEdit** component, which supports *RichText* but works in the "traditional" way (that is, identifying characters by their absolute position) and so we had to add a completely custom intermediate layer which translates all editing operations between the traditional text editor and our CRDT representation (in both directions).
+The editor presents a fully customized GUI with action menus, toolbars, context menus and supports keyboard shortcuts.
+
+A secondary thread is always active and handles the network communication with the server, requiring little to no synchronization (only when switching from LandingPage to TextEditor).
 
 # Security
 
-Our University assignment has no security requirements, but security issues are an interesting and important topic nowadays.
-We care about it as we want to provide a basic way to exchange data in a safe way.
+Our assignment had no security requirement, but we believe that in today's world every application should protect the users' data and privacy through the available security protocols for exhanging and storing data in a safe way.
 
-First of all we set up [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) connections between the server and clients using a self-signed certificate.
-In this way all data flow in the network is encripted and no one can see what are the inside messages if someone sniffed packets.
+Every single byte exchanged between each client and the server is encrypted using [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) with the *ECDHE-RSA-AES256-GCM-SHA384* cipher.
 
-If SSL connection is not enough, we provide a simple way to exchange critical data, such as passwords, during Registration and Login operations. 
-We send to clients a random "nonce" within they hashed the password and sand it back to the server.
+**Note:** for practicality the server uses a self-signed certificate, which is fine for the scope of this project, but could easily be upgraded to a proper CA-signed certificate if needed.
 
-User DataBase is also a critical point under security point of view, so we save all the passwords hashed with a random "salt", which is also stored in the DataBase.
+In addition to that (as if an SSL connection wasn't enough), the authentication process is implemented through a challenge protocol which removes the need of sending critical data, such as passwords, on the network during the Login phase. 
 
-# Main functions code
-//TODO
+The password is only sent to the server once during the Registration phase, and then it is hashed with a random "salt" and stored in the server's SQLite Database along with all other user informations.
+
+# Performance considerations
+
+Our internal document representation stores the text in a **single ordered array** of symbol objects (while paragraphs and lists make use of additional data structures) which grants us random access to any character and simplifies the translation between fractional positions and "traditional" indexes (required for QTextEdit interoperability) but suffers from a complexity of O(N) for the insertion or deletion of a character in the middle of the document.
+
+While inserting or deleting single characters at a time (*e.g.* user typing on a keyboard) does not cause any perceivable delay, operations that involve a large number of symbols (*e.g.* copy-pasting or selecting and deleting thousands of characters) come with a big performance cost that may even freeze the editor for a few seconds.
+
+An ordered tree structure could have avoided the cost of shifting all the elements at every editing operation, but it would've still presented a linear complexity (but lower overall cost due to no memory copy) for the translation between fractional positions and array indexes.
