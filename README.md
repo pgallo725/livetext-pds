@@ -6,9 +6,9 @@ LiveText is a client-server, "real-time" collaborative text editor built in C++ 
 
 We began our project by studying other collaborative text editors such as [Conclave](https://conclave-team.github.io/conclave-site/) and Google Docs and then we developed our own version in the form of a desktop application.
 
-Here you can download the latest server and client packages for your own use:
-- server (link al .exe)
-- client (link al .exe)
+Here you can download the latest server and client packages:
+- [Server](https://github.com/paolo257428/livetext-pds/releases/download/v1.0.0/textserver-v1.0.0-win-x64.rar)
+- [Client](https://github.com/paolo257428/livetext-pds/releases/download/v1.0.0/textedit-v1.0.0-win-x64.rar)
 
 # Index
 1. [What is a real-time text editor?](#What-is-a-real-time-text-editor)
