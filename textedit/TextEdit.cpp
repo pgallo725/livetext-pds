@@ -1499,7 +1499,37 @@ bool QTextEditWrapper::canInsertFromMimeData(const QMimeData* source) const {
 //Prevent pasting images overload of QTextEdit function
 void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
 	if (!source->hasImage())
-		QTextEdit::insertFromMimeData(source);
+	{
+		if (source->hasHtml())
+		{
+			QString data = source->data("text/html");
+
+			// Link tags are removed, the hypertext is colored blue and underlined instead
+			data.replace(QRegExp("<a[^>]+>", Qt::CaseInsensitive), "<span style=\"color:blue;text-decoration:underline\">");
+			data.replace(QRegExp("<\/a>", Qt::CaseInsensitive), "<\/span>");
+
+			// All table elements are removed from the clipboard data
+			data.replace("<\/tr>", "<br>", Qt::CaseInsensitive);
+			data.remove(QRegExp("<[\/]?(table|thead|tbody|tfoot|t[dhr])[^>]*>", Qt::CaseInsensitive));
+
+			// Remove images from the MIME data
+			data.remove(QRegExp("<[\/]?img[^>]+>", Qt::CaseInsensitive));
+
+			// Other unsupported tags are removed
+			data.remove(QRegExp("<[\/]?big>|<hr>|<[\/]?su[bp][^>]*>", Qt::CaseInsensitive));
+
+			// Headings are replaced with normal paragraphs using bold font
+			data.replace(QRegExp("<h[1-6]>([^<]*)<\/h[1-6]>", Qt::CaseInsensitive), "<p style=\"font-size:24pt;font-weight:bold\">\\1<\/p>");
+
+			QMimeData sanitizedSource;
+			sanitizedSource.setData("text/html", data.toUtf8());
+			QTextEdit::insertFromMimeData(&sanitizedSource);
+		}
+		else
+		{
+			QTextEdit::insertFromMimeData(source);
+		}
+	}
 }
 
 
