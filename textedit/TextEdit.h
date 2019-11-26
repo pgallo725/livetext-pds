@@ -121,6 +121,8 @@ private:
 	QAction* actionTextUnderline;
 	QAction* actionTextItalic;
 	QAction* actionTextStrikeout;
+	QAction* actionTextSubscript;
+	QAction* actionTextSuperscript;
 	QAction* actionTextColor;
 	QAction* actionAlignLeft;
 	QAction* actionAlignCenter;
@@ -172,6 +174,7 @@ private:
 	void fontChanged(const QFont& f);
 	void colorChanged(const QColor& c);
 	void alignmentChanged(Qt::Alignment a);
+	void scriptChanged(QTextCharFormat::VerticalAlignment a);
 	void lineHeightChanged(qreal height);
 	void toggleCheckList(int listType);
 
@@ -289,6 +292,8 @@ private slots:
 	void textUnderline();
 	void textItalic();
 	void textStrikeout();
+	void textSubscript();
+	void textSuperscript();
 	void textFamily(const QString& f);
 	void textSize(const QString& p);
 	void incrementSize();

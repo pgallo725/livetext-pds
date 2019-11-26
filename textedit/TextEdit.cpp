@@ -602,6 +602,26 @@ void TextEdit::setupEditorActions()
 
 	tb->addAction(a);
 
+
+	tb->addSeparator();
+
+
+	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/decrementsize.png");
+	actionTextSubscript = tb->addAction(subscriptTextIcon, tr("Subscript text"), this, &TextEdit::textSubscript);
+	actionTextSubscript->setPriority(QAction::LowPriority);
+	actionTextSubscript->setCheckable(true);
+
+	tb->addAction(actionTextSubscript);
+
+
+	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/incrementsize.png"); 
+	actionTextSuperscript = tb->addAction(superscriptTextIcon, tr("Superscript text"), this, &TextEdit::textSuperscript);
+	actionTextSuperscript->setPriority(QAction::LowPriority);
+	actionTextSuperscript->setCheckable(true);
+
+	tb->addAction(actionTextSuperscript);
+
+
 	/********** HELP AND INFORMATIONS **********/
 
 	menu = menuBar()->addMenu(tr("?"));
@@ -1070,7 +1090,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 
 /**************************** CHANGE TEXT FORMAT ****************************/
 /*
-*	Bold/Underline/Italic
+*	Bold/Underline/Italic/Strikeout/Subscript/Superscript
 *	Change text family
 *	Change text size
 *	Change text color
@@ -1124,6 +1144,32 @@ void TextEdit::textStrikeout()
 	//Set Strikethrough according to button
 	QTextCharFormat fmt;
 	fmt.setFontStrikeOut(actionTextStrikeout->isChecked());
+
+	//Apply format
+	mergeFormatOnSelection(fmt);
+}
+
+void TextEdit::textSubscript()
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	//Set Subscript format according to button
+	QTextCharFormat fmt;
+	fmt.setVerticalAlignment(actionTextSubscript->isChecked() ?
+		QTextCharFormat::AlignSubScript : QTextCharFormat::AlignNormal);
+
+	//Apply format
+	mergeFormatOnSelection(fmt);
+}
+
+void TextEdit::textSuperscript()
+{
+	const QSignalBlocker blocker(_textEdit->document());
+
+	//Set Superscript format according to button
+	QTextCharFormat fmt;
+	fmt.setVerticalAlignment(actionTextSuperscript->isChecked() ? 
+		QTextCharFormat::AlignSuperScript : QTextCharFormat::AlignNormal);
 
 	//Apply format
 	mergeFormatOnSelection(fmt);
@@ -1413,6 +1459,7 @@ void TextEdit::currentCharFormatChanged(const QTextCharFormat& format)
 	//Apply changes to buttons/comboboxes
 	fontChanged(format.font());
 	colorChanged(format.foreground().color());
+	scriptChanged(format.verticalAlignment());
 }
 
 void TextEdit::fontChanged(const QFont& f)
@@ -1458,6 +1505,24 @@ void TextEdit::alignmentChanged(Qt::Alignment a)
 		actionAlignRight->setChecked(true);
 	else if (a & Qt::AlignJustify)
 		actionAlignJustify->setChecked(true);
+}
+
+void TextEdit::scriptChanged(QTextCharFormat::VerticalAlignment a)
+{
+	//Checks SubScript/SuperScript button according to the text's vertical alignment
+	if (a == QTextCharFormat::AlignSubScript) 
+	{
+		actionTextSubscript->setChecked(true);
+		actionTextSuperscript->setChecked(false);
+	}
+	else if (a == QTextCharFormat::AlignSuperScript) {
+		actionTextSubscript->setChecked(false);
+		actionTextSuperscript->setChecked(true);
+	}
+	else {
+		actionTextSubscript->setChecked(false);
+		actionTextSuperscript->setChecked(false);
+	}
 }
 
 void TextEdit::lineHeightChanged(qreal height)
@@ -1513,7 +1578,7 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
 			data.remove(QRegularExpression("<[\/]?(table|thead|tbody|tfoot|t[dhr])[^>]*>", QRegularExpression::CaseInsensitiveOption));
 
 			// Remove other unsupported tags from the MIME data (e.g. images)
-			data.remove(QRegularExpression("<[\/]?img[^>]+>|<[\/]?big>|<[\/]?su[bp][^>]*>", QRegularExpression::CaseInsensitiveOption));
+			data.remove(QRegularExpression("<[\/]?img[^>]+>|<[\/]?big>", QRegularExpression::CaseInsensitiveOption));
 
 			// Headings are replaced with normal paragraphs using bold font with the proper size
 			QRegularExpression headingsRegex("<(h[1-6])[^>]*>(.*?)<\/\\1>", QRegularExpression::CaseInsensitiveOption);
@@ -1540,7 +1605,6 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
 			QTextEdit::insertFromMimeData(&sanitizedSource);
-
 		}
 		else
 		{
