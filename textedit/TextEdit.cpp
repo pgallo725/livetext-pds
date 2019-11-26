@@ -1505,25 +1505,42 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
 			QString data = source->data("text/html");
 
 			// Link tags are removed, the hypertext is colored blue and underlined instead
-			data.replace(QRegExp("<a[^>]+>", Qt::CaseInsensitive), "<span style=\"color:blue;text-decoration:underline\">");
-			data.replace(QRegExp("<\/a>", Qt::CaseInsensitive), "<\/span>");
+			data.replace(QRegularExpression("<a[^>]+>(.*?)<\/a>", QRegularExpression::CaseInsensitiveOption),
+				"<span style=\"color:blue;text-decoration:underline\">\\1<\/span>");
 
 			// All table elements are removed from the clipboard data
-			data.replace("<\/tr>", "<br>", Qt::CaseInsensitive);
-			data.remove(QRegExp("<[\/]?(table|thead|tbody|tfoot|t[dhr])[^>]*>", Qt::CaseInsensitive));
+			data.replace(QRegularExpression("<\/(tr|hr)>", QRegularExpression::CaseInsensitiveOption), "<br>");
+			data.remove(QRegularExpression("<[\/]?(table|thead|tbody|tfoot|t[dhr])[^>]*>", QRegularExpression::CaseInsensitiveOption));
 
-			// Remove images from the MIME data
-			data.remove(QRegExp("<[\/]?img[^>]+>", Qt::CaseInsensitive));
+			// Remove other unsupported tags from the MIME data (e.g. images)
+			data.remove(QRegularExpression("<[\/]?img[^>]+>|<[\/]?big>|<[\/]?su[bp][^>]*>", QRegularExpression::CaseInsensitiveOption));
 
-			// Other unsupported tags are removed
-			data.remove(QRegExp("<[\/]?big>|<hr>|<[\/]?su[bp][^>]*>", Qt::CaseInsensitive));
+			// Headings are replaced with normal paragraphs using bold font with the proper size
+			QRegularExpression headingsRegex("<(h[1-6])[^>]*>(.*?)<\/\\1>", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpressionMatchIterator it = headingsRegex.globalMatch(data);
+			int delta = 0;
+			while (it.hasNext())
+			{
+				QRegularExpressionMatch headingMatch = it.next();
+				QString heading = headingMatch.captured(1);
+				QString fontSize;
 
-			// Headings are replaced with normal paragraphs using bold font
-			data.replace(QRegExp("<h[1-6]>([^<]*)<\/h[1-6]>", Qt::CaseInsensitive), "<p style=\"font-size:24pt;font-weight:bold\">\\1<\/p>");
+				if (heading.compare("h1", Qt::CaseInsensitive) == 0)		fontSize = "24";	// H1 -> 24pt (bold)
+				else if (heading.compare("h2", Qt::CaseInsensitive) == 0)	fontSize = "18";	// H2 -> 18pt (bold)
+				else if (heading.compare("h3", Qt::CaseInsensitive) == 0)	fontSize = "14";	// H3 -> 14pt (bold)
+				else if (heading.compare("h4", Qt::CaseInsensitive) == 0)	fontSize = "12";	// H4 -> 12pt (bold)
+				else if (heading.compare("h5", Qt::CaseInsensitive) == 0)	fontSize = "10";	// H5 -> 10pt (bold)
+				else if (heading.compare("h6", Qt::CaseInsensitive) == 0)	fontSize = "8";		// H6 -> 8pt (bold)
+
+				QString str = QString("<p style=\"font-size:") + fontSize + "pt; font-weight:bold\">" + headingMatch.captured(2) + "<\/p>";
+				data.replace(headingMatch.capturedStart() + delta, headingMatch.capturedLength(), str);
+				delta += str.length() - headingMatch.capturedLength();
+			}
 
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
 			QTextEdit::insertFromMimeData(&sanitizedSource);
+
 		}
 		else
 		{
