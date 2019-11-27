@@ -605,8 +605,9 @@ void TextEdit::setupEditorActions()
 
 	tb->addSeparator();
 
+	/********** TEXT SUBSCRIPT/SUPERSCRIPT **********/
 
-	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/decrementsize.png");
+	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/textpedix.png");
 	actionTextSubscript = tb->addAction(subscriptTextIcon, tr("Subscript text"), this, &TextEdit::textSubscript);
 	actionTextSubscript->setPriority(QAction::LowPriority);
 	actionTextSubscript->setCheckable(true);
@@ -614,7 +615,7 @@ void TextEdit::setupEditorActions()
 	tb->addAction(actionTextSubscript);
 
 
-	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/incrementsize.png"); 
+	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/textapix.png"); 
 	actionTextSuperscript = tb->addAction(superscriptTextIcon, tr("Superscript text"), this, &TextEdit::textSuperscript);
 	actionTextSuperscript->setPriority(QAction::LowPriority);
 	actionTextSuperscript->setCheckable(true);
@@ -1141,6 +1142,7 @@ void TextEdit::textStrikeout()
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
+
 	//Set Strikethrough according to button
 	QTextCharFormat fmt;
 	fmt.setFontStrikeOut(actionTextStrikeout->isChecked());
@@ -1152,6 +1154,9 @@ void TextEdit::textStrikeout()
 void TextEdit::textSubscript()
 {
 	const QSignalBlocker blocker(_textEdit->document());
+
+	//Uncheck text Superscription
+	actionTextSuperscript->setChecked(false);
 
 	//Set Subscript format according to button
 	QTextCharFormat fmt;
@@ -1165,6 +1170,9 @@ void TextEdit::textSubscript()
 void TextEdit::textSuperscript()
 {
 	const QSignalBlocker blocker(_textEdit->document());
+
+	//Uncheck text Subscription
+	actionTextSubscript->setChecked(false);
 
 	//Set Superscript format according to button
 	QTextCharFormat fmt;
@@ -1293,6 +1301,9 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 
 	//Apply format to the document, if the textCursor has a selection, apply format to the selection
 	_textEdit->mergeCurrentCharFormat(format);
+
+	//Redraw graohic cursor
+	redrawAllCursors();
 
 	QVector<QTextCharFormat> formats;
 	int i = cursor.selectionStart();
