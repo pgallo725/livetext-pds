@@ -967,9 +967,14 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	if (currentList) {
 		//Getting current block
 		QTextBlock blk = _extraCursor->block();
+		QTextBlockFormat blkFormat = _extraCursor->blockFormat();
 
 		//Remove target bock from list
 		currentList->remove(blk);
+
+		//Reset block format to default
+		blkFormat.setObjectIndex(-1);
+		_extraCursor->setBlockFormat(blkFormat);
 	}
 
 	//GUI update
@@ -1262,7 +1267,7 @@ void TextEdit::mergeFormatOnSelection(const QTextCharFormat& format)
 	//Apply format to the document, if the textCursor has a selection, apply format to the selection
 	_textEdit->mergeCurrentCharFormat(format);
 
-	//Redraw graohic cursor
+	//Redraw graphic cursor
 	redrawAllCursors();
 
 	QVector<QTextCharFormat> formats;
@@ -1306,6 +1311,9 @@ void TextEdit::applyCharFormat(int start, int end, QTextCharFormat fmt)
 
 	//Update GUI buttons according to new format
 	currentCharFormatChanged(_textEdit->textCursor().charFormat());
+
+	//Redraw cursors because the text size and layouts may have changed
+	redrawAllCursors();
 }
 
 
