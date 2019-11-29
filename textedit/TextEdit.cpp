@@ -207,7 +207,7 @@ void TextEdit::setupMainWindow()
 	QHBoxLayout* bl = new QHBoxLayout(area);
 	bl->setContentsMargins(0, 24, 0, 0);
 	bl->setAlignment(Qt::AlignHCenter); 	//Set widget alignment
-	bl->addWidget(_textEdit);	//Add text editor to widget
+	bl->addWidget(_textEdit);				//Add text editor to widget
 
 	//set widget layout
 	cntr->setLayout(bl);
@@ -236,37 +236,33 @@ void TextEdit::setupEditorActions()
 
 	//Share URI, opens a box with URI pasted inside
 	const QIcon shareIcon = QIcon(rsrcPath + "/editor/share.png");
-	QAction* a = menu->addAction(shareIcon, tr("Share URI"), this, &TextEdit::fileShare);
+	QAction* a = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
 	tb->addAction(a);
 
 	menu->addSeparator();
 
-	//If the print plugin is enabled
-#ifndef QT_NO_PRINTER
+#ifndef QT_NO_PRINTER	//If the print plugin is enabled
 
 	//Export document in PDF
 	const QIcon exportPdfIcon = QIcon(rsrcPath + "/editor/exportpdf.png");
-	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf);
-	a->setPriority(QAction::LowPriority);
-	a->setShortcut(Qt::CTRL + Qt::Key_D);
+	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf, Qt::CTRL + Qt::Key_D);
 	tb->addAction(a);
 
 	//Print document
 	const QIcon filePrintIcon = QIcon(rsrcPath + "/editor/fileprint.png");
 	menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
 
-	a = menu->addAction(filePrintIcon, tr("&Print..."), this, &TextEdit::filePrint);
-	a->setPriority(QAction::LowPriority);
-	a->setShortcut(QKeySequence::Print);
+	a = menu->addAction(filePrintIcon, tr("&Print..."), this, &TextEdit::filePrint, QKeySequence::Print);
 	tb->addAction(a);
 
-#endif
 	menu->addSeparator();
+
+#endif
 
 	//Close document
 	const QIcon closeDocumentIcon(rsrcPath + "/misc/logout.png");
-	QAction* closeDocoumentAction = menu->addAction(closeDocumentIcon, tr("&Close Document"), this, &TextEdit::askBeforeCloseDocument);
-
+	QAction* closeDocumentAction = menu->addAction(closeDocumentIcon, tr("&Close Document"),
+		this, &TextEdit::askBeforeCloseDocument);
 
 
 	/********** EDIT MENU **********/
@@ -278,50 +274,42 @@ void TextEdit::setupEditorActions()
 #ifndef QT_NO_CLIPBOARD
 	//Cut
 	const QIcon cutIcon = QIcon(rsrcPath + "/editor/editcut.png");
-	actionCut = menu->addAction(cutIcon, tr("Cu&t"), _textEdit, &QTextEdit::cut);
-	actionCut->setPriority(QAction::LowPriority);
-	actionCut->setShortcut(QKeySequence::Cut);
+	actionCut = menu->addAction(cutIcon, tr("Cu&t"), _textEdit, &QTextEdit::cut, QKeySequence::Cut);
 	tb->addAction(actionCut);
 
 	//Copy
 	const QIcon copyIcon = QIcon(rsrcPath + "/editor/editcopy.png");
-	actionCopy = menu->addAction(copyIcon, tr("&Copy"), _textEdit, &QTextEdit::copy);
-	actionCopy->setPriority(QAction::LowPriority);
-	actionCopy->setShortcut(QKeySequence::Copy);
+	actionCopy = menu->addAction(copyIcon, tr("&Copy"), _textEdit, &QTextEdit::copy, QKeySequence::Copy);
 	tb->addAction(actionCopy);
 
 	//Paste
 	const QIcon pasteIcon = QIcon(rsrcPath + "/editor/editpaste.png");
-	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), _textEdit, &QTextEdit::paste);
-	actionPaste->setPriority(QAction::LowPriority);
-	actionPaste->setShortcut(QKeySequence::Paste);
+	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), _textEdit, &QTextEdit::paste, QKeySequence::Paste);
 	tb->addAction(actionPaste);
+
+	menu->addSeparator();
 
 	//Checks if there's some items in the clipboards
 	clipboardDataChanged();
 #endif
 
-	menu->addSeparator();
 	//Delete
-	actionDelete = menu->addAction(tr("Delete"), this, [this]() { _textEdit->textCursor().removeSelectedText(); });
-	actionDelete->setPriority(QAction::LowPriority);
-	actionDelete->setShortcut(QKeySequence::Delete);
+	actionDelete = menu->addAction(tr("&Delete"), this,
+		[this]() { _textEdit->textCursor().removeSelectedText(); }, QKeySequence::Delete);
+
 	//Select all
-	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
+	menu->addAction(tr("&Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 
 
 	/********** FORMAT MENU **********/
 
 	tb = addToolBar(tr("Format Actions"));
-	QMenu* formatMenu = menuBar()->addMenu(tr("F&ormat"));
+	QMenu* formatMenu = menuBar()->addMenu(tr("&Format"));
 
 	//Bold
 	const QIcon boldIcon = QIcon(rsrcPath + "/editor/textbold.png");
-	actionTextBold = formatMenu->addAction(boldIcon, tr("&Bold"), this, &TextEdit::textBold);
-	actionTextBold->setShortcut(Qt::CTRL + Qt::Key_B);
-	actionTextBold->setPriority(QAction::LowPriority);
-
-	//Checkable
+	actionTextBold = formatMenu->addAction(boldIcon, tr("&Bold"),
+		this, &TextEdit::textBold, QKeySequence::Bold);
 	actionTextBold->setCheckable(true);
 
 	//Sets menu entry style
@@ -335,9 +323,8 @@ void TextEdit::setupEditorActions()
 
 	//Italic
 	const QIcon italicIcon = QIcon(rsrcPath + "/editor/textitalic.png");
-	actionTextItalic = formatMenu->addAction(italicIcon, tr("&Italic"), this, &TextEdit::textItalic);
-	actionTextItalic->setPriority(QAction::LowPriority);
-	actionTextItalic->setShortcut(Qt::CTRL + Qt::Key_I);
+	actionTextItalic = formatMenu->addAction(italicIcon, tr("&Italic"),
+		this, &TextEdit::textItalic, QKeySequence::Italic);
 	actionTextItalic->setCheckable(true);
 
 	QFont italic;
@@ -349,9 +336,8 @@ void TextEdit::setupEditorActions()
 
 	//Underline
 	const QIcon underlineIcon = QIcon(rsrcPath + "/editor/textunder.png");
-	actionTextUnderline = formatMenu->addAction(underlineIcon, tr("&Underline"), this, &TextEdit::textUnderline);
-	actionTextUnderline->setShortcut(Qt::CTRL + Qt::Key_U);
-	actionTextUnderline->setPriority(QAction::LowPriority);
+	actionTextUnderline = formatMenu->addAction(underlineIcon, tr("&Underline"),
+		this, &TextEdit::textUnderline, QKeySequence::Underline);
 	actionTextUnderline->setCheckable(true);
 
 	QFont underline;
@@ -360,10 +346,11 @@ void TextEdit::setupEditorActions()
 
 	tb->addAction(actionTextUnderline);
 
+
 	//Strikethrough
 	const QIcon strikeIcon = QIcon(rsrcPath + "/editor/textstrikethrough.png");
-	actionTextStrikeout = formatMenu->addAction(strikeIcon, tr("&Strikeout"), this, &TextEdit::textStrikeout);
-	actionTextStrikeout->setPriority(QAction::LowPriority);
+	actionTextStrikeout = formatMenu->addAction(strikeIcon, tr("&Strikeout"),
+		this, &TextEdit::textStrikeout, Qt::CTRL + Qt::Key_S);
 	actionTextStrikeout->setCheckable(true);
 
 	QFont strikethrough;
@@ -375,42 +362,54 @@ void TextEdit::setupEditorActions()
 	formatMenu->addSeparator();
 	tb->addSeparator();
 
+
+	// Subscript
+	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/textpedix.png");
+	actionTextSubscript = formatMenu->addAction(subscriptTextIcon, tr("Su&bscript"),
+		this, &TextEdit::textSubscript);
+	actionTextSubscript->setCheckable(true);
+
+	// Superscript
+	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/textapix.png");
+	actionTextSuperscript = formatMenu->addAction(superscriptTextIcon, tr("Su&perscript"),
+		this, &TextEdit::textSuperscript);
+	actionTextSuperscript->setCheckable(true);
+
+	formatMenu->addSeparator();
+
+
 	//Color
 	QPixmap pix(rsrcPath + "/editor/textcolor.png");
 	actionTextColor = formatMenu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
 	tb->addAction(actionTextColor);
 
-
 	formatMenu->addSeparator();
 	tb->addSeparator();
+
 
 	//Align Left
 	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
 	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
-	actionAlignLeft->setPriority(QAction::LowPriority);
 
 	//Align Center
 	const QIcon centerIcon = QIcon(rsrcPath + "/editor/textcenter.png");
 	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
-	actionAlignCenter->setPriority(QAction::LowPriority);
 
 	//Align Right
 	const QIcon rightIcon = QIcon(rsrcPath + "/editor/textright.png");
 	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
-	actionAlignRight->setPriority(QAction::LowPriority);
 
 	//Align Justify
 	const QIcon fillIcon = QIcon(rsrcPath + "/editor/textjustify.png");
 	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
 	actionAlignJustify->setCheckable(true);
-	actionAlignJustify->setPriority(QAction::LowPriority);
 
 	//Creating a new QActionGroup
 	QActionGroup* alignGroup = new QActionGroup(this);
@@ -434,6 +433,7 @@ void TextEdit::setupEditorActions()
 	formatMenu->addActions(alignGroup->actions());
 
 	tb->addSeparator();
+
 
 	//Lists
 	QMenu* menuList = new QMenu("List menu");
@@ -480,7 +480,6 @@ void TextEdit::setupEditorActions()
 	listButton->setToolTip(tr("List style"));
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
 	listButton->setDefaultAction(listActions[disc]);
-
 	listButton->setCheckable(true);
 
 	listButton->setIcon(QIcon(rsrcPath + "/editor/list.png"));
@@ -488,13 +487,13 @@ void TextEdit::setupEditorActions()
 
 	tb->addSeparator();
 
+
 	//LineHeight
 	QMenu* menuLineHeight = new QMenu("Line height menu");
 
 	//1
 	actionLineHeight100 = new QAction(tr("1"), this);
 	actionLineHeight100->setCheckable(true);
-
 
 	//1.15
 	actionLineHeight115 = new QAction(tr("1.15"), this);
@@ -531,6 +530,7 @@ void TextEdit::setupEditorActions()
 
 	formatMenu->addSeparator();
 
+
 	/********** ACCOUNT MENU **********/
 
 	addToolBarBreak(Qt::TopToolBarArea);
@@ -539,11 +539,12 @@ void TextEdit::setupEditorActions()
 	menu = menuBar()->addMenu(tr("&Account"));
 
 	//Close document
-	tb->addAction(closeDocoumentAction);
+	tb->addAction(closeDocumentAction);
 
 	//Highlight user text
 	const QIcon HighlightUsersIcon(rsrcPath + "/editor/highlightusers.png");
-	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"), this, &TextEdit::highlightUsersText);
+	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"),
+		this, &TextEdit::highlightUsersText);
 
 	menu->addSeparator();
 
@@ -560,7 +561,8 @@ void TextEdit::setupEditorActions()
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 
-	/********** FONT AND SIZE **********/
+
+	/********** FONT AND TEXT SIZE **********/
 
 	//Font and Size
 	tb = addToolBar(tr("Font and Size"));
@@ -590,45 +592,25 @@ void TextEdit::setupEditorActions()
 
 
 	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/editor/incrementsize.png");
-	a = new QAction(incrementSizeIcon, tr("Increment text size"), this);
-	connect(a, &QAction::triggered, this, &TextEdit::incrementSize);
-
-	tb->addAction(a);
-
+	tb->addAction(incrementSizeIcon, tr("Increase font size"), this, &TextEdit::incrementSize);
 
 	const QIcon decrementSizeIcon = QIcon(rsrcPath + "/editor/decrementsize.png");
-	a = new QAction(decrementSizeIcon, tr("Decrement text size"), this);
-	connect(a, &QAction::triggered, this, &TextEdit::decrementSize);
-
-	tb->addAction(a);
-
+	tb->addAction(decrementSizeIcon, tr("Reduce font size"), this, &TextEdit::decrementSize);
 
 	tb->addSeparator();
 
-	/********** TEXT SUBSCRIPT/SUPERSCRIPT **********/
 
-	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/textpedix.png");
-	actionTextSubscript = tb->addAction(subscriptTextIcon, tr("Subscript text"), this, &TextEdit::textSubscript);
-	actionTextSubscript->setPriority(QAction::LowPriority);
-	actionTextSubscript->setCheckable(true);
-
+	// Text subscript and superscript (in toolbar)
 	tb->addAction(actionTextSubscript);
-
-
-	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/textapix.png"); 
-	actionTextSuperscript = tb->addAction(superscriptTextIcon, tr("Superscript text"), this, &TextEdit::textSuperscript);
-	actionTextSuperscript->setPriority(QAction::LowPriority);
-	actionTextSuperscript->setCheckable(true);
-
 	tb->addAction(actionTextSuperscript);
 
 
 	/********** HELP AND INFORMATIONS **********/
 
-	menu = menuBar()->addMenu(tr("?"));
-	menu->addAction(tr("Readme..."), this, &TextEdit::linkPressed);
+	menu = menuBar()->addMenu(tr("&?"));
+	menu->addAction(tr("&Readme..."), this, &TextEdit::linkPressed, QKeySequence::HelpContents);
 	menu->addSeparator();
-	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("About LiveText   "), _aboutWindow, &AboutWindow::exec);
+	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("&About LiveText   "), _aboutWindow, &AboutWindow::exec);
 }
 
 
