@@ -92,6 +92,9 @@
     <ClCompile Include="ProfileEditWindow.cpp">
       <Filter>Source Files\UI Windows</Filter>
     </ClCompile>
+    <ClCompile Include="QTextEditWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Client.h">
@@ -275,6 +278,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WidgetsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QTextEditWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

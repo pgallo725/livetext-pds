@@ -204,6 +204,7 @@
     <ClCompile Include="OpenUriWindow.cpp" />
     <ClCompile Include="Presence.cpp" />
     <ClCompile Include="ProfileEditWindow.cpp" />
+    <ClCompile Include="QTextEditWrapper.cpp" />
     <ClCompile Include="ShareUriWindow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TextEdit.cpp" />
@@ -211,6 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="AboutWindow.h" />
+    <ClInclude Include="QTextEditWrapper.h" />
     <ClInclude Include="WidgetsManager.h" />
     <QtMoc Include="Client.h">
     </QtMoc>

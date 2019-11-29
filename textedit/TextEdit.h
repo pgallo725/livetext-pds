@@ -7,6 +7,7 @@
 
 #include <User.h>
 
+#include "QTextEditWrapper.h"
 #include "Presence.h"
 #include "ShareUriWindow.h"
 #include "AboutWindow.h"
@@ -29,15 +30,6 @@ class QPrinter;
 class QLabel;
 class QToolButton;
 
-
-
-//This class is necessary to prevent pasting / drag & drop images inside editors
-class QTextEditWrapper : public QTextEdit {
-
-protected:
-	virtual void insertFromMimeData(const QMimeData* source);
-	bool canInsertFromMimeData(const QMimeData* source) const;
-};
 
 
 
@@ -185,6 +177,9 @@ private:
 	void handleMultipleSelections();
 	int areUserIconActive();
 
+	//Cursor timer
+	void cursorTimerEvent();
+
 	//Graphic cursors
 	void redrawAllCursors();
 	void drawGraphicCursor(Presence* p);
@@ -192,8 +187,6 @@ private:
 	//Status bar messages
 	void showStatusBarMessage(QString text);
 
-protected:
-	void cursorTimerEvent();
 
 public:
 	TextEdit(User& user, QWidget* parent = 0);
@@ -259,6 +252,7 @@ signals:
 
 	/* ----------------------- SLOTS ----------------------- */
 public slots:
+
 	//User cursor position changed
 	void userCursorPositionChanged(qint32 position, qint32 user);
 
@@ -269,9 +263,8 @@ public slots:
 	//Shows error in case of failure during document closing
 	void closeDocumentError(QString error);
 
-
-	//Bindend to actions
 private slots:
+
 	//File printing
 	void filePrint();
 	void filePrintPreview();

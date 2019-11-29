@@ -79,7 +79,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
-	connect(this, &TextEdit::resizeEvent, this, [this] {redrawAllCursors(); });
+	connect(this, &TextEdit::resizeEvent, this, [this] { redrawAllCursors(); });
 
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
@@ -181,10 +181,7 @@ void TextEdit::setupMainWindow()
 	_textEdit = new QTextEditWrapper();
 	_textEdit->setMaximumWidth(screenWidth);
 	_textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-	//Creates 3D effect of document
 	_textEdit->setFrameStyle(QFrame::Plain);
-	//_textEdit->setFrameShadow(QFrame::Raised);
 	_textEdit->setLineWidth(1);
 
 	//Set central widget and layout
@@ -435,6 +432,7 @@ void TextEdit::setupEditorActions()
 
 	tb->addSeparator();
 
+
 	//Lists
 	QMenu* menuList = new QMenu("List menu");
 	listActions[standard] = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
@@ -602,7 +600,6 @@ void TextEdit::setupEditorActions()
 
 	tb->addAction(a);
 
-
 	tb->addSeparator();
 
 
@@ -634,8 +631,6 @@ void TextEdit::setupEditorActions()
 
 /**************************** ONLINE USERS ****************************/
 /*
-*	Setup Online users toolbar
-*	Setup current user
 *	Add presence to editor
 *	Remove presence from editor
 */
@@ -823,7 +818,7 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 
 	_shareUri = new ShareUriWindow(URI);
 
-	//Sulla finestra appare nomeFile - nomeApplicazione
+	//Set "fileName - applicationName" as the window title
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 }
 
@@ -922,7 +917,7 @@ void TextEdit::fileShare()
 
 /**************************** LISTS ****************************/
 /*
-*	Handle button behavior, when a type of list is checked it's unchecks other styles
+*	Handle button behavior, when a type of list is checked it unchecks other styles
 *	Create a new list
 *	Add a block to list
 *	Remove a block from a list
@@ -1058,7 +1053,7 @@ void TextEdit::applyBlockFormat(int position, QTextBlockFormat fmt)
 	format.setAlignment(fmt.alignment());
 	format.setIndent(fmt.indent());
 
-	// Set margins
+	//Set margins
 	format.setBottomMargin(fmt.bottomMargin());
 	format.setTopMargin(fmt.topMargin());
 	format.setLeftMargin(fmt.leftMargin());
@@ -1141,7 +1136,7 @@ void TextEdit::textStrikeout()
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
-	//Set Strikethrough according to button
+	//Set Strikeout according to button
 	QTextCharFormat fmt;
 	fmt.setFontStrikeOut(actionTextStrikeout->isChecked());
 
@@ -1216,10 +1211,10 @@ void TextEdit::incrementSize()
 	//Get current combobox index
 	int index = comboSize->currentIndex();
 	if (index < comboSize->count() - 1) {
-		//Increment it (if less the max size)
+		//Increment it (if less than max size)
 		comboSize->setCurrentIndex(++index);
 
-		//Adapt text size according
+		//Adapt text size accordingly
 		textSize(comboSize->currentText());
 	}
 }
@@ -1228,10 +1223,10 @@ void TextEdit::decrementSize()
 {
 	int index = comboSize->currentIndex();
 	if (index > 0) {
-		//Increment it (if greater then first index)
+		//Increment it (if greater than first index)
 		comboSize->setCurrentIndex(--index);
 
-		//Adapt text size according
+		//Adapt text size accordingly
 		textSize(comboSize->currentText());
 	}
 }
@@ -1283,6 +1278,7 @@ void TextEdit::textAlign(QAction* a)
 	emit blockFormatChanged(cursor.selectionStart(), cursor.selectionEnd(),
 		cursor.blockFormat().alignment());
 }
+
 
 
 //Merge new format to current char format also for a selection (if present) 
@@ -1538,79 +1534,16 @@ void TextEdit::lineHeightChanged(qreal height)
 		actionLineHeight100->setChecked(true);
 }
 
-/**************************** PASTE EVENT ****************************/
-/*
-*	When clipboard content changes, it prevents pasting images
-*/
 
 void TextEdit::clipboardDataChanged()
 {
 #ifndef QT_NO_CLIPBOARD
 
-	//Se ho del testo negli appunti allora si sblocca il pulsante incolla
+	//When clipboard content changes, it prevents pasting images
 	if (const QMimeData* md = QApplication::clipboard()->mimeData())
 		actionPaste->setEnabled(!md->hasImage());
 
 #endif
-}
-
-
-//Disable drag&drop images
-bool QTextEditWrapper::canInsertFromMimeData(const QMimeData* source) const {
-	return !(source->hasImage() || source->hasUrls());
-}
-
-
-//Prevent pasting images overload of QTextEdit function
-void QTextEditWrapper::insertFromMimeData(const QMimeData* source) {
-	if (!source->hasImage())
-	{
-		if (source->hasHtml())
-		{
-			QString data = source->data("text/html");
-
-			// Link tags are removed, the hypertext is colored blue and underlined instead
-			data.replace(QRegularExpression("<a[^>]+>(.*?)<\/a>", QRegularExpression::CaseInsensitiveOption),
-				"<span style=\"color:blue;text-decoration:underline\">\\1<\/span>");
-
-			// All table elements are removed from the clipboard data
-			data.replace(QRegularExpression("<\/(tr|hr)>", QRegularExpression::CaseInsensitiveOption), "<br>");
-			data.remove(QRegularExpression("<[\/]?(table|thead|tbody|tfoot|t[dhr])[^>]*>", QRegularExpression::CaseInsensitiveOption));
-
-			// Remove other unsupported tags from the MIME data (e.g. images)
-			data.remove(QRegularExpression("<[\/]?img[^>]+>|<[\/]?big>", QRegularExpression::CaseInsensitiveOption));
-
-			// Headings are replaced with normal paragraphs using bold font with the proper size
-			QRegularExpression headingsRegex("<(h[1-6])[^>]*>(.*?)<\/\\1>", QRegularExpression::CaseInsensitiveOption);
-			QRegularExpressionMatchIterator it = headingsRegex.globalMatch(data);
-			int delta = 0;
-			while (it.hasNext())
-			{
-				QRegularExpressionMatch headingMatch = it.next();
-				QString heading = headingMatch.captured(1);
-				QString fontSize;
-
-				if (heading.compare("h1", Qt::CaseInsensitive) == 0)		fontSize = "24";	// H1 -> 24pt (bold)
-				else if (heading.compare("h2", Qt::CaseInsensitive) == 0)	fontSize = "18";	// H2 -> 18pt (bold)
-				else if (heading.compare("h3", Qt::CaseInsensitive) == 0)	fontSize = "14";	// H3 -> 14pt (bold)
-				else if (heading.compare("h4", Qt::CaseInsensitive) == 0)	fontSize = "12";	// H4 -> 12pt (bold)
-				else if (heading.compare("h5", Qt::CaseInsensitive) == 0)	fontSize = "10";	// H5 -> 10pt (bold)
-				else if (heading.compare("h6", Qt::CaseInsensitive) == 0)	fontSize = "8";		// H6 -> 8pt (bold)
-
-				QString str = QString("<p style=\"font-size:") + fontSize + "pt; font-weight:bold\">" + headingMatch.captured(2) + "<\/p>";
-				data.replace(headingMatch.capturedStart() + delta, headingMatch.capturedLength(), str);
-				delta += str.length() - headingMatch.capturedLength();
-			}
-
-			QMimeData sanitizedSource;
-			sanitizedSource.setData("text/html", data.toUtf8());
-			QTextEdit::insertFromMimeData(&sanitizedSource);
-		}
-		else
-		{
-			QTextEdit::insertFromMimeData(source);
-		}
-	}
 }
 
 
@@ -1784,7 +1717,7 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 	}
 }
 
-//Redraw all cursor in case of window update (scroll, resize...)
+//Redraw all cursors in case of window update (scroll, resize...)
 void TextEdit::redrawAllCursors() {
 
 	foreach(Presence * p, onlineUsers.values()) {
@@ -1795,9 +1728,8 @@ void TextEdit::redrawAllCursors() {
 
 void TextEdit::drawGraphicCursor(Presence* p)
 {
-	//Getting Presence's cursor
+	//Getting Presence's cursor and QLabel (to draw the graphic cursor)
 	QTextCursor* cursor = p->cursor();
-	//Getting Presence's QLabel (to draw the graphic cursor on the editor)
 	QLabel* userCursorLabel = p->label();
 
 	//Hide label to move it
@@ -1830,7 +1762,7 @@ void TextEdit::drawGraphicCursor(Presence* p)
 
 void TextEdit::highlightUsersText()
 {
-	//For every user it's check/uncheck his selection to be displayed
+	//For every user it checks/unchecks his selection to be displayed
 	foreach(Presence * p, onlineUsers.values())
 		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
