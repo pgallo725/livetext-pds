@@ -947,12 +947,10 @@ void TextEdit::createList(int position, QTextListFormat fmt)
 	if (_extraCursor->currentList())
 		removeBlockFromList(position);
 
-	//Setting list indentation to 1 step
-	//fmt.setIndent(1);
-
 	//Creating list with given format
 	_extraCursor->createList(fmt);
 
+	//GUI Update
 	updateEditorSelectedActions();
 }
 
@@ -966,9 +964,6 @@ void TextEdit::removeBlockFromList(int blockPosition)
 	//Getting current list
 	QTextList* currentList = _extraCursor->currentList();
 
-	//Getting current block format
-	QTextBlockFormat blkFormat = _extraCursor->blockFormat();
-
 	if (currentList) {
 		//Getting current block
 		QTextBlock blk = _extraCursor->block();
@@ -976,18 +971,6 @@ void TextEdit::removeBlockFromList(int blockPosition)
 		//Remove target bock from list
 		currentList->remove(blk);
 	}
-
-	//Makes the index of the blockFormat object -1 --> Reset block format to default
-	blkFormat.setObjectIndex(-1);
-	//blkFormat.setIndent(0);
-
-	//Apply new format (is applied anyway)
-	_extraCursor->setBlockFormat(blkFormat);
-
-	//Reload updated block format to send it to the server
-	//blkFormat = _extraCursor->blockFormat();
-	//Sends new block format to server
-	//emit blockFormatChanged(blockPosition, blockPosition, blkFormat);
 
 	//GUI update
 	updateEditorSelectedActions();
