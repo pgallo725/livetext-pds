@@ -1,8 +1,6 @@
 # LiveText
 
-University assignment project for System and Device Programming at PoliTO
-
-LiveText is a client-server, "real-time" collaborative text editor built in C++ using the Qt framework.
+Developed as an assignment project for the System and Device Programming course at PoliTO, LiveText is a client-server "real-time" collaborative text editor built in C++ using the Qt framework.
 
 We began our project by studying other collaborative editors such as [Conclave](https://conclave-team.github.io/conclave-site/) and Google Docs and then we developed our own version in the form of a desktop application.
 
@@ -108,7 +106,7 @@ A secondary thread is always active and handles the network communication with t
 
 Our assignment had no security requirement, but we believe that in today's world every application should protect the users' privacy through the available security protocols for exchanging and storing data in a safe way.
 
-Every single byte exchanged between a client and the server is encrypted using [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) with the *ECDHE-RSA-AES256-GCM-SHA384* cipher.
+Every single byte exchanged between a client and the server is encrypted using [SSL](https://it.wikipedia.org/wiki/Transport_Layer_Security) with the *ECDHE-RSA-AES256-GCM-SHA384* cipher suite.
 
 **Note:** for practicality the server uses a self-signed certificate, which is fine for the scope of this project, but could easily be upgraded to a proper CA-signed certificate if needed.
 
