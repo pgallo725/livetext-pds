@@ -264,10 +264,11 @@ void WorkSpace::answerAccountUpdate(QSharedPointer<Client> client, MessageCapsul
 
 	if (msg->getType() == AccountConfirmed) {
 		User* user = client->getUser();
+		QString nickname = user->getNickname().isEmpty() ? user->getUsername() : user->getNickname();
 
 		// Notify all other clients of the changes in this user's account
 		dispatchMessage(MessageFactory::PresenceUpdate(user->getUserId(),
-			user->getNickname(), user->getIcon()), clientSocket);
+			nickname, user->getIcon()), clientSocket);
 	}
 
 	if (clientSocket->isOpen())
