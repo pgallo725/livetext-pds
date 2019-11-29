@@ -2,33 +2,26 @@
 
 #include <QPainter>
 
-Presence::Presence(qint32 id, QString name, QColor color, QPixmap profilePic, QTextEdit* textedit, QString nickname) : _id(id), _name(name), _nickname(nickname), _color(color)
+Presence::Presence(qint32 id, QString name, QColor color, QImage profilePic, QTextEdit* textedit) 
+	: _id(id), _name(name), _color(color), _iconPressedAction(nullptr)
 {
 	_userCursor = new QTextCursor(textedit->document());
 	_label = new QLabel(textedit);
 
-	//Setting up background to draw a rectangle
-	QPixmap background(32, 32);
+	//Setting up a colored background
+	QImage canvas(36, 36, QImage::Format_RGB32);
+	canvas.fill(color);
 
 	//Setting-up painter
-	QPainter painter(&background);
+	QPainter painter(&canvas);
 	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
-	//Set up painter's pen
-	QPen pen(Qt::NoBrush, 6);
-	pen.setColor(_color);
-	painter.setPen(pen);
-
-	//Draw rectangle on background
-	painter.drawRect(0, 0, 32, 32);
-
-	//Build user-icon with colored frame
-	painter.drawPixmap(4, 4, 24, 24, profilePic.scaled(24, 24, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	//Draw the user icon above the colored canvas
+	painter.drawImage(QPoint(3, 3), profilePic.scaled(30, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 	painter.end();
 
-	_profilePicture = background;
+	_profilePicture.convertFromImage(canvas);
 }
 
 Presence::~Presence()
@@ -37,6 +30,7 @@ Presence::~Presence()
 }
 
 /************************ GETTERS ************************/
+
 QColor Presence::color()
 {
 	return _color;
@@ -45,11 +39,6 @@ QColor Presence::color()
 QString Presence::name()
 {
 	return _name;
-}
-
-QString Presence::nickname()
-{
-	return _nickname;
 }
 
 QPixmap Presence::profilePicture()

@@ -556,6 +556,7 @@ void TextEdit::setupEditorActions()
 
 	//Online users toolbar
 	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	onlineUsersToolbar->setIconSize(QSize(36, 36));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 
 
@@ -628,16 +629,12 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	//Pick a color
 	QColor color = (Qt::GlobalColor) (randomNumber);
 
-	//Getting user image
-	QPixmap userPic;
-	userPic.convertFromImage(image);
-
 	//Remove presence if already present
 	if (onlineUsers.contains(userId)) {
 		removePresence(userId);
 	}
 
-	Presence* p = new Presence(userId, username, color, userPic, _textEdit);
+	Presence* p = new Presence(userId, username, color, image, _textEdit);
 
 	//Add user icon on user toolbar
 	QAction* onlineAction = new QAction(QIcon(p->profilePicture()), username, this);

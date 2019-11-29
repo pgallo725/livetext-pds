@@ -297,7 +297,8 @@ void LiveText::accountUpdated(User user)
 	_user = user;
 
 	if (editorOpen) {
-		_textEdit->newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
+		QString name = _user.getNickname().isEmpty() ? _user.getUsername() : _user.getNickname();
+		_textEdit->newPresence(_user.getUserId(), name, _user.getIcon());
 	}
 	if (_landingPage->isVisible()) 
 	{
