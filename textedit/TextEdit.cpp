@@ -79,7 +79,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
-	connect(this, &TextEdit::resizeEvent, this, [this] { redrawAllCursors(); });
+	connect(_textEdit, &QTextEditWrapper::editorResizeEvent, this, &TextEdit::redrawAllCursors);
 
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed

@@ -130,6 +130,9 @@
     <QtMoc Include="LandingPage.h">
       <Filter>Header Files\UI Windows</Filter>
     </QtMoc>
+    <QtMoc Include="QTextEditWrapper.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -278,9 +281,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WidgetsManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QTextEditWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

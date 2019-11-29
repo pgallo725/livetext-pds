@@ -212,7 +212,7 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="AboutWindow.h" />
-    <ClInclude Include="QTextEditWrapper.h" />
+    <QtMoc Include="QTextEditWrapper.h" />
     <ClInclude Include="WidgetsManager.h" />
     <QtMoc Include="Client.h">
     </QtMoc>

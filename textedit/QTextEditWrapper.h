@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <QSet>
 #include <QTextEdit>
 
@@ -12,10 +13,13 @@
 *  contents from an external source (other applications, web pages...)
 *  we need to parse the MIME data to sanitize what is being copied
 *  and in some cases even prevent the pasting of such contents.
-*  In practice, this is done by overriding a couple of QTextEdit methods
+*  In practice, this is done by overriding a couple of QTextEdit methods,
+*  also needed to catch resize events and propagate them to TextEdit
 */
 class QTextEditWrapper : public QTextEdit 
 {
+	Q_OBJECT
+
 private:
 
 	const QSet<QString> supportedTags
@@ -68,4 +72,10 @@ protected:
 
 	bool canInsertFromMimeData(const QMimeData* source) const override;
 	virtual void insertFromMimeData(const QMimeData* source) override;
+
+	virtual void resizeEvent(QResizeEvent* e) override;
+
+signals:
+
+	void editorResizeEvent();
 };
