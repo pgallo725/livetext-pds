@@ -36,7 +36,7 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 				"<span style=\"color:blue;text-decoration:underline;\">\\1<\/span>");
 
 			// Clean up all empty tags
-			data.remove(QRegularExpression("<(\\w+)[^>]*?>\\s*(?R)*\s*<\/\\1>", QRegularExpression::CaseInsensitiveOption));
+			data.remove(QRegularExpression("<(\\w+)[^>]*?>\\s*(?R)*\\s*<\/\\1>", QRegularExpression::CaseInsensitiveOption));
 
 			// Add an empty line after each paragraph and other elements (to compensate for the missing margins)
 			data.replace(QRegularExpression("(<\/p>)|<\/(address|blockquote|d[dlt]|table|t[rt]|code|pre|samp|hr)>",
