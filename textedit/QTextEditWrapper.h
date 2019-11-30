@@ -30,7 +30,6 @@ private:
 		"br",
 		"cite", "/cite",
 		"dfn", "/dfn",
-		"div", "/div",
 		"em", "/em",
 		"font", "/font",
 		"h1", "/h1",
@@ -58,14 +57,31 @@ private:
 		"var", "/var"
 	};
 
+	const QSet<QString> unstyledTags
+	{
+		"html",
+		"qt",
+		"head",
+		"title",
+		"body",
+		"meta",
+		"br"
+	};
+
 	const QSet<QString> supportedAttributes
 	{
 		"color",
 		"font",
+		"font-family",
 		"font-size",
 		"font-style",
 		"font-weight",
-		"text-decoration"
+		"text-decoration",
+		"line-height",
+		"vertical-align",
+		"-qt-paragraph-type",
+		"-qt-block-indent",
+		"-qt-list-indent"
 	};
 
 protected:

@@ -19,9 +19,9 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 		if (source->hasHtml())
 		{
 			QString data = source->data("text/html");
-
-			QRegularExpression tagsRegex("<([\/]?\\w+)([^>]*?)>", QRegularExpression::CaseInsensitiveOption);
-			QRegularExpression styleRegex("[^>]*?style=\"([^>\"]+)\"[^>]*", QRegularExpression::CaseInsensitiveOption);
+			
+			QRegularExpression tagsRegex("<([\/]?\\w+)([^>]*?)( \/)?>", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpression styleRegex("[^>]*?style=\"([^>\"]*)\"[^>]*", QRegularExpression::CaseInsensitiveOption);
 			QRegularExpression attributesRegex("([-\\w\\s]+?):([^;]+);?", QRegularExpression::CaseInsensitiveOption);
 			QRegularExpression headingsRegex("<(h[1-6])([^>]*)>(.*?)<\/\\1>", QRegularExpression::CaseInsensitiveOption);
 
@@ -33,15 +33,17 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 
 			// Link tags are removed, the hypertext is colored blue and underlined instead
 			data.replace(QRegularExpression("<a[^>]+>(.*?)<\/a>", QRegularExpression::CaseInsensitiveOption),
-				"<span style=\"color:blue;text-decoration:underline;\">\\1<\/span>");
+				"<span style=\"color:blue;text-decoration:underline;\">\\1</span>");
 
 			// Clean up all empty tags
 			data.remove(QRegularExpression("<(\\w+)[^>]*?>\\s*(?R)*\\s*<\/\\1>", QRegularExpression::CaseInsensitiveOption));
 
-			// Add an empty line after each paragraph and other elements (to compensate for the missing margins)
-			data.replace(QRegularExpression("(<\/p>)|<\/(address|blockquote|d[dlt]|table|t[rt]|code|pre|samp|hr)>",
-				QRegularExpression::CaseInsensitiveOption), "\\1<br>");
-
+			// Replace some unsupported tags with paragraph blocks or spans to maintain similar formatting
+			data.replace(QRegularExpression("<(table|blockquote|address|dl|pre)([^>]*?)>(.*?)<\/\\1>",
+				QRegularExpression::CaseInsensitiveOption),	"<p\\2>\\3</p>");
+			data.replace(QRegularExpression("<(\/?)div([^>]*?)>", QRegularExpression::CaseInsensitiveOption), "<\\1span\\2>");
+			data.replace(QRegularExpression("<\/(d[dt]|[th]r)>", QRegularExpression::CaseInsensitiveOption), "<br />");
+			
 
 			// PARSE ALL HTML TAGS
 			int delta = 0;
@@ -63,7 +65,7 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 
 				if (attributes.isEmpty() || !attributes.contains("style="))
 				{
-					if (!tag.contains('/') && tag != "br")
+					if (!tag.contains('/') && !unstyledTags.contains(tag))
 					{
 						// Force-add a 0px margin style attribute to all opening tags
 						attributes.append(" style=\"margin:0px;\"");
@@ -145,6 +147,48 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 									style_delta += fontWeight.length() - attrMatch.capturedLength(2);
 								}
 							}
+							// Only subscript or superscript alignments are allowed in the document
+							else if (attribute == "vertical-align")
+							{
+								if (!value.contains(QRegularExpression("sub|super", QRegularExpression::CaseInsensitiveOption)))
+								{
+									// Remove the unsupported value from the style attributes
+									style.remove(attrMatch.capturedStart() + style_delta, attrMatch.capturedLength());
+									style_delta -= attrMatch.capturedLength();
+								}
+							}
+							// Translate line height values into a supported size
+							else if (attribute == "line-height")
+							{
+								int lineHeight = 100;
+
+								if (value.contains("%"))
+								{
+									value.remove("%", Qt::CaseInsensitive);
+									lineHeight = value.toInt();
+								}
+								else
+								{
+									// Verify that the line height is specified as a number, NOT in pt, px, cm...
+									QRegularExpression re("^[\\s\\d\\.,]+$", QRegularExpression::CaseInsensitiveOption);		
+									if (re.match(value).hasMatch())
+									{
+										// Translate number -> %
+										float n = value.toFloat();
+										lineHeight = std::floor(n * 100.0f);
+									}
+								}
+
+								// Normalize the % to the closest of the 4 supported values (100, 115, 150, 200)
+								if (lineHeight < 105) lineHeight = 100;
+								else if (lineHeight < 130) lineHeight = 115;
+								else if (lineHeight < 175) lineHeight = 150;
+								else lineHeight = 200;
+
+								QString str = QString::number(lineHeight) + "%";
+								style.replace(attrMatch.capturedStart(2) + style_delta, attrMatch.capturedLength(2), str);
+								style_delta += str.length() - attrMatch.capturedLength(2);
+							}
 						}
 					}
 
@@ -188,8 +232,8 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 					attributes.insert(pos + 7, QString("font-size:") + fontSize + "pt;");
 
 
-				// Replace the heading tag with an equivalent paragraph tag surrounded by line breaks
-				QString str = QString("<br><p" + attributes + ">" + match.captured(3) + "<\/p><br>");
+				// Replace the heading tag with an equivalent paragraph tag preceded by an empty line
+				QString str = QString("<p") + attributes + ">" + match.captured(3) + "</p>";
 				data.replace(match.capturedStart() + delta, match.capturedLength(), str);
 				delta += str.length() - match.capturedLength();
 			}
