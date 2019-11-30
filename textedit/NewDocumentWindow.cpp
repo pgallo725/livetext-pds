@@ -48,6 +48,9 @@ void NewDocumentWindow::resetFields()
 	//Reset all fields
 	ui->lineEdit_fileName->setText("");
 	ui->label_incorrectFilename->setText("");
+
+	//Reset the focus
+	ui->lineEdit_fileName->setFocus();
 }
 
 void NewDocumentWindow::acceptClicked()
@@ -64,7 +67,6 @@ void NewDocumentWindow::acceptClicked()
 
 void NewDocumentWindow::rejectClicked()
 {
-	//Reset fields and closes
-	resetFields();
+	//Close the window
 	this->close();
 }

@@ -41,14 +41,17 @@ void OpenUriWindow::resetFields()
 	//Reset fields
 	ui->label_incorrectUri->setText("");
 	ui->lineEdit_uri->setText("");
+
+	//Reset focus
+	ui->lineEdit_uri->setFocus();
 }
 
 void OpenUriWindow::acceptClicked()
 {
-	//Gets uri
+	//Gets URI inserted by user
 	_uri = ui->lineEdit_uri->text();
 
-	//If filename is valid it closes and confirm operation else print an error
+	//If filename is valid it closes and confirms operation else print an error
 	if (!_uri.isEmpty())
 		this->done(QDialog::Accepted);
 	else
@@ -57,7 +60,6 @@ void OpenUriWindow::acceptClicked()
 
 void OpenUriWindow::rejectClicked()
 {
-	//Reset fields and closes
-	resetFields();
+	//Close the window
 	this->close();
 }
