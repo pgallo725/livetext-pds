@@ -88,7 +88,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 void WorkSpace::readMessage()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
-	if (socket == nullptr)
+	if (socket == nullptr || !socket->isOpen() || !socket->isValid())
 		return;
 
 	QDataStream streamIn(socket);	/* connect stream with socket */
@@ -124,7 +124,7 @@ void WorkSpace::readMessage()
 		}
 		catch (MessageException& me) 
 		{
-			clientQuit(socket, true);					// Remove the client from the document
+			forceClientQuit(socket);					// Remove the client from the document
 			Logger(Error) << me.what();
 			socketBuffer.clear();
 			return;
@@ -314,4 +314,13 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
+}
+
+void WorkSpace::forceClientQuit(QSslSocket* clientSocket)
+{
+	// Disconnect all the socket's signals from Workspace slots
+	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+
+	clientSocket->close();
 }
