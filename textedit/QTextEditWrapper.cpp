@@ -44,7 +44,7 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 			data.replace(QRegularExpression("<(\/?)div([^>]*?)>", QRegularExpression::CaseInsensitiveOption), "<\\1span\\2>");
 			data.replace(QRegularExpression("<\/(d[dt]|[th]r)>", QRegularExpression::CaseInsensitiveOption), "<br />");
 			
-
+			
 			// PARSE ALL HTML TAGS
 			int delta = 0;
 			QRegularExpressionMatchIterator tags = tagsRegex.globalMatch(data);
@@ -238,6 +238,7 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 				delta += str.length() - match.capturedLength();
 			}
 
+			data.remove("&quot;");
 
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
