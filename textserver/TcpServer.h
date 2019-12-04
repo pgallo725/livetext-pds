@@ -12,8 +12,6 @@
 #include "ServerException.h"
 #include <Message.h>
 #include "MessageHandler.h"
-#include "SocketBuffer.h"
-
 
 class TcpServer : public QTcpServer
 {
@@ -33,10 +31,7 @@ private:
 	
 	MessageHandler messageHandler;
 
-	SocketBuffer socketBuffer;
-
 	QSslConfiguration config;
-
 
 	URI generateURI(QString authorName, QString docName) const;
 	bool validateURI(URI uri) const;

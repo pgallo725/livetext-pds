@@ -3,6 +3,8 @@
 #include <User.h>
 #include <QSslSocket>	
 
+#include "SocketBuffer.h"
+
 class Client 
 {
 
@@ -14,6 +16,8 @@ private:
 
 	QByteArray nonce;
 	static const QString nonceCharacters;
+
+	QSharedPointer<SocketBuffer> socketBuffer;
 
 public:
 
@@ -34,6 +38,6 @@ public:
 	QString getUsername() const;
 	QSslSocket* getSocket() const;
 	qintptr getSocketDescriptor() const;
-
+	QSharedPointer<SocketBuffer> getSocketBuffer();
 };
 

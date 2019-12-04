@@ -54,11 +54,11 @@ void Client::readBuffer()
 
 			messageHandler(message);
 
-			socketBuffer.clear();
+			socketBuffer.clearBuffer();
 		}
 		catch (MessageException& me) {
 			qDebug() << me.what();
-			socketBuffer.clear();
+			socketBuffer.clearBuffer();
 		}
 	}
 }
@@ -68,7 +68,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 {
 	if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) 
 	{
-		socketBuffer.clear();
+		socketBuffer.clearBuffer();
 		return MessageCapsule();
 	}
 
@@ -82,7 +82,7 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 	while (!socketBuffer.bufferReadyRead()) 
 	{
 		if (!socket->waitForReadyRead(READYREAD_TIMEOUT)) {
-			socketBuffer.clear();
+			socketBuffer.clearBuffer();
 			return MessageCapsule();
 		}
 
@@ -96,13 +96,13 @@ MessageCapsule Client::readMessage(QDataStream& stream)
 		MessageCapsule message = MessageFactory::Empty((MessageType)socketBuffer.getType());
 		message->read(dataStream);
 
-		socketBuffer.clear();
+		socketBuffer.clearBuffer();
 
 		return message;
 	}
 	catch (MessageException& me) {
 		qDebug() << me.what();
-		socketBuffer.clear();
+		socketBuffer.clearBuffer();
 		return MessageCapsule();
 	}
 }

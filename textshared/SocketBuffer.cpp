@@ -40,7 +40,7 @@ void SocketBuffer::append(QByteArray array)
 	buffer.append(array); 
 };
 
-void SocketBuffer::clear() 
+void SocketBuffer::clearBuffer() 
 { 
 	mSize = 0; buffer.clear(); 
 };

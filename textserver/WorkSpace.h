@@ -8,7 +8,6 @@
 #include "Client.h"
 #include "MessageHandler.h"
 #include "ServerException.h"
-#include "SocketBuffer.h"
 
 #define DOCUMENT_SAVE_TIMEOUT 30000		/* ms */
 #define DOCUMENT_MAX_FAILS 3			/* #  */
@@ -28,8 +27,6 @@ private:
 	quint16 nFails;
 
 	MessageHandler messageHandler;
-
-	SocketBuffer socketBuffer;
 
 public:
 

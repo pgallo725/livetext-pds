@@ -18,7 +18,7 @@ public:
 	~SocketBuffer();
 
 	void append(QByteArray array);
-	void clear();
+	void clearBuffer();
 	bool bufferReadyRead();
 	QByteArray* bufferPtr();
 

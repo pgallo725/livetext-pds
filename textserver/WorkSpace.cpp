@@ -5,7 +5,7 @@
 #include "ServerLogger.h"
 #include <MessageFactory.h>
 #include <SharedException.h>
-
+#include "SocketBuffer.h"
 
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
@@ -93,28 +93,29 @@ void WorkSpace::readMessage()
 
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	QByteArray dataBuffer;
+	QSharedPointer<SocketBuffer> socketBuffer = editors[socket]->getSocketBuffer();
 
-	if (!socketBuffer.getDataSize()) {
-		streamIn >> socketBuffer;
+	if (!socketBuffer->getDataSize()) {
+		streamIn >> *socketBuffer;
 
-		if (!socketBuffer.getType() && !socketBuffer.getDataSize())
+		if (!socketBuffer->getType() && !socketBuffer->getDataSize())
 			return;
 	}
 
 	// Read all the available message data from the socket
-	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
+	dataBuffer = socket->read((qint64)(socketBuffer->getDataSize() - socketBuffer->getReadDataSize()));
 
-	socketBuffer.append(dataBuffer);
+	socketBuffer->append(dataBuffer);
 
-	if (socketBuffer.bufferReadyRead())
+	if (socketBuffer->bufferReadyRead())
 	{
-		QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
-		quint16 mType = socketBuffer.getType();
+		QDataStream dataStream(socketBuffer->bufferPtr(), QIODevice::ReadWrite);
+		quint16 mType = socketBuffer->getType();
 
 		try {
 			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
 			message->read(dataStream);
-			socketBuffer.clear();
+			socketBuffer->clearBuffer();
 
 			if (mType == AccountUpdate || (mType >= CharsInsert && mType <= PresenceRemove) || mType == DocumentClose)
 			{

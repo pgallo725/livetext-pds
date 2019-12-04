@@ -11,7 +11,7 @@
 #include "ServerLogger.h"
 #include <MessageFactory.h>
 #include <SharedException.h>
-
+#include "SocketBuffer.h"
 
 /* Server constructor */
 TcpServer::TcpServer(QObject* parent)
@@ -685,25 +685,26 @@ void TcpServer::readMessage()
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	QByteArray dataBuffer;
+	QSharedPointer<SocketBuffer> socketBuffer = clients.value(socket)->getSocketBuffer();
 
-	if (!socketBuffer.getDataSize()) {
-		streamIn >> socketBuffer;
+	if (!socketBuffer->getDataSize()) {
+		streamIn >> *socketBuffer;
 	}
 
 	// Read all the available message data from the socket
-	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
+	dataBuffer = socket->read((qint64)(socketBuffer->getDataSize() - socketBuffer->getReadDataSize()));
 
-	socketBuffer.append(dataBuffer);
+	socketBuffer->append(dataBuffer);
 
-	if (socketBuffer.bufferReadyRead()) {
+	if (socketBuffer->bufferReadyRead()) {
 		
-		QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
-		quint16 mType = socketBuffer.getType();
+		QDataStream dataStream(socketBuffer->bufferPtr(), QIODevice::ReadWrite);
+		quint16 mType = socketBuffer->getType();
 		
 		try {
 			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
 			message->read(dataStream);
-			socketBuffer.clear();
+			socketBuffer->clearBuffer();
 
 			if (mType == LoginRequest || mType == LoginUnlock || mType == AccountCreate || mType == AccountUpdate ||
 				mType == Logout || mType == DocumentCreate || mType == DocumentOpen || mType == DocumentRemove)
@@ -717,7 +718,7 @@ void TcpServer::readMessage()
 			MessageCapsule message = MessageFactory::Failure(me.what());
 			message->send(socket);												// Inform the client of the exception
 			Logger(Error) << me.what();
-			socketBuffer.clear();
+			socketBuffer->clearBuffer();
 			return;
 		}
 	}
