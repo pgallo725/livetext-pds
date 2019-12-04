@@ -127,7 +127,7 @@ void WorkSpace::readMessage()
 		{
 			forceClientQuit(socket);					// Remove the client from the document
 			Logger(Error) << me.what();
-			socketBuffer.clear();
+			socketBuffer->clearBuffer();
 			return;
 		}
 	}
