@@ -1709,14 +1709,17 @@ void TextEdit::redrawAllCursors() {
 void TextEdit::drawGraphicCursor(Presence* p)
 {
 	//Getting Presence's cursor and QLabel (to draw the graphic cursor)
-	QTextCursor* cursor = p->cursor();
+	QTextCursor cursor;
 	QLabel* userCursorLabel = p->label();
 
 	//Hide label to move it
 	userCursorLabel->close();
 
+	//Set user cursor position
+	cursor.setPosition(p->cursor()->position());
+
 	//Getting cursor rectangle (x,y) position of the window
-	const QRect qRect = _textEdit->cursorRect(*cursor);
+	const QRect qRect = _textEdit->cursorRect(cursor);
 
 	//Draw the cursor (Pixmap)
 	QPixmap pix(qRect.width() * 2.5, qRect.height());

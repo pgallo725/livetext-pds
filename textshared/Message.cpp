@@ -13,6 +13,9 @@ void Message::send(QSslSocket* socket) const
 	QByteArray buffer;
 	QDataStream stream(&buffer, QIODevice::WriteOnly);
 
+	if (socket == nullptr || !socket->isValid() || !socket->isOpen())
+		return;
+
 	// Serialize the message contents on the byte-stream, first the Type and Length fields,
 	// then the Payload (specific to each message) and therefore handled by the sub-class
 	stream << m_type << quint32(0); 
