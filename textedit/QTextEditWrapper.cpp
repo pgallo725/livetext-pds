@@ -62,6 +62,10 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 					continue;
 				}
 
+				// Some applications make use of the HTML special characters inside tag attributes, 
+				// which have to be removed before the actual parsing (unnecessary anyways)
+				attributes.remove("&quot;");
+				attributes.remove("&amp;");
 
 				if (attributes.isEmpty() || !attributes.contains("style="))
 				{
@@ -238,7 +242,9 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 				delta += str.length() - match.capturedLength();
 			}
 
-			data.remove("&quot;");
+			// HTML special characters (not part of tag attributes) are replaced with the proper symbol
+			data.replace("&quot;", "\"");
+			data.replace("&amp;", "&");
 
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
