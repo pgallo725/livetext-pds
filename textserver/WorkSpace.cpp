@@ -7,6 +7,7 @@
 #include <SharedException.h>
 #include "SocketBuffer.h"
 
+
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
 {
@@ -125,10 +126,9 @@ void WorkSpace::readMessage()
 		}
 		catch (MessageException& me) 
 		{
-			forceClientQuit(socket);					// Remove the client from the document
 			Logger(Error) << me.what();
 			socketBuffer->clearBuffer();
-			return;
+			socketAbort(socket);				// Terminate the client connection
 		}
 	}
 }
@@ -156,10 +156,36 @@ void WorkSpace::clientDisconnection()
 	socket->deleteLater();
 	Logger() << "Connection from client " << c->getUsername() << " was terminated";
 
-	// Make this user avaiable to be logged-in again	
+	// Make this user avaiable to be logged-in again
 	emit userDisconnected(c->getUsername());
 
 	// Send to other clients that this client is disconnected
+	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
+
+	// If there are no more clients using this workspace, emit noEditors signal
+	if (editors.isEmpty())
+		emit noEditors(doc->getURI());
+}
+
+
+/* Force-close a client connection, logging out the user and discarding the socket */
+void WorkSpace::socketAbort(QSslSocket* clientSocket)
+{
+	// Disconnect all the socket's signals from Workspace slots
+	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
+	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
+	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+
+	QSharedPointer<Client> c = editors[clientSocket];
+	editors.remove(clientSocket);
+	clientSocket->abort();
+	clientSocket->deleteLater();
+	Logger() << "Shutdown connection to client " << c->getUsername();
+
+	// Make the user avaiable to be logged-in again
+	emit userDisconnected(c->getUsername());
+
+	// Send to other clients that this user was disconnected
 	dispatchMessage(MessageFactory::PresenceRemove(c->getUserId()), nullptr);
 
 	// If there are no more clients using this workspace, emit noEditors signal
@@ -315,13 +341,4 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 
 	if (editors.size() == 0)
 		emit noEditors(doc->getURI());		// Close the workspace if nobody is editing the document
-}
-
-void WorkSpace::forceClientQuit(QSslSocket* clientSocket)
-{
-	// Disconnect all the socket's signals from Workspace slots
-	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
-
-	clientSocket->close();
 }

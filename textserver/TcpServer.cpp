@@ -194,7 +194,7 @@ void TcpServer::newClientConnection()
 		return;
 	}
 
-	Logger() << "New connection from a client";
+	Logger() << "Incoming connection";
 
 	// Create a new client object 
 	QSharedPointer<Client> client(new Client(socket));
@@ -220,6 +220,28 @@ void TcpServer::clientDisconnection()
 	clients.remove(socket);					/* remove this client from the map */
 	socket->close();						/* close and destroy the socket */
 	socket->deleteLater();
+}
+
+/* Terminate the connection with a client and destroy the socket */
+void TcpServer::socketAbort(QSslSocket* clientSocket)
+{
+	// Disconnect all the socket's signals from server slots
+	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
+	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
+	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
+
+	QSharedPointer<Client> client = clients[clientSocket];
+
+	clientSocket->abort();						/* abort and destroy the socket */
+	clientSocket->deleteLater();
+
+	clients.remove(clientSocket);				/* remove this client from the active connections */
+	if (client->isLogged())
+	{
+		Logger() << "Shutdown connection to client " << client->getUsername();
+		restoreUserAvaiable(client->getUsername());
+	}
+	else Logger() << "Shutdown connection to unidentified client";
 }
 
 
@@ -715,11 +737,9 @@ void TcpServer::readMessage()
 		}
 		catch (MessageException& me) 
 		{
-			MessageCapsule message = MessageFactory::Failure(me.what());
-			message->send(socket);												// Inform the client of the exception
 			Logger(Error) << me.what();
 			socketBuffer->clearBuffer();
-			return;
+			socketAbort(socket);				// Terminate connection with the client
 		}
 	}
 }

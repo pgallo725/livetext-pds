@@ -48,6 +48,7 @@ public slots:
 	void newClientConnection();
 	void clientDisconnection();
 	void readMessage();
+	void socketAbort(QSslSocket* clientSocket);
 	QSharedPointer<WorkSpace> createWorkspace(QSharedPointer<Document> document);
 	void deleteWorkspace(URI document);
 
