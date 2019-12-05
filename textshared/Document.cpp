@@ -88,7 +88,7 @@ Document::Document(URI docURI, qint32 authorId) :
 {
 	// Insert a ParagraphTerminator character inside a default block in the empty document
 	TextBlock defaultBlock = TextBlock(_blockCounter++, authorId, QTextBlockFormat());
-	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), Position({ 100, 100, authorId }));
+	Symbol eof = Symbol(QChar::ParagraphSeparator, QTextCharFormat(), Position({ 0, authorId }));
 	defaultBlock.setBegin(eof.getPosition());
 	defaultBlock.setEnd(eof.getPosition());
 	eof.setBlock(defaultBlock.getId());
@@ -747,7 +747,7 @@ QDataStream& operator>>(QDataStream& in, Document& doc)		// Input
 {
 	// Deserialization
 	in >> doc.uri >> doc._blockCounter >> doc._blocks 
-		>> doc._listCounter >> doc._lists >> doc._text ;
+		>> doc._listCounter >> doc._lists >> doc._text;
 
 	return in;
 }
