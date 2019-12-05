@@ -42,7 +42,7 @@ void Message::read(QDataStream& stream)
 	readFrom(stream);
 
 	if (stream.status() != QDataStream::Ok || !stream.atEnd()) {
-		throw MessageReadException("Read corrupted streamData", m_type);
+		throw MessageReadException("Read corrupted stream data", m_type);
 	}
 }
 
