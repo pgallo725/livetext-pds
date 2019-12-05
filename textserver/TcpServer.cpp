@@ -270,6 +270,8 @@ void TcpServer::incomingConnection(qintptr socketDescriptor)
 		serverSocket->setPrivateKey("server.key", QSsl::Rsa, QSsl::Pem, "LiveTextKey");
 		serverSocket->setLocalCertificate("server.pem", QSsl::Pem);
 
+		serverSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+
 		addPendingConnection(serverSocket);
 		connect(serverSocket, &QSslSocket::encrypted, this, &TcpServer::sslSocketReady);
 		serverSocket->startServerEncryption();
