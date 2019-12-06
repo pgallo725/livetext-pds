@@ -63,6 +63,7 @@ private slots:
 
 	//Server connection
 	void loginSuccess(User user);
+	void logoutClient();
 	void forceLogout();
 
 	//GUI
@@ -70,7 +71,8 @@ private slots:
 
 signals:
 
-	void disconnect();
+	void closeConnection();
+	void logout();
 };
 
 #endif //LIVETEXT_H
