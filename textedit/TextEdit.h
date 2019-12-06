@@ -190,6 +190,7 @@ private:
 
 public:
 	TextEdit(User& user, QWidget* parent = 0);
+	~TextEdit();
 
 	//Start timer
 	void startCursorTimer();

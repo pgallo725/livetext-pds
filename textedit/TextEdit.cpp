@@ -153,6 +153,15 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 		newPresence(_user.getUserId(), _user.getUsername(), _user.getIcon());
 }
 
+
+TextEdit::~TextEdit()
+{
+	// The QTextEdit component is custom-wrapped into a class which does not  
+	// inherit Qt's parenting system and therefore it needs to be deleted manually
+	delete _textEdit;
+}
+
+
 /**************************** GUI SETUP ****************************/
 /*
 *	Setup window appearance (centralWidget/Resize/Borders/Style)
