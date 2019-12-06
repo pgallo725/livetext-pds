@@ -66,10 +66,13 @@ public:
 
 	virtual ~Message() { };
 
+	// Utility method for translating MessageType codes into human-readable names
+	static std::string TypeName(MessageType type);
+
 	// Handles serialization of the message contents to a byte-stream and writes it on the socket
 	void send(QSslSocket* socket) const;
 
-	// call readFrom and check stream status
+	// Call readFrom and check stream status
 	void read(QDataStream& stream);
 	
 	/* getter */

@@ -52,6 +52,43 @@ MessageType Message::getType()
 }
 
 
+std::string Message::TypeName(MessageType type)
+{
+	switch (type)
+	{
+	case MessageType::LoginRequest:			return "LoginRequest";
+	case MessageType::LoginChallenge:		return "LoginChallenge";
+	case MessageType::LoginUnlock:			return "LoginUnlock";
+	case MessageType::LoginGranted:			return "LoginGranted";
+	case MessageType::LoginError:			return "LoginError";
+	case MessageType::AccountCreate:		return "AccountCreate";
+	case MessageType::AccountUpdate:		return "AccountUpdate";
+	case MessageType::AccountConfirmed:		return "AccountConfirmed";
+	case MessageType::AccountError:			return "AccountError";
+	case MessageType::Logout:				return "Logout";
+	case MessageType::DocumentCreate:		return "DocumentCreate";
+	case MessageType::DocumentRemove:		return "DocumentRemove";
+	case MessageType::DocumentDismissed:	return "DocumentDismissed";
+	case MessageType::DocumentOpen:			return "DocumentOpen";
+	case MessageType::DocumentReady:		return "DocumentReady";
+	case MessageType::DocumentClose:		return "DocumentClose";
+	case MessageType::DocumentExit:			return "DocumentExit";
+	case MessageType::DocumentError:		return "DocumentError";
+	case MessageType::CharsInsert:			return "CharsInsert";
+	case MessageType::CharsDelete:			return "CharsDelete";
+	case MessageType::CharsFormat:			return "CharsFormat";
+	case MessageType::BlockEdit:			return "BlockEdit";
+	case MessageType::ListEdit:				return "ListEdit";
+	case MessageType::CursorMove:			return "CursorMove";
+	case MessageType::PresenceUpdate:		return "PresenceUpdate";
+	case MessageType::PresenceAdd:			return "PresenceAdd";
+	case MessageType::PresenceRemove:		return "PresenceRemove";
+	case MessageType::Failure:				return "Failure";
+
+	default:		return "UnknownType " + std::to_string(type);
+	}
+}
+
 
 /******************** MESSAGE CAPSULE METHODS ********************/
 

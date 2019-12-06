@@ -29,3 +29,6 @@ public:
 
 	~ServerLogger();
 };
+
+/* Additional operator for std::string interoperability */
+QDebug operator<<(QDebug debug, std::string str);

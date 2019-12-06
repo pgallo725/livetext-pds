@@ -57,3 +57,11 @@ ServerLogger::~ServerLogger()
 {
 	// The message printing (logging) is handled by the QDebug destructor
 }
+
+
+QDebug operator<<(QDebug debug, std::string str)
+{
+	debug << QString::fromStdString(str);
+
+	return debug;
+}

@@ -111,10 +111,10 @@ void WorkSpace::readMessage()
 	if (socketBuffer->bufferReadyRead())
 	{
 		QDataStream dataStream(socketBuffer->bufferPtr(), QIODevice::ReadWrite);
-		quint16 mType = socketBuffer->getType();
+		MessageType mType = (MessageType)socketBuffer->getType();
 
 		try {
-			MessageCapsule message = MessageFactory::Empty((MessageType)mType);
+			MessageCapsule message = MessageFactory::Empty(mType);
 			message->read(dataStream);
 			socketBuffer->clearBuffer();
 
@@ -122,7 +122,7 @@ void WorkSpace::readMessage()
 			{
 				messageHandler.process(message, socket);
 			}
-			else Logger(Error) << "(MESSAGE ERROR) Received unexpected message of type: " << mType;
+			else Logger(Error) << "(MESSAGE ERROR) Received unexpected message: " << Message::TypeName(mType);
 		}
 		catch (MessageException& me) 
 		{
