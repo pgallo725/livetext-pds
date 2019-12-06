@@ -20,12 +20,12 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 
 	//LANDINGPAGE - LIVETEXT
 	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
+	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::logoutClient);
 
 	//LANDINGPAGE - CLIENT
 	connect(_landingPage, &LandingPage::connectToServer, _client, &Client::Connect, Qt::QueuedConnection);			// Connect
 	connect(_landingPage, &LandingPage::serverLogin, _client, &Client::Login, Qt::QueuedConnection);				// Login
 	connect(_landingPage, &LandingPage::serverRegister, _client, &Client::Register, Qt::QueuedConnection);			// Register
-	connect(_landingPage, &LandingPage::serverLogout, _client, &Client::Logout, Qt::QueuedConnection);				// Logout
 	connect(_landingPage, &LandingPage::newDocument, _client, &Client::createDocument, Qt::QueuedConnection);		// Create document
 	connect(_landingPage, &LandingPage::removeDocument, _client, &Client::deleteDocument, Qt::QueuedConnection);	// Remove document
 	connect(_landingPage, &LandingPage::openDocument, _client, &Client::openDocument, Qt::QueuedConnection);		// Open document
@@ -45,10 +45,11 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted, Qt::QueuedConnection);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted, Qt::QueuedConnection);
 	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted, Qt::QueuedConnection);
-	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
+	
 	
 	//LIVETEXT - CLIENT
-	connect(this, &LiveText::disconnect, _client, &Client::Disconnect, Qt::QueuedConnection);
+	connect(this, &LiveText::closeConnection, _client, &Client::Disconnect, Qt::QueuedConnection);		// Disconnect from server
+	connect(this, &LiveText::logout, _client, &Client::Logout, Qt::QueuedConnection);					// Logout
 }
 
 LiveText::~LiveText()
@@ -67,6 +68,7 @@ void LiveText::launch()
 /************************ SERVER CONNECTION ************************/
 /*
 *	Connection to server
+*	Disconnection from server
 *	Force logout from server
 *	Error during login/register
 */
@@ -79,6 +81,7 @@ void LiveText::loginSuccess(User user)
 	//Initialize edit Profile window
 	_editProfile = new ProfileEditWindow(_user);
 
+	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
 	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed, Qt::QueuedConnection);
 
@@ -86,6 +89,16 @@ void LiveText::loginSuccess(User user)
 	_landingPage->LoginSuccessful(&_user);
 }
 
+void LiveText::logoutClient()
+{
+	//Resets user
+	_user = User();
+
+	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
+
+	// Logout the client
+	emit logout();
+}
 
 void LiveText::operationFailed(QString errorType)
 {
@@ -93,11 +106,13 @@ void LiveText::operationFailed(QString errorType)
 	_landingPage->incorrectOperation(errorType);
 
 	//Disconnect from server
-	emit disconnect();
+	emit closeConnection();
 }
 
 void LiveText::forceLogout()
 {
+	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
+
 	//Close edit profile (if opened)
 	if (_editProfile->isVisible())
 		_editProfile->close();
@@ -105,7 +120,7 @@ void LiveText::forceLogout()
 	if (editorOpen) {
 		//Show an error popup in the editor
 		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
-			tr("Server not responding, you will be disconnected"), QMessageBox::Ok, _textEdit);
+			tr("Server network error, you will be disconnected"), QMessageBox::Ok, _textEdit);
 		err->exec();
 
 		if (!editorOpen)	// Avoid crashes when multiple popups appear at once
@@ -113,7 +128,7 @@ void LiveText::forceLogout()
 
 		//Shows landing page again
 		_landingPage->pushButtonBackClicked();
-		_landingPage->incorrectOperation(tr("Server not responding"));
+		_landingPage->incorrectOperation(tr("Server communication error"));
 		_landingPage->show();
 
 		//Close editor
@@ -122,11 +137,11 @@ void LiveText::forceLogout()
 	else {
 		//Show error on landing page
 		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(),
-			tr("Server not responding, you will be disconnected"), QMessageBox::Ok));
+			tr("Server network error, you will be disconnected"), QMessageBox::Ok));
 
 		//Return to login page
 		_landingPage->pushButtonBackClicked();
-		_landingPage->incorrectOperation(tr("Server not responding"));
+		_landingPage->incorrectOperation(tr("Server communication error"));
 	}
 }
 

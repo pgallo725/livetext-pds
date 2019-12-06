@@ -4,11 +4,15 @@
 
 
 Client::Client(QSharedPointer<QWaitCondition> wc, QObject* parent)
-	: QObject(parent), socket(nullptr), sync(false), wc(wc)
+	: QObject(parent), sync(false), wc(wc)
 {
 	qRegisterMetaType<User>("User");
 	qRegisterMetaType<Document>("Document");
 	qRegisterMetaType<URI>("URI");
+
+	// Create the client socket and attach error handler slot
+	socket = new QSslSocket(this);
+	connect(socket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors), this, &Client::handleSslErrors);
 
 	// Instantiate the Workspace thread and start it
 	workThread = QSharedPointer<QThread>(new QThread(parent));
@@ -28,6 +32,9 @@ Client::~Client()
 
 void Client::readBuffer() 
 {
+	if (socket == nullptr || !socket->isValid() || !socket->isOpen())
+		return;
+
 	QByteArray dataBuffer;
 	QDataStream in(socket);
 
@@ -168,11 +175,7 @@ void Client::getSync()
 
 void Client::Connect(QString ipAddress, quint16 port) 
 {
-	socket = new QSslSocket(this);
-	//socket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
-
-	// Attach the client slots to the socket's state signals
-	connect(socket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors), this, &Client::handleSslErrors);
+	// Attach the disconnection signal to the client slot
 	connect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
 
 	socket->connectToHostEncrypted(ipAddress, port);	// Attempt server connection
@@ -206,8 +209,8 @@ void Client::handleSslErrors(const QList<QSslError>& sslErrors)
 }
 
 
-void Client::Disconnect() {
-
+void Client::Disconnect() 
+{
 	disconnect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
 	socket->disconnectFromHost();
 	qDebug() << "Closed server connection";
@@ -216,10 +219,10 @@ void Client::Disconnect() {
 
 void Client::serverDisconnection()
 {
-	qDebug() << "Disconnected from server";
-	emit abortConnection();
+	disconnect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
 	socket->abort();
-	socket->deleteLater();
+	emit abortConnection();
+	qDebug() << "Disconnected from server";
 }
 
 
