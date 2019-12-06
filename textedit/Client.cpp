@@ -211,6 +211,7 @@ void Client::handleSslErrors(const QList<QSslError>& sslErrors)
 
 void Client::Disconnect() 
 {
+	disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
 	disconnect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
 	socket->disconnectFromHost();
 	qDebug() << "Closed server connection";
@@ -219,6 +220,7 @@ void Client::Disconnect()
 
 void Client::serverDisconnection()
 {
+	disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
 	disconnect(socket, &QSslSocket::disconnected, this, &Client::serverDisconnection);
 	socket->abort();
 	emit abortConnection();
