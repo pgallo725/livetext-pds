@@ -707,6 +707,9 @@ void TcpServer::deleteWorkspace(URI document)
 void TcpServer::readMessage()
 {
 	QSslSocket* socket = dynamic_cast<QSslSocket*>(sender());
+	if (socket == nullptr || !socket->isOpen() || !socket->isValid())
+		return;
+
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	QByteArray dataBuffer;
 	QSharedPointer<SocketBuffer> socketBuffer = clients.value(socket)->getSocketBuffer();
