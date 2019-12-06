@@ -81,6 +81,8 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit, &QTextEditWrapper::editorResizeEvent, this, &TextEdit::redrawAllCursors);
 
+	//Update char format
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::currentCharFormatChanged);
 
 	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
@@ -1305,10 +1307,14 @@ void TextEdit::applyCharFormat(int start, int end, QTextCharFormat fmt)
 
 	//Apply char format to selected text
 	_extraCursor->setCharFormat(fmt);
-
+	
+	QTextCursor cursor = _textEdit->textCursor();
+	if (cursor.hasSelection() && (cursor.selectionStart() == cursor.position()))
+		cursor.setPosition(cursor.position() + 1); //Format is taken from the char left to the cursor
+	
 	//Update GUI buttons according to new format
-	currentCharFormatChanged(_textEdit->textCursor().charFormat());
-
+	currentCharFormatChanged(cursor.charFormat());
+	
 	//Redraw cursors because the text size and layouts may have changed
 	redrawAllCursors();
 }
@@ -1623,8 +1629,9 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 	//Reset old cursor position
 	_currentCursorPosition = -1;
 
+	//if(_extraCursor->blockFormat().alignment() != Qt::AlignJustify)
 	//Update GUI after some insertion/deletion
-	updateEditorSelectedActions();
+	//updateEditorSelectedActions();
 
 	//User text higlighting
 	handleMultipleSelections();
@@ -1709,17 +1716,13 @@ void TextEdit::redrawAllCursors() {
 void TextEdit::drawGraphicCursor(Presence* p)
 {
 	//Getting Presence's cursor and QLabel (to draw the graphic cursor)
-	QTextCursor cursor;
 	QLabel* userCursorLabel = p->label();
 
 	//Hide label to move it
 	userCursorLabel->close();
 
-	//Set user cursor position
-	cursor.setPosition(p->cursor()->position());
-
 	//Getting cursor rectangle (x,y) position of the window
-	const QRect qRect = _textEdit->cursorRect(cursor);
+	const QRect qRect = _textEdit->cursorRect(*p->cursor());
 
 	//Draw the cursor (Pixmap)
 	QPixmap pix(qRect.width() * 2.5, qRect.height());
