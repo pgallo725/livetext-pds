@@ -18,7 +18,7 @@ private:
 	//Loading splash screen
 	QLabel* loading;
 
-	//User infos
+	//Pointer to user object
 	User& _user;
 
 	//Widget manager (resize/loading screen)
@@ -27,7 +27,7 @@ private:
 	Ui::ProfileEditWindow* ui;
 
 	//Checks if window is open from editor (true) or from LandingPage (false)
-	bool _fromEditor;
+	bool _editorFlag;
 
 	//Flag used to determine whether the image was changed or not
 	bool _iconChanged;
@@ -44,7 +44,7 @@ public:
 	void updateSuccessful();
 	void updateFailed(QString error);
 	void updateInfo();
-	void setFromEditor(bool fromEditor);
+	void setEditorFlag(bool fromEditor);
 
 signals:
 	//LOCAL: Account modified

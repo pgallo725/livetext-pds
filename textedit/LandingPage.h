@@ -16,9 +16,7 @@
 #define STATUSBAR_MSG_DURATION 5000		// ms
 
 
-namespace Ui {
-	class LandingPage;
-}
+namespace Ui { class LandingPage; }
 
 class LandingPage : public QMainWindow
 {
@@ -41,6 +39,9 @@ private:
 	NewDocumentWindow* newFileWindow;
 	//Service buffer for filename or URI
 	QString _buffer;
+
+	//Document list context menu
+	QMenu* _docMenu;
 
 	//Register/Login methods
 	void Register();

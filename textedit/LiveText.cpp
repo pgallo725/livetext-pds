@@ -18,6 +18,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 
 	/************************ CONNECTS ************************/
 
+	
 	//LANDINGPAGE - LIVETEXT
 	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::logoutClient);
@@ -45,7 +46,6 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted, Qt::QueuedConnection);
 	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted, Qt::QueuedConnection);
 	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted, Qt::QueuedConnection);
-	
 	
 	//LIVETEXT - CLIENT
 	connect(this, &LiveText::closeConnection, _client, &Client::Disconnect, Qt::QueuedConnection);		// Disconnect from server
@@ -81,9 +81,9 @@ void LiveText::loginSuccess(User user)
 	//Initialize edit Profile window
 	_editProfile = new ProfileEditWindow(_user);
 
-	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
 	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
 	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed, Qt::QueuedConnection);
+	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
 
 	//Open logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
@@ -94,30 +94,24 @@ void LiveText::logoutClient()
 	//Resets user
 	_user = User();
 
+	//The old ProfileEditWindow is deleted
+	delete _editProfile;
+
 	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 
 	// Logout the client
 	emit logout();
 }
 
-void LiveText::operationFailed(QString errorType)
-{
-	//Sets error message to landing page
-	_landingPage->incorrectOperation(errorType);
-
-	//Disconnect from server
-	emit closeConnection();
-}
-
 void LiveText::forceLogout()
 {
 	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 
-	//Close edit profile (if opened)
-	if (_editProfile->isVisible())
-		_editProfile->close();
+	//Delete edit profile window
+	delete _editProfile;
 
-	if (editorOpen) {
+	if (editorOpen) 
+	{
 		//Show an error popup in the editor
 		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
 			tr("Server network error, you will be disconnected"), QMessageBox::Ok, _textEdit);
@@ -143,6 +137,15 @@ void LiveText::forceLogout()
 		_landingPage->pushButtonBackClicked();
 		_landingPage->incorrectOperation(tr("Server communication error"));
 	}
+}
+
+void LiveText::operationFailed(QString errorType)
+{
+	//Sets error message to landing page
+	_landingPage->incorrectOperation(errorType);
+
+	//Disconnect from server
+	emit closeConnection();
 }
 
 /************************ DOCUMENT OPERATIONS ************************/
@@ -301,7 +304,7 @@ void LiveText::closeEditor()
 void LiveText::openEditProfile(bool fromEditor)
 {
 	//Update edit profile window info
-	_editProfile->setFromEditor(fromEditor);
+	_editProfile->setEditorFlag(fromEditor);
 	_editProfile->updateInfo();
 	_editProfile->exec();
 }

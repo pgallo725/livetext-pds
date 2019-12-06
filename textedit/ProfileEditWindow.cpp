@@ -61,6 +61,7 @@ ProfileEditWindow::~ProfileEditWindow()
 	delete ui;
 }
 
+
 /* ---------------- ERRORS/MESSAGES ----------------*/
 
 void ProfileEditWindow::updateSuccessful()
@@ -127,7 +128,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	mngr.showLoadingScreen(loading, tr("Updating profile..."));
 
 	//Sends new info to server
-	emit accountUpdate(nick, userIcon, newPassword, _fromEditor);
+	emit accountUpdate(nick, userIcon, newPassword, _editorFlag);
 
 	_iconChanged = false;	 // Reset the image flag
 }
@@ -233,7 +234,7 @@ void ProfileEditWindow::updateInfo()
 	ui->label_userId->setText(QString::number(_user.getUserId()).rightJustified(4, '0'));
 }
 
-void ProfileEditWindow::setFromEditor(bool fromEditor)
+void ProfileEditWindow::setEditorFlag(bool fromEditor)
 {
-	_fromEditor = fromEditor;
+	_editorFlag = fromEditor;
 }

@@ -40,12 +40,12 @@ LandingPage::LandingPage(QWidget* parent)
 	else
 		mngr.centerAndResize(0.55, 0.65);
 
-
 	//Creates new file window
-	newFileWindow = new NewDocumentWindow(_buffer);
+	newFileWindow = new NewDocumentWindow(_buffer, this);
 
 	//Create open from URI window
-	openURIWindow = new OpenUriWindow(_buffer);
+	openURIWindow = new OpenUriWindow(_buffer, this);
+
 
 	//New file push button icon
 	ui->pushButton_new->setIconSize(ui->pushButton_new->size());
@@ -71,6 +71,16 @@ LandingPage::LandingPage(QWidget* parent)
 
 	//Remove
 	ui->pushButton_remove->setIcon(QIcon(rsrcPath + "/landingPage/remove.png"));
+
+
+	//Document table contextual menu setup
+	_docMenu = new QMenu(this);
+
+	_docMenu->addAction(QIcon(rsrcPath + "/editor/share.png"), tr("Copy URI"), this, &LandingPage::copyDocumentURI);
+	_docMenu->addAction(QIcon(rsrcPath + "/landingPage/filenew.png"), tr("Open Document"),	this, &LandingPage::pushButtonOpenClicked);
+	_docMenu->addSeparator();
+	_docMenu->addAction(QIcon(rsrcPath + "/landingPage/remove.png"), tr("Remove Document"),	this, &LandingPage::pushButtonRemoveClicked);
+
 
 	//LiveText main page logo
 	QPixmap logoPix(rsrcPath + "/misc/logo.png");
@@ -145,12 +155,9 @@ LandingPage::LandingPage(QWidget* parent)
 		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
 	//Validator for username (no spaces and '_')
-	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(
-		QRegExp("^[^\\s" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
-	
+	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(QRegExp("^[^\\s" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
 	//Validator for nickname (no spaces)
-	ui->lineEdit_regNick->setValidator(new QRegExpValidator(
-		QRegExp("^[^\\s]+$"), this));
+	ui->lineEdit_regNick->setValidator(new QRegExpValidator(QRegExp("^[^\\s]+$"), this));
 
 
 	//Loads user login infos
@@ -440,27 +447,11 @@ void LandingPage::showDocumentActionsMenu(const QPoint& position)
 {
 	QTableWidgetItem* selectedItem = ui->tableWidget->itemAt(position);
 	
-	if (selectedItem && selectedItem->text() != "<No documents found>") {
-		//Creates menu when right mouse button is pressed on Document table
-		QMenu* menu = new QMenu;
-
-		//Open document
-		QAction* a = menu->addAction(QIcon(rsrcPath + "/editor/share.png"), tr("Copy URI"));
-		connect(a, &QAction::triggered, this, &LandingPage::copyDocumentURI);
-
-
-		a = menu->addAction(QIcon(rsrcPath + "/landingPage/filenew.png"), tr("Open Document"));
-		connect(a, &QAction::triggered, this, &LandingPage::pushButtonOpenClicked);
-
-		menu->addSeparator();
-		a = menu->addAction(QIcon(rsrcPath + "/landingPage/remove.png"), tr("Remove Document"));
-		connect(a, &QAction::triggered, this, &LandingPage::pushButtonRemoveClicked);
-
-		
-
-
-		menu->exec(QCursor::pos());
-		menu->clear();
+	if (selectedItem && selectedItem->text() != "<No documents found>") 
+	{
+		//Shows menu when right mouse button is pressed on Document table
+		_docMenu->exec(QCursor::pos());
+		_docMenu->hide();
 	}
 }
 

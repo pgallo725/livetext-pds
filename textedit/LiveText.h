@@ -18,11 +18,18 @@ class LiveText : public QObject
 	Q_OBJECT
 
 private:
-	//Landing page
-	LandingPage* _landingPage;
 
 	//Client
 	Client* _client;
+
+	//Landing page
+	LandingPage* _landingPage;
+
+	//Current user
+	User _user;
+
+	//Profile edit window
+	ProfileEditWindow* _editProfile;
 
 	//Text editor
 	TextEdit* _textEdit;
@@ -30,12 +37,6 @@ private:
 
 	//Local document editor
 	DocumentEditor* _docEditor;
-
-	//profile edit window
-	ProfileEditWindow* _editProfile;
-
-	//Current user
-	User _user;
 
 	//Sync variable
 	QSharedPointer<QWaitCondition> _wc;
