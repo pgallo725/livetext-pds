@@ -31,37 +31,37 @@ Presence::~Presence()
 
 /************************ GETTERS ************************/
 
-QColor Presence::color()
+QColor Presence::color() const
 {
 	return _color;
 }
 
-QString Presence::name()
+QString Presence::name() const
 {
 	return _name;
 }
 
-QPixmap Presence::profilePicture()
+QPixmap Presence::profilePicture() const
 {
 	return _profilePicture;
 }
 
-QTextCursor* Presence::cursor()
+QTextCursor* Presence::cursor() const
 {
 	return _userCursor;
 }
 
-QLabel* Presence::label()
+QLabel* Presence::label() const
 {
 	return _label;
 }
 
-QAction* Presence::actionHighlightText()
+QAction* Presence::actionHighlightText() const
 {
 	return _iconPressedAction;
 }
 
-qint32 Presence::id()
+qint32 Presence::id() const
 {
 	return _id;
 }

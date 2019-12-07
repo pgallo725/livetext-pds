@@ -61,7 +61,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 {
 
 	//About widget
-	_aboutWindow = new AboutWindow();
+	_aboutWindow = new AboutWindow(this);
 
 
 	/**************************** GUI SETUP ****************************/
@@ -237,63 +237,71 @@ void TextEdit::setupEditorActions()
 	/********** DOCUMENT MENU **********/
 
 	//New toolbar
-	QToolBar* tb = addToolBar(tr("Document Actions"));
+	QToolBar* toolbar = addToolBar(tr("Document Actions"));
 
 	//New menu
 	QMenu* menu = menuBar()->addMenu(tr("&Document"));
 
 	//Share URI, opens a box with URI pasted inside
-	const QIcon shareIcon = QIcon(rsrcPath + "/editor/share.png");
-	QAction* a = menu->addAction(shareIcon, tr("&Share URI"), this, &TextEdit::fileShare);
-	tb->addAction(a);
+	QAction* action = menu->addAction(
+		QIcon(rsrcPath + "/editor/share.png"), tr("&Share URI"),
+		this, &TextEdit::fileShare);
+	toolbar->addAction(action);
 
 	menu->addSeparator();
 
 #ifndef QT_NO_PRINTER	//If the print plugin is enabled
 
 	//Export document in PDF
-	const QIcon exportPdfIcon = QIcon(rsrcPath + "/editor/exportpdf.png");
-	a = menu->addAction(exportPdfIcon, tr("&Export PDF..."), this, &TextEdit::filePrintPdf, Qt::CTRL + Qt::Key_D);
-	tb->addAction(a);
+	action = menu->addAction(
+		QIcon(rsrcPath + "/editor/exportpdf.png"), tr("&Export PDF..."),
+		this, &TextEdit::filePrintPdf, Qt::CTRL + Qt::Key_D);
+	toolbar->addAction(action);
 
 	//Print document
-	const QIcon filePrintIcon = QIcon(rsrcPath + "/editor/fileprint.png");
-	menu->addAction(filePrintIcon, tr("Print Preview..."), this, &TextEdit::filePrintPreview);
+	menu->addAction(
+		QIcon(rsrcPath + "/editor/fileprint.png"), tr("Print Preview..."),
+		this, &TextEdit::filePrintPreview);
 
-	a = menu->addAction(filePrintIcon, tr("&Print..."), this, &TextEdit::filePrint, QKeySequence::Print);
-	tb->addAction(a);
+	action = menu->addAction(
+		QIcon(rsrcPath + "/editor/fileprint.png"), tr("&Print..."),
+		this, &TextEdit::filePrint, QKeySequence::Print);
+	toolbar->addAction(action);
 
 	menu->addSeparator();
 
 #endif
 
 	//Close document
-	const QIcon closeDocumentIcon(rsrcPath + "/misc/logout.png");
-	QAction* closeDocumentAction = menu->addAction(closeDocumentIcon, tr("&Close Document"),
+	QAction* closeDocumentAction = menu->addAction(
+		QIcon(rsrcPath + "/misc/logout.png"), tr("&Close Document"),
 		this, &TextEdit::askBeforeCloseDocument);
 
 
 	/********** EDIT MENU **********/
 
-	tb = addToolBar(tr("Edit Actions"));
+	toolbar = addToolBar(tr("Edit Actions"));
 	menu = menuBar()->addMenu(tr("&Edit"));
 
 
 #ifndef QT_NO_CLIPBOARD
 	//Cut
-	const QIcon cutIcon = QIcon(rsrcPath + "/editor/editcut.png");
-	actionCut = menu->addAction(cutIcon, tr("Cu&t"), _textEdit, &QTextEdit::cut, QKeySequence::Cut);
-	tb->addAction(actionCut);
+	actionCut = menu->addAction(
+		QIcon(rsrcPath + "/editor/editcut.png"), tr("Cu&t"),
+		_textEdit, &QTextEdit::cut, QKeySequence::Cut);
+	toolbar->addAction(actionCut);
 
 	//Copy
-	const QIcon copyIcon = QIcon(rsrcPath + "/editor/editcopy.png");
-	actionCopy = menu->addAction(copyIcon, tr("&Copy"), _textEdit, &QTextEdit::copy, QKeySequence::Copy);
-	tb->addAction(actionCopy);
+	actionCopy = menu->addAction(
+		QIcon(rsrcPath + "/editor/editcopy.png"), tr("&Copy"), 
+		_textEdit, &QTextEdit::copy, QKeySequence::Copy);
+	toolbar->addAction(actionCopy);
 
 	//Paste
-	const QIcon pasteIcon = QIcon(rsrcPath + "/editor/editpaste.png");
-	actionPaste = menu->addAction(pasteIcon, tr("&Paste"), _textEdit, &QTextEdit::paste, QKeySequence::Paste);
-	tb->addAction(actionPaste);
+	actionPaste = menu->addAction(
+		QIcon(rsrcPath + "/editor/editpaste.png"), tr("&Paste"),
+		_textEdit, &QTextEdit::paste, QKeySequence::Paste);
+	toolbar->addAction(actionPaste);
 
 	menu->addSeparator();
 
@@ -306,17 +314,18 @@ void TextEdit::setupEditorActions()
 		[this]() { _textEdit->textCursor().removeSelectedText(); }, QKeySequence::Delete);
 
 	//Select all
-	menu->addAction(tr("&Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
+	menu->addAction(tr("&Select all"),
+		_textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
 
 
 	/********** FORMAT MENU **********/
 
-	tb = addToolBar(tr("Format Actions"));
+	toolbar = addToolBar(tr("Format Actions"));
 	QMenu* formatMenu = menuBar()->addMenu(tr("&Format"));
 
 	//Bold
-	const QIcon boldIcon = QIcon(rsrcPath + "/editor/textbold.png");
-	actionTextBold = formatMenu->addAction(boldIcon, tr("&Bold"),
+	actionTextBold = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textbold.png"), tr("&Bold"),
 		this, &TextEdit::textBold, QKeySequence::Bold);
 	actionTextBold->setCheckable(true);
 
@@ -326,12 +335,12 @@ void TextEdit::setupEditorActions()
 	actionTextBold->setFont(bold);
 
 	//Add action to toolbar
-	tb->addAction(actionTextBold);
+	toolbar->addAction(actionTextBold);
 
 
 	//Italic
-	const QIcon italicIcon = QIcon(rsrcPath + "/editor/textitalic.png");
-	actionTextItalic = formatMenu->addAction(italicIcon, tr("&Italic"),
+	actionTextItalic = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textitalic.png"), tr("&Italic"),
 		this, &TextEdit::textItalic, QKeySequence::Italic);
 	actionTextItalic->setCheckable(true);
 
@@ -339,12 +348,12 @@ void TextEdit::setupEditorActions()
 	italic.setItalic(true);
 	actionTextItalic->setFont(italic);
 
-	tb->addAction(actionTextItalic);
+	toolbar->addAction(actionTextItalic);
 
 
 	//Underline
-	const QIcon underlineIcon = QIcon(rsrcPath + "/editor/textunder.png");
-	actionTextUnderline = formatMenu->addAction(underlineIcon, tr("&Underline"),
+	actionTextUnderline = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textunder.png"), tr("&Underline"),
 		this, &TextEdit::textUnderline, QKeySequence::Underline);
 	actionTextUnderline->setCheckable(true);
 
@@ -352,12 +361,12 @@ void TextEdit::setupEditorActions()
 	underline.setUnderline(true);
 	actionTextUnderline->setFont(underline);
 
-	tb->addAction(actionTextUnderline);
+	toolbar->addAction(actionTextUnderline);
 
 
 	//Strikethrough
-	const QIcon strikeIcon = QIcon(rsrcPath + "/editor/textstrikethrough.png");
-	actionTextStrikeout = formatMenu->addAction(strikeIcon, tr("&Strikeout"),
+	actionTextStrikeout = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textstrikethrough.png"), tr("&Strikeout"),
 		this, &TextEdit::textStrikeout, Qt::CTRL + Qt::Key_S);
 	actionTextStrikeout->setCheckable(true);
 
@@ -365,21 +374,21 @@ void TextEdit::setupEditorActions()
 	strikethrough.setStrikeOut(true);
 	actionTextStrikeout->setFont(strikethrough);
 
-	tb->addAction(actionTextStrikeout);
+	toolbar->addAction(actionTextStrikeout);
 
 	formatMenu->addSeparator();
-	tb->addSeparator();
+	toolbar->addSeparator();
 
 
 	// Subscript
-	const QIcon subscriptTextIcon = QIcon(rsrcPath + "/editor/textpedix.png");
-	actionTextSubscript = formatMenu->addAction(subscriptTextIcon, tr("Su&bscript"),
+	actionTextSubscript = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textpedix.png"), tr("Su&bscript"),
 		this, &TextEdit::textSubscript);
 	actionTextSubscript->setCheckable(true);
 
 	// Superscript
-	const QIcon superscriptTextIcon = QIcon(rsrcPath + "/editor/textapix.png");
-	actionTextSuperscript = formatMenu->addAction(superscriptTextIcon, tr("Su&perscript"),
+	actionTextSuperscript = formatMenu->addAction(
+		QIcon(rsrcPath + "/editor/textapix.png"), tr("Su&perscript"),
 		this, &TextEdit::textSuperscript);
 	actionTextSuperscript->setCheckable(true);
 
@@ -387,41 +396,38 @@ void TextEdit::setupEditorActions()
 
 
 	//Color
-	QPixmap pix(rsrcPath + "/editor/textcolor.png");
-	actionTextColor = formatMenu->addAction(pix, tr("&Color..."), this, &TextEdit::textColor);
-	tb->addAction(actionTextColor);
+	actionTextColor = formatMenu->addAction(
+		QPixmap(rsrcPath + "/editor/textcolor.png"), tr("&Color..."),
+		this, &TextEdit::textColor);
+	toolbar->addAction(actionTextColor);
 
 	formatMenu->addSeparator();
-	tb->addSeparator();
+	toolbar->addSeparator();
 
+
+	//Creating a new QActionGroup
+	QActionGroup* alignGroup = new QActionGroup(toolbar);
+	connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
 
 	//Align Left
-	const QIcon leftIcon = QIcon(rsrcPath + "/editor/textleft.png");
-	actionAlignLeft = new QAction(leftIcon, tr("&Left"), this);
+	actionAlignLeft = new QAction(QIcon(rsrcPath + "/editor/textleft.png"), tr("&Left"), alignGroup);
 	actionAlignLeft->setShortcut(Qt::CTRL + Qt::Key_L);
 	actionAlignLeft->setCheckable(true);
 
 	//Align Center
-	const QIcon centerIcon = QIcon(rsrcPath + "/editor/textcenter.png");
-	actionAlignCenter = new QAction(centerIcon, tr("C&enter"), this);
+	actionAlignCenter = new QAction(QIcon(rsrcPath + "/editor/textcenter.png"), tr("C&enter"), alignGroup);
 	actionAlignCenter->setShortcut(Qt::CTRL + Qt::Key_E);
 	actionAlignCenter->setCheckable(true);
 
 	//Align Right
-	const QIcon rightIcon = QIcon(rsrcPath + "/editor/textright.png");
-	actionAlignRight = new QAction(rightIcon, tr("&Right"), this);
+	actionAlignRight = new QAction(QIcon(rsrcPath + "/editor/textright.png"), tr("&Right"), alignGroup);
 	actionAlignRight->setShortcut(Qt::CTRL + Qt::Key_R);
 	actionAlignRight->setCheckable(true);
 
 	//Align Justify
-	const QIcon fillIcon = QIcon(rsrcPath + "/editor/textjustify.png");
-	actionAlignJustify = new QAction(fillIcon, tr("&Justify"), this);
+	actionAlignJustify = new QAction(QIcon(rsrcPath + "/editor/textjustify.png"), tr("&Justify"), alignGroup);
 	actionAlignJustify->setShortcut(Qt::CTRL + Qt::Key_J);
 	actionAlignJustify->setCheckable(true);
-
-	//Creating a new QActionGroup
-	QActionGroup* alignGroup = new QActionGroup(this);
-	connect(alignGroup, &QActionGroup::triggered, this, &TextEdit::textAlign);
 
 	//Mantain user local settings for alignment
 	if (QApplication::isLeftToRight()) {
@@ -437,53 +443,56 @@ void TextEdit::setupEditorActions()
 	alignGroup->addAction(actionAlignJustify);
 
 	//Add all actions to toolbar
-	tb->addActions(alignGroup->actions());
+	toolbar->addActions(alignGroup->actions());
 	formatMenu->addActions(alignGroup->actions());
 
-	tb->addSeparator();
+	toolbar->addSeparator();
 
 
 	//Lists
-	QMenu* menuList = new QMenu("List menu");
-	listActions[standard] = menuList->addAction(tr("Standard"), this, [this]() { listStyle(standard); });
-	listActions[standard]->setCheckable(true);
+	listButton = new QToolButton(toolbar);
+	QMenu* menuList = new QMenu("List menu", listButton);
+
+	listActions[standard] = menuList->addAction(tr("Standard"),
+		this, [this]() { listStyle(standard); });
+
+	listActions[disc] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/disc.png"), tr("Bullet List - Disc"),
+		this, [this]() { listStyle(disc); });
+
+	listActions[circle] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/circle.png"), tr("Bullet List - Circle"),
+		this, [this]() { listStyle(circle); });
+
+	listActions[square] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/square.png"), tr("Bullet List - Square"),
+		this, [this]() { listStyle(square); });
+
+	listActions[decimal] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/decimal.png"), tr("Ordered List - Decimal"),
+		this, [this]() { listStyle(decimal); });
+
+	listActions[alpha] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/alpha.png"), tr("Ordered List - Alpha"),
+		this, [this]() { listStyle(alpha); });
+
+	listActions[alphaupper] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/alphaupper.png"), tr("Ordered List - Uppercase alpha"),
+		this, [this]() { listStyle(alphaupper); });
+
+	listActions[roman] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/roman.png"), tr("Ordered List - Roman"),
+		this, [this]() { listStyle(roman); });
+
+	listActions[romanupper] = menuList->addAction(
+		QIcon(rsrcPath + "/editor/romanupper.png"), tr("Ordered List - Uppercase roman"),
+		this, [this]() { listStyle(romanupper); });
+
+	for(int i = 0; i < LIST_STYLES; ++i)
+		listActions[i]->setCheckable(true);
 	listActions[standard]->setChecked(true);
 
-	listActions[disc] = menuList->addAction(QIcon(rsrcPath + "/editor/disc.png"), tr("Bullet List - Disc"), this, [this]() { listStyle(disc); });
-	listActions[disc]->setCheckable(true);
-	listActions[disc]->setChecked(false);
-
-	listActions[circle] = menuList->addAction(QIcon(rsrcPath + "/editor/circle.png"), tr("Bullet List - Circle"), this, [this]() { listStyle(circle); });
-	listActions[circle]->setCheckable(true);
-	listActions[circle]->setChecked(false);
-
-	listActions[square] = menuList->addAction(QIcon(rsrcPath + "/editor/square.png"), tr("Bullet List - Square"), this, [this]() { listStyle(square); });
-	listActions[square]->setCheckable(true);
-	listActions[square]->setChecked(false);
-
-	listActions[decimal] = menuList->addAction(QIcon(rsrcPath + "/editor/decimal.png"), tr("Ordered List - Decimal"), this, [this]() { listStyle(decimal); });
-	listActions[decimal]->setCheckable(true);
-	listActions[decimal]->setChecked(false);
-
-	listActions[alpha] = menuList->addAction(QIcon(rsrcPath + "/editor/alpha.png"), tr("Ordered List - Alpha"), this, [this]() { listStyle(alpha); });
-	listActions[alpha]->setCheckable(true);
-	listActions[alpha]->setChecked(false);
-
-	listActions[alphaupper] = menuList->addAction(QIcon(rsrcPath + "/editor/alphaupper.png"), tr("Ordered List - Uppercase alpha"), this, [this]() { listStyle(alphaupper); });
-	listActions[alphaupper]->setCheckable(true);
-	listActions[alphaupper]->setChecked(false);
-
-	listActions[roman] = menuList->addAction(QIcon(rsrcPath + "/editor/roman.png"), tr("Ordered List - Roman"), this, [this]() { listStyle(roman); });
-	listActions[roman]->setCheckable(true);
-	listActions[roman]->setChecked(false);
-
-	listActions[romanupper] = menuList->addAction(QIcon(rsrcPath + "/editor/romanupper.png"), tr("Ordered List - Uppercase roman"), this, [this]() { listStyle(romanupper); });
-	listActions[romanupper]->setCheckable(true);
-	listActions[romanupper]->setChecked(false);
-
-
 	//Setup ToolButton
-	listButton = new QToolButton();
 	listButton->setMenu(menuList);
 	listButton->setToolTip(tr("List style"));
 	listButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -491,50 +500,45 @@ void TextEdit::setupEditorActions()
 	listButton->setCheckable(true);
 
 	listButton->setIcon(QIcon(rsrcPath + "/editor/list.png"));
-	tb->addWidget(listButton);
+	toolbar->addWidget(listButton);
 
-	tb->addSeparator();
+	toolbar->addSeparator();
 
 
 	//LineHeight
-	QMenu* menuLineHeight = new QMenu("Line height menu");
+	lineHeightButton = new QToolButton(toolbar);
+	QMenu* menuLineHeight = new QMenu("Line height menu", lineHeightButton);
+
+	//Creating a new QActionGroup
+	QActionGroup* lineHeightGroup = new QActionGroup(menuLineHeight);
+	connect(lineHeightGroup, &QActionGroup::triggered, this, &TextEdit::setLineHeight);
 
 	//1
-	actionLineHeight100 = new QAction(tr("1"), this);
+	actionLineHeight100 = lineHeightGroup->addAction(tr("1"));
 	actionLineHeight100->setCheckable(true);
 
 	//1.15
-	actionLineHeight115 = new QAction(tr("1.15"), this);
+	actionLineHeight115 = lineHeightGroup->addAction(tr("1.15"));
 	actionLineHeight115->setCheckable(true);
 
 	//1.5
-	actionLineHeight150 = new QAction(tr("1.5"), this);
+	actionLineHeight150 = lineHeightGroup->addAction(tr("1.5"));
 	actionLineHeight150->setCheckable(true);
 
 	//2
-	actionLineHeight200 = new QAction(tr("2"), this);
+	actionLineHeight200 = lineHeightGroup->addAction(tr("2"));
 	actionLineHeight200->setCheckable(true);
-
-	//Creating a new QActionGroup
-	QActionGroup* lineHeightGroup = new QActionGroup(this);
-	connect(lineHeightGroup, &QActionGroup::triggered, this, &TextEdit::setLineHeight);
-
-	lineHeightGroup->addAction(actionLineHeight100);
-	lineHeightGroup->addAction(actionLineHeight115);
-	lineHeightGroup->addAction(actionLineHeight150);
-	lineHeightGroup->addAction(actionLineHeight200);
 
 	menuLineHeight->addActions(lineHeightGroup->actions());
 
 	//Setup ToolButton
-	lineHeightButton = new QToolButton();
 	lineHeightButton->setMenu(menuLineHeight);
 	lineHeightButton->setPopupMode(QToolButton::InstantPopup);
 	lineHeightButton->setToolTip(tr("Line height"));
 
 	lineHeightButton->setIcon(QIcon(rsrcPath + "/editor/lineheight.png"));
 
-	tb->addWidget(lineHeightButton);
+	toolbar->addWidget(lineHeightButton);
 
 	formatMenu->addSeparator();
 
@@ -543,30 +547,31 @@ void TextEdit::setupEditorActions()
 
 	addToolBarBreak(Qt::TopToolBarArea);
 
-	tb = addToolBar(tr("&Account"));
+	toolbar = addToolBar(tr("&Account"));
 	menu = menuBar()->addMenu(tr("&Account"));
 
 	//Close document
-	tb->addAction(closeDocumentAction);
+	toolbar->addAction(closeDocumentAction);
 
 	//Highlight user text
-	const QIcon HighlightUsersIcon(rsrcPath + "/editor/highlightusers.png");
-	actionHighlightUsers = menu->addAction(HighlightUsersIcon, tr("&Highlight users text"),
+	actionHighlightUsers = menu->addAction(
+		QIcon(rsrcPath + "/editor/highlightusers.png"), tr("&Highlight users text"),
 		this, &TextEdit::highlightUsersText);
 
 	menu->addSeparator();
 
 	//Edit profile
-	const QIcon userIcon(rsrcPath + "/editor/user.png");
-	a = menu->addAction(userIcon, tr("&Edit profile"), this, &TextEdit::openEditProfile);
-	tb->addAction(a);
+	action = menu->addAction(
+		QIcon(rsrcPath + "/editor/user.png"), tr("&Edit profile"),
+		this, &TextEdit::openEditProfile);
+	toolbar->addAction(action);
 
-	tb->addAction(actionHighlightUsers);
+	toolbar->addAction(actionHighlightUsers);
 	actionHighlightUsers->setCheckable(true);
 
 
 	//Online users toolbar
-	onlineUsersToolbar = new QToolBar(tr("&Online users"));
+	onlineUsersToolbar = new QToolBar(tr("&Online users"), this);
 	onlineUsersToolbar->setIconSize(QSize(36, 36));
 	addToolBar(Qt::RightToolBarArea, onlineUsersToolbar);
 
@@ -574,19 +579,19 @@ void TextEdit::setupEditorActions()
 	/********** FONT AND TEXT SIZE **********/
 
 	//Font and Size
-	tb = addToolBar(tr("Font and Size"));
-	tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-	addToolBar(tb);
+	toolbar = addToolBar(tr("Font and Size"));
+	toolbar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+	addToolBar(toolbar);
 
 	//Combobox setup
-	comboFont = new QFontComboBox(tb);
-	tb->addWidget(comboFont);
+	comboFont = new QFontComboBox(toolbar);
+	toolbar->addWidget(comboFont);
 	connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
 
 	//Size combobox
-	comboSize = new QComboBox(tb);
+	comboSize = new QComboBox(toolbar);
 	comboSize->setObjectName("comboSize");
-	tb->addWidget(comboSize);
+	toolbar->addWidget(comboSize);
 	comboSize->setEditable(true);
 
 	//Adding standard sizes to combobox
@@ -600,18 +605,20 @@ void TextEdit::setupEditorActions()
 	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
 
 
-	const QIcon incrementSizeIcon = QIcon(rsrcPath + "/editor/incrementsize.png");
-	tb->addAction(incrementSizeIcon, tr("Increase font size"), this, &TextEdit::incrementSize);
+	toolbar->addAction(
+		QIcon(rsrcPath + "/editor/incrementsize.png"), tr("Increase font size"),
+		this, &TextEdit::incrementSize);
 
-	const QIcon decrementSizeIcon = QIcon(rsrcPath + "/editor/decrementsize.png");
-	tb->addAction(decrementSizeIcon, tr("Reduce font size"), this, &TextEdit::decrementSize);
+	toolbar->addAction(
+		QIcon(rsrcPath + "/editor/decrementsize.png"), tr("Reduce font size"),
+		this, &TextEdit::decrementSize);
 
-	tb->addSeparator();
+	toolbar->addSeparator();
 
 
 	// Text subscript and superscript (in toolbar)
-	tb->addAction(actionTextSubscript);
-	tb->addAction(actionTextSuperscript);
+	toolbar->addAction(actionTextSubscript);
+	toolbar->addAction(actionTextSuperscript);
 
 
 	/********** HELP AND INFORMATIONS **********/
@@ -620,6 +627,48 @@ void TextEdit::setupEditorActions()
 	menu->addAction(tr("&Readme..."), this, &TextEdit::linkPressed, QKeySequence::HelpContents);
 	menu->addSeparator();
 	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("&About LiveText   "), _aboutWindow, &AboutWindow::exec);
+
+
+	/********** CONTEXT MENU **********/
+
+	_contextMenu = new QMenu(this);
+
+	//Cut/Copy/Paste
+#ifndef QT_NO_CLIPBOARD
+	_contextMenu->addAction(actionCopy);
+	_contextMenu->addAction(actionCut);
+	_contextMenu->addAction(actionPaste);
+#endif
+
+	//Select All/Delete
+	_contextMenu->addSeparator();
+	_contextMenu->addAction(actionDelete);
+	_contextMenu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
+
+	_contextMenu->addSeparator();
+
+	//Alignment
+	QMenu* alignmentMenu = new QMenu(tr("Paragraph"), this);
+	alignmentMenu->setIcon(QIcon(rsrcPath + "/editor/paragraph.png"));
+	alignmentMenu->addAction(actionAlignLeft);
+	alignmentMenu->addAction(actionAlignCenter);
+	alignmentMenu->addAction(actionAlignRight);
+	alignmentMenu->addAction(actionAlignJustify);
+
+	_contextMenu->addMenu(alignmentMenu);
+
+	//List style
+	QMenu* listMenu = new QMenu(tr("Lists"), this);
+	listMenu->setIcon(QIcon(rsrcPath + "/editor/list.png"));
+	for (int i = 0; i < LIST_STYLES; ++i) {
+		listMenu->addAction(listActions[i]);
+	}
+
+	_contextMenu->addMenu(listMenu);
+	_contextMenu->addSeparator();
+
+	//Highlight user text
+	_contextMenu->addAction(actionHighlightUsers);
 }
 
 
@@ -645,16 +694,16 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 		removePresence(userId);
 	}
 
-	Presence* p = new Presence(userId, username, color, image, _textEdit);
+	Presence p(userId, username, color, image, _textEdit);
 
 	//Add user icon on user toolbar
-	QAction* onlineAction = new QAction(QIcon(p->profilePicture()), username, this);
+	QAction* onlineAction = new QAction(QIcon(p.profilePicture()), username, this);
 	connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
 
 	onlineAction->setCheckable(true);
 	onlineUsersToolbar->addAction(onlineAction);
 
-	p->setAction(onlineAction);
+	p.setAction(onlineAction);
 
 	if (areUserIconActive() && areUserIconActive() == onlineUsers.size())
 		onlineAction->setChecked(true);
@@ -672,24 +721,21 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 //Remove presence in the document
 void TextEdit::removePresence(qint32 userId)
 {
-	if (onlineUsers.contains(userId)) {
-		Presence* p = onlineUsers.find(userId).value();
+	if (onlineUsers.contains(userId)) 
+	{
+		Presence& p = onlineUsers.find(userId).value();
 
 		//Hide user cursor
-		p->label()->clear();
-
-		//Remove frome editor
-		onlineUsers.remove(userId);
+		p.label()->clear();
 
 		//Remove user icon from users toolbar
-		onlineUsersToolbar->removeAction(p->actionHighlightText());
+		onlineUsersToolbar->removeAction(p.actionHighlightText());
+
+		//Remove from editor
+		onlineUsers.remove(userId);
 
 		//Recompute user text highlighting
 		handleMultipleSelections();
-
-		//Clean pointers
-		delete p;
-		p = nullptr;
 	}
 }
 
@@ -807,7 +853,7 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 	this->fileName = fileName;
 	this->URI = uri;
 
-	_shareUri = new ShareUriWindow(URI);
+	_shareUri = new ShareUriWindow(URI, this);
 
 	//Set "fileName - applicationName" as the window title
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
@@ -1701,13 +1747,13 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 {
 	if (onlineUsers.contains(user)) {
 		//Finds the Presence
-		Presence* p = onlineUsers.find(user).value();
+		Presence& p = onlineUsers.find(user).value();
 
 		if (position < _textEdit->document()->characterCount())
 			//Change user's cursor position
-			p->cursor()->setPosition(position);
+			p.cursor()->setPosition(position);
 		else
-			p->cursor()->setPosition(_textEdit->document()->characterCount() - 1);
+			p.cursor()->setPosition(_textEdit->document()->characterCount() - 1);
 
 		drawGraphicCursor(p);
 	}
@@ -1716,26 +1762,26 @@ void TextEdit::userCursorPositionChanged(qint32 position, qint32 user)
 //Redraw all cursors in case of window update (scroll, resize...)
 void TextEdit::redrawAllCursors() {
 
-	foreach(Presence * p, onlineUsers.values()) {
-		if (p->id() != _user.getUserId())
+	foreach(const Presence& p, onlineUsers.values()) {
+		if (p.id() != _user.getUserId())
 			drawGraphicCursor(p);
 	}
 }
 
-void TextEdit::drawGraphicCursor(Presence* p)
+void TextEdit::drawGraphicCursor(const Presence& p)
 {
 	//Getting Presence's cursor and QLabel (to draw the graphic cursor)
-	QLabel* userCursorLabel = p->label();
+	QLabel* userCursorLabel = p.label();
 
 	//Hide label to move it
 	userCursorLabel->close();
 
 	//Getting cursor rectangle (x,y) position of the window
-	const QRect qRect = _textEdit->cursorRect(*p->cursor());
+	const QRect qRect = _textEdit->cursorRect(*p.cursor());
 
 	//Draw the cursor (Pixmap)
 	QPixmap pix(qRect.width() * 2.5, qRect.height());
-	pix.fill(p->color());
+	pix.fill(p.color());
 
 	//Set the graphic cursor to the label
 	userCursorLabel->setPixmap(pix);
@@ -1758,9 +1804,8 @@ void TextEdit::drawGraphicCursor(Presence* p)
 void TextEdit::highlightUsersText()
 {
 	//For every user it checks/unchecks his selection to be displayed
-	foreach(Presence * p, onlineUsers.values())
-		p->actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
-
+	foreach(const Presence& p, onlineUsers.values())
+		p.actionHighlightText()->setChecked(actionHighlightUsers->isChecked());
 
 	handleMultipleSelections();
 }
@@ -1770,9 +1815,9 @@ void TextEdit::highlightUsersText()
 void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 {
 	if (onlineUsers.contains(userId)) {
-		Presence* p = onlineUsers.find(userId).value();
+		const Presence& p = onlineUsers.find(userId).value();
 
-		if (p->actionHighlightText()->isChecked()) {
+		if (p.actionHighlightText()->isChecked()) {
 			QTextCursor cursor(_textEdit->document());
 
 			//Text selection
@@ -1782,7 +1827,7 @@ void TextEdit::setExtraSelections(qint32 userId, QPair<int, int> selection)
 			QTextEdit::ExtraSelection userText;
 
 			//Sets format of extra selection
-			QColor color = p->color();
+			QColor color = p.color();
 			color.setAlpha(70);
 			userText.format.setBackground(color);
 			userText.cursor = cursor;
@@ -1835,8 +1880,8 @@ void TextEdit::handleMultipleSelections()
 int TextEdit::areUserIconActive()
 {
 	int checkedActions = 0;
-	foreach(Presence * p, onlineUsers.values()) {
-		if (p->actionHighlightText()->isChecked())
+	foreach(const Presence& p, onlineUsers.values()) {
+		if (p.actionHighlightText()->isChecked())
 			checkedActions++;
 	}
 
@@ -1850,49 +1895,9 @@ int TextEdit::areUserIconActive()
 */
 void TextEdit::showCustomContextMenu(const QPoint& position)
 {
-	QMenu* menu = new QMenu(this);
-
-	//Cut/Copy/Paste
-#ifndef QT_NO_CLIPBOARD
-	menu->addAction(actionCopy);
-	menu->addAction(actionCut);
-	menu->addAction(actionPaste);
-#endif
-
-	//Select All/Delete
-	menu->addSeparator();
-	menu->addAction(actionDelete);
-	menu->addAction(tr("Select all"), _textEdit, &QTextEdit::selectAll, QKeySequence::SelectAll);
-
-	menu->addSeparator();
-
-	//Alignment
-	const QIcon alignmentIcon = QIcon(rsrcPath + "/editor/paragraph.png");
-	QMenu* alignmentMenu = new QMenu(tr("Paragraph"), this);
-	alignmentMenu->setIcon(alignmentIcon);
-	alignmentMenu->addAction(actionAlignLeft);
-	alignmentMenu->addAction(actionAlignCenter);
-	alignmentMenu->addAction(actionAlignRight);
-	alignmentMenu->addAction(actionAlignJustify);
-
-	menu->addMenu(alignmentMenu);
-
-	//List style
-	const QIcon listIcon = QIcon(rsrcPath + "/editor/list.png");
-	QMenu* listMenu = new QMenu(tr("Lists"), this);
-	listMenu->setIcon(listIcon);
-	for (int i = 0; i < LIST_STYLES; ++i) {
-		listMenu->addAction(listActions[i]);
-	}
-
-	menu->addMenu(listMenu);
-
-	//Highlight user text
-	menu->addSeparator();
-	menu->addAction(actionHighlightUsers);
-
-	menu->exec(QCursor::pos());
-	menu->clear();
+	// Use QCursor instead of the provided position because QAbstractScrollArea
+	// maps event coordinates to the viewport instead of giving an absolute value
+	_contextMenu->exec(QCursor::pos());
 }
 
 
@@ -1900,8 +1905,6 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 /*
 *	Open repository main page
 */
-
-
 void TextEdit::linkPressed()
 {
 	QDesktopServices::openUrl(QUrl("https://github.com/paolo257428/livetext-pds/blob/master/README.md"));

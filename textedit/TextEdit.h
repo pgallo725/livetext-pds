@@ -32,7 +32,6 @@ class QToolButton;
 
 
 
-
 //Main editor class
 class TextEdit : public QMainWindow
 {
@@ -43,7 +42,7 @@ private:
 	User& _user;
 
 	//Online users
-	QMap<qint32, Presence*> onlineUsers;
+	QMap<qint32, Presence> onlineUsers;
 	QToolBar* onlineUsersToolbar;
 	//User text highlighting
 	QAction* actionHighlightUsers;
@@ -147,6 +146,9 @@ private:
 	//About dialog
 	AboutWindow* _aboutWindow;
 
+	//Editor context menu
+	QMenu* _contextMenu;
+
 	//Text highlighting
 	QList<QTextEdit::ExtraSelection> _usersText;
 
@@ -182,7 +184,7 @@ private:
 
 	//Graphic cursors
 	void redrawAllCursors();
-	void drawGraphicCursor(Presence* p);
+	void drawGraphicCursor(const Presence& p);
 
 	//Status bar messages
 	void showStatusBarMessage(QString text);
