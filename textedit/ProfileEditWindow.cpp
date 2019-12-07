@@ -14,7 +14,7 @@ const QString rsrcPath = ":/images";
 
 ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow),
-	_user(user), _iconChanged(false), mngr(WidgetsManager(this))
+	mngr(WidgetsManager(this)), _user(user), _editorFlag(false), _iconChanged(false)
 {
 	//UI setup
 	ui->setupUi(this);
@@ -41,8 +41,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 	connect(ui->radioButton_defaultAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
 
 	//Validator for nickname (no spaces)
-	ui->lineEdit_editNick->setValidator(new QRegExpValidator(
-		QRegExp("^[^\\s]+$"), this));
+	ui->lineEdit_editNick->setValidator(new QRegExpValidator(QRegExp("^[^\\s]+$"), this));
 
 
 	//Update GUI according to user info

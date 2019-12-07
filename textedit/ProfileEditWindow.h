@@ -15,22 +15,23 @@ class ProfileEditWindow : public QDialog
 
 private:
 
-	//Loading splash screen
-	QLabel* loading;
-
-	//Pointer to user object
+	//Reference to user object
 	User& _user;
+
+	Ui::ProfileEditWindow* ui;
 
 	//Widget manager (resize/loading screen)
 	WidgetsManager mngr;
 
-	Ui::ProfileEditWindow* ui;
+	//Loading splash screen
+	QLabel* loading;
 
 	//Checks if window is open from editor (true) or from LandingPage (false)
 	bool _editorFlag;
 
 	//Flag used to determine whether the image was changed or not
 	bool _iconChanged;
+
 
 	//Methods
 	void resetFields();
