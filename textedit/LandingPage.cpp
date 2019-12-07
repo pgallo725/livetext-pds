@@ -451,7 +451,6 @@ void LandingPage::showDocumentActionsMenu(const QPoint& position)
 	{
 		//Shows menu when right mouse button is pressed on Document table
 		_docMenu->exec(QCursor::pos());
-		_docMenu->hide();
 	}
 }
 
