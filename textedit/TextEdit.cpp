@@ -1,50 +1,47 @@
-#include <QAction>
+
+#include "TextEdit.h"
+
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QClipboard>
+#include <QDesktopServices>
+#include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QAction>
+#include <QToolButton>
 #include <QColorDialog>
+#include <QMessageBox>
 #include <QComboBox>
 #include <QFontComboBox>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFontDatabase>
-#include <QMenu>
+#include <QPainter>
 #include <QBitmap>
-#include <QMenuBar>
 #include <QTextCodec>
 #include <QTextEdit>
-#include <QStatusBar>
-#include <QToolBar>
-#include <QTextCursor>
-#include <QPainter>
-#include <QTextDocumentWriter>
 #include <QTextList>
-#include <QtDebug>
-#include <QCloseEvent>
-#include <QMessageBox>
-#include <QLabel>
+#include <QTextCursor>
+#include <QTextDocumentWriter>
+#include <QClipboard>
 #include <QMimeData>
 #include <QScrollBar>
-#include <QRectF>
-#include <QToolButton>
 #include <QScrollArea>
-#include <QTimer>
-#include <QDesktopServices>
+#include <QAbstractTextDocumentLayout>
+#include <QLayout>
 
 #if defined(QT_PRINTSUPPORT_LIB)
 #include <QtPrintSupport/qtprintsupportglobal.h>
 
 #if QT_CONFIG(printer)
+#include <QPrinter>
+
 #if QT_CONFIG(printdialog)
 #include <QPrintDialog>
 #endif
-
-#include <QPrinter>
-#include <QTimer>
-#include <QLayout>
-#include <QAbstractTextDocumentLayout>
-#include <QAbstractScrollArea>
 
 #if QT_CONFIG(printpreviewdialog)
 #include <QPrintPreviewDialog>
@@ -52,17 +49,12 @@
 #endif
 #endif
 
-#include "textedit.h"
-
 const QString rsrcPath = ":/images";
 
 
-TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(user)
+TextEdit::TextEdit(User& user, QWidget* parent) 
+	: QMainWindow(parent), _user(user)
 {
-
-	//About widget
-	_aboutWindow = new AboutWindow(this);
-
 
 	/**************************** GUI SETUP ****************************/
 
@@ -96,7 +88,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	//Adapt textEditor layout according to document
 	connect(_textEdit->document()->documentLayout(), &QAbstractTextDocumentLayout::documentSizeChanged, this, &TextEdit::resizeEditor);
 
-	//Enable buttons when text is selected2wa
+	//Enable buttons when text is selected
 	connect(_textEdit, &QTextEdit::selectionChanged, this, &TextEdit::updateEditorSelectedActions);
 
 
@@ -107,6 +99,7 @@ TextEdit::TextEdit(User& user, QWidget* parent) : QMainWindow(parent), _user(use
 	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &TextEdit::clipboardDataChanged);
 #endif
 
+	
 	//Setup extra cursor
 	_extraCursor = new QTextCursor(_textEdit->document());
 
@@ -255,7 +248,7 @@ void TextEdit::setupEditorActions()
 	//Export document in PDF
 	action = menu->addAction(
 		QIcon(rsrcPath + "/editor/exportpdf.png"), tr("&Export PDF..."),
-		this, &TextEdit::filePrintPdf, Qt::CTRL + Qt::Key_D);
+		this, &TextEdit::exportPdf, Qt::CTRL + Qt::Key_D);
 	toolbar->addAction(action);
 
 	//Print document
@@ -398,7 +391,7 @@ void TextEdit::setupEditorActions()
 	//Color
 	actionTextColor = formatMenu->addAction(
 		QPixmap(rsrcPath + "/editor/textcolor.png"), tr("&Color..."),
-		this, &TextEdit::textColor);
+		this, &TextEdit::selectColor);
 	toolbar->addAction(actionTextColor);
 
 	formatMenu->addSeparator();
@@ -626,7 +619,7 @@ void TextEdit::setupEditorActions()
 	menu = menuBar()->addMenu(tr("&?"));
 	menu->addAction(tr("&Readme..."), this, &TextEdit::linkPressed, QKeySequence::HelpContents);
 	menu->addSeparator();
-	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("&About LiveText   "), _aboutWindow, &AboutWindow::exec);
+	menu->addAction(QIcon(rsrcPath + "/misc/logo.png"), tr("&About LiveText   "), this, &TextEdit::showAboutWindow);
 
 
 	/********** CONTEXT MENU **********/
@@ -773,7 +766,7 @@ void TextEdit::askBeforeCloseDocument()
 	}
 }
 
-void TextEdit::showStatusBarMessage(QString text)
+void TextEdit::showStatusBarMessage(const QString& text)
 {
 	//Show status bar
 	statusBar()->show();
@@ -805,10 +798,6 @@ void TextEdit::closeEditor()
 
 	//Kill timer
 	_cursorTimer.stop();
-
-	if (_shareUri->isVisible()) {
-		_shareUri->close();
-	}
 
 	//Close window
 	this->close();
@@ -853,8 +842,6 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 	this->fileName = fileName;
 	this->URI = uri;
 
-	_shareUri = new ShareUriWindow(URI, this);
-
 	//Set "fileName - applicationName" as the window title
 	setWindowTitle(tr("%1 - %2").arg(fileName, QCoreApplication::applicationName()));
 }
@@ -863,22 +850,19 @@ void TextEdit::setCurrentFileName(QString fileName, QString uri)
 void TextEdit::filePrint()
 {
 #if QT_CONFIG(printdialog)
-	//Create printer object
+	//Create printer
 	QPrinter printer(QPrinter::HighResolution);
 
-	//Open print dialog
-	QPrintDialog* dlg = new QPrintDialog(&printer, this);
+	//Initialize print dialog
+	QPrintDialog* printDialog = new QPrintDialog(this);
+	printDialog->setWindowTitle(tr("Print Document"));
+	printDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	//Enable option to print only selection
-	if (_textEdit->textCursor().hasSelection())
-		dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
+	printDialog->setOption(QAbstractPrintDialog::PrintSelection, _textEdit->textCursor().hasSelection());
 
 	//Open print document window
-	dlg->setWindowTitle(tr("Print Document"));
-	if (dlg->exec() == QDialog::Accepted)
-		//If answer is yes, start printing
-		_textEdit->print(&printer);
-	delete dlg;
+	printDialog->open(this, SLOT(printDocument(QPrinter*)));
 #endif
 }
 
@@ -886,20 +870,20 @@ void TextEdit::filePrint()
 void TextEdit::filePrintPreview()
 {
 #if QT_CONFIG(printpreviewdialog)
-	//Create printer
-	QPrinter printer(QPrinter::HighResolution);
-
 	//Print preview window
-	QPrintPreviewDialog preview(&printer, this);
+	QPrintPreviewDialog* previewDialog = new QPrintPreviewDialog(this);
+	previewDialog->setWindowTitle(tr("Print Preview"));
+	previewDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	//Connect to print function
-	connect(&preview, &QPrintPreviewDialog::paintRequested, this, &TextEdit::printPreview);
+	//Connect PreviewDialog to print function
+	connect(previewDialog, &QPrintPreviewDialog::paintRequested, this, &TextEdit::printDocument);
 
-	preview.exec();
+	//Show print preview dialog
+	previewDialog->open();
 #endif
 }
 
-void TextEdit::printPreview(QPrinter* printer)
+void TextEdit::printDocument(QPrinter* printer)
 {
 #ifdef QT_NO_PRINTER
 	Q_UNUSED(printer);
@@ -909,29 +893,27 @@ void TextEdit::printPreview(QPrinter* printer)
 #endif
 }
 
-//Save as PDF File
-void TextEdit::filePrintPdf()
+void TextEdit::exportPdf()
 {
 #ifndef QT_NO_PRINTER
-	//Open Save As... window for saving PDF
-	QFileDialog fileDialog(this, tr("Export PDF"));
-	fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+	//Export PDF dialogs
+	QFileDialog* fileDialog = new QFileDialog(this, tr("Export PDF"));
+	fileDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+	fileDialog->setAcceptMode(QFileDialog::AcceptSave);
+	fileDialog->setFileMode(QFileDialog::AnyFile);
+	fileDialog->setMimeTypeFilters(QStringList("application/pdf"));
+	fileDialog->setDefaultSuffix("pdf");
+	fileDialog->selectFile(this->fileName);
 
-	//Show only PDF files
-	fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
+	//Open save file dialog
+	fileDialog->open(this, SLOT(filePrintPdf(const QString&)));
+#endif
+}
 
-	//Append pdf suffix to file
-	fileDialog.setDefaultSuffix("pdf");
-
-	//Set file name
-	fileDialog.selectFile(this->fileName);
-
-	//If answer is not Accept it closes
-	if (fileDialog.exec() != QDialog::Accepted)
-		return;
-
-	QString fileName = fileDialog.selectedFiles().first();
-
+//Save as PDF File
+void TextEdit::filePrintPdf(const QString& fileName)
+{
+#ifndef QT_NO_PRINTER
 	//Open print window but with PDF settings
 	QPrinter printer(QPrinter::HighResolution);
 	printer.setOutputFormat(QPrinter::PdfFormat);
@@ -947,9 +929,11 @@ void TextEdit::filePrintPdf()
 
 void TextEdit::fileShare()
 {
-	//Show created window
-	if (_shareUri->exec() == QDialog::Accepted)
-		showStatusBarMessage(tr("URI copied into clipboards"));		//Show message to clipboard
+	ShareUriWindow* shareUri = new ShareUriWindow(URI, this);
+	shareUri->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	//Show created window, connecting the outcome notification to the status bar
+	shareUri->open(this, SLOT(showStatusBarMessage(const QString&)));
 }
 
 /**************************** LISTS ****************************/
@@ -1262,28 +1246,29 @@ void TextEdit::decrementSize()
 	}
 }
 
-void TextEdit::textColor()
+void TextEdit::selectColor()
+{
+	QColorDialog* colorDialog = new QColorDialog(_textEdit->textColor(), this);
+	colorDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	//Open dialog window for colors
+	colorDialog->open(this, SLOT(textColor(const QColor&)));
+}
+
+void TextEdit::textColor(const QColor& color)
 {
 	const QSignalBlocker blocker(_textEdit->document());
 
-	//Open dialog window for colors
-	QColor col = QColorDialog::getColor(_textEdit->textColor(), this);
-
-	//Checks if color is valid
-	if (!col.isValid())
-		return;
-
-	//Change format
+	//Change format with the selected color
 	QTextCharFormat fmt;
-	fmt.setForeground(col);
+	fmt.setForeground(color);
 
 	//Apply format
 	mergeFormatOnSelection(fmt);
 
 	//Update GUI
-	colorChanged(col);
+	colorChanged(color);
 }
-
 
 void TextEdit::textAlign(QAction* a)
 {
@@ -1903,8 +1888,19 @@ void TextEdit::showCustomContextMenu(const QPoint& position)
 
 /**************************** ABOUT ****************************/
 /*
+*	Show AboutWindow
 *	Open repository main page
 */
+void TextEdit::showAboutWindow()
+{
+	//About widget
+	AboutWindow* aboutWindow = new AboutWindow(this);
+	aboutWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	//Show the AboutWindow widget
+	aboutWindow->open();
+}
+
 void TextEdit::linkPressed()
 {
 	QDesktopServices::openUrl(QUrl("https://github.com/paolo257428/livetext-pds/blob/master/README.md"));

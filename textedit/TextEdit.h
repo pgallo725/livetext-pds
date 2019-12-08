@@ -18,18 +18,16 @@
 #define LIST_STYLES 9
 
 
-//Method encapsulation
+//Pre-declaration of some QtWidget classes
+class QMenu;
 class QAction;
+class QLabel;
 class QComboBox;
 class QFontComboBox;
-class QTextEdit;
-class QScrollArea;
 class QTextCharFormat;
-class QMenu;
 class QPrinter;
-class QLabel;
+class QScrollArea;
 class QToolButton;
-
 
 
 //Main editor class
@@ -38,14 +36,34 @@ class TextEdit : public QMainWindow
 	Q_OBJECT
 
 private:
+
+	//Document infos
+	QString URI;
+	QString fileName;
+
+	//Text editor
+	QTextEditWrapper* _textEdit;
+
+
 	//Logged user
 	User& _user;
 
 	//Online users
 	QMap<qint32, Presence> onlineUsers;
 	QToolBar* onlineUsersToolbar;
+
 	//User text highlighting
 	QAction* actionHighlightUsers;
+	QList<QTextEdit::ExtraSelection> _usersText;
+
+	//Current cursor position
+	int _currentCursorPosition;
+	//Extra cursor to apply formats or insert/delete characters
+	QTextCursor* _extraCursor;
+
+	//Timer event
+	QTimer _cursorTimer;
+
 
 	//Button and actions of list menu
 	QToolButton* listButton;
@@ -91,15 +109,6 @@ private:
 		QTextListFormat::ListUpperRoman
 	};
 
-	//Current cursor position
-	int _currentCursorPosition;
-	//Extra cursor to apply formats or insert/delete characters
-	QTextCursor* _extraCursor;
-
-	//Document infos
-	QString URI;
-	QString fileName;
-
 	//Line height
 	QToolButton* lineHeightButton;
 	QAction* actionLineHeight100;
@@ -122,7 +131,6 @@ private:
 	QFontComboBox* comboFont;
 	QComboBox* comboSize;
 
-
 	//Copy/Cut/Paste
 #ifndef QT_NO_CLIPBOARD
 	QAction* actionCut;
@@ -131,27 +139,14 @@ private:
 #endif
 	QAction* actionDelete;
 
-	//Text editor
-	QTextEditWrapper* _textEdit;
-
+	//Editor context menu
+	QMenu* _contextMenu;
+	
 	//Scroll area widget to move document inside QMainWindow
 	QScrollArea* area;
 
-	//Timer event
-	QTimer _cursorTimer;
-
-	//Share URI window
-	ShareUriWindow* _shareUri;
-
-	//About dialog
-	AboutWindow* _aboutWindow;
-
-	//Editor context menu
-	QMenu* _contextMenu;
-
-	//Text highlighting
-	QList<QTextEdit::ExtraSelection> _usersText;
-
+	
+	
 	/* ----------------------- METHODS ----------------------- */
 
 	//GUI Setup
@@ -185,9 +180,6 @@ private:
 	//Graphic cursors
 	void redrawAllCursors();
 	void drawGraphicCursor(const Presence& p);
-
-	//Status bar messages
-	void showStatusBarMessage(QString text);
 
 
 public:
@@ -266,13 +258,17 @@ public slots:
 	//Shows error in case of failure during document closing
 	void closeDocumentError(QString error);
 
+	//Status bar messages
+	void showStatusBarMessage(const QString& text);
+
 private slots:
 
 	//File printing
 	void filePrint();
+	void printDocument(QPrinter* p);
 	void filePrintPreview();
-	void filePrintPdf();
-	void printPreview(QPrinter*);
+	void exportPdf();
+	void filePrintPdf(const QString& file);
 
 	//Share URI
 	void fileShare();
@@ -294,7 +290,8 @@ private slots:
 	void textSize(const QString& p);
 	void incrementSize();
 	void decrementSize();
-	void textColor();
+	void selectColor();
+	void textColor(const QColor& color);
 	void textAlign(QAction* a);
 
 	//Lists
@@ -317,6 +314,7 @@ private slots:
 	void showCustomContextMenu(const QPoint& position);
 
 	//About
+	void showAboutWindow();
 	void linkPressed();
 };
 

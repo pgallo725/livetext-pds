@@ -1,12 +1,9 @@
 #include "ProfileEditWindow.h"
-
 #include "ui_profileeditwindow.h"
-#include "textedit.h"
 
-#include <QMessageBox>
 #include <QPixmap>
-#include <QFileDialog>
 #include <QDesktopWidget>
+#include <QFileDialog>
 #include <QRegExpValidator>
 
 const QString rsrcPath = ":/images";
@@ -88,15 +85,13 @@ void ProfileEditWindow::updateFailed(QString error)
 
 void ProfileEditWindow::pushButtonBrowseClicked()
 {
-	//Open file dialog, to choose profile picture
-	QString filename = QFileDialog::getOpenFileName(this, "Choose your profile icon",
-		QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
+	//File dialog
+	QFileDialog* fileSelector = new QFileDialog(this, "Choose your profile icon", QDir::homePath(), "Image files(*.png *.jpg *.bmp *.jpeg)");
+	fileSelector->setFileMode(QFileDialog::ExistingFile);
+	fileSelector->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	//Sets in path box correct path
-	if (!filename.isEmpty()) {
-		updateUserAvatarPreview(filename);
-		_iconChanged = true;
-	}
+	//Open file dialog, to choose profile picture
+	fileSelector->open(this, SLOT(updateSelectedAvatar(const QString&)));
 }
 
 void ProfileEditWindow::pushButtonCancelClicked()
@@ -111,8 +106,8 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString nick = ui->lineEdit_editNick->text();
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
-	QImage userIcon = _iconChanged ?
-		ui->label_UsrIcon->pixmap()->toImage() : QImage();		//If the image was not changed, an empty one is sent
+	//If the image was not changed, an empty one is sent
+	QImage userIcon = _iconChanged ? ui->label_UsrIcon->pixmap()->toImage() : QImage();		
 
 
 	//Check if all password are the same (if setted)
@@ -166,7 +161,7 @@ void ProfileEditWindow::radioButtonPressed()
 
 /* ---------------- GUI UPDATE ----------------*/
 
-void ProfileEditWindow::updateUserAvatarPreview(QString path)
+void ProfileEditWindow::updateSelectedAvatar(const QString& path)
 {
 	QFileInfo file(path);
 
@@ -190,6 +185,7 @@ void ProfileEditWindow::updateUserAvatarPreview(QString path)
 				ui->label_imageSize->setText("Image size: " + QString::number(fileSize / 1024) + " KB");
 				ui->label_UsrIcon->setPixmap(userPix.scaled(ui->label_UsrIcon->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 				ui->label_incorrect_edit->setText("");
+				_iconChanged = true;
 				return;
 			}
 		}

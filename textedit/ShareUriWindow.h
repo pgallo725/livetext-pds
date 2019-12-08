@@ -18,6 +18,12 @@ public:
 	Ui::ShareUriWindow* ui;
 	ShareUriWindow(QString uri, QWidget* parent = nullptr);
 	~ShareUriWindow();
+
+	void open(QObject* receiver, const char* slot);
+
+signals:
+
+	void finished(const QString& msg);
 };
 
 

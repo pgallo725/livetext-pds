@@ -64,7 +64,7 @@ private slots:
 	void radioButtonPressed();
 
 	//GUI update
-	void updateUserAvatarPreview(QString path);
+	void updateSelectedAvatar(const QString& path);
 };
 
 

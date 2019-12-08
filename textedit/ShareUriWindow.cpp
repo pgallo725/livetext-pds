@@ -34,6 +34,15 @@ ShareUriWindow::~ShareUriWindow()
 	delete ui;
 }
 
+void ShareUriWindow::open(QObject* receiver, const char* slot)
+{
+	// Connect the finished() signal to the notification slot
+	connect(this, SIGNAL(finished(const QString&)), receiver, slot);
+
+	//Show the window
+	((QDialog*)this)->open();
+}
+
 void ShareUriWindow::copyAndClose()
 {
 	//Copy uri to clipboard
@@ -41,5 +50,6 @@ void ShareUriWindow::copyAndClose()
 	clipboard->setText(ui->lineEdit_uri->text());
 
 	//Close window
-	this->done(QDialog::Accepted);
+	emit finished(tr("URI copied into clipboards"));
+	this->close();
 }

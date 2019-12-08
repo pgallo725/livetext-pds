@@ -248,8 +248,8 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
-			QTextEdit::insertFromMimeData(&sanitizedSource);
-			//textCursor().insertText(data);
+			//QTextEdit::insertFromMimeData(&sanitizedSource);
+			textCursor().insertText(data);
 		}
 		else
 		{
