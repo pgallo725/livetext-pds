@@ -16,8 +16,13 @@
 #include <QFrame>
 #include <QTableWidget>
 #include <QMenu>
+#include <QLabel>
+#include <QPoint>
 #include <QTimer>
 #include <QClipboard>
+
+#include "OpenUriWindow.h"
+#include "NewDocumentWindow.h"
 
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PORT "1500"
@@ -39,13 +44,6 @@ LandingPage::LandingPage(QWidget* parent)
 		mngr.centerAndResize(0.68, 0.8);
 	else
 		mngr.centerAndResize(0.55, 0.65);
-
-	//Creates new file window
-	newFileWindow = new NewDocumentWindow(_buffer, this);
-
-	//Create open from URI window
-	openURIWindow = new OpenUriWindow(_buffer, this);
-
 
 	//New file push button icon
 	ui->pushButton_new->setIconSize(ui->pushButton_new->size());
@@ -491,16 +489,14 @@ void LandingPage::resetFields()
 	ui->label_incorrect_file_operation->setText("");
 	ui->label_imageSize->setText("");
 
-	//Reset also additional windows fields
-	newFileWindow->resetFields();
-	openURIWindow->resetFields();
-
 	//Reset user avatar preview
 	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
 	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Check radio-button
 	ui->radioButton_defaultAvatar->setChecked(true);
+
+	emit landingPageReset();
 }
 
 
@@ -576,9 +572,7 @@ void LandingPage::closeAll()
 	//Reset error messages
 	resetFields();
 
-	//Close all LandingPage
-	openURIWindow->close();
-	newFileWindow->close();
+	//Close LandingPage window
 	this->hide();
 }
 
@@ -680,40 +674,32 @@ void LandingPage::pushButtonRemoveClicked()
 
 void LandingPage::pushButtonOpenUriClicked()
 {
-	//Show and lanch dialog
-	if (openURIWindow->exec() == QDialog::Accepted) {
-		mngr.showLoadingScreen(loading, tr("Opening URI..."));
-		//Adds document recived from open uri
-		emit openDocument(URI(_buffer));
-	};
+	OpenUriWindow* openUriWindow = new OpenUriWindow(this);
+	openUriWindow->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	//Reset all fields of openURIWindow
-	openURIWindow->resetFields();
+	//Connect reset signal to "close" slot on the dialog
+	connect(this, &LandingPage::landingPageReset, openUriWindow, &QDialog::close);
+
+	//Show and launch dialog
+	openUriWindow->open(this, SLOT(openDocumentURI(const QString&)));
 }
 
 void LandingPage::pushButtonNewClicked()
 {
+	NewDocumentWindow* newDocWindow = new NewDocumentWindow(this);
+	newDocWindow->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	//Connect reset signal to "close" slot on the dialog
+	connect(this, &LandingPage::landingPageReset, newDocWindow, &QDialog::close);
+
 	//Show and launch dialog
-	if (newFileWindow->exec() == QDialog::Accepted) {
-		mngr.showLoadingScreen(loading, tr("Creating document..."));
-
-		//Adds document recived from open uri
-		emit newDocument(_buffer);
-	};
-
-	//Reset all fields of newFileWindow
-	newFileWindow->resetFields();
+	newDocWindow->open(this, SLOT(createDocument(const QString&)));
 }
-
 
 void LandingPage::pushButtonBackClicked()
 {
 	//Reset fields
 	resetFields();
-
-	//Close all windows
-	openURIWindow->close();
-	newFileWindow->close();
 
 	//Return to Home Page
 	ui->stackedWidget->setCurrentIndex(0);
@@ -724,6 +710,14 @@ void LandingPage::pushButtonBackClicked()
 	ui->lineEdit_psw->setFocus();
 }
 
+
+void LandingPage::openDocumentURI(const QString& uri)
+{
+	mngr.showLoadingScreen(loading, tr("Opening URI..."));
+
+	//Adds document recived from open uri
+	emit openDocument(URI(uri));
+}
 
 void LandingPage::copyDocumentURI()
 {
@@ -743,6 +737,14 @@ void LandingPage::copyDocumentURI()
 
 	//Hides status bar after 5"
 	QTimer::singleShot(STATUSBAR_MSG_DURATION, [this] {statusBar()->hide(); });
+}
+
+void LandingPage::createDocument(const QString& name)
+{
+	mngr.showLoadingScreen(loading, tr("Creating document..."));
+
+	//Adds document recived from open uri
+	emit newDocument(name);
 }
 
 

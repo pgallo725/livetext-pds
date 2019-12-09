@@ -2,21 +2,19 @@
 #define LANDINGPAGE_H
 
 #include <QMainWindow>
-#include <QDialog>
-#include <QLabel>
-#include <Document.h>
-#include <QPoint>
 
+#include <Document.h>
 #include <User.h>
 
-#include "OpenUriWindow.h"
-#include "NewDocumentWindow.h"
 #include "WidgetsManager.h"
 
 #define STATUSBAR_MSG_DURATION 5000		// ms
 
 
 namespace Ui { class LandingPage; }
+
+class QLabel;
+class QPoint;
 
 class LandingPage : public QMainWindow
 {
@@ -33,12 +31,6 @@ private:
 
 	//Widget Manager for resizing and loading screen
 	WidgetsManager mngr;
-
-	//Dialogs to open/create a file
-	OpenUriWindow* openURIWindow;
-	NewDocumentWindow* newFileWindow;
-	//Service buffer for filename or URI
-	QString _buffer;
 
 	//Document list context menu
 	QMenu* _docMenu;
@@ -72,22 +64,8 @@ public:
 	void loadUserLoginInfo();
 	void saveUserLoginInfo(QString username);
 	
-signals:
-	//Create/Open/Remove document
-	void newDocument(QString name);
-	void openDocument(URI uri);
-	void removeDocument(URI uri);
-
-	//Server (Connection/Login/Register/Logout)
-	void connectToServer(QString ipAddress, quint16 port);
-	void serverLogin(QString username, QString password);
-	void serverRegister(QString username, QString password, QString nickname, QImage icon);
-	void serverLogout();
-	
-	//Open edit profile window
-	void openEditProfile();
-
 public slots:
+
 	void connectionEstabilished();
 	void incorrectFileOperation(QString error);
 	void pushButtonBackClicked();
@@ -118,8 +96,29 @@ private slots:
 	//User profile picture preview
 	void updateUserAvatarPreview(QString path);
 
-	//Copy document URI
+	//Landing page document actions
+	void createDocument(const QString& name);
+	void openDocumentURI(const QString& uri);
 	void copyDocumentURI();
+
+
+signals:
+	//Create/Open/Remove document
+	void newDocument(QString name);
+	void openDocument(URI uri);
+	void removeDocument(URI uri);
+
+	//Server (Connection/Login/Register/Logout)
+	void connectToServer(QString ipAddress, quint16 port);
+	void serverLogin(QString username, QString password);
+	void serverRegister(QString username, QString password, QString nickname, QImage icon);
+	void serverLogout();
+
+	//Open edit profile window
+	void openEditProfile();
+
+	//Called on forceLogout
+	void landingPageReset();
 };
 
 #endif // LANDINGPAGE_H

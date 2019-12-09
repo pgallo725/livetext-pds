@@ -1,11 +1,13 @@
 #include "OpenUriWindow.h"
 #include "ui_openuriwindow.h"
 
+#include <QRegularExpression>
+
 #include "WidgetsManager.h"
 
 
-OpenUriWindow::OpenUriWindow(QString& uri, QWidget* parent) 
-	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow), _uri(uri) 
+OpenUriWindow::OpenUriWindow(QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::OpenUriWindow)
 {
 	//Window name and logo
 	setWindowTitle(tr("Open from URI"));
@@ -30,6 +32,15 @@ OpenUriWindow::~OpenUriWindow()
 	delete ui;
 }
 
+void OpenUriWindow::open(QObject* receiver, const char* slot)
+{
+	// Connect the finished() signal to the external slot
+	connect(this, SIGNAL(finished(const QString&)), receiver, slot);
+
+	//Show the window
+	((QDialog*)this)->open();
+}
+
 void OpenUriWindow::incorrectOperation(QString error)
 {
 	//Sets error
@@ -48,14 +59,20 @@ void OpenUriWindow::resetFields()
 
 void OpenUriWindow::acceptClicked()
 {
-	//Gets URI inserted by user
-	_uri = ui->lineEdit_uri->text();
+	QString uri = ui->lineEdit_uri->text();
+	// RegExp to check if the candidate URI has the correct format
+	QRegularExpression uriFormat("^[^_]+_[^_]+_[a-zA-Z0-9]{12}$");
 
-	//If filename is valid it closes and confirms operation else print an error
-	if (!_uri.isEmpty())
-		this->done(QDialog::Accepted);
-	else
+	//If provided URI is incorrect it prints an error, otherwise close and proceed
+	if (ui->lineEdit_uri->text().isEmpty())
 		incorrectOperation(tr("Please insert a valid URI"));
+	else if (!uriFormat.match(uri).hasMatch())	
+		incorrectOperation(tr("The provided URI has an invalid format"));
+	else 
+	{
+		emit finished(ui->lineEdit_uri->text());
+		this->close();
+	}
 }
 
 void OpenUriWindow::rejectClicked()

@@ -10,17 +10,18 @@ class OpenUriWindow : public QDialog
 	Q_OBJECT
 
 private:
-	// Application buffer holding the URI of the document to be opened
-	QString& _uri;
+
+	//Show an error
+	void incorrectOperation(QString error);
 
 public:
 
 	Ui::OpenUriWindow* ui;
-	OpenUriWindow(QString& uri, QWidget* parent = nullptr);
+	OpenUriWindow(QWidget* parent = nullptr);
 	~OpenUriWindow();
 		
-	//Show an error
-	void incorrectOperation(QString error);
+	//Open the dialog
+	void open(QObject* receiver, const char* slot);
 
 	//Reset all fields
 	void resetFields();
@@ -29,6 +30,10 @@ private slots:
 	//Buttons slots
 	void acceptClicked();
 	void rejectClicked();
+
+signals:
+
+	void finished(const QString& name);
 };
 
 

@@ -7,8 +7,8 @@
 #include "Document.h"
 
 
-NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent) 
-	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewDocumentWindow), _filename(filename)
+NewDocumentWindow::NewDocumentWindow(QWidget* parent) 
+	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::NewDocumentWindow)
 {
 	//Window name
 	setWindowTitle(tr("New document"));
@@ -25,8 +25,7 @@ NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent)
 	connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &NewDocumentWindow::rejectClicked);
 
 	//Validator to prevent insertion of '_' character in filename
-	ui->lineEdit_fileName->setValidator(new QRegExpValidator(
-		QRegExp(QString("^[^") + URI_FIELD_SEPARATOR + "]+$"), this));
+	ui->lineEdit_fileName->setValidator(new QRegExpValidator(QRegExp(QString("^[^") + URI_FIELD_SEPARATOR + "]+$"), this));
 
 	//Set keyboard focus
 	ui->lineEdit_fileName->setFocus();
@@ -35,6 +34,15 @@ NewDocumentWindow::NewDocumentWindow(QString& filename, QWidget* parent)
 NewDocumentWindow::~NewDocumentWindow()
 {
 	delete ui;
+}
+
+void NewDocumentWindow::open(QObject* receiver, const char* slot)
+{
+	// Connect the finished() signal to the external slot
+	connect(this, SIGNAL(finished(const QString&)), receiver, slot);
+
+	//Show the window
+	((QDialog*)this)->open();
 }
 
 void NewDocumentWindow::incorrectOperation(QString error)
@@ -55,14 +63,14 @@ void NewDocumentWindow::resetFields()
 
 void NewDocumentWindow::acceptClicked()
 {
-	//Gets filename
-	_filename = ui->lineEdit_fileName->text();
-
 	//If filename is valid it closes and confirm operation else print an error
-	if (!_filename.isEmpty())
-		this->done(QDialog::Accepted);
-	else
+	if (ui->lineEdit_fileName->text().isEmpty())
 		incorrectOperation(tr("Please insert a valid document name"));
+	else
+	{
+		emit finished(ui->lineEdit_fileName->text());
+		this->close();
+	}
 }
 
 void NewDocumentWindow::rejectClicked()
