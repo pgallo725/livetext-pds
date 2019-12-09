@@ -1,4 +1,3 @@
-
 #include "TextEdit.h"
 
 #include <QApplication>
@@ -48,6 +47,9 @@
 #endif
 #endif
 #endif
+
+#include "ShareUriWindow.h"
+#include "AboutWindow.h"
 
 const QString rsrcPath = ":/images";
 

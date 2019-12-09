@@ -7,10 +7,9 @@
 
 #include <User.h>
 
-#include "QTextEditWrapper.h"
 #include "Presence.h"
-#include "ShareUriWindow.h"
-#include "AboutWindow.h"
+#include "QTextEditWrapper.h"
+
 
 #define CURSOR_SEND_INTERVAL 200
 #define STATUSBAR_MSG_DURATION 5000
