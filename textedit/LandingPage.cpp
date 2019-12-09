@@ -1,25 +1,22 @@
 #include "LandingPage.h"
 #include "ui_landingpage.h"
 
-#include <QMessageBox>
-#include <QPixmap>
-#include <QBitmap>
-#include <QPainter>
-#include <QWidget>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QStandardPaths>
-#include <QTextStream>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QPixmap>
+#include <QPainter>
 #include <QPainterPath>
-#include <QFrame>
+#include <QStandardPaths>
+#include <QTextStream>
+#include <QClipboard>
 #include <QTableWidget>
 #include <QMenu>
 #include <QLabel>
 #include <QPoint>
 #include <QTimer>
-#include <QClipboard>
 
 #include "OpenUriWindow.h"
 #include "NewDocumentWindow.h"
