@@ -233,6 +233,10 @@ void Client::serverDisconnection()
 
 void Client::Login(QString usr, QString passwd) 
 {
+	// Clear the socket from any unexpected message
+	if (socket->bytesAvailable())
+		socket->readAll();
+
 	try 
 	{	// Send the LoginRequest message to the server
 		MessageFactory::LoginRequest(usr)->send(socket);
@@ -333,10 +337,14 @@ void Client::Login(QString usr, QString passwd)
 }
 
 
-void Client::Register(QString usr, QString passwd, QString nick, QImage img) {
-
+void Client::Register(QString usr, QString passwd, QString nick, QImage img) 
+{
 	QDataStream in(socket);
 	MessageCapsule incomingMessage;
+
+	// Clear the socket from any unexpected message
+	if (socket->bytesAvailable())
+		socket->readAll();
 
 	try 
 	{	// Send the account creation request (with all user info) to the server
