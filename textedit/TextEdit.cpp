@@ -67,16 +67,13 @@ TextEdit::TextEdit(User& user, QWidget* parent)
 	//GUI update in case of format change or cursor position changed
 	connect(_textEdit, &QTextEdit::cursorPositionChanged, this, &TextEdit::cursorPositionChanged);
 
-	//Online users cursor redraw in case of window aspect, char format, cursor position changed
+	//Online users cursor redraw in case of scrollbar positions changed
 	connect(_textEdit->verticalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit->horizontalScrollBar(), &QScrollBar::valueChanged, this, &TextEdit::redrawAllCursors);
-	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
-	connect(_textEdit, &QTextEditWrapper::editorResizeEvent, this, &TextEdit::redrawAllCursors);
 
-	//Update char format
+	//Update char format and redraw cursor and text highlighting (the size may have changed)
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::currentCharFormatChanged);
-
-	//Online users text highlight redraw in case of window aspect, char format, cursor position changed
+	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::redrawAllCursors);
 	connect(_textEdit, &QTextEdit::currentCharFormatChanged, this, &TextEdit::handleMultipleSelections);
 
 	//Custom context menu
@@ -751,6 +748,9 @@ void TextEdit::resizeEditor(const QSizeF& newSize)
 	else {
 		_textEdit->setFixedHeight(height);
 	}
+
+	// Redraw cursors inside the new document layout
+	redrawAllCursors();
 }
 
 void TextEdit::askBeforeCloseDocument()
@@ -1676,13 +1676,8 @@ void TextEdit::contentsChange(int position, int charsRemoved, int charsAdded)
 		}
 	}
 
-
 	//Reset old cursor position
 	_currentCursorPosition = -1;
-
-	//if(_extraCursor->blockFormat().alignment() != Qt::AlignJustify)
-	//Update GUI after some insertion/deletion
-	//updateEditorSelectedActions();
 
 	//User text higlighting
 	handleMultipleSelections();

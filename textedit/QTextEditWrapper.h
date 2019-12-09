@@ -10,11 +10,10 @@
 *  QTextEdit is the core component of our LiveText editor, but the
 *  set of features and supported RichText formats vastly exceeds
 *  those integrated into our editor, therefore when pasting
-*  contents from an external source (other applications, web pages...)
+*  contents from an external source (other apps or web pages...)
 *  we need to parse the MIME data to sanitize what is being copied
 *  and in some cases even prevent the pasting of such contents.
-*  In practice, this is done by overriding a couple of QTextEdit methods,
-*  also needed to catch resize events and propagate them to TextEdit
+*  In practice, this is done by overriding a couple of QTextEdit methods
 */
 class QTextEditWrapper : public QTextEdit 
 {
@@ -89,9 +88,4 @@ protected:
 	bool canInsertFromMimeData(const QMimeData* source) const override;
 	virtual void insertFromMimeData(const QMimeData* source) override;
 
-	virtual void resizeEvent(QResizeEvent* e) override;
-
-signals:
-
-	void editorResizeEvent();
 };

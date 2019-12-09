@@ -257,10 +257,3 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 		}
 	}
 }
-
-
-void QTextEditWrapper::resizeEvent(QResizeEvent* e)
-{
-	QTextEdit::resizeEvent(e);
-	emit editorResizeEvent();
-}
