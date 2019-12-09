@@ -689,7 +689,7 @@ void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 	Presence p(userId, username, color, image, _textEdit);
 
 	//Add user icon on user toolbar
-	QAction* onlineAction = new QAction(QIcon(p.profilePicture()), username, this);
+	QAction* onlineAction = new QAction(QIcon(p.profilePicture()), username, onlineUsersToolbar);
 	connect(onlineAction, &QAction::triggered, this, &TextEdit::handleMultipleSelections);
 
 	onlineAction->setCheckable(true);
