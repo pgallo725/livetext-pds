@@ -886,6 +886,7 @@ void TextEdit::filePrintPreview()
 	//Print preview window
 	QPrintPreviewDialog* previewDialog = new QPrintPreviewDialog(this);
 	previewDialog->setWindowTitle(tr("Print Preview"));
+	previewDialog->setMinimumSize(200, 200);
 	previewDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	//Connect PreviewDialog to print function
