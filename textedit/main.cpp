@@ -5,10 +5,10 @@
 
 int main(int argc, char *argv[])
 {
-	Q_INIT_RESOURCE(textedit); //Inizializza .qrc per il bind delle immagini
+	Q_INIT_RESOURCE(textedit); //Initialize .qrc for icon and resources binding
 
-	//Crea applicazione con vari parametri
-	QApplication a(argc, argv); 
+	//Create application with the proper parameters
+	QApplication app(argc, argv); 
 	QCoreApplication::setApplicationName("LiveText");
 	QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
@@ -16,6 +16,6 @@ int main(int argc, char *argv[])
 
 	liveText.launch();
 
-	//Entra nel loop principale dell'applicazione in attesa di azioni e attende fino alla exit (chiusura app)
-	return a.exec();
+	//Enter main application loop waiting for events to handle or exit
+	return app.exec();
 }
