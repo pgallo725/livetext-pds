@@ -1,9 +1,7 @@
 #include "LiveText.h"
 
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QRect>
 #include <QString>
+#include <QApplication>
 #include <QMessageBox>
 
 
@@ -95,7 +93,7 @@ void LiveText::logoutClient()
 	_user = User();
 
 	//The old ProfileEditWindow is deleted
-	delete _editProfile;
+	_editProfile->deleteLater();
 
 	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 
@@ -108,7 +106,7 @@ void LiveText::forceLogout()
 	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
 
 	//Delete edit profile window
-	delete _editProfile;
+	_editProfile->deleteLater();
 
 	if (editorOpen) 
 	{
@@ -288,8 +286,8 @@ void LiveText::closeEditor()
 	_textEdit->closeEditor();
 
 	//Delete pointers
-	delete _docEditor;
-	delete _textEdit;
+	_docEditor->deleteLater();
+	_textEdit->deleteLater();
 
 	editorOpen = false;
 }
@@ -306,7 +304,7 @@ void LiveText::openEditProfile(bool fromEditor)
 	//Update edit profile window info
 	_editProfile->setEditorFlag(fromEditor);
 	_editProfile->updateInfo();
-	_editProfile->exec();
+	_editProfile->open();
 }
 
 
