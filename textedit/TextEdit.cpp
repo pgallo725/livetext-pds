@@ -738,8 +738,8 @@ void TextEdit::removePresence(qint32 userId)
 *	Close document msgbox
 *	Close editor
 *	Status bar messages
-*	Error messages
-*	Start timer
+*	Start timers
+*   Cursor positions handling
 */
 
 void TextEdit::resizeEditor(const QSizeF& newSize)
@@ -757,25 +757,19 @@ void TextEdit::askBeforeCloseDocument()
 {
 	QMessageBox* confirm = new QMessageBox(QMessageBox::Icon::Warning, QCoreApplication::applicationName(),
 		tr("Do you want to close this document?"), QMessageBox::Yes | QMessageBox::No, this);
+	confirm->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	QMessageBox::StandardButton reply = (QMessageBox::StandardButton)confirm->exec();
+	//Show the exit confirmation dialog
+	confirm->open(this, SLOT(doCloseDocument(int)));
+}
 
-	if (reply == QMessageBox::Yes) {
+void TextEdit::doCloseDocument(int reply)
+{
+	if ((QMessageBox::StandardButton)reply == QMessageBox::Yes)
+	{
 		_cursorTimer.stop();
 		emit closeDocument(_user.getUserId());
 	}
-}
-
-void TextEdit::showStatusBarMessage(const QString& text)
-{
-	//Show status bar
-	statusBar()->show();
-
-	//Shows message for 5"
-	statusBar()->showMessage(text, STATUSBAR_MSG_DURATION);
-
-	//Hides status bar after 5"
-	QTimer::singleShot(STATUSBAR_MSG_DURATION, [this] {statusBar()->hide(); });
 }
 
 void TextEdit::closeDocumentError(QString error)
@@ -798,26 +792,36 @@ void TextEdit::closeEditor()
 
 	//Kill timer
 	_cursorTimer.stop();
+	_statusBarTimer.stop();
 
 	//Close window
 	this->close();
 }
 
 
-void TextEdit::resetCursorPosition()
+// Setup timer events
+void TextEdit::startTimers()
 {
-	//Set new cursor
-	_textEdit->setTextCursor(QTextCursor(_textEdit->document()));
-	area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
-}
-
-//	Handle timer event to send cursor position to the server
-void TextEdit::startCursorTimer()
-{
+	//Cursor timer
 	_cursorTimer.callOnTimeout<TextEdit*>(this, &TextEdit::cursorTimerEvent);
 	_cursorTimer.start(CURSOR_SEND_INTERVAL);
+
+	//Status bar timer
+	_statusBarTimer.callOnTimeout<TextEdit*>(this, [this] { statusBar()->hide(); });
+	_statusBarTimer.setSingleShot(true);
 }
 
+void TextEdit::showStatusBarMessage(const QString& text)
+{
+	//Show status bar
+	statusBar()->show();
+
+	//Shows message
+	statusBar()->showMessage(text);
+
+	//Hides status bar after 5"
+	_statusBarTimer.start(STATUSBAR_MSG_DURATION);
+}
 
 void TextEdit::cursorTimerEvent()
 {
@@ -826,6 +830,13 @@ void TextEdit::cursorTimerEvent()
 		_currentCursorPosition = _textEdit->textCursor().position();
 		emit newCursorPosition(_user.getUserId(), _textEdit->textCursor().position());
 	}
+}
+
+void TextEdit::resetCursorPosition()
+{
+	//Set new cursor
+	_textEdit->setTextCursor(QTextCursor(_textEdit->document()));
+	area->verticalScrollBar()->setValue(area->verticalScrollBar()->minimum());
 }
 
 

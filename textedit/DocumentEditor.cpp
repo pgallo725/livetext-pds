@@ -69,7 +69,7 @@ void DocumentEditor::openDocument()
 	}
 
 	_textedit->setCurrentFileName(_document.getName(), _document.getURI().toString());
-	_textedit->startCursorTimer();
+	_textedit->startTimers();
 }
 
 

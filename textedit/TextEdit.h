@@ -63,6 +63,7 @@ private:
 
 	//Timer event
 	QTimer _cursorTimer;
+	QTimer _statusBarTimer;
 
 
 	//Button and actions of list menu
@@ -187,7 +188,7 @@ public:
 	~TextEdit();
 
 	//Start timer
-	void startCursorTimer();
+	void startTimers();
 
 	//Document
 	void setCurrentFileName(QString fileName, QString uri);
@@ -255,8 +256,9 @@ public slots:
 	void newPresence(qint32 userId, QString username, QImage image);
 	void removePresence(qint32 userId);
 
-	//Shows error in case of failure during document closing
+	//Shows error in case of failure during document cl
 	void closeDocumentError(QString error);
+	void doCloseDocument(int reply);
 
 	//Status bar messages
 	void showStatusBarMessage(const QString& text);
