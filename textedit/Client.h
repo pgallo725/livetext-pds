@@ -120,7 +120,8 @@ signals:
 	void openFileCompleted(Document document);
 	void fileOperationFailed(QString errorType);
 	void documentDismissed(URI URI);
-	void documentExitComplete(bool isForced = false);
+	void documentExitComplete();
+	void documentForceClose();
 	void documentExitFailed(QString errorType);
 	
 	// TextEdit Signals

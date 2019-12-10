@@ -9,9 +9,9 @@
 const QString rsrcPath = ":/images";
 
 
-ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
+ProfileEditWindow::ProfileEditWindow(User& user, bool fromEditor, QWidget* parent)
 	: QDialog(parent, Qt::WindowCloseButtonHint | Qt::WindowTitleHint), ui(new Ui::ProfileEditWindow),
-	mngr(WidgetsManager(this)), _user(user), _editorFlag(false), _iconChanged(false)
+	mngr(WidgetsManager(this)), _user(user), _editorFlag(fromEditor), _iconChanged(false)
 {
 	//UI setup
 	ui->setupUi(this);
@@ -26,7 +26,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, QWidget* parent)
 	//Connects of ui elements
 	connect(ui->pushButton_updateProfile, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonUpdateClicked);
 	connect(ui->pushButton_browse, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonBrowseClicked);
-	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &ProfileEditWindow::pushButtonCancelClicked);
+	connect(ui->pushButton_cancel, &QPushButton::clicked, this, &QDialog::close);
 
 	connect(ui->lineEdit_editNick, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
 	connect(ui->lineEdit_editPsw, &QLineEdit::returnPressed, this, &ProfileEditWindow::pushButtonUpdateClicked);
@@ -62,23 +62,18 @@ ProfileEditWindow::~ProfileEditWindow()
 
 void ProfileEditWindow::updateSuccessful()
 {
-	//If update went successful it closes the window
+	//If update was successful it closes the window
 	mngr.hideLoadingScreen(loading);
 
-	//Reset fields
-	resetFields();
-
-	//Closes window
 	this->close();
 }
 
 void ProfileEditWindow::updateFailed(QString error)
 {
-	//if update went wrong it displays an error message
+	//If update went wrong it displays an error message
 	mngr.hideLoadingScreen(loading);
 	ui->label_incorrect_edit->setText(error);
 }
-
 
 
 /* ---------------- PUSH BUTTONS ----------------*/
@@ -92,12 +87,6 @@ void ProfileEditWindow::pushButtonBrowseClicked()
 
 	//Open file dialog, to choose profile picture
 	fileSelector->open(this, SLOT(updateSelectedAvatar(const QString&)));
-}
-
-void ProfileEditWindow::pushButtonCancelClicked()
-{
-	resetFields();
-	this->close();
 }
 
 void ProfileEditWindow::pushButtonUpdateClicked()
@@ -227,9 +216,4 @@ void ProfileEditWindow::updateInfo()
 	ui->label_username->setText(_user.getUsername());
 	ui->lineEdit_editNick->setText(_user.getNickname());
 	ui->label_userId->setText(QString::number(_user.getUserId()).rightJustified(4, '0'));
-}
-
-void ProfileEditWindow::setEditorFlag(bool fromEditor)
-{
-	_editorFlag = fromEditor;
 }

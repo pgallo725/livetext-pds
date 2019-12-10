@@ -555,7 +555,7 @@ void TextEdit::setupEditorActions()
 	//Edit profile
 	action = menu->addAction(
 		QIcon(rsrcPath + "/editor/user.png"), tr("&Edit profile"),
-		this, &TextEdit::openEditProfile);
+		this, [this] { emit openEditProfile(); });
 	toolbar->addAction(action);
 
 	toolbar->addAction(actionHighlightUsers);

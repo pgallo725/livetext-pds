@@ -115,7 +115,7 @@ signals:
 	void serverLogout();
 
 	//Open edit profile window
-	void openEditProfile();
+	void openEditProfile(bool inEditor = false);
 
 	//Called on forceLogout
 	void landingPageReset();

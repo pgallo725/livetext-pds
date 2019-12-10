@@ -6,11 +6,10 @@
 #include <QSharedPointer>
 
 #include <User.h>
-#include "TextEdit.h"
-#include "LandingPage.h"
 #include "Client.h"
+#include "LandingPage.h"
+#include "TextEdit.h"
 #include "DocumentEditor.h"
-#include "ProfileEditWindow.h"
 
 
 class LiveText : public QObject
@@ -22,14 +21,11 @@ private:
 	//Client
 	Client* _client;
 
-	//Landing page
-	LandingPage* _landingPage;
-
 	//Current user
 	User _user;
 
-	//Profile edit window
-	ProfileEditWindow* _editProfile;
+	//Landing page
+	LandingPage* _landingPage;
 
 	//Text editor
 	TextEdit* _textEdit;
@@ -55,7 +51,8 @@ private slots:
 
 	//Document operation
 	void openDocumentCompleted(Document doc);
-	void closeDocumentCompleted(bool isForced);
+	void forceCloseDocument();
+	void closeDocumentCompleted();
 	void dismissDocumentCompleted(URI URI);
 
 	//User profile editing
@@ -65,6 +62,7 @@ private slots:
 	//Server connection
 	void loginSuccess(User user);
 	void logoutClient();
+	void showForceLogout();
 	void forceLogout();
 
 	//GUI

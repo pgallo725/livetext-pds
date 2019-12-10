@@ -223,7 +223,7 @@ signals:
 	void newCursorPosition(int userId, qint32 position);
 
 	//Ask to open edit profile window
-	void openEditProfile();
+	void openEditProfile(bool inEditor = true);
 
 	//LOCAL: character insertion/deletion/format change
 	void charsAdded(QVector<QChar> chars, QVector<QTextCharFormat> fmts, int pos, bool isLast, QTextBlockFormat blkFmt);

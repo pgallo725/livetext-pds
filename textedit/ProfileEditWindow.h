@@ -35,27 +35,23 @@ private:
 
 	//Methods
 	void resetFields();
+	void updateInfo();
 	
 public:
 
-	ProfileEditWindow(User& user, QWidget* parent = nullptr);
+	ProfileEditWindow(User& user, bool fromEditor, QWidget* parent = nullptr);
 	~ProfileEditWindow();
+
+public slots:
 
 	//REMOTE: response from server
 	void updateSuccessful();
 	void updateFailed(QString error);
-	void updateInfo();
-	void setEditorFlag(bool fromEditor);
-
-signals:
-	//LOCAL: Account modified
-	void accountUpdate(QString name, QImage image, QString password, bool fromEditor);
 
 private slots:
 	//Push buttons
 	void pushButtonUpdateClicked();
 	void pushButtonBrowseClicked();
-	void pushButtonCancelClicked();
 
 	//Password editing
 	void passwordEdited();
@@ -65,8 +61,12 @@ private slots:
 
 	//GUI update
 	void updateSelectedAvatar(const QString& path);
+
+signals:
+
+	//LOCAL: Account modified
+	void accountUpdate(QString name, QImage image, QString password, bool fromEditor);
 };
 
 
 #endif //PROFILEEDITWINDOW_H
-

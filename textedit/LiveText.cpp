@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#include "ProfileEditWindow.h"
+
 
 LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 {
@@ -18,7 +20,7 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 
 	
 	//LANDINGPAGE - LIVETEXT
-	connect(_landingPage, &LandingPage::openEditProfile, this, [this] {openEditProfile(false); });
+	connect(_landingPage, &LandingPage::openEditProfile, this, &LiveText::openEditProfile);
 	connect(_landingPage, &LandingPage::serverLogout, this, &LiveText::logoutClient);
 
 	//LANDINGPAGE - CLIENT
@@ -42,8 +44,9 @@ LiveText::LiveText(QObject* parent) : QObject(parent), editorOpen(false)
 	connect(_client, &Client::registrationCompleted, this, &LiveText::loginSuccess, Qt::QueuedConnection);
 	connect(_client, &Client::accountUpdateComplete, this, &LiveText::accountUpdated, Qt::QueuedConnection);
 	connect(_client, &Client::openFileCompleted, this, &LiveText::openDocumentCompleted, Qt::QueuedConnection);
-	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted, Qt::QueuedConnection);
+	connect(_client, &Client::documentForceClose, this, &LiveText::forceCloseDocument, Qt::QueuedConnection);
 	connect(_client, &Client::documentExitComplete, this, &LiveText::closeDocumentCompleted, Qt::QueuedConnection);
+	connect(_client, &Client::documentDismissed, this, &LiveText::dismissDocumentCompleted, Qt::QueuedConnection);
 	
 	//LIVETEXT - CLIENT
 	connect(this, &LiveText::closeConnection, _client, &Client::Disconnect, Qt::QueuedConnection);		// Disconnect from server
@@ -76,12 +79,7 @@ void LiveText::loginSuccess(User user)
 	//Sets logged user
 	_user = user;
 
-	//Initialize edit Profile window
-	_editProfile = new ProfileEditWindow(_user);
-
-	connect(_editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
-	connect(_client, &Client::accountUpdateFailed, _editProfile, &ProfileEditWindow::updateFailed, Qt::QueuedConnection);
-	connect(_client, &Client::abortConnection, this, &LiveText::forceLogout, Qt::QueuedConnection);
+	connect(_client, &Client::abortConnection, this, &LiveText::showForceLogout, Qt::QueuedConnection);
 
 	//Open logged page in landing page
 	_landingPage->LoginSuccessful(&_user);
@@ -92,49 +90,37 @@ void LiveText::logoutClient()
 	//Resets user
 	_user = User();
 
-	//The old ProfileEditWindow is deleted
-	_editProfile->deleteLater();
-
-	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
+	disconnect(_client, &Client::abortConnection, this, &LiveText::showForceLogout);
 
 	// Logout the client
 	emit logout();
 }
 
+void LiveText::showForceLogout()
+{
+	disconnect(_client, &Client::abortConnection, this, &LiveText::showForceLogout);
+
+	QWidget* parent = QApplication::activeModalWidget();
+	if (!parent)
+		parent = (editorOpen ? (QWidget*)_textEdit : (QWidget*)_landingPage);
+	
+	//Create and show critical error popup on top of the current top-level application window
+	QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
+		tr("Server network error, you will be disconnected"), QMessageBox::Ok, parent);
+	err->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	err->open(this, SLOT(forceLogout()));
+}
+
 void LiveText::forceLogout()
 {
-	disconnect(_client, &Client::abortConnection, this, &LiveText::forceLogout);
+	//Return to login page
+	_landingPage->pushButtonBackClicked();
+	_landingPage->incorrectOperation(tr("Server communication error"));
+	_landingPage->show();
 
-	//Delete edit profile window
-	_editProfile->deleteLater();
-
-	if (editorOpen) 
-	{
-		//Show an error popup in the editor
-		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
-			tr("Server network error, you will be disconnected"), QMessageBox::Ok, _textEdit);
-		err->exec();
-
-		if (!editorOpen)	// Avoid crashes when multiple popups appear at once
-			return;
-
-		//Shows landing page again
-		_landingPage->pushButtonBackClicked();
-		_landingPage->incorrectOperation(tr("Server communication error"));
-		_landingPage->show();
-
-		//Close editor
+	if (editorOpen)		//Close editor
 		closeEditor();
-	}
-	else {
-		//Show error on landing page
-		QMessageBox::StandardButton(QMessageBox::critical(_landingPage, QCoreApplication::applicationName(),
-			tr("Server network error, you will be disconnected"), QMessageBox::Ok));
-
-		//Return to login page
-		_landingPage->pushButtonBackClicked();
-		_landingPage->incorrectOperation(tr("Server communication error"));
-	}
 }
 
 void LiveText::operationFailed(QString errorType)
@@ -176,7 +162,7 @@ void LiveText::openDocumentCompleted(Document doc)
 	connect(_textEdit, &TextEdit::setBlockNoList, _docEditor, &DocumentEditor::removeBlockFromList);
 
 	//TEXTEDIT - LIVETEXT
-	connect(_textEdit, &TextEdit::openEditProfile, this, [this] {openEditProfile(true); });
+	connect(_textEdit, &TextEdit::openEditProfile, this, &LiveText::openEditProfile );
 
 
 	//CLIENT - TEXTEDIT
@@ -222,30 +208,27 @@ void LiveText::openDocumentCompleted(Document doc)
 }
 
 
-void LiveText::closeDocumentCompleted(bool isForced)
+void LiveText::forceCloseDocument()
 {
-	if (isForced) 
-	{
-		//Close edit profile (if opened)
-		if (_editProfile->isVisible())
-			_editProfile->close();
+	QWidget* parent = QApplication::activeModalWidget();
+	if (!parent) parent = _textEdit;
 
-		//If it is forced, show an error popup to the user inside the editor
-		QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
-			tr("Server encountered an error, the document will be closed"), QMessageBox::Ok, _textEdit);
-		err->exec();
-	}
+	//Show an error popup to the user inside the editor (on top of any other window)
+	QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
+		tr("Server encountered an error, the document will be closed"), QMessageBox::Ok, parent);
+	err->setAttribute(Qt::WA_DeleteOnClose, true);
 
-	if (!editorOpen)	// Avoid crashes when multiple popups appear at once
-		return;
+	err->open(this, SLOT(closeDocumentCompleted()));
+}
 
+void LiveText::closeDocumentCompleted()
+{
 	//Keep the user logged in and return to landing page (document selection)
 	_landingPage->LoginSuccessful(&_user);
 	_landingPage->show();
 
 	closeEditor();
 }
-
 
 void LiveText::dismissDocumentCompleted(URI URI)
 {
@@ -265,6 +248,9 @@ void LiveText::dismissDocumentCompleted(URI URI)
 
 void LiveText::openEditor()
 {
+	if (editorOpen)
+		return;
+
 	//Show maximized
 	_textEdit->showMaximized();
 	QApplication::processEvents();	//Fully show text editor before reset cursor position
@@ -282,6 +268,9 @@ void LiveText::openEditor()
 
 void LiveText::closeEditor()
 {
+	if (!editorOpen)
+		return;
+
 	//Close editor
 	_textEdit->closeEditor();
 
@@ -298,29 +287,36 @@ void LiveText::closeEditor()
 *	Update account in editor/landing page
 */
 
-
 void LiveText::openEditProfile(bool fromEditor)
 {
-	//Update edit profile window info
-	_editProfile->setEditorFlag(fromEditor);
-	_editProfile->updateInfo();
-	_editProfile->open();
-}
+	QWidget* source = dynamic_cast<QWidget*>(sender());
 
+	//Create edit profile window with user info, parented to the caller widget
+	ProfileEditWindow* editProfile = new ProfileEditWindow(_user, fromEditor, source);
+	editProfile->setAttribute(Qt::WA_DeleteOnClose, true);
+
+	//Connect reset signal to "close" slot on the dialog
+	connect(_landingPage, &LandingPage::landingPageReset, editProfile, &QDialog::close);
+
+	//Connect the account update operation signals to the proper slots
+	connect(editProfile, &ProfileEditWindow::accountUpdate, _client, &Client::sendAccountUpdate, Qt::QueuedConnection);
+	connect(_client, &Client::accountUpdateComplete, editProfile, &ProfileEditWindow::updateSuccessful, Qt::QueuedConnection);
+	connect(_client, &Client::accountUpdateFailed, editProfile, &ProfileEditWindow::updateFailed, Qt::QueuedConnection);
+
+	//Show the edit profile window
+	editProfile->open();
+}
 
 void LiveText::accountUpdated(User user)
 {
 	_user = user;
 
-	if (editorOpen) {
+	if (editorOpen)	{
 		QString name = _user.getNickname().isEmpty() ? _user.getUsername() : _user.getNickname();
 		_textEdit->newPresence(_user.getUserId(), name, _user.getIcon());
 	}
-	if (_landingPage->isVisible()) 
-	{
+	if (_landingPage->isVisible())	{
 		_landingPage->resetFields();
 		_landingPage->updateUserInfo();
 	}
-
-	_editProfile->updateSuccessful();
 }

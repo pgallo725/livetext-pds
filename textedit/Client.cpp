@@ -147,7 +147,7 @@ void Client::messageHandler(MessageCapsule message)
 		break;
 	case Failure:
 		disconnect(socket, &QSslSocket::readyRead, this, &Client::readBuffer);
-		emit documentExitComplete(true);
+		emit documentForceClose();
 		break;
 	default:
 		throw MessageTypeException(message->getType());
