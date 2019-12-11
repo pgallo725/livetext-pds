@@ -9,19 +9,24 @@ Presence::Presence(qint32 id, QString name, QColor color, QImage profilePic, QTe
 	_label = new QLabel(textedit);
 
 	//Setting up a colored background
-	QImage canvas(36, 36, QImage::Format_RGB32);
-	canvas.fill(color);
+	QPixmap canvas(36, 36);
 
 	//Setting-up painter
 	QPainter painter(&canvas);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
+	QPen pen(Qt::NoBrush, 6);
+	pen.setColor(_color);
+	painter.setPen(pen);
+	painter.drawRect(0, 0, 36, 36);
+
 	//Draw the user icon above the colored canvas
 	painter.drawImage(QPoint(3, 3), profilePic.scaled(30, 30, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 	painter.end();
-
-	_profilePicture.convertFromImage(canvas);
+	
+	//Set presence profile picture
+	_profilePicture = canvas;
 }
 
 Presence::~Presence()
