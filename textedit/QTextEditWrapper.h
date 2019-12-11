@@ -69,6 +69,17 @@ private:
 
 	const QSet<QString> supportedAttributes
 	{
+		"align",
+		"class",
+		"bgcolor",
+		"dir",
+		"style",
+		"title",
+		"type"
+	};
+
+	const QSet<QString> supportedProperties
+	{
 		"color",
 		"font",
 		"font-family",
@@ -82,6 +93,13 @@ private:
 		"-qt-block-indent",
 		"-qt-list-indent"
 	};
+
+private:
+
+	QString correctFont(QString value);
+	QString correctFontSize(QString value);
+	QString correctFontWeight(QString value);
+	QString correctLineHeight(QString value);
 
 protected:
 

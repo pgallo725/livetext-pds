@@ -21,22 +21,21 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 			QString data = source->data("text/html");
 			
 			QRegularExpression tagsRegex("<([\/]?\\w+)([^>]*?)( \/)?>", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpression attributesRegex(" ([\\w-]+)=\"([^>\"]*)\"", QRegularExpression::CaseInsensitiveOption);
 			QRegularExpression styleRegex("[^>]*?style=\"([^>\"]*)\"[^>]*", QRegularExpression::CaseInsensitiveOption);
-			QRegularExpression attributesRegex("([-\\w\\s]+?):([^;]+);?", QRegularExpression::CaseInsensitiveOption);
+			QRegularExpression propertiesRegex("([-\\w\\s]+?):([^;]+);?", QRegularExpression::CaseInsensitiveOption);
 			QRegularExpression headingsRegex("<(h[1-6])([^>]*)>(.*?)<\/\\1>", QRegularExpression::CaseInsensitiveOption);
 
 			tagsRegex.optimize();
-			styleRegex.optimize();
 			attributesRegex.optimize();
+			styleRegex.optimize();
+			propertiesRegex.optimize();
 			headingsRegex.optimize();
 
 
 			// Link tags are removed, the hypertext is colored blue and underlined instead
 			data.replace(QRegularExpression("<a[^>]+>(.*?)<\/a>", QRegularExpression::CaseInsensitiveOption),
 				"<span style=\"color:blue;text-decoration:underline;\">\\1</span>");
-
-			// Clean up all empty tags
-			data.remove(QRegularExpression("<(\\w+)[^>]*?>\\s*(?R)*\\s*<\/\\1>", QRegularExpression::CaseInsensitiveOption));
 
 			// Replace some unsupported tags with paragraph blocks or spans to maintain similar formatting
 			data.replace(QRegularExpression("<(table|blockquote|address|dl|pre)([^>]*?)>(.*?)<\/\\1>",
@@ -67,12 +66,29 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 				attributes.remove("&quot;");
 				attributes.remove("&amp;");
 
+
+				// PARSE ALL TAG ATTRIBUTES
+				QRegularExpressionMatchIterator attrs = attributesRegex.globalMatch(attributes);
+				int attr_delta = 0;
+				while (attrs.hasNext())
+				{
+					QRegularExpressionMatch match = attrs.next();
+					QString attribute = match.captured(1);
+
+					// Remove all unsupported tag attributes
+					if (!supportedAttributes.contains(attribute))
+					{
+						attributes.remove(match.capturedStart() + attr_delta, match.capturedLength());
+						attr_delta -= match.capturedLength();
+					}
+				}
+
 				if (attributes.isEmpty() || !attributes.contains("style="))
 				{
 					if (!tag.contains('/') && !unstyledTags.contains(tag))
 					{
 						// Force-add a 0px margin style attribute to all opening tags
-						attributes.append(" style=\"margin:0px;\"");
+						attributes.append(" style=\"margin: 0px;\"");
 					}
 				}
 				else
@@ -80,124 +96,69 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 					QRegularExpressionMatch styleMatch = styleRegex.match(attributes);
 					QString style = styleMatch.captured(1);
 
-					// PARSE ALL STYLE ATTRIBUTES ONE BY ONE
+					// PARSE ALL STYLE PROPERTIES ONE BY ONE
 					int style_delta = 0;
-					QRegularExpressionMatchIterator attrs = attributesRegex.globalMatch(style);
-					while (attrs.hasNext())
+					QRegularExpressionMatchIterator props = propertiesRegex.globalMatch(style);
+					while (props.hasNext())
 					{
-						QRegularExpressionMatch attrMatch = attrs.next();
-						QString attribute = attrMatch.captured(1).trimmed();
-						QString value = attrMatch.captured(2);
+						QRegularExpressionMatch propMatch = props.next();
+						QString property = propMatch.captured(1).trimmed();
+						QString value = propMatch.captured(2);
 
-						if (!supportedAttributes.contains(attribute))
+						if (!supportedProperties.contains(property))
 						{
-							// Remove the unsupported value from the style attributes
-							style.remove(attrMatch.capturedStart() + style_delta, attrMatch.capturedLength());
-							style_delta -= attrMatch.capturedLength();
+							// Remove the unsupported value from the style properties
+							style.remove(propMatch.capturedStart() + style_delta, propMatch.capturedLength());
+							style_delta -= propMatch.capturedLength();
 						}
 						else
 						{
-							// Replace font-size properties with actual sizes in pt
-							if (attribute == "font-size")
+							// Sanitize font property fields
+							if (property == "font")
 							{
-								QString fontSize = value;
-
-								if (value.contains("px", Qt::CaseInsensitive))
-								{
-									// Translate px -> pt
-									value.remove("px", Qt::CaseInsensitive);
-									int px = value.toInt();
-									int pt = std::ceil(px * 0.75f);				// 1px = 0.75pt
-									fontSize = QString::number(pt) + "pt";
-								}
-								else if (value.contains("em", Qt::CaseInsensitive))
-								{
-									// Translate em -> pt
-									value.remove("em", Qt::CaseInsensitive);
-									float em = value.toFloat();
-									int pt = std::ceil(em * 12);				// 1em = 12pt
-									fontSize = QString::number(pt) + "pt";									
-								}
-								else if (value.contains("%"))
-								{
-									// Translate % -> pt
-									value.remove("%", Qt::CaseInsensitive);
-									float em = value.toFloat() / 100.0f;
-									int pt = std::ceil(em * 12);				// 100% = 1em = 12pt
-									fontSize = QString::number(pt) + "pt";
-								}
-								else if (!value.contains("pt", Qt::CaseInsensitive))
-								{
-									if (value.compare("small", Qt::CaseInsensitive) == 0)			fontSize = "10pt";	 // small	 ->  10pt 
-									else if (value.compare("medium", Qt::CaseInsensitive) == 0)		fontSize = "12pt";	 // medium	 ->  12pt
-									else if (value.compare("large", Qt::CaseInsensitive) == 0)		fontSize = "14pt";	 // large	 ->  14pt
-									else if (value.compare("x-large", Qt::CaseInsensitive) == 0)	fontSize = "18pt";	 // x-large	 ->  18pt
-									else if (value.compare("xx-large", Qt::CaseInsensitive) == 0)	fontSize = "24pt";	 // xx-large ->  24pt
-								}
-								
-								style.replace(attrMatch.capturedStart(2) + style_delta, attrMatch.capturedLength(2), fontSize);
-								style_delta += fontSize.length() - attrMatch.capturedLength(2);
+								QString font = QChar::Space + correctFont(value);
+								style.replace(propMatch.capturedStart(2) + style_delta, propMatch.capturedLength(2), font);
+								style_delta += font.length() - propMatch.capturedLength(2);
+							}
+							// Replace font-size properties with actual sizes in pt
+							if (property == "font-size")
+							{
+								QString fontSize = QChar::Space + correctFontSize(value.trimmed());
+								style.replace(propMatch.capturedStart(2) + style_delta, propMatch.capturedLength(2), fontSize);
+								style_delta += fontSize.length() - propMatch.capturedLength(2);
 							}
 							// Replace different font weight types with just normal and bold
-							else if (attribute == "font-weight")
+							else if (property == "font-weight")
 							{
 								if (!value.contains(QRegularExpression("normal|bold", QRegularExpression::CaseInsensitiveOption)))
 								{
-									// Mapping between numeric values and types
-									int n = value.toInt();					
-									QString fontWeight = n < 500 ? "normal" : "bold";	// < 500 = Normal, > 500 = Bold
-
-									style.replace(attrMatch.capturedStart(2) + style_delta, attrMatch.capturedLength(2), fontWeight);
-									style_delta += fontWeight.length() - attrMatch.capturedLength(2);
+									QString fontWeight = QChar::Space + correctFontWeight(value);
+									style.replace(propMatch.capturedStart(2) + style_delta, propMatch.capturedLength(2), fontWeight);
+									style_delta += fontWeight.length() - propMatch.capturedLength(2);
 								}
 							}
 							// Only subscript or superscript alignments are allowed in the document
-							else if (attribute == "vertical-align")
+							else if (property == "vertical-align")
 							{
 								if (!value.contains(QRegularExpression("sub|super", QRegularExpression::CaseInsensitiveOption)))
 								{
-									// Remove the unsupported value from the style attributes
-									style.remove(attrMatch.capturedStart() + style_delta, attrMatch.capturedLength());
-									style_delta -= attrMatch.capturedLength();
+									// Remove the unsupported value from the style properties
+									style.remove(propMatch.capturedStart() + style_delta, propMatch.capturedLength());
+									style_delta -= propMatch.capturedLength();
 								}
 							}
 							// Translate line height values into a supported size
-							else if (attribute == "line-height")
+							else if (property == "line-height")
 							{
-								int lineHeight = 100;
-
-								if (value.contains("%"))
-								{
-									value.remove("%", Qt::CaseInsensitive);
-									lineHeight = value.toInt();
-								}
-								else
-								{
-									// Verify that the line height is specified as a number, NOT in pt, px, cm...
-									QRegularExpression re("^[\\s\\d\\.,]+$", QRegularExpression::CaseInsensitiveOption);		
-									if (re.match(value).hasMatch())
-									{
-										// Translate number -> %
-										float n = value.toFloat();
-										lineHeight = std::floor(n * 100.0f);
-									}
-								}
-
-								// Normalize the % to the closest of the 4 supported values (100, 115, 150, 200)
-								if (lineHeight < 105) lineHeight = 100;
-								else if (lineHeight < 130) lineHeight = 115;
-								else if (lineHeight < 175) lineHeight = 150;
-								else lineHeight = 200;
-
-								QString str = QString::number(lineHeight) + "%";
-								style.replace(attrMatch.capturedStart(2) + style_delta, attrMatch.capturedLength(2), str);
-								style_delta += str.length() - attrMatch.capturedLength(2);
+								QString lineHeight = QChar::Space + correctLineHeight(value);
+								style.replace(propMatch.capturedStart(2) + style_delta, propMatch.capturedLength(2), lineHeight);
+								style_delta += lineHeight.length() - propMatch.capturedLength(2);
 							}
 						}
 					}
 
 					// Add a 0px margin to the style attributes
-					style.append("margin:0px;");
+					style.append("margin: 0px;");
 					
 					attributes.replace(styleMatch.capturedStart(1), styleMatch.capturedLength(1), style.trimmed());
 				}
@@ -230,10 +191,10 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 
 				// Add the new style settings to the existing attributes (if they're not already specified)
 				if (!attributes.contains("font-weight", Qt::CaseInsensitive))
-					attributes.insert(pos + 7, "font-weight:bold;");
+					attributes.insert(pos + 7, "font-weight: bold;");
 
 				if (!attributes.contains("font-size", Qt::CaseInsensitive))
-					attributes.insert(pos + 7, QString("font-size:") + fontSize + "pt;");
+					attributes.insert(pos + 7, QString("font-size: ") + fontSize + "pt;");
 
 
 				// Replace the heading tag with an equivalent paragraph tag preceded by an empty line
@@ -248,12 +209,160 @@ void QTextEditWrapper::insertFromMimeData(const QMimeData* source)
 
 			QMimeData sanitizedSource;
 			sanitizedSource.setData("text/html", data.toUtf8());
-			//QTextEdit::insertFromMimeData(&sanitizedSource);
-			textCursor().insertText(data);
+			QTextEdit::insertFromMimeData(&sanitizedSource);
+			//textCursor().insertText(data);
 		}
 		else
 		{
 			QTextEdit::insertFromMimeData(source);
 		}
 	}
+}
+
+
+
+/*************** PRIVATE HELPER FUNCTIONS ***************/
+
+
+QString QTextEditWrapper::correctFont(QString value)
+{
+	QString fontStyle;
+	QString fontWeight;
+	QString fontSize;
+	QString lineHeight;
+	QString fontFamily;
+
+	value.remove("small-caps");
+	value.remove("lighter");
+	value.remove("normal");
+
+	QStringList elements = value.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+
+	while (!elements.isEmpty())
+	{
+		QString element = elements.front();
+
+		if (element == "italic" || element == "oblique") 
+		{
+			fontStyle = element;
+		}
+		else if (element.contains("bold") || element.contains("00")) 
+		{
+			fontWeight = element;
+		}
+		else 
+		{
+			if (fontSize.isNull())
+			{
+				QStringList parts = element.split("/");
+				fontSize = correctFontSize(parts[0]);
+				if (parts.length() > 1)
+					lineHeight = correctLineHeight(parts[1]);
+			}
+			else
+			{
+				fontFamily = elements.join(" ");
+				break;
+			}
+		}
+
+		//Remove the element after parsing
+		elements.pop_front();
+	}
+
+	// Build up again the sanitized font property string
+	QString font;
+	font.append(fontStyle);
+	if (!font.isEmpty())
+		font.append(QChar::Space);
+	font.append(fontWeight);
+	if (!font.isEmpty())
+		font.append(QChar::Space);
+	font.append(fontSize);
+	if (!lineHeight.isNull())
+		font.append("/" + lineHeight);
+	font.append(QChar::Space + fontFamily);
+
+	return font;
+}
+
+
+QString QTextEditWrapper::correctFontSize(QString value)
+{
+	QString fontSize = value;
+
+	if (value.contains("px", Qt::CaseInsensitive))
+	{
+		// Translate px -> pt
+		value.remove("px", Qt::CaseInsensitive);
+		int px = value.toInt();
+		int pt = std::ceil(px * 0.75f);				// 1px = 0.75pt
+		fontSize = QString::number(pt) + "pt";
+	}
+	else if (value.contains("em", Qt::CaseInsensitive))
+	{
+		// Translate em/rem -> pt
+		value.remove("r", Qt::CaseInsensitive);
+		value.remove("em", Qt::CaseInsensitive);
+		float em = value.toFloat();
+		int pt = std::ceil(em * 12);				// 1em = 12pt
+		fontSize = QString::number(pt) + "pt";
+	}
+	else if (value.contains("%"))
+	{
+		// Translate % -> pt
+		value.remove("%", Qt::CaseInsensitive);
+		float em = value.toFloat() / 100.0f;
+		int pt = std::ceil(em * 12);				// 100% = 1em = 12pt
+		fontSize = QString::number(pt) + "pt";
+	}
+	else if (!value.contains("pt", Qt::CaseInsensitive))
+	{
+		if (value.compare("small", Qt::CaseInsensitive) == 0)			fontSize = "10pt";	 // small	 ->  10pt 
+		else if (value.compare("medium", Qt::CaseInsensitive) == 0)		fontSize = "12pt";	 // medium	 ->  12pt
+		else if (value.compare("large", Qt::CaseInsensitive) == 0)		fontSize = "14pt";	 // large	 ->  14pt
+		else if (value.compare("x-large", Qt::CaseInsensitive) == 0)	fontSize = "18pt";	 // x-large	 ->  18pt
+		else if (value.compare("xx-large", Qt::CaseInsensitive) == 0)	fontSize = "24pt";	 // xx-large ->  24pt
+	}
+
+	return fontSize;
+}
+
+
+QString QTextEditWrapper::correctFontWeight(QString value)
+{
+	// Mapping between numeric values and types
+	int n = value.toInt();
+	return (n < 500 ? "normal" : "bold");		// < 500 = Normal, > 500 = Bold
+}
+
+
+QString QTextEditWrapper::correctLineHeight(QString value)
+{
+	int lineHeight = 100;
+
+	if (value.contains("%"))
+	{
+		value.remove("%", Qt::CaseInsensitive);
+		lineHeight = value.toInt();
+	}
+	else
+	{
+		// Verify that the line height is specified as a number, NOT in pt, px, cm...
+		QRegularExpression re("^[\\s\\d\\.,]+$", QRegularExpression::CaseInsensitiveOption);
+		if (re.match(value).hasMatch())
+		{
+			// Translate number -> %
+			float n = value.toFloat();
+			lineHeight = std::floor(n * 100.0f);
+		}
+	}
+
+	// Normalize the % to the closest of the 4 supported values (100, 115, 150, 200)
+	if (lineHeight < 105) lineHeight = 100;
+	else if (lineHeight < 130) lineHeight = 115;
+	else if (lineHeight < 175) lineHeight = 150;
+	else lineHeight = 200;
+
+	return QString::number(lineHeight) + "%";
 }
