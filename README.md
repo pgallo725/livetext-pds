@@ -5,8 +5,8 @@ Developed as an assignment project for the System and Device Programming course 
 We began our project by studying other collaborative editors such as [Conclave](https://conclave-team.github.io/conclave-site/) and Google Docs and then we developed our own version in the form of a desktop application.
 
 Here you can download the latest server and client packages:
-- [Server](https://github.com/paolo257428/livetext-pds/releases/download/v1.0.0/textserver-v1.0.0-win-x64.zip)
-- [Client](https://github.com/paolo257428/livetext-pds/releases/download/v1.0.0/textedit-v1.0.0-win-x64.zip)
+- [Server](https://github.com/paolo257428/livetext-pds/releases/download/v1.2.0/textserver-v1.2.0-win-x64.zip)
+- [Client](https://github.com/paolo257428/livetext-pds/releases/download/v1.2.0/textedit-v1.2.0-win-x64.zip)
 
 # Index
 1. [What is a real-time text editor?](#What-is-a-real-time-text-editor)
