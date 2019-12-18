@@ -94,29 +94,29 @@ void WorkSpace::readMessage()
 
 	QDataStream streamIn(socket);	/* connect stream with socket */
 	QByteArray dataBuffer;
-	QSharedPointer<SocketBuffer> socketBuffer = editors[socket]->getSocketBuffer();
+	SocketBuffer& socketBuffer = editors[socket]->getSocketBuffer();
 
-	if (!socketBuffer->getDataSize()) {
-		streamIn >> *socketBuffer;
+	if (!socketBuffer.getDataSize()) {
+		streamIn >> socketBuffer;
 
-		if (!socketBuffer->getType() && !socketBuffer->getDataSize())
+		if (!socketBuffer.getType() && !socketBuffer.getDataSize())
 			return;
 	}
 
 	// Read all the available message data from the socket
-	dataBuffer = socket->read((qint64)(socketBuffer->getDataSize() - socketBuffer->getReadDataSize()));
+	dataBuffer = socket->read((qint64)(socketBuffer.getDataSize() - socketBuffer.getReadDataSize()));
 
-	socketBuffer->append(dataBuffer);
+	socketBuffer.append(dataBuffer);
 
-	if (socketBuffer->bufferReadyRead())
+	if (socketBuffer.bufferReadyRead())
 	{
-		QDataStream dataStream(socketBuffer->bufferPtr(), QIODevice::ReadWrite);
-		MessageType mType = (MessageType)socketBuffer->getType();
+		QDataStream dataStream(socketBuffer.bufferPtr(), QIODevice::ReadWrite);
+		MessageType mType = (MessageType)socketBuffer.getType();
 
 		try {
 			MessageCapsule message = MessageFactory::Empty(mType);
 			message->read(dataStream);
-			socketBuffer->clearBuffer();
+			socketBuffer.clearBuffer();
 
 			if (mType == AccountUpdate || (mType >= CharsInsert && mType <= PresenceRemove) || mType == DocumentClose)
 			{
@@ -127,7 +127,7 @@ void WorkSpace::readMessage()
 		catch (MessageException& me) 
 		{
 			Logger(Error) << me.what();
-			socketBuffer->clearBuffer();
+			socketBuffer.clearBuffer();
 			socketAbort(socket);				// Terminate the client connection
 		}
 	}

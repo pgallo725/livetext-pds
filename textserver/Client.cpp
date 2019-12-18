@@ -8,7 +8,7 @@ const QString Client::nonceCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWX
 
 
 Client::Client(QSslSocket* s) :
-	socket(s), activeUser(nullptr), logged(false), socketBuffer(new SocketBuffer())
+	socket(s), activeUser(nullptr), logged(false), socketBuffer(SocketBuffer())
 {
 }
 
@@ -27,7 +27,7 @@ qintptr Client::getSocketDescriptor() const
 	return socket->socketDescriptor();
 }
 
-QSharedPointer<SocketBuffer> Client::getSocketBuffer()
+SocketBuffer& Client::getSocketBuffer()
 {
 	return socketBuffer;
 }
