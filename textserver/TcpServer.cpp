@@ -553,6 +553,7 @@ MessageCapsule TcpServer::createDocument(QSslSocket* author, QString docName)
 		}
 		catch (DatabaseException& dbe) {
 			Logger(Error) << dbe.what();
+			user->rollback(backupUser);
 			doc->erase();
 			return MessageFactory::DocumentError("Document creation failed due to an internal error");
 		}
