@@ -676,7 +676,7 @@ void TextEdit::setupEditorActions()
 void TextEdit::newPresence(qint32 userId, QString username, QImage image)
 {
 	//Init a random value for new user color
-	int randomNumber = 7 + (userId) % 11;
+	int randomNumber = 7 + (userId-1) % 11;
 
 	//Pick a color
 	QColor color = (Qt::GlobalColor) (randomNumber);

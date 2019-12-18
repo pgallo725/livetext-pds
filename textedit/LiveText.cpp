@@ -100,14 +100,14 @@ void LiveText::showForceLogout()
 {
 	disconnect(_client, &Client::abortConnection, this, &LiveText::showForceLogout);
 
-	QWidget* parent = QApplication::activeModalWidget();
-	if (!parent)
-		parent = (editorOpen ? (QWidget*)_textEdit : (QWidget*)_landingPage);
+	QWidget* parent = (editorOpen ? (QWidget*)_textEdit : (QWidget*)_landingPage);
 	
 	//Create and show critical error popup on top of the current top-level application window
 	QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
 		tr("Server network error, you will be disconnected"), QMessageBox::Ok, parent);
 	err->setAttribute(Qt::WA_DeleteOnClose, true);
+	err->setWindowFlag(Qt::WindowStaysOnTopHint, true);
+	err->setWindowFlag(Qt::X11BypassWindowManagerHint, true);
 
 	err->open(this, SLOT(forceLogout()));
 }
@@ -210,13 +210,12 @@ void LiveText::openDocumentCompleted(Document doc)
 
 void LiveText::forceCloseDocument()
 {
-	QWidget* parent = QApplication::activeModalWidget();
-	if (!parent) parent = _textEdit;
-
 	//Show an error popup to the user inside the editor (on top of any other window)
 	QMessageBox* err = new QMessageBox(QMessageBox::Icon::Critical, QCoreApplication::applicationName(),
-		tr("Server encountered an error, the document will be closed"), QMessageBox::Ok, parent);
+		tr("Server encountered an error, the document will be closed"), QMessageBox::Ok, _textEdit);
 	err->setAttribute(Qt::WA_DeleteOnClose, true);
+	err->setWindowFlag(Qt::WindowStaysOnTopHint, true);
+	err->setWindowFlag(Qt::X11BypassWindowManagerHint, true);
 
 	err->open(this, SLOT(closeDocumentCompleted()));
 }
