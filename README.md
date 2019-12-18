@@ -8,6 +8,8 @@ Here you can download the latest server and client packages:
 - [Server](https://github.com/paolo257428/livetext-pds/releases/download/v1.2.0/textserver-v1.2.0-win-x64.zip)
 - [Client](https://github.com/paolo257428/livetext-pds/releases/download/v1.2.0/textedit-v1.2.0-win-x64.zip)
 
+![LiveText editor screenshot](/LiveText_screenshot.jpg)
+
 # Index
 1. [What is a real-time text editor?](#What-is-a-real-time-text-editor)
 2. [Which are the new problems?](#Which-are-the-new-problems)
