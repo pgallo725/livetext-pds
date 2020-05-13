@@ -91,7 +91,7 @@ The server application is a multi-threaded process.
 
 The main thread is in charge of serving all user requests such as the creation of a new account, login and profile updates, while also handling the creation, deletion and opening of documents and updating the database accordingly.
 
-All editors working on the a shared document are connected to the same *Workspace*, which is run on a separate thread and handles all the received editing operations, automatically saves the document on the server file system and dispatches messages to all connected clients (no synchronization needed due to clear roles separation between threads). 
+All editors working on a shared document are connected to the same *Workspace*, which is run on a separate thread and handles all the received editing operations, automatically saves the document on the server file system and dispatches messages to all connected clients (no synchronization needed due to clear roles separation between threads). 
 All documents that are not being currently edited are stored on disk and unloaded from memory.
 
 ## Client
@@ -99,7 +99,7 @@ The LiveText client is a QtGUI-based desktop application.
 
 It provides a landing page with basic account operations such login, registration and profile editing and grants access to the user's documents, which are opened inside the TextEditor.
 
-The editor is based on Qt's powerful **QTextEdit** component (supporting *RichText*), on top of which we added a completely custom extra layer in charge of translating all editing operations between Qt's "traditional" text editor (that is, using indexes to identify characters in the document) and our CRDT representation, in both directions.
+The editor is based on Qt's powerful **QTextEdit** component (supporting *RichText*), on top of which we added a completely custom layer in charge of translating all editing operations between Qt's "traditional" text editor (that is, using indexes to identify characters in the document) and our CRDT representation, in both directions.
 The editor presents a fully customized GUI with action menus, toolbars, context menus and supports keyboard shortcuts.
 
 A secondary thread is always active and handles the network communication with the server, requiring little to no synchronization with the main application thread.
