@@ -236,7 +236,7 @@ QString QTextEditWrapper::correctFont(QString value)
 	value.remove("lighter");
 	value.remove("normal");
 
-	QStringList elements = value.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
+	QStringList elements = value.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 
 	while (!elements.isEmpty())
 	{

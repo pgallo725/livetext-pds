@@ -2,9 +2,10 @@
 #include "ui_profileeditwindow.h"
 
 #include <QPixmap>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
+#include <QScreen>
 #include <QFileDialog>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 const QString rsrcPath = ":/images";
 
@@ -17,7 +18,8 @@ ProfileEditWindow::ProfileEditWindow(User& user, bool fromEditor, QWidget* paren
 	ui->setupUi(this);
 
 	//Center and resize
-	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+	// if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+		if(QGuiApplication::primaryScreen()->availableGeometry().size().width()<=1366)
 		mngr.centerAndResize(0.55, 0.62);
 	else
 		mngr.centerAndResize(0.5, 0.55);
@@ -38,7 +40,7 @@ ProfileEditWindow::ProfileEditWindow(User& user, bool fromEditor, QWidget* paren
 	connect(ui->radioButton_defaultAvatar, &QRadioButton::toggled, this, &ProfileEditWindow::radioButtonPressed);
 
 	//Validator for nickname (no spaces)
-	ui->lineEdit_editNick->setValidator(new QRegExpValidator(QRegExp("^[^\\s]+$"), this));
+	ui->lineEdit_editNick->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^\\s]+$"), this));
 
 
 	//Update GUI according to user info
@@ -96,7 +98,7 @@ void ProfileEditWindow::pushButtonUpdateClicked()
 	QString newPassword = ui->lineEdit_editPsw->text();
 	QString newPasswordConf = ui->lineEdit_editPswConf->text();
 	//If the image was not changed, an empty one is sent
-	QImage userIcon = _iconChanged ? ui->label_UsrIcon->pixmap()->toImage() : QImage();		
+	QImage userIcon = _iconChanged ? ui->label_UsrIcon->pixmap().toImage() : QImage();		
 
 
 	//Check if all password are the same (if setted)
@@ -141,8 +143,8 @@ void ProfileEditWindow::radioButtonPressed()
 		ui->label_imageSize->setText("");
 
 		//Load default profile picture
-		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+		QPixmap default_pixmap{rsrcPath + "/misc/defaultProfile.png"};
+		ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 		_iconChanged = true;
 	}
 }
@@ -181,8 +183,8 @@ void ProfileEditWindow::updateSelectedAvatar(const QString& path)
 	}
 
 	//Load default profile picture
-	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap default_pixmap(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -195,8 +197,8 @@ void ProfileEditWindow::resetFields()
 	ui->lineEdit_editPswConf->setText("");
 
 	//Load default profile picture
-	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap default_pixmap(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Check radio-button
 	ui->radioButton_customAvatar->setChecked(true);

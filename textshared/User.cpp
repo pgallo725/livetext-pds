@@ -17,9 +17,11 @@ User::User(QString username, int userId, QString nickname, QString passwd, QImag
 {
 	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated salt sequence
 	{
-		int index = qrand() % saltCharacters.length();
+	//	int index = qrand() % saltCharacters.length(); 
+		int index = QRandomGenerator::global()->generate() % saltCharacters.length();
 		QChar nextChar = saltCharacters.at(index);
-		m_salt.append(nextChar);
+	//	m_salt.append(nextChar);
+		m_salt.append(nextChar.unicode() );
 	}
 
 	QCryptographicHash hash(QCryptographicHash::Sha512);
@@ -112,9 +114,11 @@ void User::setPassword(QString newPassword)
 
 	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated salt sequence
 	{
-		int index = qrand() % saltCharacters.length();
+	//	int index = qrand() % saltCharacters.length();
+		int index = QRandomGenerator::global()->generate() % saltCharacters.length();
 		QChar nextChar = saltCharacters.at(index);
-		m_salt.append(nextChar);
+		// m_salt.append(nextChar);
+		m_salt.append(nextChar.unicode());
 	}
 
 	QCryptographicHash hash(QCryptographicHash::Sha512);

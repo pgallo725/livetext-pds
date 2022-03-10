@@ -2,7 +2,10 @@
 #include "ui_landingpage.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
+#include <QScreen>
+#include <QGuiApplication>
+
+//#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -37,7 +40,8 @@ LandingPage::LandingPage(QWidget* parent)
 	ui->setupUi(this);
 
 	//Center and resize
-	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+//	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+	if(QGuiApplication::primaryScreen()->availableGeometry().size().width()<=1366)
 		mngr.centerAndResize(0.68, 0.8);
 	else
 		mngr.centerAndResize(0.55, 0.65);
@@ -146,13 +150,13 @@ LandingPage::LandingPage(QWidget* parent)
 	//Validator for server port
 	ui->lineEdit_serverPort->setValidator(new QIntValidator(0, 65535, this));
 	//Validator for server IP
-	ui->lineEdit_serverIP->setValidator(new QRegExpValidator(
-		QRegExp("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
+	ui->lineEdit_serverIP->setValidator(new QRegularExpressionValidator(
+		QRegularExpression("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])[\.]){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"),
 		this));
 	//Validator for username (no spaces and '_')
-	ui->lineEdit_regUsr->setValidator(new QRegExpValidator(QRegExp("^[^\\s" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
+	ui->lineEdit_regUsr->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^\\s" + QString(URI_FIELD_SEPARATOR) + "]+$"), this));
 	//Validator for nickname (no spaces)
-	ui->lineEdit_regNick->setValidator(new QRegExpValidator(QRegExp("^[^\\s]+$"), this));
+	ui->lineEdit_regNick->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^\\s]+$"), this));
 
 
 	//Loads user login infos
@@ -267,7 +271,7 @@ void LandingPage::Register()
 	QString username = ui->lineEdit_regUsr->text();
 	QString password = ui->lineEdit_regPsw->text();
 	QString passwordConf = ui->lineEdit_regPswConf->text();
-	QImage userIcon = ui->label_UsrIcon->pixmap()->toImage();
+	QImage userIcon = ui->label_UsrIcon->pixmap().toImage();
 
 	//Save login info to file
 	saveUserLoginInfo(username);
@@ -289,8 +293,8 @@ void LandingPage::radioButtonPressed()
 		ui->label_imageSize->setText("");
 
 		//Load default profile picture
-		QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-		ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+		QPixmap default_pixmap(rsrcPath + "/misc/defaultProfile.png");
+		ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 	}
 }
 
@@ -381,7 +385,8 @@ void LandingPage::setupFileList()
 		//Setting item style
 		noDocuments->setTextAlignment(Qt::AlignCenter);
 		noDocuments->setFont(QFont("Helvetica", 12));
-		noDocuments->setTextColor(Qt::darkGray);
+		//noDocuments->setTextColor(Qt::darkGray);
+		noDocuments->setForeground(Qt::darkGray);
 		noDocuments->setFlags(noDocuments->flags() & ~Qt::ItemIsSelectable);
 
 		//Set item in the table
@@ -459,7 +464,7 @@ void LandingPage::setupUserProfilePicture(QPixmap userPix)
 	//Initialize painter to create a rounded profile picture
 	QPainter painter(&base);
 	painter.setRenderHint(QPainter::Antialiasing, true);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
 	//Create a round shape to set label rounded
@@ -487,8 +492,8 @@ void LandingPage::resetFields()
 	ui->label_imageSize->setText("");
 
 	//Reset user avatar preview
-	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap default_pixmap(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
 	//Check radio-button
 	ui->radioButton_defaultAvatar->setChecked(true);
@@ -605,8 +610,8 @@ void LandingPage::updateUserAvatarPreview(QString path)
 
 
 	//Load default profile picture
-	QPixmap default(rsrcPath + "/misc/defaultProfile.png");
-	ui->label_UsrIcon->setPixmap(default.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+	QPixmap default_pixmap(rsrcPath + "/misc/defaultProfile.png");
+	ui->label_UsrIcon->setPixmap(default_pixmap.scaled(ui->label_UsrIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -781,12 +786,12 @@ void LandingPage::saveUserLoginInfo(QString username)
 	if (file.open(QIODevice::WriteOnly)) {
 		QTextStream stream(&file);
 		if (ui->checkBox_saveCredential->isChecked()) {
-			stream << username << endl;
-			stream << ui->lineEdit_serverIP->text() << endl;
-			stream << ui->lineEdit_serverPort->text() << endl;
+			stream << username << Qt::endl;
+			stream << ui->lineEdit_serverIP->text() << Qt::endl;
+			stream << ui->lineEdit_serverPort->text() << Qt::endl;
 		}
 		else {
-			stream << "" << endl;
+			stream << "" << Qt::endl;
 		}
 	}
 

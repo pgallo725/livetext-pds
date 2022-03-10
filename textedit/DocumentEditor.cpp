@@ -142,7 +142,7 @@ void DocumentEditor::charsDelete(QVector<Position> positions)
 	int position = -1;
 	int count = 0;
 
-	for each (Position fPos in positions)
+	for(Position fPos : positions)
 	{
 		int index = _document.remove(fPos, position);
 

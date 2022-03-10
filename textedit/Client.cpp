@@ -204,7 +204,7 @@ void Client::handleSslErrors(const QList<QSslError>& sslErrors)
 	}
 	else
 	{
-		qDebug() << "Encountered SSL errors: " << sslErrors << endl;
+		qDebug() << "Encountered SSL errors: " << sslErrors << Qt::endl;
 	}
 }
 

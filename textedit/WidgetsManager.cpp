@@ -1,8 +1,9 @@
 #include "WidgetsManager.h"
 
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QApplication>
 #include <QStyle>
+#include <QScreen>
 
 
 WidgetsManager::WidgetsManager(QWidget* widget) : _widget(widget)
@@ -19,7 +20,9 @@ WidgetsManager::~WidgetsManager()
 void WidgetsManager::centerAndResize(double wScale, double hScale)
 {
 	//Gets desktop available size
-	QSize availableSize = QApplication::desktop()->availableGeometry().size();
+	//QSize availableSize = QApplication::desktop()->availableGeometry().size();
+	QSize availableSize = QGuiApplication::primaryScreen()->availableGeometry().size();
+
 	int width = availableSize.width();
 	int height = availableSize.height();
 
@@ -37,7 +40,8 @@ void WidgetsManager::centerAndResize(double wScale, double hScale)
 	QSize newSize(width, height);
 
 	//Draw window in desktop center
-	_widget->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize, QApplication::desktop()->availableGeometry()));
+	_widget->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, newSize,// QApplication::desktop()->availableGeometry()
+		QGuiApplication::primaryScreen()->availableGeometry()));
 }
 
 

@@ -1,5 +1,5 @@
 #include <QApplication>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 
 #include "LiveText.h"
 

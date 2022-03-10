@@ -21,11 +21,12 @@ TcpServer::TcpServer(QObject* parent)
 	qRegisterMetaType<URI>("URI");
 	qRegisterMetaType<MessageCapsule>("MessageCapsule");
 
-	Logger(Info) << "LiveText Server (version 1.2.0)" << endl
-		<< "Politecnico di Torino - a.a. 2018/2019 " << endl;
+	Logger(Info) << "LiveText Server (version 1.2.0)" << Qt::endl
+		<< "Politecnico di Torino - a.a. 2018/2019 " << Qt::endl;
 
 	/* initialize random number generator with timestamp */
-	qsrand(QDateTime::currentDateTime().toTime_t());
+	//qsrand(QDateTime::currentDateTime().toTime_t());
+//	QRandomGenerator::global()->seed(QDateTime::currentDateTime().toSecsSinceEpoch());
 
 	/* connect newConnection from QTcpServer to newClientConnection() */
 	connect(this, &QTcpServer::newConnection, this, &TcpServer::newClientConnection);
@@ -46,7 +47,7 @@ TcpServer::TcpServer(QObject* parent)
 	else
 	{
 		Logger(Info) << "Qt built with SSL version: " << QSslSocket::sslLibraryBuildVersionString();
-		Logger(Info) << "SSL version supported on this system: " << QSslSocket::supportsSsl() << endl;
+		Logger(Info) << "SSL version supported on this system: " << QSslSocket::supportsSsl() <<Qt:: endl;
 
 		QSslCipher ECDHE_RSA_cipher;
 		for (QSslCipher cipher : QSslConfiguration::supportedCiphers())
@@ -74,7 +75,7 @@ TcpServer::TcpServer(QObject* parent)
 				if (address.protocol() == QAbstractSocket::IPv4Protocol)
 					qInfo().noquote() << " - " << address.toString();
 			}
-			Logger(Info) << endl << "Available on TCP/IP port: " << port << endl << endl;
+			Logger(Info) << Qt::endl << "Available on TCP/IP port: " << port << Qt::endl << Qt::endl;
 		}
 	}
 }
@@ -129,9 +130,9 @@ void TcpServer::initialize()
 
 	// Load all user information from the database
 	Logger() << "Loading users database";
-	for each (User user in db.readUsersList())
+	for (User user : db.readUsersList())
 	{
-		for each (URI docUri in db.readUserDocuments(user.getUsername()))
+		for  (URI docUri : db.readUserDocuments(user.getUsername()))
 		{
 			user.addDocument(docUri);
 		}
@@ -142,7 +143,7 @@ void TcpServer::initialize()
 	// Initialize the counter to assign user IDs
 	_userIdCounter = db.getMaxUserID();
 
-	Logger() << "(INITIALIZATION COMPLETE)" << endl;
+	Logger() << "(INITIALIZATION COMPLETE)" << Qt::endl;
 }
 
 
@@ -228,7 +229,8 @@ void TcpServer::socketAbort(QSslSocket* clientSocket)
 	// Disconnect all the socket's signals from server slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
+	//disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &TcpServer::sslSocketError);
 
 	QSharedPointer<Client> client = clients[clientSocket];
 
@@ -262,7 +264,8 @@ void TcpServer::sslSocketReady()
 void TcpServer::incomingConnection(qintptr socketDescriptor)
 {
 	QSslSocket* serverSocket = new QSslSocket;
-	connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
+	connect(serverSocket, (&QAbstractSocket::errorOccurred), this, &TcpServer::sslSocketError);
+	//connect(serverSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
 
 	if (serverSocket->setSocketDescriptor(socketDescriptor))
 	{
@@ -357,7 +360,9 @@ MessageCapsule TcpServer::createAccount(QSslSocket* socket, QString username, QS
 		return MessageFactory::AccountError("The requested username is already taken");
 
 	/* check if the username or nickname are made up only of whitespaces */
-	if (!QRegExp("^[^\\s]+$").exactMatch(username) || (!nickname.isEmpty() && !QRegExp("^[^\\s]+$").exactMatch(nickname)))
+	//if (!QRegularExpression("^[^\\s]+$").exactMatch(username) || (!nickname.isEmpty() && !QRegularExpression("^[^\\s]+$").exactMatch(nickname)))
+	if (!QRegularExpression(QRegularExpression::anchoredPattern("^[^\\s]+$")).match(username).hasMatch()
+		|| (!nickname.isEmpty() && !QRegularExpression(QRegularExpression::anchoredPattern("^[^\\s]+$")).match(nickname).hasMatch() ))
 		return MessageFactory::AccountError("Invalid username and/or nickname, must not be only whitespaces");
 
 	/* check if image size is acceptable */
@@ -398,7 +403,8 @@ MessageCapsule TcpServer::updateAccount(QSslSocket* clientSocket, QString nickna
 	if (nickname.length() > MAX_NAME_LENGTH)
 		return MessageFactory::AccountError("Nickname string too long (Max 50 characters)");
 
-	if (!nickname.isEmpty() && !QRegExp("^[^\\s]+$").exactMatch(nickname))
+	//if (!nickname.isEmpty() && !QRegularExpression("^[^\\s]+$").exactMatch(nickname))
+	if (!nickname.isEmpty() && !QRegularExpression(QRegularExpression::anchoredPattern("^[^\\s]+$")).match(nickname).hasMatch())
 		return MessageFactory::AccountError("Nickname string cannot be only whitespaces");
 
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
@@ -434,7 +440,7 @@ void TcpServer::workspaceAccountUpdate(QSharedPointer<Client> client, QString ni
 	if (nickname.length() > MAX_NAME_LENGTH)
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Nickname string too long (Max 50 characters)"));
 
-	if (!nickname.isEmpty() && !QRegExp("^[^\\s]+$").exactMatch(nickname))
+	if (!nickname.isEmpty() && !QRegularExpression(QRegularExpression::anchoredPattern("^[^\\s]+$")).match(nickname).hasMatch())
 		emit sendAccountUpdate(client, MessageFactory::AccountError("Nickname string cannot be only whitespaces"));
 
 	if (icon.sizeInBytes() > MAX_IMAGE_SIZE)
@@ -622,7 +628,8 @@ MessageCapsule TcpServer::openDocument(QSslSocket* clientSocket, URI docUri, boo
 	/* this thread will not receive any more messages from the client */
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &TcpServer::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &TcpServer::clientDisconnection);
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError);
+//	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &TcpServer::sslSocketError); 
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &TcpServer::sslSocketError); 
 
 	/* move the socket's affinity to the workspace thread */
 	QSslSocket* s = client->getSocket();

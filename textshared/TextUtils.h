@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QDataStream>
-
+#include <QVector>
+#include <QMetaType>
 
 class Position
 {

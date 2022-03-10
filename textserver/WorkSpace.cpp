@@ -63,7 +63,8 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage, Qt::QueuedConnection);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	// connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	connect(socket,(&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	MessageFactory::DocumentReady(*doc)->send(socket);		// Send the document to the client
 
@@ -174,7 +175,8 @@ void WorkSpace::socketAbort(QSslSocket* clientSocket)
 	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+//	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	QSharedPointer<Client> c = editors[clientSocket];
 	editors.remove(clientSocket);
@@ -224,7 +226,7 @@ void WorkSpace::documentSave()
 		Logger(Error) << de.what() << ", fail count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Send Failure message to all clients in the workspace
-			for each (QSslSocket * client in editors.keys())
+			for (QSslSocket * client : editors.keys())
 				clientQuit(client, true);
 		}
 	}
@@ -234,7 +236,7 @@ void WorkSpace::documentInsertSymbols(QVector<Symbol> symbols, TextBlockID block
 {
 	int hint = -1;
 
-	for each (Symbol symbol in symbols)
+	for (Symbol symbol : symbols)
 	{
 		hint = doc->insert(symbol, hint) + 1;
 	}
@@ -247,7 +249,7 @@ void WorkSpace::documentDeleteSymbols(QVector<Position> positions)
 {
 	int hint = -1;
 
-	for each (Position position in positions)
+	for (Position position : positions)
 	{
 		hint = doc->remove(position, hint);
 	}
@@ -330,7 +332,8 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);	
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	//disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	// Move the socket object back to the main server thread
 	QSslSocket* s = client->getSocket();
