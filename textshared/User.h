@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __USER__
+#define __USER__
 
 #include <QImage>
 #include <QList>
@@ -56,3 +58,4 @@ public:
 	void update(QString nickname, QImage icon, QString password);
 	void rollback(const User& backup);
 };
+#endif//  __USER__

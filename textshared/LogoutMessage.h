@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _LOGOUT_MESSAGE_
+#define _LOGOUT_MESSAGE_
 
 #include "Message.h"
 
@@ -22,3 +24,5 @@ public:
 	~LogoutMessage() {};
 	
 };
+
+#endif

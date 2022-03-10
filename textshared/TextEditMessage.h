@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _TEXT_EDIT_MESSAGE_
+#define _TEXT_EDIT_MESSAGE_
 
 #include "Message.h"
 #include "Symbol.h"
@@ -148,3 +150,4 @@ public:
 	TextListID getListId() const;
 	QTextListFormat getListFormat() const;
 };
+#endif // _TEXT_EDIT_MESSAGE_

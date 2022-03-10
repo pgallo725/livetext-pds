@@ -2,10 +2,15 @@
 
 
 ServerException::ServerException(std::string msg)
-	: std::exception(msg.c_str())
+    : std::exception()
 {
+    m_message=msg;
 }
 
+ const char* ServerException::what() const noexcept
+ {
+     return  m_message.c_str();
+ }
 
 StartupException::StartupException(std::string msg)
 	: ServerException("textserver was unable to start...\n(ERROR) " + msg)

@@ -2,10 +2,15 @@
 
 
 SharedException::SharedException(std::string msg)
-	: std::exception(msg.c_str())
+    :exception()
 {
+    m_message=msg;
 }
 
+ const char* SharedException::what()const noexcept
+{
+    return m_message.c_str();
+}
 
 DocumentException::DocumentException(std::string msg)
 	: SharedException("(DOCUMENT ERROR) " + msg)

@@ -10,6 +10,16 @@
 #include "Presence.h"
 #include "QTextEditWrapper.h"
 
+#if defined(QT_PRINTSUPPORT_LIB)
+#include <QtPrintSupport/qtprintsupportglobal.h>
+#if QT_CONFIG(printer)
+#if QT_CONFIG(printdialog)
+#include <QPrintDialog>
+#endif // QT_CONFIG(printdialog)
+#include <QPrinter>
+#endif // QT_CONFIG(printer)
+#endif // QT_PRINTSUPPORT_LIB
+
 
 #define CURSOR_SEND_INTERVAL 200
 #define STATUSBAR_MSG_DURATION 5000

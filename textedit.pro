@@ -6,7 +6,7 @@
 # Remove it when you are finished editing this file.
 message("You are running qmake on a generated .pro file. This may not work!")
 
-
+QT+=network widgets
 TEMPLATE = subdirs
 SUBDIRS += textedit/textedit.pro \
     textserver/textserver.pro

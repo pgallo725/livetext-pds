@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MESSAGE_HANDLER__
+#define __MESSAGE_HANDLER__
 
 #include <QSslSocket>
 
@@ -58,3 +60,5 @@ signals:
 	void userLogout(QSslSocket* clientSocket);
 
 };
+
+#endif

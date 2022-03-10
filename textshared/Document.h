@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef _DOCUMENT_
+#define _DOCUMENT_
+
 #include <QString>
 
 #include "Symbol.h"
@@ -132,3 +135,4 @@ private:
 	void addBlockToList(TextBlock& b, TextList& l);
 	void removeBlockFromList(TextBlock& b, TextList& l);
 };
+#endif // _DOCUMENT_

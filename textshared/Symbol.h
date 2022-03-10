@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _SYMBOL_
+#define _SYMBOL_
 
 #include <QChar>
 #include <QTextCharFormat>
@@ -38,3 +40,5 @@ public:
 };
 
 Q_DECLARE_METATYPE(Symbol);
+
+#endif // _SYMBOL_

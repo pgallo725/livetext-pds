@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _DOCUMENT_MESSAGE_
+#define _DOCUMENT_MESSAGE_
 
 #include "Message.h"
 #include "Document.h"
@@ -199,3 +201,5 @@ public:
 	
 	QString getErrorMessage() const;
 };
+
+#endif // _DOCUMENT_MESSAGE_

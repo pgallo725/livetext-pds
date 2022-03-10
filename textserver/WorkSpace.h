@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __WORK_SPACE__
+#define __WORK_SPACE__
 
 #include <QThread>
 #include <QTimer>
@@ -62,4 +64,5 @@ signals:
 	void noEditors(URI documentURI);
 
 };
+#endif
 

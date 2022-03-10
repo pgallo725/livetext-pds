@@ -1,6 +1,8 @@
 #pragma once
+#ifndef __CLIENT__
+#define __CLIENT__
 
-#include <User.h>
+#include "User.h"
 #include <QSslSocket>	
 
 #include "SocketBuffer.h"
@@ -41,3 +43,4 @@ public:
 	SocketBuffer& getSocketBuffer();
 };
 
+#endif // __CLIENT__
