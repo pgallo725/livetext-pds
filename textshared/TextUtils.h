@@ -1,7 +1,10 @@
 #pragma once
+#ifndef _TEXT_UTILS_
+#define _TEXT_UTILS_
 
 #include <QDataStream>
-
+#include <QVector>
+#include <QMetaType>
 
 class Position
 {
@@ -92,3 +95,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(TextListID);
+#endif

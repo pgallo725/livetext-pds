@@ -1,6 +1,6 @@
 #include "Message.h"
 
-#include <SharedException.h>
+#include "SharedException.h"
 
 
 Message::Message(MessageType type)

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _QTEXT_EDIT_WRAPPER_
+#define _QTEXT_EDIT_WRAPPER_
 
 #include <QObject>
 #include <QSet>
@@ -107,3 +109,4 @@ protected:
 	virtual void insertFromMimeData(const QMimeData* source) override;
 
 };
+#endif

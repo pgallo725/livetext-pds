@@ -1,7 +1,8 @@
 #include "TextEdit.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
+#include <QActionGroup>
 #include <QDesktopServices>
 #include <QLabel>
 #include <QMenu>
@@ -20,7 +21,7 @@
 #include <QFontDatabase>
 #include <QPainter>
 #include <QBitmap>
-#include <QTextCodec>
+//#include <QTextCodec>
 #include <QTextEdit>
 #include <QTextList>
 #include <QTextCursor>
@@ -174,7 +175,8 @@ void TextEdit::setupMainWindow()
 	setWindowIcon(QIcon(rsrcPath + "/misc/logo.png"));
 
 	//Center and resizes window
-	const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+	// const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+	const QRect availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
 
 	int screenWidth = availableGeometry.width() * 0.6;
 	resize(screenWidth + 100, availableGeometry.height() * 0.75);
@@ -578,7 +580,8 @@ void TextEdit::setupEditorActions()
 	//Combobox setup
 	comboFont = new QFontComboBox(toolbar);
 	toolbar->addWidget(comboFont);
-	connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
+	//connect(comboFont, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textFamily);
+	connect(comboFont,&QComboBox::textActivated, this, &TextEdit::textFamily);
 
 	//Size combobox
 	comboSize = new QComboBox(toolbar);
@@ -594,7 +597,8 @@ void TextEdit::setupEditorActions()
 	//Update current index according to format
 	comboSize->setCurrentIndex(standardSizes.indexOf(QApplication::font().pointSize()));
 
-	connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
+	// connect(comboSize, QOverload<const QString&>::of(&QComboBox::activated), this, &TextEdit::textSize);
+	connect(comboSize, &QComboBox::textActivated, this, &TextEdit::textSize);
 
 
 	toolbar->addAction(
@@ -743,7 +747,8 @@ void TextEdit::removePresence(qint32 userId)
 
 void TextEdit::resizeEditor(const QSizeF& newSize)
 {
-	int height = QApplication::desktop()->availableGeometry(this).height();
+	//int height = QApplication::desktop()->availableGeometry(this).height();
+	int height = QGuiApplication::primaryScreen()->availableGeometry().height();
 	if (newSize.height() > height) {
 		_textEdit->setFixedHeight(newSize.height());
 	}
@@ -1521,7 +1526,7 @@ void TextEdit::colorChanged(const QColor& c)
 
 	QPainter painter(&pix);
 	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setRenderHint(QPainter::HighQualityAntialiasing, true);
+	painter.setRenderHint(QPainter::Antialiasing, true);
 	painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
 
 	painter.drawPixmap(0, 0, QPixmap(rsrcPath + "/editor/textcolor_top.png"));

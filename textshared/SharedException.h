@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef _SHARED_EXCEPTION_
+#define _SHARED_EXCEPTION_
 #include <exception>
 #include <string>
 #include "Message.h"
@@ -21,9 +22,13 @@
 
 class SharedException : public std::exception
 {
+private:
+   std::string m_message;
 protected:
 
 	SharedException(std::string msg);
+public:
+    virtual const char* what()const noexcept;
 };
 
 
@@ -90,3 +95,5 @@ public:
 
 	MessageTypeException(MessageType type);
 };
+
+#endif

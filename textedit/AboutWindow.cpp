@@ -2,8 +2,9 @@
 #include "ui_aboutwindow.h"
 
 #include "WidgetsManager.h"
-
-#include <QDesktopWidget>
+#include <QScreen>
+#include <qguiapplication.h>
+//#include <QDesktopWidget>
 
 const QString rsrcPath = ":/images";
 
@@ -20,7 +21,8 @@ AboutWindow::AboutWindow(QWidget* parent)
 	//Center and resize window
 	WidgetsManager mngr(this);
 	//Center and resize
-	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+//	if (QApplication::desktop()->availableGeometry().size().width() <= 1366)
+	if(QGuiApplication::primaryScreen()->availableGeometry().size().width()<=1366)
 		mngr.centerAndResize(0.4, 0.4);
 	else
 		mngr.centerAndResize(0.36, 0.38);

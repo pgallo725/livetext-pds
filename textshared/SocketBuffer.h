@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _SOCKET_BUFFER_
+#define _SOCKET_BUFFER_
 
 #include <QByteArray>
 #include <QDataStream>
@@ -32,3 +34,4 @@ public:
 	quint32 getReadDataSize() const;
 };
 
+#endif // _SOCKET_BUFFER_

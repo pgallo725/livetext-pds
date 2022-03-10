@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _TEXT_LIST_
+#define _TEXT_LIST_
 
 #include <QTextListFormat>
 #include "TextUtils.h"
@@ -38,3 +40,5 @@ public:
 };
 
 Q_DECLARE_METATYPE(TextList);
+
+#endif

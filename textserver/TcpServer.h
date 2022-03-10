@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef __TCP_SERVER__
+#define __TCP_SERVER__
+
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslConfiguration>
@@ -77,3 +80,5 @@ signals: void clientToWorkspace(QSharedPointer<Client> client);
 signals: void sendAccountUpdate(QSharedPointer<Client> client, MessageCapsule msg);
 
 };
+
+#endif

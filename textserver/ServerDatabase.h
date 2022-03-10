@@ -1,4 +1,7 @@
 #pragma once
+#ifndef __SERVER_DATABASE__
+#define __SERVER_DATABASE__
+
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -45,3 +48,4 @@ public:
 	int countDocEditors(QString docURI);
 
 };
+#endif // __SERVER_DATABASE__

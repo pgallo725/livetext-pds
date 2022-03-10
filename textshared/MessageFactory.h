@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _MESSAGE_FACTORY_
+#define _MESSAGE_FACTORY_
 
 #include "Message.h"
 #include "User.h"
@@ -47,3 +49,4 @@ public:
 
 	static MessageCapsule Failure(QString error);
 };
+#endif

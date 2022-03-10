@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _CLIENT_
+#define _CLIENT_
 
 #include <QObject>
 #include <QtNetwork>
@@ -143,3 +145,4 @@ signals:
 
 };
 
+#endif // _CLIENT_

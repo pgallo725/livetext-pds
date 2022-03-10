@@ -7,7 +7,7 @@
 #include "TextEditMessage.h"
 #include "PresenceMessage.h"
 #include "FailureMessage.h"
-#include <SharedException.h>
+#include "SharedException.h"
 
 
 MessageCapsule MessageFactory::Empty(MessageType type)

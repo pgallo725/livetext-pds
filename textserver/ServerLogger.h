@@ -1,11 +1,12 @@
 #pragma once
 
+#ifndef __SERVER_LOGGER__
+#define __SERVER_LOGGER__
 #include <QDebug>
 
 
 // Macro for initiating a logging stream of the desired type (default = Debug)
-#define Logger(...)		ServerLogger(this, __VA_ARGS__)
-
+//#define Logger(...)		ServerLogger(this, __VA_ARGS__)
 
 // Supported log message types, interchangeable with the corresponding QtMsgType values
 enum LogType
@@ -32,3 +33,6 @@ public:
 
 /* Additional operator for std::string interoperability */
 QDebug operator<<(QDebug debug, std::string str);
+using Logger=ServerLogger;
+
+#endif

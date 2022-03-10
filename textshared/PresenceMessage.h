@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _PRESENCE_MESSAGE_
+#define _PRESENCE_MESSAGE_
 
 #include "Message.h"
 #include <QImage>
@@ -116,3 +118,5 @@ public:
 
 	qint32 getUserId() const;
 };
+
+#endif

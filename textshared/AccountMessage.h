@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _ACCOUNT_MESSAGE_
+#define _ACCOUNT_MESSAGE_
 
 #include "Message.h"
 #include "User.h"
@@ -119,3 +121,4 @@ public:
 
 	QString getErrorMessage() const;
 };
+#endif

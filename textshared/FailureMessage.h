@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _FAILURE_MESSAGE_
+#define _FAILURE_MESSAGE_
 
 #include "Message.h"
 
@@ -28,3 +30,4 @@ public:
 	QString getDescription() const;
 };
 
+#endif

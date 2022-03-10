@@ -22,7 +22,7 @@ ShareUriWindow::ShareUriWindow(QString uri, QWidget* parent)
 	ui->lineEdit_uri->setText(uri);
 
 	//Copy icon
-	ui->pushButton_copy->setIcon(QIcon::QIcon(rsrcPath + "/editor/editcopy.png"));
+    ui->pushButton_copy->setIcon(QIcon(rsrcPath + "/editor/editcopy.png"));
 
 	//Connect pushbutton
 	connect(ui->pushButton_copy, &QPushButton::clicked, this, &ShareUriWindow::copyAndClose);

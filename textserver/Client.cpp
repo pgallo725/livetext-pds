@@ -1,7 +1,7 @@
 #include "Client.h"
 
 #include <QCryptographicHash>
-
+#include <QRandomGenerator>
 
 // Set of characters that will be used to generate random sequences as nonce
 const QString Client::nonceCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
@@ -47,7 +47,10 @@ int Client::getUserId() const
 QString Client::getUsername() const
 {
 	if (activeUser == nullptr)
-		return QString::null;
+	{
+		return QString();
+	}//return QString::null;
+
 	else return activeUser->getUsername();
 }
 
@@ -86,9 +89,11 @@ QByteArray Client::challenge(User* user)
 
 	for (int i = 0; i < 32; ++i)	// create a 32-character randomly generated nonce
 	{
-		int index = qrand() % nonceCharacters.length();
+		// int index = qrand() % nonceCharacters.length();
+		int index = QRandomGenerator::global()->generate() & nonceCharacters.length();
 		QChar nextChar = nonceCharacters.at(index);
-		nonce.append(nextChar);
+		//nonce.append(nextChar);
+		nonce.append(nextChar.unicode());
 	}
 
 	return nonce;

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _MESSAGE_
+#define _MESSAGE_
 
 #include <QSslSocket>
 #include <QDataStream>
@@ -116,3 +118,5 @@ public:
 
 	~MessageCapsule();
 };
+
+#endif // _MESSAGE_

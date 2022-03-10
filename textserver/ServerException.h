@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef __SERVER_EXCEPTION__
+#define __SERVER_EXCEPTION__
+
 #include <exception>
 #include <string>
 #include <QSqlError>
@@ -21,6 +24,10 @@
 
 class ServerException : public std::exception
 {
+private :
+    std::string m_message;
+   public:
+    virtual const char* what() const noexcept;
 protected:
 
 	ServerException(std::string msg);
@@ -77,3 +84,4 @@ public:
 
 	DatabaseWriteException(std::string query, QSqlError err);
 };
+#endif

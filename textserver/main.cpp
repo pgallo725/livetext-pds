@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	}
 	catch (ServerException& ex) 
 	{
-		qCritical().nospace() << endl << ex.what();
+		qCritical().nospace() << Qt::endl << ex.what();
 
 		getchar();
 

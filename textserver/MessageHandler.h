@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __MESSAGE_HANDLER__
+#define __MESSAGE_HANDLER__
 
 #include <QSslSocket>
 
@@ -40,12 +42,12 @@ signals:
 	MessageCapsule loginRequest(QSslSocket* clientSocket, QString username);
 	MessageCapsule loginUnlock(QSslSocket* clientSocket, QByteArray token);
 
-	MessageCapsule accountCreate(QSslSocket* çlientSocket, QString username, QString nickname, QImage icon, QString password);
-	MessageCapsule accountUpdate(QSslSocket* çlientSocket, QString nickname, QImage icon, QString password);
+	MessageCapsule accountCreate(QSslSocket* clientSocket, QString username, QString nickname, QImage icon, QString password);
+	MessageCapsule accountUpdate(QSslSocket* clientSocket, QString nickname, QImage icon, QString password);
 
-	MessageCapsule documentCreate(QSslSocket* çlientSocket, QString docName);
-	MessageCapsule documentOpen(QSslSocket* çlientSocket, URI docUri, bool docJustCreated = false);
-	MessageCapsule documentRemove(QSslSocket* çlientSocket, URI docUri);
+	MessageCapsule documentCreate(QSslSocket* clientSocket, QString docName);
+	MessageCapsule documentOpen(QSslSocket* clientSocket, URI docUri, bool docJustCreated = false);
+	MessageCapsule documentRemove(QSslSocket* clientSocket, URI docUri);
 
 	void charsInsert(QVector<Symbol> syms, TextBlockID bId, QTextBlockFormat blkFmt);
 	void charsDelete(QVector<Position> poss);
@@ -58,3 +60,5 @@ signals:
 	void userLogout(QSslSocket* clientSocket);
 
 };
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef _TEXT_BLOCK_
+#define _TEXT_BLOCK_
 
 #include <QTextBlockFormat>
 #include "TextUtils.h"
@@ -44,3 +46,5 @@ public:
 };
 
 Q_DECLARE_METATYPE(TextBlock);
+
+#endif

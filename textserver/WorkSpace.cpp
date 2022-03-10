@@ -11,12 +11,12 @@
 WorkSpace::WorkSpace(QSharedPointer<Document> d, QObject* parent)
 	: doc(d), messageHandler(this), nFails(0)
 {
-	Logger() << "Loading document " << doc->getURI().toString();
+    Logger(this) << "Loading document " << doc->getURI().toString();
 
 	// Load the document contents
 	doc->load();
 
-	Logger() << "(LOAD COMPLETED)";
+    Logger(this) << "(LOAD COMPLETED)";
 
 	// Start the auto-save timer
 	timer.callOnTimeout<WorkSpace*>(this, &WorkSpace::documentSave);
@@ -35,19 +35,19 @@ WorkSpace::~WorkSpace()
 	workThread->quit();		// Quit the thread
 	workThread->wait();		// Waiting for ending the thread
 
-	Logger() << "Saving and unloading document " << doc->getURI().toString();
+    Logger(this) << "Saving and unloading document " << doc->getURI().toString();
 
 	try
 	{
 		doc->save();			// Saving changes to the document before closing the workspace
 		doc->unload();			// Unload the document contents from memory until it gets re-opened
 
-		Logger() << "(COMPLETED)";
+        Logger(this) << "(COMPLETED)";
 	}
 	catch (DocumentException & de)
 	{
 		doc->unload();
-		Logger(Error) << de.what();
+        Logger(this,Error) << de.what();
 	}
 }
 
@@ -63,7 +63,8 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	connect(socket, &QSslSocket::readyRead, this, &WorkSpace::readMessage, Qt::QueuedConnection);
 	connect(socket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
-	connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	// connect(socket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	connect(socket,(&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	MessageFactory::DocumentReady(*doc)->send(socket);		// Send the document to the client
 
@@ -82,7 +83,7 @@ void WorkSpace::newClient(QSharedPointer<Client> client)
 
 	editors.insert(socket, client);
 
-	Logger() << "User " << client->getUsername() << " opened the document";
+    Logger(this) << "User " << client->getUsername() << " opened the document";
 }
 
 /* Read an incoming message on the workspace socket and process it */
@@ -122,11 +123,11 @@ void WorkSpace::readMessage()
 			{
 				messageHandler.process(message, socket);
 			}
-			else Logger(Error) << "(MESSAGE ERROR) Received unexpected message: " << Message::TypeName(mType);
+            else Logger(this,Error) << "(MESSAGE ERROR) Received unexpected message: " << Message::TypeName(mType);
 		}
 		catch (MessageException& me) 
 		{
-			Logger(Error) << me.what();
+            Logger(this,Error) << me.what();
 			socketBuffer.clearBuffer();
 			socketAbort(socket);				// Terminate the client connection
 		}
@@ -154,7 +155,7 @@ void WorkSpace::clientDisconnection()
 	editors.remove(socket);
 	socket->close();
 	socket->deleteLater();
-	Logger() << "Connection from client " << c->getUsername() << " was terminated";
+    Logger(this) << "Connection from client " << c->getUsername() << " was terminated";
 
 	// Make this user avaiable to be logged-in again
 	emit userDisconnected(c->getUsername());
@@ -174,13 +175,14 @@ void WorkSpace::socketAbort(QSslSocket* clientSocket)
 	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+//	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	QSharedPointer<Client> c = editors[clientSocket];
 	editors.remove(clientSocket);
 	clientSocket->abort();
 	clientSocket->deleteLater();
-	Logger() << "Shutdown connection to client " << c->getUsername();
+    Logger(this) << "Shutdown connection to client " << c->getUsername();
 
 	// Make the user avaiable to be logged-in again
 	emit userDisconnected(c->getUsername());
@@ -197,7 +199,7 @@ void WorkSpace::socketAbort(QSslSocket* clientSocket)
 void WorkSpace::socketErr(QAbstractSocket::SocketError socketError)
 {
 	if (socketError != QAbstractSocket::RemoteHostClosedError)
-		Logger(Error) << "(SOCKET ERROR) " << socketError;
+        Logger(this,Error) << "(SOCKET ERROR) " << socketError;
 }
 
 
@@ -212,19 +214,19 @@ void WorkSpace::documentSave()
 	try
 	{
 		// Save the document's contents to file
-		Logger() << "Saving document " << doc->getURI().toString();
+        Logger(this) << "Saving document " << doc->getURI().toString();
 		doc->save();
 
-		Logger() << "(SAVE COMPLETED)";
+        Logger(this) << "(SAVE COMPLETED)";
 		nFails = 0;
 	}
 	catch (DocumentException& de)
 	{
 		nFails++;
-		Logger(Error) << de.what() << ", fail count = " << nFails;
+        Logger(this,Error) << de.what() << ", fail count = " << nFails;
 		if (nFails >= DOCUMENT_MAX_FAILS) {
 			// Send Failure message to all clients in the workspace
-			for each (QSslSocket * client in editors.keys())
+			for (QSslSocket * client : editors.keys())
 				clientQuit(client, true);
 		}
 	}
@@ -234,7 +236,7 @@ void WorkSpace::documentInsertSymbols(QVector<Symbol> symbols, TextBlockID block
 {
 	int hint = -1;
 
-	for each (Symbol symbol in symbols)
+	for (Symbol symbol : symbols)
 	{
 		hint = doc->insert(symbol, hint) + 1;
 	}
@@ -247,7 +249,7 @@ void WorkSpace::documentDeleteSymbols(QVector<Position> positions)
 {
 	int hint = -1;
 
-	for each (Position position in positions)
+	for (Position position : positions)
 	{
 		hint = doc->remove(position, hint);
 	}
@@ -314,14 +316,14 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 
 	if (isForced)
 	{
-		Logger() << "User " << client->getUsername() << " was removed from the document";
+        Logger(this) << "User " << client->getUsername() << " was removed from the document";
 
 		// Send the Failure notification to the client
 		MessageFactory::Failure("Server encountered an error")->send(clientSocket);
 	}
 	else
 	{
-		Logger() << "User " << client->getUsername() << " closed the document";
+        Logger(this) << "User " << client->getUsername() << " closed the document";
 
 		// Send the DocumentExit confirmation to the client
 		MessageFactory::DocumentExit()->send(clientSocket);
@@ -330,7 +332,8 @@ void WorkSpace::clientQuit(QSslSocket* clientSocket, bool isForced)
 	// Disconnect all the socket's signals from Workspace slots
 	disconnect(clientSocket, &QSslSocket::readyRead, this, &WorkSpace::readMessage);
 	disconnect(clientSocket, &QSslSocket::disconnected, this, &WorkSpace::clientDisconnection);	
-	disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	//disconnect(clientSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &WorkSpace::socketErr);
+	disconnect(clientSocket, (&QAbstractSocket::errorOccurred), this, &WorkSpace::socketErr);
 
 	// Move the socket object back to the main server thread
 	QSslSocket* s = client->getSocket();
